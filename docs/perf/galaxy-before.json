@@ -1,0 +1,325 @@
+{
+  "base": "http://localhost:18746",
+  "date": "2026-11-11T06:18:43.515Z",
+  "browser": "~/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+  "sizes": {
+    "desktop": {
+      "width": 1280,
+      "height": 900,
+      "dpr": 1,
+      "runs": [
+        {
+          "durationMs": 10159.5,
+          "frames": 531,
+          "meanMs": 19.12,
+          "p95Ms": 33.3,
+          "worstMs": 433.3,
+          "over25ms": 36,
+          "phases": {
+            "spin": {
+              "frames": 253,
+              "meanMs": 21.1,
+              "p95Ms": 49.9,
+              "worstMs": 433.3,
+              "over25ms": 25
+            },
+            "hold": {
+              "frames": 178,
+              "meanMs": 16.85,
+              "p95Ms": 16.8,
+              "worstMs": 33.3,
+              "over25ms": 2
+            },
+            "recede": {
+              "frames": 99,
+              "meanMs": 18.18,
+              "p95Ms": 33.4,
+              "worstMs": 33.4,
+              "over25ms": 9
+            },
+            "closed": {
+              "frames": 1,
+              "meanMs": 16.7,
+              "p95Ms": 16.7,
+              "worstMs": 16.7,
+              "over25ms": 0
+            }
+          }
+        },
+        {
+          "durationMs": 9820.6,
+          "frames": 583,
+          "meanMs": 16.81,
+          "p95Ms": 16.8,
+          "worstMs": 33.4,
+          "over25ms": 6,
+          "phases": {
+            "spin": {
+              "frames": 297,
+              "meanMs": 16.78,
+              "p95Ms": 16.8,
+              "worstMs": 33.3,
+              "over25ms": 3
+            },
+            "hold": {
+              "frames": 178,
+              "meanMs": 16.85,
+              "p95Ms": 16.8,
+              "worstMs": 33.4,
+              "over25ms": 2
+            },
+            "recede": {
+              "frames": 107,
+              "meanMs": 16.82,
+              "p95Ms": 16.8,
+              "worstMs": 33.3,
+              "over25ms": 1
+            },
+            "closed": {
+              "frames": 1,
+              "meanMs": 16.7,
+              "p95Ms": 16.7,
+              "worstMs": 16.7,
+              "over25ms": 0
+            }
+          }
+        },
+        {
+          "durationMs": 9809.8,
+          "frames": 566,
+          "meanMs": 17.32,
+          "p95Ms": 16.8,
+          "worstMs": 66.7,
+          "over25ms": 17,
+          "phases": {
+            "spin": {
+              "frames": 284,
+              "meanMs": 17.56,
+              "p95Ms": 16.8,
+              "worstMs": 66.7,
+              "over25ms": 13
+            },
+            "hold": {
+              "frames": 178,
+              "meanMs": 16.85,
+              "p95Ms": 16.8,
+              "worstMs": 50.1,
+              "over25ms": 1
+            },
+            "recede": {
+              "frames": 103,
+              "meanMs": 17.47,
+              "p95Ms": 16.8,
+              "worstMs": 66.6,
+              "over25ms": 3
+            },
+            "closed": {
+              "frames": 1,
+              "meanMs": 16.7,
+              "p95Ms": 16.7,
+              "worstMs": 16.7,
+              "over25ms": 0
+            }
+          }
+        }
+      ],
+      "shots": [
+        {
+          "path": "/tmp/galaxy-before/galaxy-before-start-desktop.jpg",
+          "at": 0.28330000000000144,
+          "phase": "spin",
+          "level": 0.31477777777777693,
+          "dim": 0.12877272727272696
+        },
+        {
+          "path": "/tmp/galaxy-before/galaxy-before-spin-desktop.jpg",
+          "at": 1.1666000000000132,
+          "phase": "spin",
+          "level": 1,
+          "dim": 0.5302727272727267
+        },
+        {
+          "path": "/tmp/galaxy-before/galaxy-before-peak-swirl-desktop.jpg",
+          "at": 2.666500000000031,
+          "phase": "spin",
+          "level": 1,
+          "dim": 1
+        },
+        {
+          "path": "/tmp/galaxy-before/galaxy-before-hold-desktop.jpg",
+          "at": 6.316299999999973,
+          "phase": "hold",
+          "level": 1,
+          "dim": 1
+        },
+        {
+          "path": "/tmp/galaxy-before/galaxy-before-recede-desktop.jpg",
+          "at": 8.816199999999933,
+          "phase": "recede",
+          "level": 0.3718461538461554,
+          "dim": 0.5463333333333337
+        }
+      ],
+      "gpu": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)"
+    },
+    "phone": {
+      "width": 390,
+      "height": 844,
+      "dpr": 2,
+      "runs": [
+        {
+          "durationMs": 9826.3,
+          "frames": 580,
+          "meanMs": 16.91,
+          "p95Ms": 16.7,
+          "worstMs": 100,
+          "over25ms": 5,
+          "phases": {
+            "spin": {
+              "frames": 291,
+              "meanMs": 17.15,
+              "p95Ms": 16.8,
+              "worstMs": 100,
+              "over25ms": 5
+            },
+            "hold": {
+              "frames": 180,
+              "meanMs": 16.67,
+              "p95Ms": 16.7,
+              "worstMs": 16.8,
+              "over25ms": 0
+            },
+            "recede": {
+              "frames": 108,
+              "meanMs": 16.67,
+              "p95Ms": 16.7,
+              "worstMs": 16.8,
+              "over25ms": 0
+            },
+            "closed": {
+              "frames": 1,
+              "meanMs": 16.6,
+              "p95Ms": 16.6,
+              "worstMs": 16.6,
+              "over25ms": 0
+            }
+          }
+        },
+        {
+          "durationMs": 9784.7,
+          "frames": 551,
+          "meanMs": 17.75,
+          "p95Ms": 16.8,
+          "worstMs": 100,
+          "over25ms": 23,
+          "phases": {
+            "spin": {
+              "frames": 279,
+              "meanMs": 17.86,
+              "p95Ms": 33.3,
+              "worstMs": 100,
+              "over25ms": 14
+            },
+            "hold": {
+              "frames": 167,
+              "meanMs": 17.96,
+              "p95Ms": 16.8,
+              "worstMs": 66.7,
+              "over25ms": 8
+            },
+            "recede": {
+              "frames": 104,
+              "meanMs": 17.15,
+              "p95Ms": 16.8,
+              "worstMs": 66.7,
+              "over25ms": 1
+            },
+            "closed": {
+              "frames": 1,
+              "meanMs": 16.7,
+              "p95Ms": 16.7,
+              "worstMs": 16.7,
+              "over25ms": 0
+            }
+          }
+        },
+        {
+          "durationMs": 9822.7,
+          "frames": 559,
+          "meanMs": 17.55,
+          "p95Ms": 16.8,
+          "worstMs": 66.7,
+          "over25ms": 24,
+          "phases": {
+            "spin": {
+              "frames": 279,
+              "meanMs": 17.9,
+              "p95Ms": 33.3,
+              "worstMs": 66.6,
+              "over25ms": 17
+            },
+            "hold": {
+              "frames": 177,
+              "meanMs": 16.95,
+              "p95Ms": 16.8,
+              "worstMs": 33.4,
+              "over25ms": 3
+            },
+            "recede": {
+              "frames": 102,
+              "meanMs": 17.65,
+              "p95Ms": 16.8,
+              "worstMs": 66.7,
+              "over25ms": 4
+            },
+            "closed": {
+              "frames": 1,
+              "meanMs": 16.6,
+              "p95Ms": 16.6,
+              "worstMs": 16.6,
+              "over25ms": 0
+            }
+          }
+        }
+      ],
+      "shots": [
+        {
+          "path": "/tmp/galaxy-before/galaxy-before-start-phone.jpg",
+          "at": 0.2500000000000009,
+          "phase": "spin",
+          "level": 0.2777777777777778,
+          "dim": 0.11363636363636365
+        },
+        {
+          "path": "/tmp/galaxy-before/galaxy-before-spin-phone.jpg",
+          "at": 1.1500000000000128,
+          "phase": "spin",
+          "level": 1,
+          "dim": 0.5227272727272726
+        },
+        {
+          "path": "/tmp/galaxy-before/galaxy-before-peak-swirl-phone.jpg",
+          "at": 2.6500000000000323,
+          "phase": "spin",
+          "level": 1,
+          "dim": 1
+        },
+        {
+          "path": "/tmp/galaxy-before/galaxy-before-hold-phone.jpg",
+          "at": 6.3166,
+          "phase": "hold",
+          "level": 1,
+          "dim": 1
+        },
+        {
+          "path": "/tmp/galaxy-before/galaxy-before-recede-phone.jpg",
+          "at": 8.816599999999958,
+          "phase": "recede",
+          "level": 0.37176923076923063,
+          "dim": 0.5462777777777769
+        }
+      ],
+      "gpu": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)"
+    }
+  }
+}

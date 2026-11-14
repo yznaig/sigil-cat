@@ -1,0 +1,96 @@
+{
+  "base": "http://localhost:18746",
+  "date": "2026-11-11T06:39:38.326Z",
+  "browser": "~/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+  "sourceSha256": "4385fc3cbb6730764571cb492de8cd459eb8479609405843639d2181737cfef0",
+  "sizes": {
+    "desktop": {
+      "width": 1280,
+      "height": 900,
+      "dpr": 1,
+      "runs": [],
+      "shots": [
+        {
+          "path": "docs/shots/galaxy-start-desktop.jpg",
+          "at": 0.25010000000000243,
+          "phase": "spin",
+          "level": 0.2778888888888893,
+          "dim": 0.11368181818181836
+        },
+        {
+          "path": "docs/shots/galaxy-spin-desktop.jpg",
+          "at": 1.1501000000000143,
+          "phase": "spin",
+          "level": 1,
+          "dim": 0.5227727272727275
+        },
+        {
+          "path": "docs/shots/galaxy-peak-swirl-desktop.jpg",
+          "at": 2.650000000000028,
+          "phase": "spin",
+          "level": 1,
+          "dim": 1
+        },
+        {
+          "path": "docs/shots/galaxy-hold-desktop.jpg",
+          "at": 6.3164999999999685,
+          "phase": "hold",
+          "level": 1,
+          "dim": 1
+        },
+        {
+          "path": "docs/shots/galaxy-recede-desktop.jpg",
+          "at": 8.816299999999927,
+          "phase": "recede",
+          "level": 0.3718461538461554,
+          "dim": 0.5463333333333338
+        }
+      ],
+      "gpu": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)"
+    },
+    "phone": {
+      "width": 390,
+      "height": 844,
+      "dpr": 2,
+      "runs": [],
+      "shots": [
+        {
+          "path": "docs/shots/galaxy-start-phone.jpg",
+          "at": 0.25000000000000355,
+          "phase": "spin",
+          "level": 0.2777777777777778,
+          "dim": 0.11363636363636365
+        },
+        {
+          "path": "docs/shots/galaxy-spin-phone.jpg",
+          "at": 1.1665000000000134,
+          "phase": "spin",
+          "level": 1,
+          "dim": 0.5302272727272728
+        },
+        {
+          "path": "docs/shots/galaxy-peak-swirl-phone.jpg",
+          "at": 2.666500000000025,
+          "phase": "spin",
+          "level": 1,
+          "dim": 1
+        },
+        {
+          "path": "docs/shots/galaxy-hold-phone.jpg",
+          "at": 6.316299999999962,
+          "phase": "hold",
+          "level": 1,
+          "dim": 1
+        },
+        {
+          "path": "docs/shots/galaxy-recede-phone.jpg",
+          "at": 8.816299999999924,
+          "phase": "recede",
+          "level": 0.3718461538461526,
+          "dim": 0.5463333333333317
+        }
+      ],
+      "gpu": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)"
+    }
+  }
+}

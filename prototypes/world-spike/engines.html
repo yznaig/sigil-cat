@@ -1,0 +1,29 @@
+<!doctype html><meta charset="utf-8"><title>Physics engine microbench</title>
+<script type="module">
+const urls={cannon:'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js',rapier:'https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.19.3/rapier.mjs',jolt:'https://cdn.jsdelivr.net/npm/jolt-physics@0.30.0/dist/jolt-physics.wasm-compat.js'};
+window.runEngine=async name=>{
+ const t=performance.now(), module=await import(urls[name]), imported=performance.now();let step,cleanup=()=>{};
+ if(name==='cannon'){
+  const C=module,w=new C.World({gravity:new C.Vec3(0,-9.81,0),allowSleep:true});w.solver.iterations=10;
+  w.addBody(new C.Body({mass:0,shape:new C.Box(new C.Vec3(10,.1,10)),position:new C.Vec3(0,-.1,0)}));
+  for(let i=0;i<20;i++)w.addBody(new C.Body({mass:1,shape:new C.Box(new C.Vec3(.1,.1,.1)),position:new C.Vec3((i%5)*.22,1+Math.floor(i/5)*.25,0),allowSleep:false}));
+  step=()=>w.step(1/120);
+ }else if(name==='rapier'){
+  const R=module.default;await R.init();const w=new R.World({x:0,y:-9.81,z:0});w.timestep=1/120;
+  w.createCollider(R.ColliderDesc.cuboid(10,.1,10).setTranslation(0,-.1,0));
+  for(let i=0;i<20;i++){const b=w.createRigidBody(R.RigidBodyDesc.dynamic().setCanSleep(false).setTranslation((i%5)*.22,1+Math.floor(i/5)*.25,0));w.createCollider(R.ColliderDesc.cuboid(.1,.1,.1),b);}
+  step=()=>w.step();cleanup=()=>w.free();
+ }else{
+  const J=await module.default(),settings=new J.JoltSettings(), filter=new J.ObjectLayerPairFilterTable(2);filter.EnableCollision(0,1);filter.EnableCollision(1,1);
+  const bp=new J.BroadPhaseLayerInterfaceTable(2,2),a=new J.BroadPhaseLayer(0),b=new J.BroadPhaseLayer(1);bp.MapObjectToBroadPhaseLayer(0,a);bp.MapObjectToBroadPhaseLayer(1,b);J.destroy(a);J.destroy(b);
+  settings.mObjectLayerPairFilter=filter;settings.mBroadPhaseLayerInterface=bp;settings.mObjectVsBroadPhaseLayerFilter=new J.ObjectVsBroadPhaseLayerFilterTable(bp,2,filter,2);
+  const jolt=new J.JoltInterface(settings);J.destroy(settings);const bi=jolt.GetPhysicsSystem().GetBodyInterface(),ids=[];
+  function add(x,y,z,hx,hy,hz,dynamic){const extent=new J.Vec3(hx,hy,hz),shape=new J.BoxShape(extent,.01,null),pos=new J.RVec3(x,y,z),q=new J.Quat(0,0,0,1),s=new J.BodyCreationSettings(shape,pos,q,dynamic?J.EMotionType_Dynamic:J.EMotionType_Static,dynamic?1:0);s.mAllowSleeping=false;const body=bi.CreateBody(s);ids.push(body.GetID());bi.AddBody(body.GetID(),J.EActivation_Activate);J.destroy(s);J.destroy(pos);J.destroy(q);J.destroy(extent);}
+  add(0,-.1,0,10,.1,10,false);for(let i=0;i<20;i++)add((i%5)*.22,1+Math.floor(i/5)*.25,0,.1,.1,.1,true);
+  step=()=>jolt.Step(1/120,1);cleanup=()=>{for(const id of ids){bi.RemoveBody(id);bi.DestroyBody(id);}J.destroy(jolt);};
+ }
+ const ready=performance.now();for(let i=0;i<60;i++)step();const samples=[];
+ for(let i=0;i<600;i++){const a=performance.now();step();samples.push(performance.now()-a);}
+ cleanup();return {name,importMs:imported-t,initializeWorldMs:ready-imported,samples};
+};
+</script>

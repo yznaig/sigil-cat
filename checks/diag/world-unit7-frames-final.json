@@ -1,0 +1,304 @@
+[
+  {
+    "size": "desktop",
+    "mode": "fresh",
+    "samples": 29,
+    "minLeft": 14,
+    "jump": 0,
+    "first": {
+      "t": 7423.199999988079,
+      "x": 14,
+      "y": 331,
+      "w": 283
+    },
+    "last": {
+      "t": 8860.09999999404,
+      "x": 14,
+      "y": 331,
+      "w": 283
+    },
+    "pass": false
+  },
+  {
+    "size": "desktop",
+    "mode": "reload",
+    "samples": 32,
+    "minLeft": 14,
+    "jump": 0,
+    "first": {
+      "t": 6358.800000011921,
+      "x": 14,
+      "y": 331,
+      "w": 283
+    },
+    "last": {
+      "t": 8046.5,
+      "x": 14,
+      "y": 331,
+      "w": 283
+    },
+    "pass": true
+  },
+  {
+    "size": "desktop",
+    "mode": "resize",
+    "bounds": [
+      {
+        "id": "rack",
+        "x": 14,
+        "right": 175,
+        "bottom": 568,
+        "width": 390,
+        "footer": 654
+      },
+      {
+        "id": "rack/wizard",
+        "x": 14,
+        "right": 112,
+        "bottom": 512,
+        "width": 390,
+        "footer": 654
+      },
+      {
+        "id": "rack/cone",
+        "x": 98,
+        "right": 175,
+        "bottom": 485,
+        "width": 390,
+        "footer": 654
+      },
+      {
+        "id": "rack/party",
+        "x": 99,
+        "right": 173,
+        "bottom": 423,
+        "width": 390,
+        "footer": 654
+      },
+      {
+        "id": "rack/crown",
+        "x": 37,
+        "right": 105,
+        "bottom": 419,
+        "width": 390,
+        "footer": 654
+      },
+      {
+        "id": "rifle",
+        "x": 12,
+        "right": 225,
+        "bottom": 502,
+        "width": 390,
+        "footer": 654
+      },
+      {
+        "id": "top",
+        "x": 164,
+        "right": 223,
+        "bottom": 499,
+        "width": 390,
+        "footer": 654
+      },
+      {
+        "id": "pat",
+        "x": 321.440676735078,
+        "right": 350.69876960290753,
+        "bottom": 620.8825093512747,
+        "width": 390,
+        "footer": 654
+      },
+      {
+        "id": "ticket",
+        "x": 233,
+        "right": 363,
+        "bottom": 188,
+        "width": 390,
+        "footer": 654
+      },
+      {
+        "id": "tin",
+        "x": 181.69644326570085,
+        "right": 231.43520114101102,
+        "bottom": 566.9953700495305,
+        "width": 390,
+        "footer": 654
+      },
+      {
+        "id": "postcard",
+        "x": 236,
+        "right": 360,
+        "bottom": 199,
+        "width": 390,
+        "footer": 654
+      },
+      {
+        "id": "paper",
+        "x": 246,
+        "right": 350,
+        "bottom": 219,
+        "width": 390,
+        "footer": 654
+      },
+      {
+        "id": "box",
+        "x": 255.11600995511606,
+        "right": 378,
+        "bottom": 507.8504745471672,
+        "width": 390,
+        "footer": 654
+      }
+    ],
+    "pass": true
+  },
+  {
+    "size": "phone",
+    "mode": "fresh",
+    "samples": 29,
+    "minLeft": 14,
+    "jump": 0,
+    "first": {
+      "t": 6682.4000000059605,
+      "x": 14,
+      "y": 328,
+      "w": 161
+    },
+    "last": {
+      "t": 8253.90000000596,
+      "x": 14,
+      "y": 328,
+      "w": 161
+    },
+    "pass": false
+  },
+  {
+    "size": "phone",
+    "mode": "reload",
+    "samples": 44,
+    "minLeft": 14,
+    "jump": 0,
+    "first": {
+      "t": 6650.9000000059605,
+      "x": 14,
+      "y": 328,
+      "w": 161
+    },
+    "last": {
+      "t": 8232.60000000894,
+      "x": 14,
+      "y": 328,
+      "w": 161
+    },
+    "pass": true
+  },
+  {
+    "size": "phone",
+    "mode": "resize",
+    "bounds": [
+      {
+        "id": "rack",
+        "x": 14,
+        "right": 297,
+        "bottom": 715,
+        "width": 1280,
+        "footer": 783
+      },
+      {
+        "id": "rack/wizard",
+        "x": 14,
+        "right": 172,
+        "bottom": 625,
+        "width": 1280,
+        "footer": 783
+      },
+      {
+        "id": "rack/cone",
+        "x": 177,
+        "right": 297,
+        "bottom": 577,
+        "width": 1280,
+        "footer": 783
+      },
+      {
+        "id": "rack/party",
+        "x": 154,
+        "right": 271,
+        "bottom": 478,
+        "width": 1280,
+        "footer": 783
+      },
+      {
+        "id": "rack/crown",
+        "x": 75,
+        "right": 178,
+        "bottom": 471,
+        "width": 1280,
+        "footer": 783
+      },
+      {
+        "id": "rifle",
+        "x": 515,
+        "right": 726,
+        "bottom": 662,
+        "width": 1280,
+        "footer": 783
+      },
+      {
+        "id": "top",
+        "x": 790,
+        "right": 853,
+        "bottom": 710,
+        "width": 1280,
+        "footer": 783
+      },
+      {
+        "id": "pat",
+        "x": 706.763980346657,
+        "right": 781.2492757568103,
+        "bottom": 753.7242995296687,
+        "width": 1280,
+        "footer": 783
+      },
+      {
+        "id": "ticket",
+        "x": 1036,
+        "right": 1247,
+        "bottom": 403,
+        "width": 1280,
+        "footer": 783
+      },
+      {
+        "id": "tin",
+        "x": 955.1006375045165,
+        "right": 1081.725639701777,
+        "bottom": 753.7242995296684,
+        "width": 1280,
+        "footer": 783
+      },
+      {
+        "id": "postcard",
+        "x": 1041,
+        "right": 1242,
+        "bottom": 298,
+        "width": 1280,
+        "footer": 783
+      },
+      {
+        "id": "paper",
+        "x": 867,
+        "right": 1034,
+        "bottom": 389,
+        "width": 1280,
+        "footer": 783
+      },
+      {
+        "id": "box",
+        "x": 955.1617592773564,
+        "right": 1268,
+        "bottom": 618.6111530258651,
+        "width": 1280,
+        "footer": 783
+      }
+    ],
+    "pass": true
+  }
+]

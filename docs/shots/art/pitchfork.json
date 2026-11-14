@@ -1,0 +1,257 @@
+{
+  "name": "pitchfork",
+  "variant": null,
+  "bounds": {
+    "min": [
+      -0.09580013900995255,
+      -1.611675654045186e-10,
+      -0.02199999988079071
+    ],
+    "max": [
+      0.09580013900995255,
+      0.9769999980926514,
+      0.05000000074505806
+    ]
+  },
+  "triangles": 1716,
+  "meshes": 3,
+  "materials": 3,
+  "textures": [
+    [
+      256,
+      256
+    ]
+  ],
+  "geometryBytes": 164736,
+  "finite": true,
+  "parts": [
+    {
+      "name": "pitchfork",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "physics": {
+        "units": "cat-height units; play mass, not kg",
+        "mass": 0.6,
+        "colliders": [
+          {
+            "type": "capsule",
+            "radius": 0.015,
+            "halfHeight": 0.32,
+            "position": [
+              0,
+              0.62,
+              0
+            ]
+          },
+          {
+            "type": "box",
+            "size": [
+              0.2,
+              0.03,
+              0.035
+            ],
+            "position": [
+              0,
+              0.235,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "type": "box",
+            "size": [
+              0.012,
+              0.22,
+              0.04
+            ],
+            "position": [
+              -0.084,
+              0.12,
+              0.015
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "type": "box",
+            "size": [
+              0.012,
+              0.22,
+              0.04
+            ],
+            "position": [
+              0,
+              0.12,
+              0.015
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "type": "box",
+            "size": [
+              0.012,
+              0.22,
+              0.04
+            ],
+            "position": [
+              0.084,
+              0.12,
+              0.015
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "anchors": {
+          "grip": [
+            0,
+            0.65,
+            0
+          ]
+        }
+      }
+    }
+  ],
+  "physics": {
+    "units": "cat-height units; play mass, not kg",
+    "mass": 0.6,
+    "colliders": [
+      {
+        "type": "capsule",
+        "radius": 0.015,
+        "halfHeight": 0.32,
+        "position": [
+          0,
+          0.62,
+          0
+        ]
+      },
+      {
+        "type": "box",
+        "size": [
+          0.2,
+          0.03,
+          0.035
+        ],
+        "position": [
+          0,
+          0.235,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "box",
+        "size": [
+          0.012,
+          0.22,
+          0.04
+        ],
+        "position": [
+          -0.084,
+          0.12,
+          0.015
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "box",
+        "size": [
+          0.012,
+          0.22,
+          0.04
+        ],
+        "position": [
+          0,
+          0.12,
+          0.015
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "box",
+        "size": [
+          0.012,
+          0.22,
+          0.04
+        ],
+        "position": [
+          0.084,
+          0.12,
+          0.015
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "anchors": {
+      "grip": [
+        0,
+        0.65,
+        0
+      ]
+    }
+  },
+  "render": [
+    {
+      "frame": 35,
+      "calls": 7,
+      "triangles": 3434,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 36,
+      "calls": 7,
+      "triangles": 3434,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 37,
+      "calls": 7,
+      "triangles": 3434,
+      "points": 0,
+      "lines": 0
+    }
+  ],
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "errors": []
+}

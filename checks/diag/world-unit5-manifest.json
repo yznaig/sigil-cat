@@ -1,0 +1,113 @@
+{
+  "status": "implementation gates pass; full-suite acceptance and API freeze blocked by repeated CDN DNS startup failures",
+  "acceptedUnit4Commit": "677f535",
+  "lastFullSuiteFinalLine": "FAILED: sounds-desktop look-landing-desktop world-core-phone",
+  "fullSuiteOnUnit5": "First closing full suite completed with three failures; second stopped after repeated CDN DNS failures. No current-source ALL PASS.",
+  "gpuRestG4": {
+    "baseline": "677f535",
+    "frameDeltaMs": {
+      "desktop": 0.1,
+      "phone": 0.1
+    },
+    "gpuDeltaMs": {
+      "desktop": 0.000576,
+      "phone": 0.000224
+    },
+    "comparison": "inclusive 100000 integer ns; raw floating-point measurements retained",
+    "pass": true
+  },
+  "renderer": "ANGLE Microsoft D3D12 NVIDIA GeForce RTX 5070 Ti",
+  "phoneIsHardwareMeasurement": false,
+  "newRuntimeFiles": [
+    "src/world/card-reader.js",
+    "src/world/card-geometry.js",
+    "src/world/pinboard.js",
+    "src/world/card-print.js",
+    "src/world/board-art.js",
+    "src/world/cards.js",
+    "src/core/supports.js",
+    "src/core/mesh-picture.js",
+    "src/core/mesh-atlas.js"
+  ],
+  "newRuntimeBytes": 54360,
+  "separateGzipEstimateBytes": 21851,
+  "bytesNote": "source-byte and gzip estimates, not an observed network capture; modules import during egg boot, procedural art/physics creation waits for the cat",
+  "shots": [
+    "docs/shots/world-unit5-back-paper-desktop.jpg",
+    "docs/shots/world-unit5-back-paper-phone.jpg",
+    "docs/shots/world-unit5-back-postcard-desktop.jpg",
+    "docs/shots/world-unit5-back-postcard-phone.jpg",
+    "docs/shots/world-unit5-back-ticket-desktop.jpg",
+    "docs/shots/world-unit5-back-ticket-phone.jpg",
+    "docs/shots/world-unit5-board-paper-desktop.jpg",
+    "docs/shots/world-unit5-board-paper-phone.jpg",
+    "docs/shots/world-unit5-board-postcard-desktop.jpg",
+    "docs/shots/world-unit5-board-postcard-phone.jpg",
+    "docs/shots/world-unit5-board-ticket-desktop.jpg",
+    "docs/shots/world-unit5-board-ticket-phone.jpg",
+    "docs/shots/world-unit5-curtain-before-phone.jpg",
+    "docs/shots/world-unit5-curtain-no-card-shadows-phone.jpg",
+    "docs/shots/world-unit5-curtain-no-independent-pictures-phone.jpg",
+    "docs/shots/world-unit5-curtain-unlock-desktop.jpg",
+    "docs/shots/world-unit5-curtain-unlock-phone.jpg",
+    "docs/shots/world-unit5-edge-paper-desktop.jpg",
+    "docs/shots/world-unit5-edge-paper-phone.jpg",
+    "docs/shots/world-unit5-edge-postcard-desktop.jpg",
+    "docs/shots/world-unit5-edge-postcard-phone.jpg",
+    "docs/shots/world-unit5-edge-ticket-desktop.jpg",
+    "docs/shots/world-unit5-edge-ticket-phone.jpg",
+    "docs/shots/world-unit5-grip-desktop.jpg",
+    "docs/shots/world-unit5-grip-phone.jpg",
+    "docs/shots/world-unit5-native-input-desktop.jpg",
+    "docs/shots/world-unit5-native-input-phone.jpg",
+    "docs/shots/world-unit5-pat-priority-left-desktop.jpg",
+    "docs/shots/world-unit5-pat-priority-left-phone.jpg",
+    "docs/shots/world-unit5-pat-priority-right-desktop.jpg",
+    "docs/shots/world-unit5-pat-priority-right-phone.jpg",
+    "docs/shots/world-unit5-read-paper-desktop.jpg",
+    "docs/shots/world-unit5-read-paper-phone.jpg",
+    "docs/shots/world-unit5-read-postcard-desktop.jpg",
+    "docs/shots/world-unit5-read-postcard-phone.jpg",
+    "docs/shots/world-unit5-read-ticket-desktop.jpg",
+    "docs/shots/world-unit5-read-ticket-phone.jpg",
+    "docs/shots/world-unit5-reload-desktop.jpg",
+    "docs/shots/world-unit5-reload-phone.jpg",
+    "docs/shots/world-unit5-rest-desktop.jpg",
+    "docs/shots/world-unit5-rest-phone.jpg",
+    "docs/shots/world-unit5-splat-support-desktop.jpg",
+    "docs/shots/world-unit5-splat-support-phone.jpg",
+    "docs/shots/world-unit5-ticket-edge-diagnostic-desktop.jpg",
+    "docs/shots/world-unit5-ticket-edge-diagnostic-phone.jpg"
+  ],
+  "newInputPictures": [],
+  "runtimeCommit": "b3e1a5b",
+  "checksCommit": "04ede4f",
+  "mergeAndImpactsCommit": "c45201e",
+  "lastPairedWorkload": {
+    "desktop20MedianP95Ms": 2.0,
+    "phone20MedianP95Ms": 2.0,
+    "desktopFiveMedianP95Ms": 1.5,
+    "phoneFiveMedianP95Ms": 1.5,
+    "source": "world-unit5-full-fourth.json"
+  },
+  "laterDesktopWorkload": {
+    "twentyMedianP95Ms": 2.4,
+    "fiveMedianP95Ms": 1.4,
+    "source": "world-unit5-full-final.json"
+  },
+  "ticket": {
+    "reusedSeeds": 100,
+    "freshSeeds": 100,
+    "allBroadFace": true,
+    "maximumSleepSeconds": 3.125,
+    "minimumFaceUpDot": 0.9999630601141973
+  },
+  "maximumCardRestGapPx": {
+    "desktop": 1.0108458591523481,
+    "phone": 0.6060616094573851
+  },
+  "idleObservationSeconds": 2.1,
+  "convertedIdleWork": 0,
+  "pinnedReloadDriftPx": 0,
+  "apiFreeze": "pending clean full-suite acceptance; documented handoff contract in docs/plans/world.md"
+}

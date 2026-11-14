@@ -1,0 +1,12 @@
+{
+  "phase": "final generic presentation mask on real GPU; quiet locked diagnostic",
+  "status": "locked start load=5.41\nfinished 0\n",
+  "checks": [
+    "CHECK board curtain renderer: ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+    "CHECK board curtain before: [{\"id\":\"paper\",\"stored\":false,\"root\":true,\"art\":true,\"picture\":false,\"domHidden\":false,\"domDisplay\":\"block\",\"shadow\":true,\"shadowParent\":\"72d0a906-c276-4d4d-a2a4-a97bf6bcc1cc\",\"artParent\":\"72d0a906-c276-4d4d-a2a4-a97bf6bcc1cc\",\"stage\":\"beb0da45-34a6-4e27-b1c3-1142fabbe2fc\"},{\"id\":\"postcard\",\"stored\":true,\"root\":false,\"art\":false,\"picture\":false,\"domHidden\":true,\"domDisplay\":\"none\",\"shadow\":false,\"shadowParent\":\"72d0a906-c276-4d4d-a2a4-a97bf6bcc1cc\",\"artParent\":\"72d0a906-c276-4d4d-a2a4-a97bf6bcc1cc\",\"stage\":\"beb0da45-34a6-4e27-b1c3-1142fabbe2fc\"},{\"id\":\"ticket\",\"domDisplay\":null,\"artParent\":\"72d0a906-c276-4d4d-a2a4-a97bf6bcc1cc\",\"stage\":\"beb0da45-34a6-4e27-b1c3-1142fabbe2fc\"}]",
+    "CHECK board curtain after new ticket: [{\"id\":\"paper\",\"stored\":true,\"root\":false,\"art\":false,\"picture\":false,\"domHidden\":true,\"domDisplay\":\"none\",\"shadow\":false,\"shadowParent\":\"e2ffe700-b999-40a3-9043-5d8eedcdfd2c\",\"artParent\":\"e2ffe700-b999-40a3-9043-5d8eedcdfd2c\",\"stage\":\"beb0da45-34a6-4e27-b1c3-1142fabbe2fc\"},{\"id\":\"postcard\",\"stored\":true,\"root\":false,\"art\":false,\"picture\":false,\"domHidden\":true,\"domDisplay\":\"none\",\"shadow\":false,\"shadowParent\":\"e2ffe700-b999-40a3-9043-5d8eedcdfd2c\",\"artParent\":\"e2ffe700-b999-40a3-9043-5d8eedcdfd2c\",\"stage\":\"beb0da45-34a6-4e27-b1c3-1142fabbe2fc\"},{\"id\":\"ticket\",\"stored\":false,\"root\":true,\"art\":true,\"picture\":false,\"domHidden\":false,\"domDisplay\":\"block\",\"shadow\":true,\"shadowParent\":\"e2ffe700-b999-40a3-9043-5d8eedcdfd2c\",\"artParent\":\"e2ffe700-b999-40a3-9043-5d8eedcdfd2c\",\"stage\":\"beb0da45-34a6-4e27-b1c3-1142fabbe2fc\"}]",
+    "PNG docs/shots/world-unit5-curtain-unlock-phone.jpg",
+    "PNG docs/shots/world-unit5-curtain-no-independent-pictures-phone.jpg",
+    "PNG docs/shots/world-unit5-curtain-no-card-shadows-phone.jpg"
+  ]
+}

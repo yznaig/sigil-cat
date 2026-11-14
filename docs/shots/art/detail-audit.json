@@ -1,0 +1,252 @@
+{
+  "scope": "Art geometry and finite pose diagnostics. Not G1-G5, real GPU or iPhone validation.",
+  "dynamic": {
+    "blower": {
+      "samples": 21,
+      "finite": true,
+      "colliderEncloses": true
+    },
+    "eyes": {
+      "bounded": true
+    },
+    "cow": {
+      "poses": 24,
+      "finite": true,
+      "namedJoints": {
+        "forward": "+X",
+        "legs": [
+          "front.L",
+          "front.R",
+          "rear.L",
+          "rear.R"
+        ],
+        "neck": "neck",
+        "head": "head",
+        "tail": [
+          "tail.base",
+          "tail.mid",
+          "tail.switch"
+        ],
+        "milkSensor": "body local [-.40,.37,0]",
+        "polled": true
+      }
+    },
+    "cloud": {
+      "boundedUniforms": true
+    },
+    "confetti": {
+      "samples": 60,
+      "lowestY": -5.353313556333283e-10,
+      "endings": [
+        {
+          "time": 2.4,
+          "count": 0,
+          "visible": false
+        },
+        {
+          "time": 20,
+          "count": 0,
+          "visible": false
+        },
+        {
+          "time": -1,
+          "count": 0,
+          "visible": false
+        },
+        {
+          "time": "NaN",
+          "count": 0,
+          "visible": false
+        }
+      ]
+    }
+  },
+  "assets": [
+    {
+      "asset": "cow",
+      "triangles": 31210,
+      "meshes": 29,
+      "materials": 12,
+      "geometryBytes": 2171840,
+      "textures": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          1024,
+          512
+        ],
+        [
+          128,
+          128
+        ]
+      ],
+      "mass": 0
+    },
+    {
+      "asset": "crumbs",
+      "triangles": 5040,
+      "meshes": 1,
+      "materials": 1,
+      "geometryBytes": 665280,
+      "textures": [
+        [
+          256,
+          256
+        ]
+      ],
+      "mass": 0.015
+    },
+    {
+      "asset": "shards",
+      "triangles": 5248,
+      "meshes": 2,
+      "materials": 2,
+      "geometryBytes": 503808,
+      "textures": [],
+      "mass": 0.035
+    },
+    {
+      "asset": "eyes",
+      "triangles": 5776,
+      "meshes": 5,
+      "materials": 4,
+      "geometryBytes": 554496,
+      "textures": [],
+      "mass": 0.04
+    },
+    {
+      "asset": "cloud",
+      "triangles": 18836,
+      "meshes": 1,
+      "materials": 1,
+      "geometryBytes": 339096,
+      "textures": [],
+      "mass": 0.04
+    },
+    {
+      "asset": "twinkle",
+      "triangles": 2496,
+      "meshes": 3,
+      "materials": 3,
+      "geometryBytes": 101056,
+      "textures": [
+        [
+          256,
+          256
+        ]
+      ],
+      "mass": 0.01
+    },
+    {
+      "asset": "cup",
+      "triangles": 2848,
+      "meshes": 3,
+      "materials": 3,
+      "geometryBytes": 273408,
+      "textures": [],
+      "mass": 0.12
+    },
+    {
+      "asset": "blower",
+      "triangles": 3160,
+      "meshes": 3,
+      "materials": 3,
+      "geometryBytes": 127280,
+      "textures": [
+        [
+          512,
+          128
+        ]
+      ],
+      "mass": 0.015
+    },
+    {
+      "asset": "confetti",
+      "triangles": 2112,
+      "meshes": 1,
+      "materials": 1,
+      "geometryBytes": 2056,
+      "textures": [],
+      "mass": 0.009600000000000001
+    }
+  ],
+  "files": [
+    {
+      "file": "blower.js",
+      "bytes": 3253,
+      "gzipBytes": 1592
+    },
+    {
+      "file": "cloud-surface.glb",
+      "bytes": 339920,
+      "gzipBytes": 287640
+    },
+    {
+      "file": "cloud.js",
+      "bytes": 2311,
+      "gzipBytes": 1089
+    },
+    {
+      "file": "confetti.js",
+      "bytes": 3704,
+      "gzipBytes": 1764
+    },
+    {
+      "file": "cow-surface.glb",
+      "bytes": 606184,
+      "gzipBytes": 301980
+    },
+    {
+      "file": "cow.js",
+      "bytes": 9403,
+      "gzipBytes": 4376
+    },
+    {
+      "file": "crumbs.js",
+      "bytes": 2051,
+      "gzipBytes": 1155
+    },
+    {
+      "file": "cup.js",
+      "bytes": 1261,
+      "gzipBytes": 703
+    },
+    {
+      "file": "eyes.js",
+      "bytes": 1371,
+      "gzipBytes": 786
+    },
+    {
+      "file": "forms.js",
+      "bytes": 3980,
+      "gzipBytes": 1758
+    },
+    {
+      "file": "glass-form.js",
+      "bytes": 1646,
+      "gzipBytes": 850
+    },
+    {
+      "file": "shards.js",
+      "bytes": 1136,
+      "gzipBytes": 625
+    },
+    {
+      "file": "twinkle.js",
+      "bytes": 2854,
+      "gzipBytes": 1385
+    }
+  ],
+  "totals": {
+    "bytes": 979074,
+    "gzipBytes": 605703,
+    "triangles": 76726,
+    "meshes": 48
+  }
+}

@@ -1,0 +1,228 @@
+{
+  "sourceHead": "121c677a5e4ba5a428100d692be49ad1b3a4462f",
+  "status": "blocked at cumulative rest gate; no current-source full suite",
+  "renderer": "ANGLE D3D12 NVIDIA GeForce RTX 5070 Ti; desktop CPU, phone viewport is not an iPhone",
+  "checks": [
+    {
+      "name": "cost-rerun-desktop",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf cost renderer: ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "CHECK shelf drop fixture starts without interpenetration: {\"run\":1,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK shelf production budget run: {\"run\":1,\"p95\":4.399999991059303,\"maxReachableSevenP95\":6.0999999940395355,\"loadBefore\":[12.52,12.13,9.8],\"loadAfter\":[12.52,12.13,9.8]}",
+        "CHECK shelf drop fixture starts without interpenetration: {\"run\":2,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK shelf production budget run: {\"run\":2,\"p95\":3.5999999940395355,\"maxReachableSevenP95\":2,\"loadBefore\":[12.52,12.13,9.8],\"loadAfter\":[12.4,12.11,9.81]}",
+        "CHECK shelf drop fixture starts without interpenetration: {\"run\":3,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK shelf production budget run: {\"run\":3,\"p95\":2.2000000029802322,\"maxReachableSevenP95\":1.5999999940395355,\"loadBefore\":[12.4,12.11,9.81],\"loadAfter\":[12.4,12.11,9.81]}",
+        "CHECK shelf drop fixture starts without interpenetration: {\"run\":4,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK shelf production budget run: {\"run\":4,\"p95\":1.800000011920929,\"maxReachableSevenP95\":1.5,\"loadBefore\":[12.4,12.11,9.81],\"loadAfter\":[12.4,12.11,9.81]}",
+        "CHECK shelf drop fixture starts without interpenetration: {\"run\":5,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK shelf production budget run: {\"run\":5,\"p95\":1.6000000089406967,\"maxReachableSevenP95\":1.4000000059604645,\"loadBefore\":[12.4,12.11,9.81],\"loadAfter\":[12.4,12.11,9.81]}",
+        "CHECK shelf 20 production bodies with adapters median p95 <=2.5ms: {\"runs\":[4.399999991059303,3.5999999940395355,2.2000000029802322,1.800000011920929,1.6000000089406967],\"median\":2.2000000029802322,\"composition\":\"2 selected splats + 10 printed cards + 8 tin/butter meshes; 20 awake at each restart, real pictures, contact shadows, DOM sync and passive air drag; desktop CPU viewport proxy\"} PASS",
+        "CHECK shelf all seven converted bodies moving <=2.5ms: {\"runs\":[6.0999999940395355,2,1.5999999940395355,1.5,1.4000000059604645],\"median\":1.5999999940395355} PASS"
+      ]
+    },
+    {
+      "name": "second-desktop",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf one unique solid stays locked:  PASS",
+        "CHECK shelf duplicate remains locked:  PASS",
+        "CHECK shelf two uniques unlock one fixed support:  PASS",
+        "CHECK shelf starts empty without moving collection:  PASS",
+        "CHECK shelf fits left and controls clear pet stroke: {\"rect\":{\"x\":16,\"y\":68,\"w\":443,\"h\":174},\"controls\":{\"x\":18,\"y\":247,\"w\":396.796875,\"h\":44},\"cat\":{\"x\":640,\"y\":398.6596559811356,\"facing\":0.9004471023526769}} PASS",
+        "CHECK shelf 44px controls:  PASS",
+        "CHECK shelf wrong bay rejects atomically:  PASS",
+        "CHECK shelf occupied bay rejects:  PASS",
+        "CHECK shelf fast release rejects:  PASS",
+        "CHECK shelf slow release accepted:  PASS",
+        "CHECK shelf plop finishes within .25s: 236.10ms PASS",
+        "CHECK shelf stored splat remains pickable:  PASS",
+        "CHECK shelf live grip detaches and retains identity:  PASS",
+        "CHECK shelf compatible slow grip previews: {\"speed\":{\"x\":-0.06250705569982529,\"y\":0.008144061081111431,\"z\":0.001982043730095029},\"candidate\":{\"id\":\"shelf\",\"name\":\"top\",\"d\":0.06285800291534352}} PASS",
+        "CHECK shelf mouse or touch release inserts:  PASS",
+        "CHECK shelf native keyboard lifts same body:  PASS",
+        "CHECK shelf escape leaves no orphan joint:  PASS",
+        "CHECK shelf arrange retains four identities:  PASS",
+        "CHECK shelf supported zero idle work: {\"before\":{\"steps\":477,\"syncs\":421,\"shadows\":274,\"supports\":29,\"atlas\":14,\"shelf\":33,\"callbacks\":12},\"after\":{\"steps\":477,\"syncs\":421,\"shadows\":274,\"supports\":29,\"atlas\":14,\"shelf\":33,\"callbacks\":12}} PASS",
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf exact supported reload <.5px: [{\"id\":\"tin\",\"px\":0,\"support\":\"shelf\",\"handle\":1e-323},{\"id\":\"rifle\",\"px\":0,\"support\":\"shelf\",\"handle\":5e-324},{\"id\":\"top\",\"px\":0,\"support\":\"shelf\",\"handle\":0},{\"id\":\"pat\",\"px\":0,\"support\":\"shelf\",\"handle\":1.5e-323}] PASS",
+        "CHECK shelf restore is quiet with four unique bodies:  PASS"
+      ]
+    },
+    {
+      "name": "second-phone",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf one unique solid stays locked:  PASS",
+        "CHECK shelf duplicate remains locked:  PASS",
+        "CHECK shelf two uniques unlock one fixed support:  PASS",
+        "CHECK shelf starts empty without moving collection:  PASS",
+        "CHECK shelf fits left and controls clear pet stroke: {\"rect\":{\"x\":14,\"y\":88,\"w\":184,\"h\":81},\"controls\":{\"x\":18,\"y\":174,\"w\":171.59375,\"h\":44},\"cat\":{\"x\":195,\"y\":365.9623666710155,\"facing\":0.9004471023526769}} PASS",
+        "CHECK shelf 44px controls:  PASS",
+        "CHECK shelf wrong bay rejects atomically:  PASS",
+        "CHECK shelf occupied bay rejects:  PASS",
+        "CHECK shelf fast release rejects:  PASS",
+        "CHECK shelf slow release accepted:  PASS",
+        "CHECK shelf plop finishes within .25s: 230.50ms PASS",
+        "CHECK shelf stored splat remains pickable:  PASS",
+        "CHECK shelf live grip detaches and retains identity:  PASS",
+        "CHECK shelf compatible slow grip previews: {\"speed\":{\"x\":-0.0010444538202136755,\"y\":0.0028533777222037315,\"z\":-0.1306522935628891},\"candidate\":{\"id\":\"shelf\",\"name\":\"top\",\"d\":0.032431157465283474}} PASS",
+        "CHECK shelf mouse or touch release inserts:  PASS",
+        "CHECK shelf native keyboard lifts same body:  PASS",
+        "CHECK shelf escape leaves no orphan joint:  PASS",
+        "CHECK shelf arrange retains four identities:  PASS",
+        "CHECK shelf supported zero idle work: {\"before\":{\"steps\":470,\"syncs\":555,\"shadows\":397,\"supports\":29,\"atlas\":148,\"shelf\":34,\"callbacks\":12},\"after\":{\"steps\":470,\"syncs\":555,\"shadows\":397,\"supports\":29,\"atlas\":148,\"shelf\":34,\"callbacks\":12}} PASS",
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf exact supported reload <.5px: [{\"id\":\"tin\",\"px\":0,\"support\":\"shelf\",\"handle\":1e-323},{\"id\":\"rifle\",\"px\":0,\"support\":\"shelf\",\"handle\":5e-324},{\"id\":\"top\",\"px\":0,\"support\":\"shelf\",\"handle\":0},{\"id\":\"pat\",\"px\":0,\"support\":\"shelf\",\"handle\":1.5e-323}] PASS",
+        "CHECK shelf restore is quiet with four unique bodies:  PASS"
+      ]
+    },
+    {
+      "name": "solids-final-desktop",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf tin physical adapter:  PASS",
+        "CHECK shelf pat physical adapter:  PASS",
+        "CHECK shelf tin 100 drops sleep <=8s contact <=2px energy: {\"id\":\"tin\",\"failed\":[],\"worstSeconds\":3.7416666666666667,\"restGapPx\":0.3387980978061503,\"visualGapPx\":0.48340581298009977,\"minY\":-0.01164837790882068,\"maxEnergyGain\":0.008922891320416737} PASS",
+        "CHECK shelf pat 100 drops sleep <=8s contact <=2px energy: {\"id\":\"pat\",\"failed\":[],\"worstSeconds\":3.808333333333333,\"restGapPx\":0.34174522534665747,\"visualGapPx\":1.9710977916590897,\"minY\":-0.021249506510862798,\"maxEnergyGain\":0.0008848381683614279} PASS",
+        "CHECK shelf solid diagnostics: [{\"id\":\"tin\",\"failed\":[],\"worstSeconds\":3.7416666666666667,\"restGapPx\":0.3387980978061503,\"visualGapPx\":0.48340581298009977,\"minY\":-0.01164837790882068,\"maxEnergyGain\":0.008922891320416737},{\"id\":\"pat\",\"failed\":[],\"worstSeconds\":3.808333333333333,\"restGapPx\":0.34174522534665747,\"visualGapPx\":1.9710977916590897,\"minY\":-0.021249506510862798,\"maxEnergyGain\":0.0008848381683614279}]"
+      ]
+    },
+    {
+      "name": "solids-final-phone",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf tin physical adapter:  PASS",
+        "CHECK shelf pat physical adapter:  PASS",
+        "CHECK shelf tin 100 drops sleep <=8s contact <=2px energy: {\"id\":\"tin\",\"failed\":[],\"worstSeconds\":3.3333333333333335,\"restGapPx\":0.19380052991216384,\"visualGapPx\":0.25401673692777593,\"minY\":-0.006415697158910438,\"maxEnergyGain\":0.008909038903587296} PASS",
+        "CHECK shelf pat 100 drops sleep <=8s contact <=2px energy: {\"id\":\"pat\",\"failed\":[],\"worstSeconds\":3.808333333333333,\"restGapPx\":0.20161976754236446,\"visualGapPx\":1.1577373114793679,\"minY\":-0.021249506510862798,\"maxEnergyGain\":0.0008848381683614279} PASS",
+        "CHECK shelf solid diagnostics: [{\"id\":\"tin\",\"failed\":[],\"worstSeconds\":3.3333333333333335,\"restGapPx\":0.19380052991216384,\"visualGapPx\":0.25401673692777593,\"minY\":-0.006415697158910438,\"maxEnergyGain\":0.008909038903587296},{\"id\":\"pat\",\"failed\":[],\"worstSeconds\":3.808333333333333,\"restGapPx\":0.20161976754236446,\"visualGapPx\":1.1577373114793679,\"minY\":-0.021249506510862798,\"maxEnergyGain\":0.0008848381683614279}]"
+      ]
+    },
+    {
+      "name": "physics-desktop",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK physics three heights share one floor within 0.5 px: base 693.72, floor 693.72; same/caught true, fell false, straight true FAIL",
+        "CHECK physics settles within 3.5 s and stays within 0.5 px for 1 s:  PASS",
+        "CHECK physics unregisters all frame work at rest:  PASS",
+        "CHECK physics exempts sky while solids settle:  PASS",
+        "CHECK physics edge drop stays entirely on screen and on the floor:  PASS",
+        "CHECK physics flick carries sideways then rests on screen on the floor:  PASS",
+        "CHECK physics material measurement: {\"id\":\"box\",\"squash\":0.9308760830281925,\"base\":693.7242995296685,\"floor\":693.7242995296685,\"angle\":0,\"resting\":true,\"sx\":1,\"sy\":1}",
+        "CHECK physics material measurement: {\"id\":\"paper\",\"squash\":1,\"base\":626,\"floor\":693.7242995296685,\"angle\":0,\"resting\":true,\"sx\":1,\"sy\":1,\"paperContact\":true}",
+        "CHECK physics material measurement: {\"id\":\"pat\",\"squash\":1,\"base\":700,\"floor\":693.7242995296685,\"angle\":0,\"resting\":true,\"sx\":1,\"sy\":1}",
+        "CHECK physics box upright physical paper broad face pat soft after settling:  PASS",
+        "CHECK physics layout moves one floor and every resting base together:  PASS",
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK physics reload restores saved x and settled floor bases without falling:  PASS",
+        "CHECK physics old airborne saves set down quietly without a frame:  PASS"
+      ]
+    },
+    {
+      "name": "physics-phone",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK physics three heights share one floor within 0.5 px: base 560.88, floor 560.88; same/caught true, fell true, straight true PASS",
+        "CHECK physics settles within 3.5 s and stays within 0.5 px for 1 s:  PASS",
+        "CHECK physics unregisters all frame work at rest:  PASS",
+        "CHECK physics exempts sky while solids settle:  PASS",
+        "CHECK physics edge drop stays entirely on screen and on the floor:  PASS",
+        "CHECK physics flick carries sideways then rests on screen on the floor:  PASS",
+        "CHECK physics material measurement: {\"id\":\"box\",\"squash\":0.9305155270952581,\"base\":560.8825093512747,\"floor\":560.8825093512747,\"angle\":0,\"resting\":true,\"sx\":1,\"sy\":1}",
+        "CHECK physics material measurement: {\"id\":\"paper\",\"squash\":1,\"base\":504,\"floor\":560.8825093512747,\"angle\":0,\"resting\":true,\"sx\":1,\"sy\":1,\"paperContact\":true}",
+        "CHECK physics material measurement: {\"id\":\"pat\",\"squash\":1,\"base\":961,\"floor\":560.8825093512747,\"angle\":0,\"resting\":true,\"sx\":1,\"sy\":1}",
+        "CHECK physics box upright physical paper broad face pat soft after settling:  PASS",
+        "CHECK physics layout moves one floor and every resting base together:  PASS",
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK physics reload restores saved x and settled floor bases without falling:  PASS",
+        "CHECK physics old airborne saves set down quietly without a frame:  PASS"
+      ]
+    },
+    {
+      "name": "layout-desktop",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK world box gag returns to reserved home:  PASS",
+        "CHECK world lower floor clears footer: floor=693.72 feet=603.72 footer=783.00 PASS",
+        "CHECK world stored cards remain accessible:  PASS",
+        "CHECK world visible items reachable: [{\"id\":\"paper\",\"box\":{\"x\":867,\"y\":183,\"w\":167,\"h\":206}},{\"id\":\"postcard\",\"box\":{\"x\":1041,\"y\":162,\"w\":201,\"h\":136}},{\"id\":\"ticket\",\"box\":{\"x\":1036,\"y\":303,\"w\":211,\"h\":100}},{\"id\":\"tin\",\"box\":{\"x\":947,\"y\":647,\"w\":149,\"h\":107}},{\"id\":\"box\",\"box\":{\"x\":955.1617592773564,\"y\":387.1108548911087,\"w\":312.83824072264366,\"h\":231.50029813475632}},{\"id\":\"rack\",\"box\":{\"x\":24.190439819339062,\"y\":396.527970843157,\"w\":156.41912036132183,\"h\":297.1963286865115}},{\"id\":\"top\",\"box\":{\"x\":582,\"y\":651,\"w\":95,\"h\":94}},{\"id\":\"rifle\",\"box\":{\"x\":206,\"y\":679,\"w\":377,\"h\":41}},{\"id\":\"pat\",\"box\":{\"x\":691,\"y\":673,\"w\":106,\"h\":71}}] PASS",
+        "CHECK world default collection mostly unobstructed: [{\"id\":\"paper\",\"fraction\":0.0043293086696929205},{\"id\":\"postcard\",\"fraction\":0},{\"id\":\"ticket\",\"fraction\":0.15889145108891284},{\"id\":\"tin\",\"fraction\":0},{\"id\":\"box\",\"fraction\":0},{\"id\":\"rack\",\"fraction\":0},{\"id\":\"top\",\"fraction\":0.004591265397536394},{\"id\":\"rifle\",\"fraction\":0},{\"id\":\"pat\",\"fraction\":0}] PASS",
+        "CHECK world homes leave cat petting stroke clear:  PASS",
+        "CHECK world rack fixed bottom left:  PASS",
+        "CHECK world saves versioned floor poses:  PASS",
+        "CHECK world legacy v2 ticket migrates without motion:  PASS",
+        "CHECK world placement sleeps without updates: shadow updates=0 PASS",
+        "CHECK world shadows attached to world plane:  PASS",
+        "CHECK world furniture reserved: {\"furniture\":{\"shelf\":{\"x\":16,\"y\":68,\"w\":443,\"h\":223},\"pinboard\":{\"x\":847,\"y\":138,\"w\":429,\"h\":340.3125},\"rack\":{\"x\":102.4,\"y\":693.7242995296685,\"fixed\":true}},\"insets\":{\"top\":56,\"bottom\":117}} PASS",
+        "CHECK world saved rigid pose restores asleep: drift=0.0000px PASS",
+        "CHECK board layout restore before: {\"selected\":\"ticket\",\"savedSelected\":\"ticket\",\"root\":[1.1201283027071534,0.8422543327685661,-0.12409793814199777],\"paper\":{\"x\":0.8301283121109009,\"y\":0.8451696634292603,\"z\":-0.10431155562400818},\"box\":{\"x\":847,\"y\":138,\"w\":429,\"h\":293}}",
+        "CHECK world matched rest submission cost: {\"samples\":{\"baseline\":[0,0,0,0,0],\"world\":[0.09999999403953552,0.09999999403953552,0.09999999403953552,0.09999999403953552,0.09999999403953552]},\"delta\":0.09999999403953552,\"units\":\"ms CPU render submission; identical cached cat, 5x120 renders\"}",
+        "CHECK world rest submission delta <=0.1ms: delta=0.100ms PASS",
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK board layout restore after: {\"selected\":\"ticket\",\"savedSelected\":\"ticket\",\"root\":[1.1201283027071534,0.8422543327685661,-0.12409793814199777],\"paper\":{\"x\":0.8301283121109009,\"y\":0.8451696634292603,\"z\":-0.10431155562400818},\"box\":{\"x\":847,\"y\":138,\"w\":429,\"h\":293}}",
+        "CHECK world layout reload under half pixel: max=0.0000px; [{\"id\":\"paper\",\"drift\":0},{\"id\":\"postcard\",\"drift\":0},{\"id\":\"tin\",\"drift\":0},{\"id\":\"box\",\"drift\":0},{\"id\":\"rack\",\"drift\":0},{\"id\":\"top\",\"drift\":0},{\"id\":\"rifle\",\"drift\":0},{\"id\":\"pat\",\"drift\":0},{\"id\":\"ticket\",\"drift\":0}] PASS",
+        "CHECK world restored floor idle:  PASS"
+      ]
+    },
+    {
+      "name": "layout-phone",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK world box gag returns to reserved home:  PASS",
+        "CHECK world lower floor clears footer: floor=560.88 feet=476.48 footer=654.00 PASS",
+        "CHECK world stored cards remain accessible:  PASS",
+        "CHECK world visible items reachable: [{\"id\":\"ticket\",\"box\":{\"x\":233,\"y\":94,\"w\":130,\"h\":64}},{\"id\":\"tin\",\"box\":{\"x\":175,\"y\":511,\"w\":62,\"h\":45}},{\"id\":\"box\",\"box\":{\"x\":255.11600995511606,\"y\":416.9163219139531,\"w\":122.88399004488397,\"h\":90.93415263321414}},{\"id\":\"rack\",\"box\":{\"x\":12.000000000000014,\"y\":381.2828315933674,\"w\":94.52614618837228,\"h\":179.59967775790733}},{\"id\":\"top\",\"box\":{\"x\":263,\"y\":558,\"w\":45,\"h\":43}},{\"id\":\"rifle\",\"box\":{\"x\":109,\"y\":570,\"w\":153,\"h\":22}},{\"id\":\"pat\",\"box\":{\"x\":300,\"y\":570,\"w\":72,\"h\":39}}] PASS",
+        "CHECK world default collection mostly unobstructed: [{\"id\":\"ticket\",\"fraction\":0},{\"id\":\"tin\",\"fraction\":0},{\"id\":\"box\",\"fraction\":0},{\"id\":\"rack\",\"fraction\":0},{\"id\":\"top\",\"fraction\":0.1281653746770026},{\"id\":\"rifle\",\"fraction\":0},{\"id\":\"pat\",\"fraction\":0}] PASS",
+        "CHECK world homes leave cat petting stroke clear:  PASS",
+        "CHECK world rack fixed bottom left:  PASS",
+        "CHECK world saves versioned floor poses:  PASS",
+        "CHECK world legacy v2 ticket migrates without motion:  PASS",
+        "CHECK world placement sleeps without updates: shadow updates=0 PASS",
+        "CHECK world shadows attached to world plane:  PASS",
+        "CHECK world furniture reserved: {\"furniture\":{\"shelf\":{\"x\":14,\"y\":88,\"w\":184,\"h\":130},\"pinboard\":{\"x\":219,\"y\":79,\"w\":159,\"h\":140.015625},\"rack\":{\"x\":42,\"y\":560.8825093512747,\"fixed\":true}},\"insets\":{\"top\":76,\"bottom\":190}} PASS",
+        "CHECK world saved rigid pose restores asleep: drift=0.0000px PASS",
+        "CHECK board layout restore before: {\"selected\":\"ticket\",\"savedSelected\":\"ticket\",\"root\":[0.45644907253338013,1.54050759320415,-0.21178870520031623],\"paper\":{\"x\":0.45644906163215637,\"y\":1.5432316064834595,\"z\":-0.19197507202625275},\"box\":{\"x\":219,\"y\":79,\"w\":159,\"h\":93}}",
+        "CHECK world matched rest submission cost: {\"samples\":{\"baseline\":[0,0,0.09999999403953552,0,0],\"world\":[0.09999999403953552,0.09999999403953552,0,0.09999999403953552,0.09999999403953552]},\"delta\":0.09999999403953552,\"units\":\"ms CPU render submission; identical cached cat, 5x120 renders\"}",
+        "CHECK world rest submission delta <=0.1ms: delta=0.100ms PASS",
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK board layout restore after: {\"selected\":\"ticket\",\"savedSelected\":\"ticket\",\"root\":[0.45644907253338013,1.54050759320415,-0.21178870520031623],\"paper\":{\"x\":0.45644906163215637,\"y\":1.5432316064834595,\"z\":-0.19197507202625275},\"box\":{\"x\":219,\"y\":79,\"w\":159,\"h\":93}}",
+        "CHECK world layout reload under half pixel: max=0.0000px; [{\"id\":\"paper\",\"drift\":0},{\"id\":\"postcard\",\"drift\":0},{\"id\":\"tin\",\"drift\":0},{\"id\":\"box\",\"drift\":0},{\"id\":\"rack\",\"drift\":0},{\"id\":\"top\",\"drift\":0},{\"id\":\"rifle\",\"drift\":0},{\"id\":\"pat\",\"drift\":0},{\"id\":\"ticket\",\"drift\":0}] PASS",
+        "CHECK world restored floor idle:  PASS"
+      ]
+    },
+    {
+      "name": "pat-return-desktop",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK look crowded floor fixture naturally settles:  PASS",
+        "CHECK pat press measurement: {\"side\":-1,\"point\":{\"x\":722,\"y\":698.0801499173027},\"px\":{\"x\":722,\"y\":713},\"box\":{\"x\":672,\"y\":659,\"w\":100,\"h\":54},\"size\":[91.81446204736818,29.839700165394657],\"phoneScale\":1,\"resting\":false,\"held\":false,\"flight\":null,\"physics\":{\"active\":0,\"steps\":0,\"listening\":false},\"layer\":\"front\",\"candidates\":[{\"id\":\"pat\",\"gl\":true,\"order\":7,\"box\":{\"x\":672,\"y\":659,\"w\":100,\"h\":54}}],\"dom\":[\"on\",\"wash\",\"BODY\",\"HTML\"],\"sponge\":{\"pointerEvents\":\"none\",\"opacity\":\"0.531534\"}}",
+        "CHECK pat press receiver: {\"held\":[],\"calls\":[]}",
+        "CHECK pat drag calls: []",
+        "CHECK look crowded floor pat returns from left:  PASS",
+        "CHECK pat press measurement: {\"side\":1,\"point\":{\"x\":793.5,\"y\":698.0801499173027},\"px\":{\"x\":793.5,\"y\":713},\"box\":{\"x\":743,\"y\":659,\"w\":101,\"h\":54},\"size\":[91.81446204736818,29.839700165394657],\"phoneScale\":1,\"resting\":false,\"held\":false,\"flight\":null,\"physics\":{\"active\":0,\"steps\":0,\"listening\":false},\"layer\":\"front\",\"candidates\":[{\"id\":\"pat\",\"gl\":true,\"order\":7,\"box\":{\"x\":743,\"y\":659,\"w\":101,\"h\":54}}],\"dom\":[\"on\",\"wash\",\"BODY\",\"HTML\"],\"sponge\":{\"pointerEvents\":\"none\",\"opacity\":\"0.531256\"}}",
+        "CHECK pat press receiver: {\"held\":[],\"calls\":[]}",
+        "CHECK pat drag calls: []",
+        "CHECK look crowded floor pat returns from right:  PASS"
+      ]
+    },
+    {
+      "name": "landing-desktop",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK look butter glass landing central: centre 0.620, 0.400; 11 impact frames PASS",
+        "CHECK look butter glass landing enlarged: projected width / resting width 3.227 PASS",
+        "CHECK look galaxy sigil faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.059308, preceding wind-down max 0.112575; hold step 0.000000 vs final wind-down 0.059308 PASS",
+        "CHECK look galaxy sigil resumes home: yaw 37.25180148368833 PASS",
+        "CHECK look galaxy positive faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.038624, preceding wind-down max 0.077391; hold step 0.000000 vs final wind-down 0.038624 PASS",
+        "CHECK look galaxy positive resumes home: yaw 87.51801350385539 PASS",
+        "CHECK look galaxy negative faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.042735, preceding wind-down max 0.089845; hold step 0.000000 vs final wind-down 0.042735 PASS",
+        "CHECK look galaxy negative resumes home: yaw -119.82681685765088 PASS"
+      ]
+    }
+  ],
+  "fullSuite": null,
+  "premise": "No recurring physics/adapter work at rest; observed delta belongs to presentation and host timing. First desktop run was quiet (load 9.78\u201312.26); repeat/phone crossed 14.",
+  "additionalQuietDraft": "Canceled before collecting any sample after the load audit proved the first desktop run already met the quiet premise. No third acceptance attempt."
+}

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 3D Cats</title>
+<style>
+  :root { --bg: #F7EDE3; --ink: #121212; --muted: #6b625a; --card: #fffaf4; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, sans-serif; }
+  header { padding: 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+  header h1 { font-size: 18px; margin: 0; }
+  header p { margin: 0; color: var(--muted); font-size: 14px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 12px; }
+  button { font: inherit; font-size: 14px; padding: 6px 12px; border-radius: 999px; border: 1px solid #d9cbbd;
+           background: var(--card); color: var(--ink); cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .stage { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px 16px; }
+  .panel { position: relative; background: var(--bg); border: 1px solid #e6d8ca; border-radius: 12px;
+           height: min(70vh, 640px); overflow: hidden; }
+  .panel img { width: 100%; height: 100%; object-fit: contain; }
+  canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; }
+  .label { position: absolute; left: 12px; top: 10px; font-size: 13px; color: var(--muted); pointer-events: none; }
+  .note { padding: 0 16px 24px; color: var(--muted); font-size: 13px; max-width: 70ch; }
+  @media (max-width: 720px) {
+    .stage { grid-template-columns: 1fr; }
+    .panel { height: 56vh; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>AI 3D cats vs the sheet</h1>
+  <p>Drag to spin. Each model came from the character sheet through a free online demo, untouched.</p>
+</header>
+<div class="bar" id="models"></div>
+<div class="bar" id="looks">
+  <button data-look="matte" aria-pressed="true">Our matte black</button>
+  <button data-look="original" aria-pressed="false">AI's own texture</button>
+  <button data-look="wire" aria-pressed="false">Wireframe</button>
+</div>
+<div class="stage">
+  <div class="panel"><canvas id="c"></canvas><div class="label" id="stats"></div></div>
+  <div class="panel"><img id="ref" src="../../docs/reference/views/main.png" alt="Character sheet main view"></div>
+</div>
+<p class="note">Wireframe shows how clean the mesh is. Animation needs a tidy mesh, so a messy one means a clean-up pass in Blender first.</p>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+// One line per generated model. Missing files show a "not generated" note.
+const MODELS = [
+  { id: 'trellis2', name: 'TRELLIS.2', file: 'models/trellis2.glb', view: 'main' },
+  { id: 'hunyuan21', name: 'Hunyuan3D 2.1', file: 'models/hunyuan21-textured.glb', view: 'main' },
+  { id: 'hunyuan21s', name: 'Hunyuan3D 2.1 (shape)', file: 'models/hunyuan21-shape.glb', view: 'main' },
+  { id: 'hunyuan2mv', name: 'Hunyuan3D 2mv (front + side)', file: 'models/hunyuan2mv-shape.glb', view: 'front' },
+  { id: 'local-mv-left', name: 'Local 2mv, side as left', file: 'models/local-mv-left.glb', view: 'front' },
+  { id: 'local-mv-right', name: 'Local 2mv, side as right', file: 'models/local-mv-right.glb', view: 'front' },
+];
+
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.NeutralToneMapping;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#F7EDE3');
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+const camera = new THREE.PerspectiveCamera(30, 1, 0.01, 100);
+camera.position.set(0, 0.25, 3.4);
+camera.lookAt(0, 0, 0);
+const key = new THREE.DirectionalLight('#fff4e8', 1.6); key.position.set(2, 3, 2); scene.add(key);
+const rim = new THREE.DirectionalLight('#ffffff', 1.2); rim.position.set(-2, 1.5, -2.5); scene.add(rim);
+
+const turntable = new THREE.Group(); scene.add(turntable);
+const shadow = new THREE.Mesh(new THREE.CircleGeometry(0.55, 48),
+  new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.14 }));
+shadow.rotation.x = -Math.PI / 2; shadow.position.y = -0.62; scene.add(shadow);
+
+const matte = new THREE.MeshPhysicalMaterial({ color: '#121212', roughness: 0.92, sheen: 0.6,
+  sheenRoughness: 0.8, sheenColor: new THREE.Color('#5a5550') });
+const wire = new THREE.MeshBasicMaterial({ color: '#121212', wireframe: true });
+let current = null, look = 'matte';
+const cache = {};
+const loader = new GLTFLoader();
+
+function applyLook() {
+  if (!current) return;
+  current.traverse((o) => {
+    if (!o.isMesh) return;
+    o.userData.orig ??= o.material;
+    o.material = look === 'matte' ? matte : look === 'wire' ? wire : o.userData.orig;
+  });
+}
+
+async function show(m) {
+  document.querySelectorAll('#models button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.id === m.id));
+  document.getElementById('ref').src = `../../docs/reference/views/${m.view}.png`;
+  const stats = document.getElementById('stats');
+  if (current) turntable.remove(current);
+  current = null;
+  try {
+    cache[m.id] ??= (await loader.loadAsync(m.file)).scene;
+  } catch {
+    stats.textContent = `${m.name}: not generated`;
+    return;
+  }
+  current = cache[m.id];
+  // Fit: center and scale to 1.2 units tall, feet on the shadow.
+  const box = new THREE.Box3().setFromObject(current);
+  const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3());
+  const s = 1.2 / size.y;
+  current.scale.setScalar(s);
+  current.position.set(-center.x * s, -box.min.y * s - 0.6, -center.z * s);
+  turntable.add(current);
+  let tris = 0;
+  current.traverse((o) => { if (o.isMesh) tris += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3; });
+  stats.textContent = `${m.name} · ${Math.round(tris).toLocaleString()} triangles`;
+  applyLook();
+}
+
+const bar = document.getElementById('models');
+for (const m of MODELS) {
+  const b = document.createElement('button');
+  b.textContent = m.name; b.dataset.id = m.id; b.onclick = () => show(m);
+  bar.appendChild(b);
+}
+document.querySelectorAll('#looks button').forEach((b) => b.onclick = () => {
+  look = b.dataset.look;
+  document.querySelectorAll('#looks button').forEach((x) => x.setAttribute('aria-pressed', x === b));
+  applyLook();
+});
+
+// Turntable: horizontal drag spins, with a little momentum.
+let dragging = false, lastX = 0, vel = 0;
+canvas.addEventListener('pointerdown', (e) => { dragging = true; lastX = e.clientX; vel = 0; canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener('pointermove', (e) => {
+  if (!dragging) return;
+  const dx = (e.clientX - lastX) * 0.01; lastX = e.clientX;
+  turntable.rotation.y += dx; vel = dx;
+});
+canvas.addEventListener('pointerup', () => { dragging = false; });
+
+function resize() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(canvas);
+renderer.setAnimationLoop(() => {
+  if (!dragging) { turntable.rotation.y += vel; vel *= 0.94; }
+  renderer.render(scene, camera);
+});
+// URL options for screenshots: ?rot=90 sets the angle in degrees, ?look=wire|original|matte.
+const params = new URLSearchParams(location.search);
+turntable.rotation.y = THREE.MathUtils.degToRad(Number(params.get('rot')) || 0);
+if (params.get('look')) document.querySelector(`#looks button[data-look="${params.get('look')}"]`)?.click();
+const start = MODELS.find((m) => m.id === (location.hash.slice(1) || 'trellis2')) || MODELS[0];
+show(start);
+</script>
+</body>
+</html>

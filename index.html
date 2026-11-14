@@ -1,43 +1,153 @@
 <!doctype html>
+<!--
+  Sigil Cat: one near-blank page, the cat floating in the middle (docs/revamp-brief.md; the look is "Hush").
+  src/main.js wires the core (src/core/: stage, cat, input, audio, saved state, keepsakes), the page's chrome
+  (src/ui/hush.js), the sigils (src/sigils/), one file per egg (src/eggs/) and one per gag (src/gags/).
+  Run locally: python3 tools/serve.py . 8732, then http://localhost:8732/
+  URL options: ?perf=1 (frame times), #debug (readout and buttons), #yaw=-90, #pose=sleep, ?rm=1 (calm motion).
+-->
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sigil Cat</title>
-  <style>
-    :root { --bg: #fdf6e3; --ink: #2b2118; --accent: #d33682; --card: #fffbef; }
-    body { margin: 0; background: var(--bg); color: var(--ink);
-           font-family: "Comic Sans MS", "Comic Neue", system-ui, sans-serif; }
-    main { max-width: 720px; margin: 0 auto; padding: 32px 16px; text-align: center; }
-    h1 { font-size: 3rem; margin: 0.2em 0; }
-    h1 span { display: inline-block; animation: wobble 2s infinite ease-in-out; }
-    @keyframes wobble { 50% { transform: rotate(-8deg) scale(1.1); } }
-    .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-             gap: 16px; margin-top: 32px; }
-    .shelf a { display: block; padding: 20px 12px; background: var(--card);
-               border: 3px solid var(--ink); border-radius: 12px; color: inherit;
-               text-decoration: none; box-shadow: 4px 4px 0 var(--ink); }
-    .shelf a:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--accent); }
-    .emoji { font-size: 2.5rem; display: block; }
-    footer { margin-top: 48px; font-size: 0.85rem; opacity: 0.6; }
-  </style>
+<meta charset="utf-8">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+} }
+</script>
+<!-- The loading screen's progress (src/ui/shell.js): real, not a timer. Each part is weighed by how long it keeps him
+     away: the files on the way to his first frame (the modulepreloads below), the bytes of his first pose and its
+     unpacking (the worker), the eggs and his first pose being built (src/main.js), the shader warm-ups drawn behind the
+     closed doors (src/main.js, stage.warmAll), his first frame. -->
+<script>
+(() => {
+  const W = { files: 25, splat: 40, eggs: 20, cat: 10, warm: 10, ready: 5 }, got = { files: 0, splat: 0, eggs: 0, cat: 0, warm: 0, ready: 0 };
+  let shown = -1;
+  const B = window.__boot = { history: [],
+    set(k, v) { got[k] = Math.max(got[k] || 0, Math.min(1, +v || 0)); B.draw(); },
+    get value() { let s = 0, t = 0; for (const k in W) { s += W[k] * got[k]; t += W[k]; } return s / t; },
+    get parts() { return { ...got }; },
+    draw() {
+      const p = B.value, el = document.getElementById('loader');
+      if (p <= shown || !el) return;   // a file that lands before the ring exists is drawn with the ring's first paint
+      if (B.history.length < 400) B.history.push([Math.round(performance.now()), +p.toFixed(4)]);   // every value drawn, once
+      shown = p;
+      for (const c of el.querySelectorAll('.ring .fill')) c.style.strokeDashoffset = (100 - p * 100).toFixed(2);
+      el.querySelectorAll('.ring .rune').forEach((r, i, all) => r.classList.toggle('lit', i < Math.floor(p * all.length + 1e-6)));
+      const n = document.getElementById('load-pct'); if (n) n.textContent = String(Math.round(p * 100));
+    },
+  };
+})();
+</script>
+<!-- His first pose starts downloading and unpacking now, in a worker, while the 3D library is still on its way
+     (src/core/splats.js picks up the worker and the result). -->
+<script>
+try {
+  const worker = new Worker('src/core/spz-worker.js', { type: 'module' }), url = new URL('assets/splats/sit.spz', document.baseURI).href;
+  const s = window.__splat = { worker, url, dead: false };
+  s.first = new Promise((done) => {
+    worker.addEventListener('message', (e) => { if (e.data.of === 0) window.__boot.set('splat', e.data.progress * 0.8); if (e.data.id === 0) { window.__boot.set('splat', 1); done(e.data.error ? null : e.data); } });
+    worker.addEventListener('error', () => { s.dead = true; done(null); });
+  });
+  worker.postMessage({ id: 0, url });
+} catch (e) { /* no workers: the page unpacks him itself */ }
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sigil Cat</title>
+<meta name="description" content="A small black felt cat floating in the middle of the page. Turn him. Tap him. Draw on the air.">
+<meta name="theme-color" content="#fdf0e6">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23121212' d='M6 4l6 6h8l6-6v13a10 10 0 01-20 0z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- the web font must not hold the page back (a stylesheet in the head does): it is fetched as a preload and switched on when it lands -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,500..900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,500..900&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="src/ui/hush.css">
+<!-- everything else on the way to his first frame starts downloading now too: the 3D library, the core, the eggs -->
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js">
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.core.js">
+<link rel="modulepreload" href="src/core/splats.js">
+<link rel="modulepreload" href="src/core/spz.js">
+<link rel="modulepreload" href="src/core/cat.js">
+<link rel="modulepreload" href="src/core/stage.js">
+<link rel="modulepreload" href="src/vendor/fzstd.js">
+<link rel="modulepreload" href="src/eggs/bolt.js">
+<link rel="modulepreload" href="src/eggs/circle.js">
+<link rel="modulepreload" href="src/eggs/bread.js">
+<link rel="modulepreload" href="src/eggs/galaxy.js">
+<link rel="modulepreload" href="src/eggs/noscope.js">
+<link rel="modulepreload" href="src/eggs/butterman.js">
+<link rel="modulepreload" href="src/eggs/butterman-config.js">
+<link rel="modulepreload" href="src/eggs/mlg.js">
+<link rel="modulepreload" href="src/gags/paradox.js">
+<link rel="modulepreload" href="src/gags/fling.js">
+<link rel="modulepreload" href="src/gags/glass.js">
+<link rel="modulepreload" href="src/gags/box.js">
+<link rel="modulepreload" href="src/gags/eyes.js">
+<link rel="modulepreload" href="src/gags/hat.js">
+<link rel="modulepreload" href="src/gags/harp.js">
+<link rel="modulepreload" href="src/gags/petbite.js">
+<link rel="modulepreload" href="src/core/util.js">
+<link rel="modulepreload" href="src/core/puff.js">
+<link rel="modulepreload" href="src/core/felt.js">
+<script>
+(() => {   // the files on the way to his first frame, as each one lands
+  const links = [...document.querySelectorAll('link[rel=modulepreload]')], seen = new Set();
+  const mark = (href) => { if (seen.has(href)) return; seen.add(href); window.__boot.set('files', seen.size / links.length); };
+  for (const l of links) {
+    if (performance.getEntriesByName(l.href).length) mark(l.href);
+    else for (const t of ['load', 'error']) l.addEventListener(t, () => mark(l.href), { once: true });
+  }
+})();
+</script>
 </head>
 <body>
-  <main>
-    <h1><span>🐈‍⬛</span> Sigil Cat <span>✨</span></h1>
-    <p>A shelf of goofy trinkets. Click one.</p>
-    <div class="shelf" id="shelf"></div>
-    <footer>Under construction since forever.</footer>
-  </main>
-  <script src="trinkets.js"></script>
-  <script>
-    const shelf = document.getElementById("shelf");
-    for (const t of TRINKETS) {
-      const a = document.createElement("a");
-      a.href = "trinkets/" + t.file;
-      a.innerHTML = `<span class="emoji">${t.emoji}</span>${t.name}`;
-      shelf.appendChild(a);
-    }
-  </script>
+<div class="wash" aria-hidden="true"></div>
+<!-- The loading screen (src/ui/shell.js): two paper doors and a ring of his runes where he will appear. -->
+<div id="loader" class="loader" aria-busy="true">
+  <div class="door door-l" aria-hidden="true"><div class="seal-half"></div></div>
+  <div class="door door-r" aria-hidden="true"><div class="seal-half"></div></div>
+  <div class="loader-words"><p class="loader-name">Sigil Cat</p><p id="status" role="status">summoning the cat</p><p class="loader-pct" aria-hidden="true"><span id="load-pct">0</span>%</p></div>
+</div>
+<script>
+(() => {   // the ring: a faint track, the line of progress, and 24 of his signs that light as it passes them
+  const BASE = ['M4 6v8a4 4 0 0 0 8 0', 'M4 12h8a4 4 0 1 0-4 4', 'M3 7h9l-8 10h10', 'M3 18v-7a5 5 0 0 1 10 0v7', 'M3 6v6a5 5 0 0 0 10 0V6',
+    'M12 7a6 6 0 1 0 1 8a3 3 0 1 0-5-2', 'M4 6v12M12 6v12M4 12h8', 'M12 7c-8-1-8 5-4 5s4 6-4 5', 'M4 8h8v8H4z', 'M8 5v13M3 9h10',
+    'M2 12c3-6 5-6 7 0s4 6 6 0', 'M3 18l5-12 5 12', 'M8 7a5 5 0 1 0 .01 0'];
+  let runes = '';
+  for (let i = 0; i < 24; i++) runes += `<g class="rune" transform="rotate(${i * 15}) translate(0 -83) scale(.42) translate(-8 -12)"><path d="${BASE[(i * 5 + 3) % 13]}"/></g>`;
+  const svg = `<svg class="ring" viewBox="-110 -110 220 220"><circle class="outer" r="104"/><circle class="track" r="96"/><circle class="fill" r="96" pathLength="100" transform="rotate(-90)"/>${runes}</svg>`;
+  for (const h of document.querySelectorAll('#loader .seal-half')) h.innerHTML = svg;
+  window.__boot.draw();
+})();
+</script>
+<div id="back" class="layer" aria-hidden="true"></div>
+<canvas id="c" aria-label="Sigil Cat, a black felt cat floating in the middle of the page. Arrow keys turn him, Enter taps him. Drag to turn him, tap him, or draw a sign in the air around him."></canvas>
+<div id="front" class="layer" aria-hidden="true"></div>
+<canvas id="ink" aria-hidden="true"></canvas>
+
+<header class="top">
+  <p class="tl">Sigil Cat</p>
+  <h1 class="name" id="name"></h1>
+  <p class="tr" id="tally"><small>so far</small><span id="rare" class="rare" hidden>0 rare bonks</span><span id="bonks">0 bonks</span><br><span id="found">0 of 9 sigils</span></p>
+</header>
+<p id="speech" class="speech" aria-live="polite"></p>
+
+<footer id="footer">
+  <div class="fl">
+    <span class="sound"><button type="button" id="sound" aria-pressed="true">sound <b>on</b></button><input type="range" id="volume" min="0" max="100" step="1" aria-label="Volume"></span>
+    <button type="button" id="ask"><i class="dot" aria-hidden="true"></i>ask the butter</button>
+  </div>
+  <div class="mid">
+    <p class="say" id="say" aria-live="polite"></p>
+    <ol class="marks" id="marks" aria-label="What you have found"></ol>
+    <p class="tiny" id="hint"></p>
+  </div>
+  <nav class="fr" id="links"><a id="grimoire" href="spellbook.html" hidden>grimoire</a><a id="achievements" class="ach-mark" href="achievements.html" hidden aria-label="achievements"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.4a5.6 5.6 0 1 0 .01 0M9.1 13.8 7.6 21l4.4-2.3 4.4 2.3-1.5-7.2"/><path d="M12 6.1l.73 1.89 2.03.11-1.57 1.29.51 1.96L12 10.25l-1.7 1.1.51-1.96-1.57-1.29 2.03-.11z"/></svg></a></nav>
+</footer>
+<ul id="keepsake-keys" class="sr" aria-label="Your keepsakes"></ul>
+<pre id="debug" hidden></pre>
+<pre id="perf" hidden></pre>
+<script type="module" src="src/main.js"></script>
 </body>
 </html>

@@ -1,0 +1,486 @@
+{
+  "reportedFailure": {
+    "before": {
+      "geometries": 44,
+      "textures": 22
+    },
+    "after": {
+      "geometries": 46,
+      "textures": 24
+    }
+  },
+  "controls": [
+    {
+      "log": "checks/out/tray-premise.log",
+      "method": "Hold deferred warm queue, finish card setup, release queue with no tray layouts, trace WebGL createTexture call stacks.",
+      "before": {
+        "geometries": 41,
+        "textures": 21
+      },
+      "after": {
+        "geometries": 44,
+        "textures": 24
+      },
+      "warmBefore": [
+        "1.58s cloud 18 ms",
+        "1.74s glass 20 ms",
+        "1.93s puddle 3 ms",
+        "2.89s buttermanLight 35 ms",
+        "3.73s butterman 25 ms"
+      ],
+      "warmAfter": [
+        "1.58s cloud 18 ms",
+        "1.74s glass 20 ms",
+        "1.93s puddle 3 ms",
+        "2.89s buttermanLight 35 ms",
+        "3.73s butterman 25 ms",
+        "5.56s Mesh 18 ms",
+        "5.71s handButter 8 ms",
+        "5.84s galaxy 18 ms",
+        "5.99s Mesh 12 ms"
+      ],
+      "events": [
+        {
+          "event": "createTexture",
+          "drawing": {
+            "geometry": "PlaneGeometry",
+            "object": "Mesh",
+            "material": "MeshBasicMaterial"
+          },
+          "stack": [
+            "    at warmDraw (http://localhost:18748/src/core/stage.js:133:20)",
+            "    at warmOne (http://localhost:18748/src/core/stage.js:146:36)",
+            "    at async Object.go [as fn] (http://localhost:18748/src/core/stage.js:165:7)"
+          ]
+        },
+        {
+          "event": "createTexture",
+          "drawing": {
+            "geometry": "PlaneGeometry",
+            "object": "galaxy",
+            "material": "ShaderMaterial"
+          },
+          "stack": [
+            "    at warmDraw (http://localhost:18748/src/core/stage.js:133:20)",
+            "    at warmOne (http://localhost:18748/src/core/stage.js:146:36)",
+            "    at async Object.go [as fn] (http://localhost:18748/src/core/stage.js:165:7)"
+          ]
+        },
+        {
+          "event": "createTexture",
+          "drawing": null,
+          "stack": [
+            "    at warmDraw (http://localhost:18748/src/core/stage.js:132:136)",
+            "    at warmOne (http://localhost:18748/src/core/stage.js:146:36)",
+            "    at async Object.go [as fn] (http://localhost:18748/src/core/stage.js:165:7)"
+          ]
+        }
+      ],
+      "warmedLayouts": "CHECK warmed repeated tray resource stability: {\"before\":{\"geometries\":44,\"textures\":24},\"after\":{\"geometries\":45,\"textures\":24}} PASS"
+    },
+    {
+      "log": "checks/out/tray-warm-premise.log",
+      "method": "Hold deferred warm queue, finish card setup, release queue with no tray layouts, trace WebGL createTexture call stacks.",
+      "before": {
+        "geometries": 43,
+        "textures": 22
+      },
+      "after": {
+        "geometries": 44,
+        "textures": 24
+      },
+      "warmBefore": [
+        "1.60s cloud 23 ms",
+        "1.76s glass 22 ms",
+        "1.90s puddle 3 ms",
+        "2.98s buttermanLight 42 ms",
+        "3.89s butterman 27 ms",
+        "4.05s Mesh 15 ms",
+        "4.20s handButter 9 ms"
+      ],
+      "warmAfter": [
+        "1.60s cloud 23 ms",
+        "1.76s glass 22 ms",
+        "1.90s puddle 3 ms",
+        "2.98s buttermanLight 42 ms",
+        "3.89s butterman 27 ms",
+        "4.05s Mesh 15 ms",
+        "4.20s handButter 9 ms",
+        "4.77s galaxy 18 ms",
+        "5.83s Mesh 16 ms"
+      ],
+      "events": [
+        {
+          "event": "createTexture",
+          "drawing": {
+            "geometry": "PlaneGeometry",
+            "object": "galaxy",
+            "material": "ShaderMaterial"
+          },
+          "stack": [
+            "    at warmDraw (http://localhost:18748/src/core/stage.js:133:20)",
+            "    at warmOne (http://localhost:18748/src/core/stage.js:146:36)",
+            "    at async Object.go [as fn] (http://localhost:18748/src/core/stage.js:165:7)"
+          ]
+        },
+        {
+          "event": "createTexture",
+          "drawing": null,
+          "stack": [
+            "    at warmDraw (http://localhost:18748/src/core/stage.js:132:136)",
+            "    at warmOne (http://localhost:18748/src/core/stage.js:146:36)",
+            "    at async Object.go [as fn] (http://localhost:18748/src/core/stage.js:165:7)"
+          ]
+        }
+      ],
+      "warmedLayouts": "CHECK warmed repeated tray resource stability: {\"before\":{\"geometries\":44,\"textures\":24},\"after\":{\"geometries\":45,\"textures\":24}} PASS"
+    }
+  ],
+  "sound": {
+    "seconds": 1.25,
+    "peakDbfs": -16.888,
+    "truePeakDbfs": -16.839,
+    "activeRmsDbfs": -22.014,
+    "sha256": "1e2e6c091daba073fc28b4a4294a09069063803dc80a79c8d2d138a89a3bbdd0"
+  },
+  "focused": {
+    "desktop": [
+      "CHECK board native Enter lifts with one joint:  PASS",
+      "CHECK board native arrows move grip and depth:  PASS",
+      "CHECK board native Escape leaves no joint:  PASS",
+      "CHECK board native mouse or finger detaches once: grabs=1 PASS",
+      "CHECK board resource baseline finishes shader warm-up: 0 pending PASS",
+      "CHECK board repeated tray layouts do not leak resources: {\"before\":{\"geometries\":50,\"textures\":24},\"after\":{\"geometries\":50,\"textures\":24}} PASS",
+      "CHECK board reservation covers current art and controls: {\"box\":{\"x\":847,\"y\":138,\"w\":429,\"h\":293},\"reservation\":{\"x\":847,\"y\":138,\"w\":429,\"h\":340.3125}} PASS",
+      "CHECK supports restored discovery order false:  PASS",
+      "CHECK supports restored discovery order true:  PASS",
+      "CHECK supports selected splat is real geometry inside slot picture:  PASS",
+      "CHECK supports charged top pauses in slot:  PASS",
+      "CHECK supports stored splat and charged top stay idle:  PASS",
+      "CHECK supports splat lift keeps pose and stops charge:  PASS"
+    ],
+    "phone": [
+      "CHECK board native Enter lifts with one joint:  PASS",
+      "CHECK board native arrows move grip and depth:  PASS",
+      "CHECK board native Escape leaves no joint:  PASS",
+      "CHECK board native mouse or finger detaches once: grabs=1 PASS",
+      "CHECK board resource baseline finishes shader warm-up: 0 pending PASS",
+      "CHECK board repeated tray layouts do not leak resources: {\"before\":{\"geometries\":45,\"textures\":24},\"after\":{\"geometries\":46,\"textures\":24}} PASS",
+      "CHECK board reservation covers current art and controls: {\"box\":{\"x\":219,\"y\":79,\"w\":159,\"h\":152},\"reservation\":{\"x\":219,\"y\":79,\"w\":159,\"h\":199.65625}} PASS",
+      "CHECK supports restored discovery order false:  PASS",
+      "CHECK supports restored discovery order true:  PASS",
+      "CHECK supports selected splat is real geometry inside slot picture:  PASS",
+      "CHECK supports charged top pauses in slot:  PASS",
+      "CHECK supports stored splat and charged top stay idle:  PASS",
+      "CHECK supports splat lift keeps pose and stops charge:  PASS"
+    ]
+  },
+  "resolverTests": [
+    "CDN DNS attempt 1: EAI_AGAIN; retrying",
+    "CDN cdn.jsdelivr.net -> 192.0.2.10 (DNS attempt 2)",
+    "CDN DNS attempt 1: DNS unavailable; retrying",
+    "\u2714 CDN resolver retries a transient failure and pins only jsDelivr (253.990175ms)",
+    "\u2714 suite answer bypasses repeated DNS and rejects resolver-rule injection (3.189964ms)",
+    "CDN DNS attempt 2: DNS unavailable; retrying",
+    "\u2714 persistent DNS failure stops after three attempts (751.881322ms)",
+    "\u2139 tests 3",
+    "\u2139 suites 0",
+    "\u2139 pass 3",
+    "\u2139 fail 0",
+    "\u2139 cancelled 0",
+    "\u2139 skipped 0",
+    "\u2139 todo 0",
+    "\u2139 duration_ms 1044.476717"
+  ],
+  "focusedEnvironment": "Device sandbox: SwiftShader despite NVIDIA flags. Resource lifetime/functional evidence only; not hardware timing acceptance.",
+  "abortedSuite": {
+    "log": "checks/out/fix-run-all-swiftshader-aborted.log",
+    "startLoad": "5.22 4.06 3.59 4/1512 3",
+    "reason": "Live board-cost log identified SwiftShader. Stopped with SIGINT before a timing verdict; no final run-all status line. Sandbox has no /dev/dxg. Host probe reports RTX 5070 Ti."
+  },
+  "firstHardwareSuite": {
+    "log": "checks/out/fix-run-all-hardware-first.log",
+    "startLoad": "9.60 10.29 6.61 5/1603 1472646",
+    "lastLine": "(full output: /tmp/tmp.GN5A1bmw0P)",
+    "failureSummary": "FAILED: sounds-desktop party-phone look-landing-phone",
+    "failures": [
+      "CHECK sounds sleeping and nested async restore schedule zero voices:  FAIL",
+      "CHECK party restores the same page and keepsakes:  FAIL",
+      "CHECK look butter glass landing central: centre 0.409, 0.331; 11 impact frames FAIL",
+      "CHECK look butter glass landing enlarged: projected width / resting width 2.183 FAIL",
+      "FAILED: sounds-desktop party-phone look-landing-phone"
+    ],
+    "resourceChecks": [
+      "CHECK board repeated tray layouts do not leak resources: {\"before\":{\"geometries\":50,\"textures\":24},\"after\":{\"geometries\":50,\"textures\":24}} PASS",
+      "CHECK board repeated tray layouts do not leak resources: {\"before\":{\"geometries\":45,\"textures\":24},\"after\":{\"geometries\":46,\"textures\":24}} PASS"
+    ],
+    "networkFailures": []
+  },
+  "isolatedReruns": {
+    "sounds-desktop": [
+      "CHECK sounds all 69 replacement and impact voices decode:  PASS",
+      "  (warning) The resource https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,500..900&display=swap was preloaded using link preload but not used within a few seconds from the window's load event. Pleas",
+      "CHECK sounds paradox loop completes its full hover and returns the cat: returned true; hover RMS 1.12e-2; paper true PASS",
+      "CHECK sounds 100 contact callbacks produce one principal voice per item: 1 first item; 1 independent item PASS",
+      "CHECK sounds same item can sound again after 80 ms:  PASS",
+      "CHECK sounds material bag exhausts variants and never repeats adjacent: impact-tin-small-02, impact-tin-small-03, impact-tin-small-01, impact-tin-small-03, impact-tin-small-01, impact-tin-small-02, impact-tin-small-01, impact-tin-small-03, impact-tin-small-02 PASS",
+      "CHECK sounds silence measurement: {\"before\":{\"clips\":16,\"loops\":2,\"tones\":0,\"impacts\":12,\"suppressedImpacts\":99,\"suppressedRestore\":0,\"restoring\":false},\"after\":{\"clips\":16,\"loops\":2,\"tones\":0,\"impacts\":12,\"suppressedImpacts\":104,\"suppressedRestore\":4,\"restoring\":false},\"allDenied\":true,\"rms\":0,\"bodies\":[]}",
+      "CHECK sounds sleeping and nested async restore schedule zero voices:  PASS",
+      "CHECK sounds crowded page and montage sum stays below -1 dBFS: -1.937 dBFS for 32 overlapping voices PASS",
+      "CHECK sounds oversampled safety handles 8x input overload: -2.081 dBFS PASS",
+      "CHECK sounds master mute silences a playing replacement: 2.22e-2 to 0.00e+0 RMS PASS",
+      "  (warning) using deprecated parameters for the initialization function; pass a single object instead",
+      "PNG checks/out/sound-check-desktop.jpg",
+      "  (warning) using deprecated parameters for the initialization function; pass a single object instead",
+      "CHECK sounds mute and volume survive a real reload:  PASS",
+      "  (warning) The resource https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,500..900&display=swap was preloaded using link preload but not used within a few seconds from the window's load event. Pleas",
+      "CHECK sounds saved keepsakes and sleeping body restore silently while unmuted: startup 0 voices; restore peak RMS 0.0e+0; sleeping true PASS"
+    ],
+    "party-phone": [
+      "PNG checks/out/party-fork-stroke-phone.jpg",
+      "CHECK fork drawn stroke finds and emits one event: fork; events 1 PASS",
+      "  (warning) The resource https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,500..900&display=swap was preloaded using link preload but not used within a few seconds from the window's load event. Pleas",
+      "  (warning) using deprecated parameters for the initialization function; pass a single object instead",
+      "CHECK party replaces the whole page with an accessible error:  PASS",
+      "CHECK party freezes callbacks, world and audio: {\"frame\":0,\"render\":0,\"timer\":0,\"interval\":0,\"idle\":0,\"raf\":0,\"stageWait\":0,\"clock\":0,\"audio\":0} PASS",
+      "PNG checks/out/party-error-phone.jpg",
+      "  (warning) The resource https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,500..900&display=swap was preloaded using link preload but not used within a few seconds from the window's load event. Pleas",
+      "  (warning) The resource https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,500..900&display=swap was preloaded using link preload but not used within a few seconds from the window's load event. Pleas",
+      "CHECK party waits 30 seconds then restores once: 30.015s; returns 1 PASS",
+      "CHECK party restores the same page and keepsakes:  PASS",
+      "CHECK party returns with hat, bilateral 3D confetti and a toot: {\"active\":false,\"returns\":1,\"toots\":1,\"effects\":true,\"confetti\":160,\"blower\":true,\"sides\":2,\"visiblePiecesPerSide\":[80,79]} PASS",
+      "PNG checks/out/party-return-phone.jpg",
+      "CHECK party effects finish without retained callbacks:  PASS",
+      "CHECK party immediate mute is silent on the first return sample: gain 0 PASS",
+      "CHECK party muted return stays silent: RMS 0 PASS",
+      "CHECK party Escape and native skip both restore controls:  PASS"
+    ],
+    "look-landing-phone": [
+      "  (warning) using deprecated parameters for the initialization function; pass a single object instead",
+      "CHECK look butter glass landing central: centre 0.620, 0.400; 9 impact frames PASS",
+      "CHECK look butter glass landing enlarged: projected width / resting width 3.185 PASS",
+      "  (warning) The resource https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,500..900&display=swap was preloaded using link preload but not used within a few seconds from the window's load event. Pleas",
+      "CHECK look galaxy sigil faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.057638, preceding wind-down max 0.113258; hold step 0.000000 vs final wind-down 0.057638 PASS",
+      "PNG checks/out/look-galaxy-landing-phone.jpg",
+      "CHECK look galaxy sigil resumes home: yaw 37.25014152257133 PASS",
+      "CHECK look galaxy positive faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.036209, preceding wind-down max 0.074900; hold step 0.000000 vs final wind-down 0.036209 PASS",
+      "CHECK look galaxy positive resumes home: yaw 87.51829827927546 PASS",
+      "CHECK look galaxy negative faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.043016, preceding wind-down max 0.091427; hold step 0.000000 vs final wind-down 0.043016 PASS",
+      "CHECK look galaxy negative resumes home: yaw -119.82691394036135 PASS"
+    ]
+  },
+  "isolatedExitSummary": [
+    "2.95 2.23 3.36 2/1479 1741487",
+    "",
+    "CDN cdn.jsdelivr.net -> 151.101.193.229 (DNS attempt 1)",
+    "isolated exits: sounds=0 party=0 landing=0"
+  ],
+  "secondHardwareSuite": {
+    "log": "checks/out/fix-run-all-hardware-second.log",
+    "startLoad": "1.47 1.92 3.03 1/1511 1759638",
+    "failureSummary": "FAILED: world-supports-phone play-phone look-landing-phone",
+    "failures": [
+      "CHECK supports plop <=250ms:  FAIL",
+      "CHECK and are where they were left: moved: postcard 0.458,1.366 -> 0.458,1.308; paper 0.458,1.273 -> 0.458,1.215; box 0.54,-0.139 -> 0.54,-0.104; ticket 0.458,1.415 -> 0.458,1.357 FAIL",
+      "CHECK look butter glass landing central: centre 0.421, 0.314; 6 impact frames FAIL",
+      "CHECK look butter glass landing enlarged: projected width / resting width 1.156 FAIL",
+      "FAILED: world-supports-phone play-phone look-landing-phone"
+    ]
+  },
+  "readinessMeasurements": {
+    "support": {
+      "log": "checks/out/fix-support-premise.log",
+      "observations": [
+        "CHECK support timing premise: {\"elapsed\":305,\"frames\":[{\"ms\":0.7000000029802322,\"active\":1,\"warm\":2},{\"ms\":271,\"active\":1,\"warm\":2},{\"ms\":271.80000001192093,\"active\":0,\"warm\":2}],\"warmBefore\":[\"5.13s cloud 114 ms\",\"5.38s glass 13 ms\",\"5.53s puddle 10 ms\",\"5.67s buttermanLight 3023 ms\",\"8.82s butterman 61 ms\",\"9.12s Mesh 24 ms\",\"9.27s handButter 33 ms\",\"9.50s galaxy 65 ms\"],\"warmAfter\":[\"5.13s cloud 114 ms\",\"5.38s glass 13 ms\",\"5.53s puddle 10 ms\",\"5.67s buttermanLight 3023 ms\",\"8.82s butterman 61 ms\",\"9.12s Mesh 24 ms\",\"9.27s handButter 33 ms\",\"9.50s galaxy 65 ms\"]}"
+      ]
+    },
+    "landing-corrected": {
+      "log": "checks/out/fix-landing-premise-corrected.log",
+      "observations": [
+        "CHECK landing clock premise: {\"started\":4.133199999999997,\"tweens\":[{\"seconds\":0.34,\"clock\":4.283199999999998,\"wall\":8486},{\"seconds\":0.22,\"clock\":4.633200000000002,\"wall\":8820.79999999702},{\"seconds\":2.6,\"clock\":4.8665000000000065,\"wall\":9053.39999999106}],\"old\":{\"frames\":[{\"t\":4.499900000000002,\"x\":0.5624887524382529,\"y\":0.32704505313705967,\"w\":29.660044511951668,\"base\":29.258092867829518},{\"t\":4.516500000000002,\"x\":0.5702315481359419,\"y\":0.33517061994539965,\"w\":32.49196066749781,\"base\":29.258092867829518},{\"t\":4.533200000000002,\"x\":0.5780209871812065,\"y\":0.3440471626831706,\"w\":33.69895791803967,\"base\":29.258092867829518},{\"t\":4.549900000000003,\"x\":0.5858104262264727,\"y\":0.353547930806334,\"w\":32.73112945072768,\"base\":29.258092867829518},{\"t\":4.566500000000003,\"x\":0.5935532219241616,\"y\":0.3635166167452034,\"w\":29.059992938220347,\"base\":29.258092867829518},{\"t\":4.583200000000002,\"x\":0.6013426609694265,\"y\":0.37396643515196876,\"w\":22.33862116105709,\"base\":29.258092867829518},{\"t\":4.599800000000003,\"x\":0.6090854566671154,\"y\":0.38465632173155645,\"w\":27.18886793607905,\"base\":29.258092867829518},{\"t\":4.616600000000002,\"x\":0.6169215390599565,\"y\":0.3956567891925135,\"w\":43.85870526100865,\"base\":29.258092867829518},{\"t\":4.633200000000002,\"x\":0.6200000000000002,\"y\":0.4000000000000007,\"w\":50.808520645849654,\"base\":29.258092867829518},{\"t\":4.649800000000003,\"x\":0.6200000000000002,\"y\":0.4000000000000007,\"w\":56.88021853837179,\"base\":29.258092867829518},{\"t\":4.666500000000004,\"x\":0.6200000000000002,\"y\":0.4000000000000007,\"w\":63.8404811763493,\"base\":29.258092867829518}],\"central\":false,\"enlarged\":false},\"actual\":{\"frames\":[{\"t\":4.649800000000003,\"x\":0.6200000000000002,\"y\":0.4000000000000007,\"w\":56.88021853837179,\"base\":29.258092867829518},{\"t\":4.666500000000004,\"x\":0.6200000000000002,\"y\":0.4000000000000007,\"w\":63.8404811763493,\"base\":29.258092867829518},{\"t\":4.683200000000003,\"x\":0.6200000000000002,\"y\":0.4000000000000007,\"w\":71.16630985801694,\"base\":29.258092867829518},{\"t\":4.699900000000004,\"x\":0.6200000000000002,\"y\":0.4000000000000007,\"w\":78.28692003501908,\"base\":29.258092867829518},{\"t\":4.716600000000003,\"x\":0.6200000000000002,\"y\":0.4000000000000007,\"w\":84.45388250135997,\"base\":29.258092867829518},{\"t\":4.733200000000004,\"x\":0.6200000000000002,\"y\":0.4000000000000007,\"w\":89.30849441747455,\"base\":29.258092867829518},{\"t\":4.749800000000004,\"x\":0.6200000000000002,\"y\":0.4000000000000007,\"w\":92.30218970528949,\"base\":29.258092867829518},{\"t\":4.766500000000005,\"x\":0.6200000000000002,\"y\":0.4000000000000007,\"w\":93.17523754872815,\"base\":29.258092867829518},{\"t\":4.783200000000004,\"x\":0.6200000000000002,\"y\":0.4000000000000007,\"w\":91.85289768958,\"base\":29.258092867829518},{\"t\":4.799800000000005,\"x\":0.6200000000000002,\"y\":0.4000000000000007,\"w\":88.5311493888627,\"base\":29.258092867829518},{\"t\":4.816500000000006,\"x\":0.6200000000000002,\"y\":0.4000000000000007,\"w\":83.51596275927523,\"base\":29.258092867829518}],\"central\":true,\"enlarged\":true}}"
+      ]
+    },
+    "font": {
+      "log": "checks/out/fix-font-premise.log",
+      "observations": [
+        "CHECK font layout premise: [{\"mode\":\"normal\",\"insets\":{\"top\":76,\"bottom\":216},\"unit\":225.0622528294578,\"feet\":{\"x\":195,\"y\":463.48250935127476,\"behind\":false},\"font\":\"Archivo, \\\"Arial Narrow\\\", system-ui, sans-serif\",\"faces\":[{\"family\":\"Archivo\",\"status\":\"unloaded\"},{\"family\":\"Archivo\",\"status\":\"unloaded\"},{\"family\":\"Archivo\",\"status\":\"loaded\"}],\"cards\":[{\"id\":\"paper\",\"x\":0.4576511552030399,\"y\":1.2151416148780296},{\"id\":\"postcard\",\"x\":0.4576511552030399,\"y\":1.3084491319582612},{\"id\":\"ticket\",\"x\":0.4576511552030399,\"y\":1.3573244980479062}]},{\"mode\":\"fallback\",\"insets\":{\"top\":76,\"bottom\":190},\"unit\":225.0622528294578,\"feet\":{\"x\":195,\"y\":476.4825093512747,\"behind\":false},\"font\":\"\\\"Arial Narrow\\\", system-ui, sans-serif\",\"faces\":[{\"family\":\"Archivo\",\"status\":\"unloaded\"},{\"family\":\"Archivo\",\"status\":\"unloaded\"},{\"family\":\"Archivo\",\"status\":\"loaded\"}],\"cards\":[{\"id\":\"paper\",\"x\":0.4576511552030399,\"y\":1.2729034111657918},{\"id\":\"postcard\",\"x\":0.4576511552030399,\"y\":1.366210928246023},{\"id\":\"ticket\",\"x\":0.4576511552030399,\"y\":1.4150862943356681}]},{\"mode\":\"normal again\",\"insets\":{\"top\":76,\"bottom\":216},\"unit\":225.0622528294578,\"feet\":{\"x\":195,\"y\":463.48250935127476,\"behind\":false},\"font\":\"Archivo, \\\"Arial Narrow\\\", system-ui, sans-serif\",\"faces\":[{\"family\":\"Archivo\",\"status\":\"unloaded\"},{\"family\":\"Archivo\",\"status\":\"unloaded\"},{\"family\":\"Archivo\",\"status\":\"loaded\"}],\"cards\":[{\"id\":\"paper\",\"x\":0.4576511552030399,\"y\":1.2151416148780296},{\"id\":\"postcard\",\"x\":0.4576511552030399,\"y\":1.3084491319582612},{\"id\":\"ticket\",\"x\":0.4576511552030399,\"y\":1.3573244980479062}]}]"
+      ]
+    },
+    "play": {
+      "log": "checks/out/fix-play-premise.log",
+      "observations": [
+        "CHECK zig-zag casts the bolt: one flash, and it leaves the cloud: drew zigzag; 0 flash; cloud true FAIL",
+        "CHECK reload premise before snapshot: {\"current\":{\"t\":146007.70000000298,\"insets\":{\"top\":76,\"bottom\":216},\"unit\":225.0622528294578,\"feet\":{\"x\":195,\"y\":463.48250935127476,\"behind\":false},\"fonts\":\"loaded\",\"warm\":0,\"board\":{\"x\":219,\"y\":79,\"w\":159,\"h\":93},\"items\":{\"cloud\":{\"x\":-0.39855639438555995,\"y\":1.2341585755020006,\"autoHome\":false},\"top\":{\"x\":0.4243270419601001,\"y\":-0.491052983160488,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.3201022446155548,\"y\":0.003000000026077032,\"z\":1.7278239727020264}},\"crumbs\":{\"x\":-0.5,\"y\":-0.3750073543605491,\"autoHome\":false},\"twinkle\":{\"x\":0.6813796001650207,\"y\":1.5883716831989554,\"autoHome\":false},\"postcard\":{\"x\":0.4576511552030399,\"y\":1.3084491319582612,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.45644906163215637,\"y\":1.4860080480575562,\"z\":-0.18410798907279968},\"support\":{\"id\":\"pinboard\",\"slot\":\"postcard\",\"position\":[0,0,0.02],\"quaternion\":[0,0,0,1],\"custom\":false}},\"rifle\":{\"x\":-0.03554572079246912,\"y\":-0.4777233378633121,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":-0.025202684104442596,\"y\":0.022021103650331497,\"z\":1.7101460695266724}},\"paper\":{\"x\":0.4576511552030399,\"y\":1.2151416148780296,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.45644906163215637,\"y\":1.4860080480575562,\"z\":-0.18410798907279968},\"support\":{\"id\":\"pinboard\",\"slot\":\"paper\",\"position\":[0,0,0.02],\"quaternion\":[0,0,0,1],\"custom\":false}},\"puddle\":{\"x\":0.46310836312773124,\"y\":-0.3750073543605491,\"autoHome\":false},\"shards\":{\"x\":0.7156083631277311,\"y\":-0.3750073543605491,\"autoHome\":false},\"box\":{\"x\":0.5401083631277311,\"y\":-0.10435093201708043,\"autoHome\":true},\"eyes\":{\"x\":-0.36790595628479006,\"y\":1.2664145755020004,\"autoHome\":false},\"rack\":{\"x\":-0.603108363127731,\"y\":-0.3750073543605491,\"autoHome\":false},\"ticket\":{\"x\":0.4576511552030399,\"y\":1.3573244980479062,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.45644906163215637,\"y\":1.4860080480575562,\"z\":-0.18410798907279968},\"support\":{\"id\":\"pinboard\",\"slot\":\"ticket\",\"position\":[0,0,0.02],\"quaternion\":[0,0,0,1],\"custom\":false}},\"tin\":{\"x\":-0.6813694691392956,\"y\":-0.3750073543605491,\"autoHome\":false}}},\"recentLayouts\":[{\"t\":8674,\"insets\":{\"top\":76,\"bottom\":216},\"unit\":225.0622528294578,\"feet\":{\"x\":195,\"y\":463.48250935127476,\"behind\":false},\"fonts\":\"loaded\",\"warm\":2,\"items\":{}},{\"t\":9695.59999999404,\"insets\":{\"top\":76,\"bottom\":216},\"unit\":225.0622528294578,\"feet\":{\"x\":195,\"y\":463.48250935127476,\"behind\":false},\"fonts\":\"loaded\",\"warm\":0,\"items\":{}},{\"t\":13730.29999999702,\"insets\":{\"top\":76,\"bottom\":216},\"unit\":225.0622528294578,\"feet\":{\"x\":195,\"y\":463.48250935127476,\"behind\":false},\"fonts\":\"loaded\",\"warm\":0,\"items\":{\"cloud\":{\"x\":-0.39855639438555995,\"y\":1.2341585755020006,\"autoHome\":false}}}]}",
+        "CHECK reload premise after load: {\"before\":{\"t\":146008.29999999702,\"insets\":{\"top\":76,\"bottom\":216},\"unit\":225.0622528294578,\"feet\":{\"x\":195,\"y\":463.48250935127476,\"behind\":false},\"fonts\":\"loaded\",\"warm\":0,\"board\":{\"x\":219,\"y\":79,\"w\":159,\"h\":93},\"items\":{\"cloud\":{\"x\":-0.39855639438555995,\"y\":1.2341585755020006,\"autoHome\":false},\"top\":{\"x\":0.4243270419601001,\"y\":-0.491052983160488,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.3201022446155548,\"y\":0.003000000026077032,\"z\":1.7278239727020264}},\"crumbs\":{\"x\":-0.5,\"y\":-0.3750073543605491,\"autoHome\":false},\"twinkle\":{\"x\":0.6813796001650207,\"y\":1.5883716831989554,\"autoHome\":false},\"postcard\":{\"x\":0.4576511552030399,\"y\":1.3084491319582612,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.45644906163215637,\"y\":1.4860080480575562,\"z\":-0.18410798907279968},\"support\":{\"id\":\"pinboard\",\"slot\":\"postcard\",\"position\":[0,0,0.02],\"quaternion\":[0,0,0,1],\"custom\":false}},\"rifle\":{\"x\":-0.03554572079246912,\"y\":-0.4777233378633121,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":-0.025202684104442596,\"y\":0.022021103650331497,\"z\":1.7101460695266724}},\"paper\":{\"x\":0.4576511552030399,\"y\":1.2151416148780296,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.45644906163215637,\"y\":1.4860080480575562,\"z\":-0.18410798907279968},\"support\":{\"id\":\"pinboard\",\"slot\":\"paper\",\"position\":[0,0,0.02],\"quaternion\":[0,0,0,1],\"custom\":false}},\"puddle\":{\"x\":0.46310836312773124,\"y\":-0.3750073543605491,\"autoHome\":false},\"shards\":{\"x\":0.7156083631277311,\"y\":-0.3750073543605491,\"autoHome\":false},\"box\":{\"x\":0.5401083631277311,\"y\":-0.10435093201708043,\"autoHome\":true},\"eyes\":{\"x\":-0.36790595628479006,\"y\":1.2664145755020004,\"autoHome\":false},\"rack\":{\"x\":-0.603108363127731,\"y\":-0.3750073543605491,\"autoHome\":false},\"ticket\":{\"x\":0.4576511552030399,\"y\":1.3573244980479062,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.45644906163215637,\"y\":1.4860080480575562,\"z\":-0.18410798907279968},\"support\":{\"id\":\"pinboard\",\"slot\":\"ticket\",\"position\":[0,0,0.02],\"quaternion\":[0,0,0,1],\"custom\":false}},\"tin\":{\"x\":-0.6813694691392956,\"y\":-0.3750073543605491,\"autoHome\":false}}},\"current\":{\"t\":3585.7000000029802,\"insets\":{\"top\":76,\"bottom\":216},\"unit\":225.0622528294578,\"feet\":{\"x\":195,\"y\":463.48250935127476,\"behind\":false},\"fonts\":\"loaded\",\"warm\":3,\"board\":{\"x\":219,\"y\":79,\"w\":159,\"h\":93},\"items\":{\"top\":{\"x\":0.4243270419601001,\"y\":-0.491052983160488,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.3201022446155548,\"y\":0.003000000026077032,\"z\":1.7278239727020264}},\"cloud\":{\"x\":-0.3986,\"y\":1.2342,\"autoHome\":false},\"puddle\":{\"x\":0.4631,\"y\":-0.375,\"autoHome\":false},\"shards\":{\"x\":0.7156,\"y\":-0.3750073543605491,\"autoHome\":false},\"box\":{\"x\":0.5401083631277311,\"y\":-0.10435093201708043,\"autoHome\":true},\"eyes\":{\"x\":-0.2738477444324706,\"y\":1.266456,\"autoHome\":false},\"rack\":{\"x\":-0.603108363127731,\"y\":-0.3750073543605491,\"autoHome\":false},\"tin\":{\"x\":-0.6814,\"y\":-0.3750073543605491,\"autoHome\":false},\"rifle\":{\"x\":-0.03554572079246912,\"y\":-0.4777233378633121,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":-0.025202684104442596,\"y\":0.022021103650331497,\"z\":1.7101460695266724}},\"crumbs\":{\"x\":-0.5,\"y\":-0.3750073543605491,\"autoHome\":false},\"twinkle\":{\"x\":0.6814,\"y\":1.5884,\"autoHome\":false},\"postcard\":{\"x\":0.4576511552030399,\"y\":1.3084491319582612,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.45644906163215637,\"y\":1.4860080480575562,\"z\":-0.18410798907279968},\"support\":{\"id\":\"pinboard\",\"slot\":\"postcard\",\"position\":[0,0,0.02],\"quaternion\":[0,0,0,1],\"custom\":false}},\"ticket\":{\"x\":0.4576511552030399,\"y\":1.3573244980479062,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.45644906163215637,\"y\":1.4860080480575562,\"z\":-0.18410798907279968},\"support\":{\"id\":\"pinboard\",\"slot\":\"ticket\",\"position\":[0,0,0.02],\"quaternion\":[0,0,0,1],\"custom\":false}},\"paper\":{\"x\":0.4576511552030399,\"y\":1.2151416148780296,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.45644906163215637,\"y\":1.4860080480575562,\"z\":-0.18410798907279968},\"support\":{\"id\":\"pinboard\",\"slot\":\"paper\",\"position\":[0,0,0.02],\"quaternion\":[0,0,0,1],\"custom\":false}}}},\"layouts\":[]}",
+        "CHECK reload premise settled: {\"current\":{\"t\":5796.20000000298,\"insets\":{\"top\":76,\"bottom\":216},\"unit\":225.0622528294578,\"feet\":{\"x\":195,\"y\":463.48250935127476,\"behind\":false},\"fonts\":\"loaded\",\"warm\":0,\"board\":{\"x\":219,\"y\":79,\"w\":159,\"h\":93},\"items\":{\"top\":{\"x\":0.4243270419601001,\"y\":-0.491052983160488,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.3201022446155548,\"y\":0.003000000026077032,\"z\":1.7278239727020264}},\"cloud\":{\"x\":-0.3986,\"y\":1.2342,\"autoHome\":false},\"puddle\":{\"x\":0.46310000000000007,\"y\":-0.3749999999999998,\"autoHome\":false},\"shards\":{\"x\":0.7156,\"y\":-0.3750073543605491,\"autoHome\":false},\"box\":{\"x\":0.5401083631277311,\"y\":-0.10435093201708043,\"autoHome\":true},\"eyes\":{\"x\":-0.2426516281820411,\"y\":1.266456,\"autoHome\":false},\"rack\":{\"x\":-0.603108363127731,\"y\":-0.3750073543605491,\"autoHome\":false},\"tin\":{\"x\":-0.6814,\"y\":-0.3750073543605491,\"autoHome\":false},\"rifle\":{\"x\":-0.03554572079246912,\"y\":-0.4777233378633121,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":-0.025202684104442596,\"y\":0.022021103650331497,\"z\":1.7101460695266724}},\"crumbs\":{\"x\":-0.5,\"y\":-0.3750073543605491,\"autoHome\":false},\"twinkle\":{\"x\":0.6813999999999999,\"y\":1.5884,\"autoHome\":false},\"postcard\":{\"x\":0.4576511552030399,\"y\":1.3084491319582612,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.45644906163215637,\"y\":1.4860080480575562,\"z\":-0.18410798907279968},\"support\":{\"id\":\"pinboard\",\"slot\":\"postcard\",\"position\":[0,0,0.02],\"quaternion\":[0,0,0,1],\"custom\":false}},\"ticket\":{\"x\":0.4576511552030399,\"y\":1.3573244980479062,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.45644906163215637,\"y\":1.4860080480575562,\"z\":-0.18410798907279968},\"support\":{\"id\":\"pinboard\",\"slot\":\"ticket\",\"position\":[0,0,0.02],\"quaternion\":[0,0,0,1],\"custom\":false}},\"paper\":{\"x\":0.4576511552030399,\"y\":1.2151416148780296,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.45644906163215637,\"y\":1.4860080480575562,\"z\":-0.18410798907279968},\"support\":{\"id\":\"pinboard\",\"slot\":\"paper\",\"position\":[0,0,0.02],\"quaternion\":[0,0,0,1],\"custom\":false}}}},\"layouts\":[{\"t\":4615.70000000298,\"insets\":{\"top\":76,\"bottom\":216},\"unit\":225.0622528294578,\"feet\":{\"x\":195,\"y\":463.48250935127476,\"behind\":false},\"fonts\":\"loaded\",\"warm\":0,\"board\":{\"x\":219,\"y\":79,\"w\":159,\"h\":93},\"items\":{\"top\":{\"x\":0.4243270419601001,\"y\":-0.491052983160488,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.3201022446155548,\"y\":0.003000000026077032,\"z\":1.7278239727020264}},\"cloud\":{\"x\":-0.3986,\"y\":1.2342,\"autoHome\":false},\"puddle\":{\"x\":0.46310000000000007,\"y\":-0.3749999999999998,\"autoHome\":false},\"shards\":{\"x\":0.7156,\"y\":-0.3750073543605491,\"autoHome\":false},\"box\":{\"x\":0.5401083631277311,\"y\":-0.10435093201708043,\"autoHome\":true},\"eyes\":{\"x\":-0.2593938476471321,\"y\":1.266456,\"autoHome\":false},\"rack\":{\"x\":-0.603108363127731,\"y\":-0.3750073543605491,\"autoHome\":false},\"tin\":{\"x\":-0.6814,\"y\":-0.3750073543605491,\"autoHome\":false},\"rifle\":{\"x\":-0.03554572079246912,\"y\":-0.4777233378633121,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":-0.025202684104442596,\"y\":0.022021103650331497,\"z\":1.7101460695266724}},\"crumbs\":{\"x\":-0.5,\"y\":-0.3750073543605491,\"autoHome\":false},\"twinkle\":{\"x\":0.6813999999999999,\"y\":1.5884,\"autoHome\":false},\"postcard\":{\"x\":0.4576511552030399,\"y\":1.3084491319582612,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.45644906163215637,\"y\":1.4860080480575562,\"z\":-0.18410798907279968},\"support\":{\"id\":\"pinboard\",\"slot\":\"postcard\",\"position\":[0,0,0.02],\"quaternion\":[0,0,0,1],\"custom\":false}},\"ticket\":{\"x\":0.4576511552030399,\"y\":1.3573244980479062,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.45644906163215637,\"y\":1.4860080480575562,\"z\":-0.18410798907279968},\"support\":{\"id\":\"pinboard\",\"slot\":\"ticket\",\"position\":[0,0,0.02],\"quaternion\":[0,0,0,1],\"custom\":false}},\"paper\":{\"x\":0.4576511552030399,\"y\":1.2151416148780296,\"physical\":true,\"autoHome\":true,\"world\":{\"x\":0.45644906163215637,\"y\":1.4860080480575562,\"z\":-0.18410798907279968},\"support\":{\"id\":\"pinboard\",\"slot\":\"paper\",\"position\":[0,0,0.02],\"quaternion\":[0,0,0,1],\"custom\":false}}}}]}"
+      ]
+    },
+    "invalidLandingControl": {
+      "log": "checks/out/fix-landing-premise.log",
+      "reason": "First control delayed every ensureButter call, including pat mesh construction; sampling threw before collecting frames. Corrected to delay the initial fling prerequisite only."
+    }
+  },
+  "harnessTests": [
+    "CDN DNS attempt 1: EAI_AGAIN; retrying",
+    "CDN cdn.jsdelivr.net -> 192.0.2.10 (DNS attempt 2)",
+    "CDN DNS attempt 1: DNS unavailable; retrying",
+    "\u2714 CDN resolver retries a transient failure and pins only jsDelivr (252.538993ms)",
+    "\u2714 suite answer bypasses repeated DNS and rejects resolver-rule injection (2.965736ms)",
+    "CDN DNS attempt 2: DNS unavailable; retrying",
+    "\u2714 persistent DNS failure stops after three attempts (751.816612ms)",
+    "FONT unavailable; retaining fallback for this check: https://fonts.googleapis.com/css2?family=Archivo",
+    "\u2714 font requests share the original response across concurrent loads and reload (1.650476ms)",
+    "\u2714 a first-navigation font failure retains the same fallback on reload (0.713332ms)",
+    "\u2139 tests 5",
+    "\u2139 suites 0",
+    "\u2139 pass 5",
+    "\u2139 fail 0",
+    "\u2139 cancelled 0",
+    "\u2139 skipped 0",
+    "\u2139 todo 0",
+    "\u2139 duration_ms 1051.95609"
+  ],
+  "fixedReadinessChecks": {
+    "supports-phone": {
+      "log": "checks/out/fix-ready-supports-phone.log",
+      "checks": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK supports floor natural sleep:  PASS",
+        "CHECK supports hidden body hides cached picture without a pose change:  PASS",
+        "CHECK supports shown body restores its cached picture:  PASS",
+        "CHECK supports correct slot mounts same body:  PASS",
+        "CHECK supports wrong or occupied slot refuses:  PASS",
+        "CHECK supports fast release refuses:  PASS",
+        "CHECK supports slow nearby release plops:  PASS",
+        "CHECK supports plop <=250ms:  PASS",
+        "CHECK supports screen overlap at wrong depth refuses:  PASS",
+        "CHECK supports detach has no position jump:  PASS",
+        "CHECK supports attachment zero idle work:  PASS",
+        "CHECK supports explicit parent update preserves local pose:  PASS",
+        "CHECK supports attachment atomic restore and single identity:  PASS",
+        "CHECK supports butter and hat share crown height:  PASS",
+        "CHECK supports actual cat picture adoption:  PASS",
+        "CHECK supports actual cat detach continuous:  PASS",
+        "CHECK supports keyboard uses the grip joint:  PASS",
+        "CHECK supports lock cancels keyboard grip:  PASS",
+        "CHECK supports fixture cleanup:  PASS"
+      ]
+    },
+    "landing-phone": {
+      "log": "checks/out/fix-ready-landing-phone.log",
+      "checks": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK look butter glass landing central: centre 0.380, 0.400; 11 impact frames PASS",
+        "CHECK look butter glass landing enlarged: projected width / resting width 3.185 PASS",
+        "CHECK look galaxy sigil faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.061349, preceding wind-down max 0.114801; hold step 0.000000 vs final wind-down 0.061349 PASS",
+        "CHECK look galaxy sigil resumes home: yaw 37.2501146947185 PASS",
+        "CHECK look galaxy positive faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.028414, preceding wind-down max 0.058268; hold step 0.000000 vs final wind-down 0.028414 PASS",
+        "CHECK look galaxy positive resumes home: yaw 81.23501531232822 PASS",
+        "CHECK look galaxy negative faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.041391, preceding wind-down max 0.088829; hold step 0.000000 vs final wind-down 0.041391 PASS",
+        "CHECK look galaxy negative resumes home: yaw -119.82681745024007 PASS"
+      ]
+    },
+    "sounds-desktop": {
+      "log": "checks/out/fix-ready-sounds-desktop.log",
+      "checks": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK sounds all 69 replacement and impact voices decode:  PASS",
+        "CHECK sounds paradox loop completes its full hover and returns the cat: returned true; hover RMS 1.21e-2; paper true PASS",
+        "CHECK sounds 100 contact callbacks produce one principal voice per item: 1 first item; 1 independent item PASS",
+        "CHECK sounds same item can sound again after 80 ms:  PASS",
+        "CHECK sounds material bag exhausts variants and never repeats adjacent: impact-tin-small-03, impact-tin-small-02, impact-tin-small-01, impact-tin-small-03, impact-tin-small-01, impact-tin-small-02, impact-tin-small-03, impact-tin-small-02, impact-tin-small-01 PASS",
+        "CHECK sounds silence baseline is naturally settled:  PASS",
+        "CHECK sounds silence measurement: {\"before\":{\"clips\":17,\"loops\":2,\"tones\":0,\"impacts\":13,\"suppressedImpacts\":101,\"suppressedRestore\":0,\"restoring\":false},\"after\":{\"clips\":17,\"loops\":2,\"tones\":0,\"impacts\":13,\"suppressedImpacts\":106,\"suppressedRestore\":4,\"restoring\":false},\"allDenied\":true,\"rms\":0,\"bodies\":[{\"id\":\"paper\",\"sleeping\":true}]}",
+        "CHECK sounds sleeping and nested async restore schedule zero voices:  PASS",
+        "CHECK sounds crowded page and montage sum stays below -1 dBFS: -1.937 dBFS for 32 overlapping voices PASS",
+        "CHECK sounds oversampled safety handles 8x input overload: -2.081 dBFS PASS",
+        "CHECK sounds master mute silences a playing replacement: 2.22e-2 to 0.00e+0 RMS PASS",
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK sounds mute and volume survive a real reload:  PASS",
+        "CHECK sounds saved keepsakes and sleeping body restore silently while unmuted: startup 0 voices; restore peak RMS 0.0e+0; sleeping true PASS"
+      ]
+    },
+    "party-phone": {
+      "log": "checks/out/fix-ready-party-final.log",
+      "checks": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK fork drawn stroke finds and emits one event: fork; events 1; age 0.091s PASS",
+        "CHECK party fixture world adapters finish before suspension:  PASS",
+        "CHECK party replaces the whole page with an accessible error:  PASS",
+        "CHECK party freezes callbacks, world and audio: {\"frame\":0,\"render\":0,\"timer\":0,\"interval\":0,\"idle\":0,\"raf\":0,\"stageWait\":0,\"clock\":0,\"audio\":0} PASS",
+        "CHECK party waits 30 seconds then restores once: 30.020s; returns 1 PASS",
+        "CHECK party restores the same page and keepsakes:  PASS",
+        "CHECK party returns with hat, bilateral 3D confetti and a toot: {\"active\":false,\"returns\":1,\"toots\":1,\"effects\":true,\"confetti\":160,\"blower\":true,\"sides\":2,\"visiblePiecesPerSide\":[64,63]} PASS",
+        "CHECK party effects finish without retained callbacks:  PASS",
+        "CHECK party immediate mute is silent on the first return sample: gain 0 PASS",
+        "CHECK party muted return stays silent: RMS 0 PASS",
+        "CHECK party Escape and native skip both restore controls:  PASS"
+      ]
+    },
+    "play-phone": {
+      "log": "checks/out/fix-ready-play-phone.log",
+      "checks": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK first cat: pose sit, picture 434x319 px at 2x PASS",
+        "CHECK at rest his splats are not redrawn: 0 picture draws in 1 s of floating PASS",
+        "CHECK spin: a 150 px drag turns him: 2.16 rad PASS",
+        "CHECK tap: bonks counted: 4 taps made, 4 counted, count 0 -> 4, shows \"4 bonks\" PASS",
+        "CHECK tap: emotes: tap: hop (in hold sit) | tap: hop (in hold sit) PASS",
+        "CHECK page hit test: on him / in the corner PASS",
+        "CHECK keyboard: arrows turn him, Enter taps him: turned 0.31 rad, taps +1 PASS",
+        "CHECK N1 loaf > sleep and sleep > loaf: no shake, the pop still plays: lie>sleep shake 0.000 rad, springs to 1.17x; sleep>lie shake 0.000 rad, springs to 1.17x PASS",
+        "CHECK N1 every other pair still shakes: sit>lie 0.028 rad, lie>stretch 0.028 rad, stretch>sit 0.028 rad PASS",
+        "CHECK zig-zag casts the bolt: one flash, and it leaves the cloud: drew zigzag; 1 flash; cloud true PASS",
+        "CHECK N6 the circle: 20 turns in about 2 s, facing his usual way after: drew circle; 20.00 turns in 2.34 s (stroke included), 0.000 rad off home PASS",
+        "CHECK N6 the circle opens neither the galaxy nor the 360: galaxy opened false, 360 fired 0, his own spin speed stayed 0.00 rad/s PASS",
+        "CHECK the circle leaves the top:  PASS",
+        "CHECK N11 a half circle casts the loaf: drew dome; he is bread PASS",
+        "CHECK tap the bread: he is back, and there are crumbs:  PASS",
+        "CHECK N12 loaf then star: the bread blasts off and the galaxy does not open: drew dome then star; blast-offs 1; galaxy opened false PASS",
+        "CHECK N12 the cat pops back, a star stays: he is cat PASS",
+        "CHECK the star alone opens the galaxy; nothing gets through while it has him: drew star; 2 presses swallowed PASS",
+        "CHECK the galaxy leaves a postcard:  PASS",
+        "CHECK N12 the other order (star first, loaf after): just bread: he is bread PASS",
+        "CHECK N6 a player's own fast spin still opens the galaxy: fast for 2.0 s PASS",
+        "CHECK noscope real flick runs the timed riser and video: black 4.988, play 5.004, full 6.003 PASS",
+        "CHECK one flick of a whole turn fires the 360 and leaves the rifle: turned 384 degrees PASS",
+        "CHECK B summons Butterman: scene 1 plays to his song and he butters the cat: drew butter; scene butter; clock audio; captions off PASS",
+        "CHECK N2 scene 2: once round the cat without touching him, then out to open floor: 1 turns, nearest 0.53 from his axis (he is 0.43 wide), stands at -0.72,0.314 PASS",
+        "CHECK N2 scene 2: still for the last second, gone in one frame as the clip ends: still for 2.452 s; last there 29.089 s, clip ends 29.114 s PASS",
+        "CHECK his legs never clip (every scene): butter gap 0.04 poke 0.002, loop gap 0.04 poke 0.005, encore gap 0.04 poke 0.002 PASS",
+        "CHECK scene 1: off screen 2 s or more before the clip ends: butter 2.804 s PASS",
+        "CHECK the whisper is silent far from the butter: loop running true; far: gain 0, heard 0.0e+0; away again: 0.0e+0 PASS",
+        "CHECK the whisper is audible near the butter, and very quiet: gain 0.045, heard 1.0e-2 PASS",
+        "CHECK finding the whisper counts:  PASS",
+        "CHECK gag 2 the butter is flung off: a streak on the glass and the pat at the bottom: butter on him false PASS",
+        "CHECK gag 2 a finger wipes the streak away:  PASS",
+        "CHECK gag 2 the pat dragged back onto him butters him again:  PASS",
+        "CHECK gag 1 a buttered cat who becomes bread hovers and turns instead, and a rejected paper is left: drew dome PASS",
+        "CHECK gag 1 tap the paper to read the rejection:  PASS",
+        "CHECK gag 3 the cup: he pushes the glass off the edge; shards and a puddle are left: drew cup PASS",
+        "CHECK gag 3 a bolt with a puddle on the floor goes through the water: struck the puddle at 299,545 PASS",
+        "CHECK gag 4 the square: a box drops, he is in it (ears out), and the box stays: drew square PASS",
+        "CHECK gag 4 tap the box: in one side, out the other:  PASS",
+        "CHECK gag 5 the eight: eyes on his face, a choir, they fall off and stay on the floor: drew eight PASS",
+        "CHECK gag 5 the eyes can be dragged onto something else (the cloud): stuck to cloud PASS",
+        "CHECK gag 6 the triangle: a hat lands on him, the butter rides on top of it, and there is a rack: drew triangle; hat party; butter lifted 0.34 PASS",
+        "CHECK N11 the triangle no longer casts the loaf: it is the hat now PASS",
+        "CHECK gag 6 tap the rack: another hat: party -> crown (1 tap) PASS",
+        "CHECK gag 7 the theme plucked on his whiskers brings the encore, and a ticket: 5 plucks landed on whiskers; scene encore PASS",
+        "CHECK gag 8 seven strokes build a purr and leave a permanent plaster and tin: purr reached 1.00; 7 strokes PASS",
+        "CHECK the sound control mutes everything (a clip, a song, the loops): playing 3.1e-2 -> muted 0.0e+0; a song started while muted 0.0e+0; button says \"sound off\" PASS",
+        "CHECK sound on again, volume set: heard 3.1e-2, volume 0.55 PASS",
+        "CHECK a keepsake can be dragged to a new place: the tin moved 0.76 cat-heights PASS",
+        "CHECK fork joins the found marks: fork PASS",
+        "CHECK found: 17 of 17: all PASS",
+        "CHECK before the reload: 14 keepsakes: cloud, top, crumbs, twinkle, postcard, rifle, paper, puddle, shards, box, eyes, rack, ticket, tin",
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK keepsakes survive a reload: 14 of 14 still there PASS",
+        "CHECK and are where they were left: every one within 0.02 cat-heights PASS",
+        "CHECK what he was wearing survives too: hat crown, butter true, eyes on cloud PASS",
+        "CHECK finds and bonks survive: 17 found, 6 bonks, 17 marks in the row PASS",
+        "CHECK the sound control survives a reload (left muted, volume kept): muted true, volume 0.55, button \"sound off\", heard 0.0e+0 PASS"
+      ]
+    }
+  }
+}

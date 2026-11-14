@@ -1,0 +1,14 @@
+# Raw AI meshes are 18 MB each; only cleaned, web-sized models get committed
+prototypes/ai-3d/models/local-*.glb
+
+# Sigil Cat build scratch (dense meshes, .blend files, previews): rebuild with prototypes/sigil-cat/build/
+prototypes/sigil-cat/build/work/
+__pycache__/
+prototypes/sigil-cat/build/crops/
+
+# Idol splat candidates for picking (tools/splats/more.sh): big PLYs, made on demand
+prototypes/splats/cands/
+# inputs not cleared for the public repo (source or licence unconfirmed): keep local
+tools/splats/inputs/*.local.png
+checks/out/
+*.pyc

@@ -1,0 +1,690 @@
+{
+  "name": "cow",
+  "variant": null,
+  "sheet": true,
+  "triangles": 31210,
+  "meshes": 29,
+  "meshDetails": [
+    {
+      "name": "",
+      "triangles": 2448,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 168,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 360,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 352,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 360,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 352,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 840,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 352,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 144,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 880,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 288,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 352,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 144,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 768,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 64,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 480,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 768,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 64,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 480,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 768,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 448,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 480,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 768,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 448,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 480,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 2796,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 240,
+      "instances": 1
+    },
+    {
+      "name": "",
+      "triangles": 240,
+      "instances": 1
+    },
+    {
+      "name": "continuous-hide",
+      "triangles": 14878,
+      "instances": 1
+    }
+  ],
+  "geometryBytes": 2171840,
+  "materials": 12,
+  "textures": [
+    [
+      128,
+      128
+    ],
+    [
+      128,
+      128
+    ],
+    [
+      1024,
+      512
+    ],
+    [
+      128,
+      128
+    ]
+  ],
+  "finite": true,
+  "physics": {
+    "units": "cat-height units; play mass, not kg",
+    "mass": 0,
+    "colliders": [
+      {
+        "type": "box",
+        "size": [
+          1.2,
+          0.65,
+          0.55
+        ],
+        "position": [
+          -0.03,
+          0.8,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "box",
+        "size": [
+          0.5,
+          0.24,
+          0.23
+        ],
+        "position": [
+          0.99,
+          1.08,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "capsule",
+        "radius": 0.045,
+        "halfHeight": 0.3,
+        "position": [
+          -0.49,
+          0.38,
+          -0.19
+        ]
+      },
+      {
+        "type": "capsule",
+        "radius": 0.045,
+        "halfHeight": 0.3,
+        "position": [
+          -0.49,
+          0.38,
+          0.19
+        ]
+      },
+      {
+        "type": "capsule",
+        "radius": 0.045,
+        "halfHeight": 0.3,
+        "position": [
+          0.43,
+          0.38,
+          -0.19
+        ]
+      },
+      {
+        "type": "capsule",
+        "radius": 0.045,
+        "halfHeight": 0.3,
+        "position": [
+          0.43,
+          0.38,
+          0.19
+        ]
+      }
+    ],
+    "anchors": {
+      "milkSensor": {
+        "position": [
+          -0.4,
+          0.37,
+          0
+        ],
+        "radius": 0.18
+      }
+    }
+  },
+  "rig": {
+    "forward": "+X",
+    "legs": [
+      "front.L",
+      "front.R",
+      "rear.L",
+      "rear.R"
+    ],
+    "neck": "neck",
+    "head": "head",
+    "tail": [
+      "tail.base",
+      "tail.mid",
+      "tail.switch"
+    ],
+    "milkSensor": "body local [-.40,.37,0]",
+    "polled": true
+  },
+  "parts": [
+    {
+      "name": "cow-v2",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "torso",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "neck",
+      "position": [
+        0.43,
+        0.93,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        -1.35
+      ]
+    },
+    {
+      "name": "head",
+      "position": [
+        0.37,
+        0.27,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0.05
+      ]
+    },
+    {
+      "name": "ear.R",
+      "position": [
+        -0.015,
+        0.063,
+        -0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "ear.L",
+      "position": [
+        -0.015,
+        0.063,
+        0.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "front.L",
+      "position": [
+        0.43,
+        0.91,
+        0.173
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.006184294968701209
+      ]
+    },
+    {
+      "name": "front.L.knee",
+      "position": [
+        0.015000000000000013,
+        -0.52,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0.01714902001119123
+      ]
+    },
+    {
+      "name": "front.L.fetlock",
+      "position": [
+        0.013000000000000012,
+        -0.29300000000000004,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.01096472504249002
+      ]
+    },
+    {
+      "name": "front.L.hoof",
+      "position": [
+        0.012,
+        -0.097,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "front.R",
+      "position": [
+        0.43,
+        0.91,
+        -0.173
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.006184294968701209
+      ]
+    },
+    {
+      "name": "front.R.knee",
+      "position": [
+        0.015000000000000013,
+        -0.52,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0.01714902001119123
+      ]
+    },
+    {
+      "name": "front.R.fetlock",
+      "position": [
+        0.013000000000000012,
+        -0.29300000000000004,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.01096472504249002
+      ]
+    },
+    {
+      "name": "front.R.hoof",
+      "position": [
+        0.012,
+        -0.097,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "rear.L",
+      "position": [
+        -0.52,
+        0.91,
+        0.205
+      ],
+      "rotation": [
+        0,
+        0,
+        -2.220446049250313e-16
+      ]
+    },
+    {
+      "name": "rear.L.stifle",
+      "position": [
+        0.11499999999999999,
+        -0.29000000000000004,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        6.661338147750939e-16
+      ]
+    },
+    {
+      "name": "rear.L.hock",
+      "position": [
+        -0.16999999999999993,
+        -0.365,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        -4.440892098500626e-16
+      ]
+    },
+    {
+      "name": "rear.L.hoof",
+      "position": [
+        0.052,
+        -0.255,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "rear.R",
+      "position": [
+        -0.52,
+        0.91,
+        -0.205
+      ],
+      "rotation": [
+        0,
+        0,
+        -2.220446049250313e-16
+      ]
+    },
+    {
+      "name": "rear.R.stifle",
+      "position": [
+        0.11499999999999999,
+        -0.29000000000000004,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        6.661338147750939e-16
+      ]
+    },
+    {
+      "name": "rear.R.hock",
+      "position": [
+        -0.16999999999999993,
+        -0.365,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        -4.440892098500626e-16
+      ]
+    },
+    {
+      "name": "rear.R.hoof",
+      "position": [
+        0.052,
+        -0.255,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "tail.base",
+      "position": [
+        -0.66,
+        1.055,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "tail.mid",
+      "position": [
+        -0.06,
+        -0.3,
+        0.005
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "tail.switch",
+      "position": [
+        -0.015,
+        -0.33,
+        0.01
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "root",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "continuous-hide",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "renders": [
+    {
+      "label": "STEP 0 · STANCE",
+      "frame": 35,
+      "calls": 59,
+      "triangles": 62422,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "label": "STEP ¼ · TRANSFER",
+      "frame": 36,
+      "calls": 59,
+      "triangles": 62422,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "label": "STEP ½ · STANCE",
+      "frame": 37,
+      "calls": 59,
+      "triangles": 62422,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "label": "STEP ¾ · TRANSFER",
+      "frame": 38,
+      "calls": 59,
+      "triangles": 62422,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "label": "GRAZE · SIDE",
+      "frame": 39,
+      "calls": 59,
+      "triangles": 62422,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "label": "GRAZE · THREE QUARTER",
+      "frame": 40,
+      "calls": 59,
+      "triangles": 62422,
+      "points": 0,
+      "lines": 0
+    }
+  ],
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "errors": []
+}

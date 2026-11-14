@@ -1,0 +1,133 @@
+{
+  "name": "hats",
+  "variant": "party",
+  "bounds": {
+    "min": [
+      -0.15299999713897705,
+      0,
+      -0.15299999713897705
+    ],
+    "max": [
+      0.15299999713897705,
+      0.43149998784065247,
+      0.15299999713897705
+    ]
+  },
+  "triangles": 424,
+  "meshes": 3,
+  "materials": 3,
+  "textures": [
+    [
+      32,
+      32
+    ]
+  ],
+  "geometryBytes": 40704,
+  "finite": true,
+  "parts": [
+    {
+      "name": "rack/party",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "physics": {
+        "units": "cat-height units; play mass, not kg",
+        "mass": 0.03,
+        "colliders": [
+          {
+            "type": "cone",
+            "radius": 0.15,
+            "height": 0.39,
+            "position": [
+              0,
+              0.195,
+              0
+            ]
+          }
+        ],
+        "anchors": {
+          "headSeat": [
+            0,
+            0,
+            0
+          ],
+          "butter": [
+            0,
+            0.4315,
+            0
+          ],
+          "peg": [
+            0,
+            0.02,
+            0
+          ]
+        }
+      }
+    }
+  ],
+  "physics": {
+    "units": "cat-height units; play mass, not kg",
+    "mass": 0.03,
+    "colliders": [
+      {
+        "type": "cone",
+        "radius": 0.15,
+        "height": 0.39,
+        "position": [
+          0,
+          0.195,
+          0
+        ]
+      }
+    ],
+    "anchors": {
+      "headSeat": [
+        0,
+        0,
+        0
+      ],
+      "butter": [
+        0,
+        0.4315,
+        0
+      ],
+      "peg": [
+        0,
+        0.02,
+        0
+      ]
+    }
+  },
+  "render": [
+    {
+      "frame": 35,
+      "calls": 7,
+      "triangles": 850,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 36,
+      "calls": 7,
+      "triangles": 850,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 37,
+      "calls": 6,
+      "triangles": 848,
+      "points": 0,
+      "lines": 0
+    }
+  ],
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "errors": []
+}

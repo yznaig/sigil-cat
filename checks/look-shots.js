@@ -1,0 +1,15 @@
+cat.auto=false;
+const detail=async(name,x,y)=>{document.body.style.transformOrigin='0 0';document.body.style.transform=`translate(${innerWidth/2-2*x}px,${innerHeight/2-2*y}px) scale(2)`;await __shot(name+'-detail');document.body.style.transform='';};
+const top=keepsakes.give('top'); await sleep(1000);
+await __shot('look-top-rest'); await detail('look-top-rest',top.px.x,top.px.y);
+top.def.tap(top); await stage.after(.8); stage.timeScale=0; await __shot('look-top-spinning'); await detail('look-top-spinning',top.px.x,top.px.y); stage.timeScale=1;
+await stage.after(3.5);stage.timeScale=0; await __shot('look-top-slowing'); await detail('look-top-slowing',top.px.x,top.px.y);stage.timeScale=1;
+await stage.after(2.2);await __shot('look-top-fallen');await detail('look-top-fallen',top.px.x,top.px.y);
+cat.setButter(true,'quiet');await sleep(700);
+const task=E.fling.fling();await stage.after(.17);stage.timeScale=0;await __shot('look-fling-flight');stage.timeScale=1;
+await stage.after(.28);stage.timeScale=0;await __shot('look-fling-impact');stage.timeScale=1;
+await stage.after(1.12);stage.timeScale=0;await __shot('look-fling-slide');const p=keepsakes.get('pat');const q=stage.toScreen(p.object.position);await detail('look-fling-slide',q.x,q.y);stage.timeScale=1;
+await task;await sleep(100);await __shot('look-fling-bottom');await detail('look-fling-bottom',p.px.x,p.px.y);
+const g=keepsakes.get('grease'), id=++pointerIds, x=g.box.x+g.w/2,y=g.box.y+35;
+fire('pointerdown',x,y,id);fire('pointermove',x,y+20,id);await sleep(70);await __shot('look-fling-sponge');await detail('look-fling-sponge',x,y+20);fire('pointerup',x,y+20,id,0);
+check('look screenshots captured',true);

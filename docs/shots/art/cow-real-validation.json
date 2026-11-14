@@ -1,0 +1,52 @@
+{
+  "samples": {
+    "walk": 129,
+    "graze": 41
+  },
+  "clips": [
+    {
+      "name": "walk",
+      "duration": 1.600000023841858,
+      "tracks": 20
+    },
+    {
+      "name": "graze",
+      "duration": 2,
+      "tracks": 15
+    }
+  ],
+  "bones": [
+    "front.L",
+    "front.L.knee",
+    "front.L.fetlock",
+    "front.L.hoof",
+    "front.R",
+    "front.R.knee",
+    "front.R.fetlock",
+    "front.R.hoof",
+    "rear.L",
+    "rear.L.hock",
+    "rear.L.fetlock",
+    "rear.L.hoof",
+    "rear.R",
+    "rear.R.hock",
+    "rear.R.fetlock",
+    "rear.R.hoof",
+    "neck.base",
+    "neck",
+    "head",
+    "tail.base",
+    "tail.mid",
+    "tail.switch"
+  ],
+  "maxBakeError": 0.004553083604558779,
+  "loopError": 0,
+  "restError": 0,
+  "transformError": 1.0022416723230652e-15,
+  "stanceHeightDrift": 0.00023706450569579984,
+  "stanceSlide": 0.0003377670860983395,
+  "minY": 0.00008234166054871261,
+  "maxY": 1.4494706636504275,
+  "grazeMinY": -3.27447691357563e-10,
+  "errors": []
+}

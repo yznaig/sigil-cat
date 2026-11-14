@@ -1,0 +1,121 @@
+{
+ "size": "desktop",
+ "gpu": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+ "rounds": 5,
+ "when": "2026-11-10T05:40:43.394Z",
+ "old": [
+  {
+   "firstCatMs": 9383,
+   "bytes": 3318678,
+   "requests": 40,
+   "restMeanMs": 1.897,
+   "restP95Ms": 4.5,
+   "startup": 1117,
+   "bolt": 367,
+   "butterman": 17,
+   "galaxy": 50
+  },
+  {
+   "firstCatMs": 2396,
+   "bytes": 3347608,
+   "requests": 38,
+   "restMeanMs": 1.713,
+   "restP95Ms": 3.9,
+   "startup": 750,
+   "bolt": 350,
+   "butterman": 17,
+   "galaxy": 50
+  },
+  {
+   "firstCatMs": 2229,
+   "bytes": 3422978,
+   "requests": 44,
+   "restMeanMs": 1.448,
+   "restP95Ms": 3.4,
+   "startup": 767,
+   "bolt": 450,
+   "butterman": 17,
+   "galaxy": 50
+  },
+  {
+   "firstCatMs": 13109,
+   "bytes": 3270142,
+   "requests": 35,
+   "restMeanMs": 4.889,
+   "restP95Ms": 18.3,
+   "startup": 1450,
+   "bolt": 650,
+   "butterman": 17,
+   "galaxy": 117
+  },
+  {
+   "firstCatMs": 8427,
+   "bytes": 3279428,
+   "requests": 36,
+   "restMeanMs": 4.824,
+   "restP95Ms": 15.5,
+   "startup": 1383,
+   "bolt": 733,
+   "butterman": 50,
+   "galaxy": 67
+  }
+ ],
+ "new": [
+  {
+   "firstCatMs": 2294,
+   "bytes": 915647,
+   "requests": 50,
+   "restMeanMs": 0.681,
+   "restP95Ms": 1.4,
+   "startup": 500,
+   "bolt": 200,
+   "butterman": 17,
+   "galaxy": 67
+  },
+  {
+   "firstCatMs": 5999,
+   "bytes": 848148,
+   "requests": 48,
+   "restMeanMs": 0.543,
+   "restP95Ms": 1.6,
+   "startup": 567,
+   "bolt": 317,
+   "butterman": 17,
+   "galaxy": 83
+  },
+  {
+   "firstCatMs": 6897,
+   "bytes": 878833,
+   "requests": 49,
+   "restMeanMs": 0.562,
+   "restP95Ms": 1.2,
+   "startup": 650,
+   "bolt": 283,
+   "butterman": 17,
+   "galaxy": 100
+  },
+  {
+   "firstCatMs": 2563,
+   "bytes": 848049,
+   "requests": 48,
+   "restMeanMs": 0.738,
+   "restP95Ms": 1.6,
+   "startup": 783,
+   "bolt": 300,
+   "butterman": 17,
+   "galaxy": 83
+  },
+  {
+   "firstCatMs": 3656,
+   "bytes": 848273,
+   "requests": 48,
+   "restMeanMs": 1.482,
+   "restP95Ms": 3.7,
+   "startup": 950,
+   "bolt": 467,
+   "butterman": 33,
+   "galaxy": 150
+  }
+ ],
+ "note": "new[].bytes misses the worker's downloads (his first pose, 0.94 MB): the corrected measure gives 1.78-1.82 MB"
+}

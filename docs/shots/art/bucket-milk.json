@@ -1,0 +1,106 @@
+{
+  "name": "bucket",
+  "variant": "milk",
+  "bounds": {
+    "min": [
+      -0.10899999737739563,
+      0,
+      -0.10899999737739563
+    ],
+    "max": [
+      0.10899999737739563,
+      0.1469999998807907,
+      0.10899999737739563
+    ]
+  },
+  "triangles": 320,
+  "meshes": 1,
+  "materials": 1,
+  "textures": [],
+  "geometryBytes": 30720,
+  "finite": true,
+  "parts": [
+    {
+      "name": "milk",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "physics": {
+        "units": "cat-height units; play mass, not kg",
+        "mass": 0.12,
+        "colliders": [
+          {
+            "type": "cylinder",
+            "radius": 0.108,
+            "height": 0.145,
+            "position": [
+              0,
+              0.0725,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "anchors": {}
+      }
+    }
+  ],
+  "physics": {
+    "units": "cat-height units; play mass, not kg",
+    "mass": 0.12,
+    "colliders": [
+      {
+        "type": "cylinder",
+        "radius": 0.108,
+        "height": 0.145,
+        "position": [
+          0,
+          0.0725,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "anchors": {}
+  },
+  "render": [
+    {
+      "frame": 35,
+      "calls": 3,
+      "triangles": 642,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 36,
+      "calls": 3,
+      "triangles": 642,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 37,
+      "calls": 3,
+      "triangles": 642,
+      "points": 0,
+      "lines": 0
+    }
+  ],
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "errors": []
+}

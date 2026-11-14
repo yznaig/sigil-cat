@@ -1,0 +1,103 @@
+{
+  "name": "confetti",
+  "variant": "start",
+  "sheet": false,
+  "triangles": 2112,
+  "meshes": 1,
+  "meshDetails": [
+    {
+      "name": "confetti.instances",
+      "triangles": 44,
+      "instances": 48
+    }
+  ],
+  "geometryBytes": 2056,
+  "materials": 1,
+  "textures": [],
+  "finite": true,
+  "physics": {
+    "mode": "finite-analytic-particles",
+    "count": 48,
+    "mass": 0.009600000000000001,
+    "massPerPiece": 0.0002,
+    "colliders": [
+      {
+        "type": "box",
+        "size": [
+          0.012,
+          0.022,
+          0.0056
+        ],
+        "position": [
+          0,
+          0,
+          0.002
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "duration": 2.4,
+    "gravity": 1.4,
+    "restitution": 0.18
+  },
+  "parts": [
+    {
+      "name": "confetti",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "confetti.instances",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "renders": [
+    {
+      "label": "FRONT / THREE QUARTER",
+      "frame": 35,
+      "calls": 3,
+      "triangles": 4226,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "label": "REAR / CONSTRUCTION",
+      "frame": 36,
+      "calls": 3,
+      "triangles": 4226,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "label": "TOP / DETAIL",
+      "frame": 37,
+      "calls": 3,
+      "triangles": 4226,
+      "points": 0,
+      "lines": 0
+    }
+  ],
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "errors": []
+}

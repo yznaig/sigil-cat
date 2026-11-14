@@ -1,0 +1,8 @@
+await site.world.ensure();
+const R=stage.renderer,P=site.world.physics,T=site.THREE,totals={physics:0,render:0,target:0,resizes:0,renders:0,targets:0},frames=[];
+for(const [object,key,bucket,count]of [[P,'step','physics',null],[R,'render','render','renders'],[R,'setRenderTarget','target','targets']]){const original=object[key].bind(object);object[key]=(...args)=>{const t=performance.now();const out=original(...args);totals[bucket]+=performance.now()-t;if(count)totals[count]++;return out;};}
+const originalSize=T.WebGLRenderTarget.prototype.setSize;T.WebGLRenderTarget.prototype.setSize=function(...args){if(this.width!==args[0]||this.height!==args[1])totals.resizes++;return originalSize.apply(this,args);};
+const originalStep=site.world.step;site.world.step=dt=>{const before={...totals},t=performance.now();originalStep(dt);const total=performance.now()-t;frames.push({total,...Object.fromEntries(Object.keys(totals).map(k=>[k,totals[k]-before[k]]))});};
+let source=await(await fetch('/checks/world-board-cost.js')).text();source=source.slice(0,source.indexOf('const median=a=>')).replace('run<5','run<1');await eval('(async()=>{'+source+'})()');
+const p95=k=>frames.map(f=>f[k]).sort((a,b)=>a-b)[Math.floor(frames.length*.95)];note('board profile components',JSON.stringify({totalP95:p95('total'),physicsP95:p95('physics'),renderP95:p95('render'),targetP95:p95('target'),load:await __loadAverage(),renderer:stage.renderer.getContext().getParameter(stage.renderer.getContext().getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL)}));
+frames.sort((a,b)=>a.total-b.total);note('board profile',JSON.stringify({totals,frames:frames.length,median:frames[Math.floor(frames.length*.5)],p95:frames[Math.floor(frames.length*.95)],slowest:frames.slice(-12)}));

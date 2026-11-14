@@ -1,0 +1,17 @@
+<!doctype html>
+<!--
+  The achievements book used to be a page of its own; it is now a pop-up over the cat (src/ui/books.js), so returning to him no
+  longer loads everything again (playtest-2). This address still works: it opens the page with the achievements up.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sigil Cat · achievements</title>
+<meta name="theme-color" content="#fdf0e6">
+<meta http-equiv="refresh" content="0; url=./?book=achievements">
+<link rel="canonical" href="./?book=achievements">
+<script>location.replace('./?book=achievements' + location.hash);</script>
+</head>
+<body style="background:#fdf0e6"><p><a href="./?book=achievements">Open the achievements</a></p></body>
+</html>

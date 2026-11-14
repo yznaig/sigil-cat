@@ -1,0 +1,262 @@
+{
+  "floorPremise": "Both solver-tuning attempts assumed the floor support readings were real post-step collider penetration.",
+  "floorFinding": "Confirmed: (b), a transient integration/contact-detection failure, not persistent settled penetration or render interpolation. Original check uses exact cuboid support from Rapier collider poses; the independent eight-corner AABB and shape-contact query corroborate it. Floor top is exactly zero.",
+  "floorMethod": "Same sequential 100 seeds and 140 steps/seed from unchanged checks/world-core.js. Probe runs immediately after W.step(1/120), whose world.step is followed only by render sync and bookkeeping. No collider transform is altered by the observer. All-seed summary and every fixed step of the worst seed retained. Rapier 0.19.3 has no public collider AABB accessor: eight-corner AABB is computed from its world pose and halfExtents, not render geometry. No public isCcdActive method: enabled=true is observable; activation inside the WASM pipeline is unknown (null), not false.",
+  "floorRecommendation": "Fix physics contact detection, retain the existing -0.01 gate. Most likely cause: thin offset barrel sweeps past the contact prediction envelope between fixed steps (0.06478 vertical corner displacement versus 0.02 prediction), so no contact constraint exists at the worst step. Next authorized fix to test: per-body soft CCD with a prediction envelope covering the swept extremity (roughly 0.08 units for this event). This is a hypothesis, not a verified fix; do not increase solver iterations again. No physics setting changed in this diagnostic.",
+  "manifoldTiming": "At worst step49 barrel manifold has zero contacts. At step50 its contactDist=-0.0354852676 describes the preceding pose, while current shape-contact distance is -0.01027617. Therefore using post-step contactPair distance alone as an updated penetration gate would mis-time the measurement by one fixed step. Keep support check and use contactCollider as diagnostic corroboration.",
+  "budgetPremise": "The earlier 1.8 desktop versus 2.1 phone-viewport p95 pair represented a repeatable phone-size cost difference and justified a phone performance failure.",
+  "budgetRecommendation": "Do not raise the 2ms target on this evidence. Correct the benchmark interpretation: these are repeated desktop-CPU samples at two viewports, not iPhone timings. Use a repeated-run summary and record machine load; require real iPhone measurements for a phone gate. Same-size variation exceeds the between-size median difference. Individual runs still exceed 2ms, so this is not an acceptance pass.",
+  "limitations": [
+    "First repeat at each size also gathers floor traces before the timed section; observer allocation/JIT/GC carry-over cannot be excluded. No observer runs within the 180 timed samples.",
+    "Original budget includes W.step bookkeeping and render-object synchronization, not solely WASM world.step; prior pointer actions depend on viewport and can leave slightly different physical states.",
+    "Five sequential repeats per viewport, desktop first; order and changing host load are confounded. Evidence rejects the single-pair inference, but does not prove a zero causal viewport effect.",
+    "No actual frame sequence was rendered during synchronous seed stepping. Pixel sizes are projections through the actual camera. Two fixed steps equal 16.67ms/one 60Hz frame duration, but display phase can show one or both poses.",
+    "No actual iPhone tested; no solver tuning, product modification or acceptance threshold changes."
+  ],
+  "sources": [
+    "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.19.3/geometry/contact.d.ts",
+    "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.19.3/geometry/narrow_phase.d.ts",
+    "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.19.3/dynamics/rigid_body.d.ts"
+  ],
+  "machine": {
+    "cpu": "AMD Ryzen 7 9700X 8-Core Processor",
+    "logicalCpus": 16,
+    "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)"
+  },
+  "floor": [
+    {
+      "size": "desktop",
+      "seed": 39,
+      "zeroBasedStep": 49,
+      "checkMinY": -0.0354852696714871,
+      "aabbMinY": -0.03548526967148711,
+      "rapierShapeContactDistance": -0.035472121089696884,
+      "subCollider": 1,
+      "half": {
+        "x": 0.14000000059604645,
+        "y": 0.012000000104308128,
+        "z": 0.012000000104308128
+      },
+      "linvel": {
+        "x": -0.2680457532405853,
+        "y": -3.1258931159973145,
+        "z": 1.427783489227295
+      },
+      "angvel": {
+        "x": 12.720252990722656,
+        "y": 1.886260179162491e-7,
+        "z": 3.429300308227539
+      },
+      "speed": 3.446972873490562,
+      "angularSpeed": 13.174404607115958,
+      "ccdEnabled": true,
+      "ccdActive": null,
+      "peakCssPixels": 14.965354835133219,
+      "peakDevicePixels": 14.965354835133219,
+      "duration": {
+        "start": 49,
+        "end": 50,
+        "fixedSteps": 2,
+        "milliseconds": 16.666666666666668,
+        "framesAt60Hz": 1
+      },
+      "violations": 26
+    },
+    {
+      "size": "phone",
+      "seed": 39,
+      "zeroBasedStep": 49,
+      "checkMinY": -0.0354852696714871,
+      "aabbMinY": -0.03548526967148711,
+      "rapierShapeContactDistance": -0.035472121089696884,
+      "subCollider": 1,
+      "half": {
+        "x": 0.14000000059604645,
+        "y": 0.012000000104308128,
+        "z": 0.012000000104308128
+      },
+      "linvel": {
+        "x": -0.2680457532405853,
+        "y": -3.1258931159973145,
+        "z": 1.427783489227295
+      },
+      "angvel": {
+        "x": 12.720252990722656,
+        "y": 1.886260179162491e-7,
+        "z": 3.429300308227539
+      },
+      "speed": 3.446972873490562,
+      "angularSpeed": 13.174404607115958,
+      "ccdEnabled": true,
+      "ccdActive": null,
+      "peakCssPixels": 8.62500598221016,
+      "peakDevicePixels": 17.25001196442032,
+      "duration": {
+        "start": 49,
+        "end": 50,
+        "fixedSteps": 2,
+        "milliseconds": 16.666666666666668,
+        "framesAt60Hz": 1
+      },
+      "violations": 26
+    }
+  ],
+  "budget": [
+    {
+      "size": "desktop",
+      "medianP95": 1.4000000059604645,
+      "minP95": 1.3999999985098839,
+      "maxP95": 2.6999999955296516,
+      "runs": [
+        {
+          "repeat": 1,
+          "p95": 2.6999999955296516,
+          "loadBefore": [
+            5.41,
+            4.79,
+            7.42
+          ],
+          "loadAfter": [
+            5.55,
+            4.84,
+            7.41
+          ]
+        },
+        {
+          "repeat": 2,
+          "p95": 1.4000000059604645,
+          "loadBefore": [
+            5.55,
+            4.84,
+            7.41
+          ],
+          "loadAfter": [
+            6.72,
+            5.13,
+            7.48
+          ]
+        },
+        {
+          "repeat": 3,
+          "p95": 2.100000001490116,
+          "loadBefore": [
+            6.72,
+            5.13,
+            7.48
+          ],
+          "loadAfter": [
+            6.67,
+            5.17,
+            7.47
+          ]
+        },
+        {
+          "repeat": 4,
+          "p95": 1.3999999985098839,
+          "loadBefore": [
+            6.67,
+            5.17,
+            7.47
+          ],
+          "loadAfter": [
+            8.24,
+            5.55,
+            7.56
+          ]
+        },
+        {
+          "repeat": 5,
+          "p95": 1.3999999985098839,
+          "loadBefore": [
+            8.24,
+            5.55,
+            7.56
+          ],
+          "loadAfter": [
+            7.96,
+            5.62,
+            7.55
+          ]
+        }
+      ]
+    },
+    {
+      "size": "phone",
+      "medianP95": 1.8999999985098839,
+      "minP95": 1.3999999985098839,
+      "maxP95": 2.3000000044703484,
+      "runs": [
+        {
+          "repeat": 1,
+          "p95": 1.8999999985098839,
+          "loadBefore": [
+            7.96,
+            5.62,
+            7.55
+          ],
+          "loadAfter": [
+            7.89,
+            5.68,
+            7.55
+          ]
+        },
+        {
+          "repeat": 2,
+          "p95": 1.4000000059604645,
+          "loadBefore": [
+            7.89,
+            5.68,
+            7.55
+          ],
+          "loadAfter": [
+            11.28,
+            6.48,
+            7.79
+          ]
+        },
+        {
+          "repeat": 3,
+          "p95": 2.3000000044703484,
+          "loadBefore": [
+            11.28,
+            6.48,
+            7.79
+          ],
+          "loadAfter": [
+            10.94,
+            6.49,
+            7.79
+          ]
+        },
+        {
+          "repeat": 4,
+          "p95": 1.3999999985098839,
+          "loadBefore": [
+            10.94,
+            6.49,
+            7.79
+          ],
+          "loadAfter": [
+            9.86,
+            6.41,
+            7.75
+          ]
+        },
+        {
+          "repeat": 5,
+          "p95": 1.8999999985098839,
+          "loadBefore": [
+            9.86,
+            6.41,
+            7.75
+          ],
+          "loadAfter": [
+            9.02,
+            6.34,
+            7.71
+          ]
+        }
+      ]
+    }
+  ]
+}

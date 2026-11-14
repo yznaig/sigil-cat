@@ -1,0 +1,228 @@
+{
+  "head": "b97f8dc52348d46066ffbb8f32ee9be71a863b96",
+  "renderer": "RTX 5070 Ti / desktop CPU; phone viewport proxy",
+  "checks": [
+    {
+      "name": "first-desktop",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf one unique solid stays locked:  PASS",
+        "CHECK shelf duplicate remains locked:  PASS",
+        "CHECK shelf two uniques unlock one fixed support:  PASS",
+        "CHECK shelf starts empty without moving collection:  PASS",
+        "CHECK shelf fits left and controls clear pet stroke: {\"rect\":{\"x\":16,\"y\":68,\"w\":443,\"h\":174},\"controls\":{\"x\":18,\"y\":247,\"w\":396.796875,\"h\":44},\"cat\":{\"x\":640,\"y\":393.77270395819096,\"facing\":0.9004471023526769}} PASS",
+        "CHECK shelf 44px controls:  PASS",
+        "CHECK shelf wrong bay rejects atomically:  PASS",
+        "CHECK shelf occupied bay rejects:  PASS",
+        "CHECK shelf fast release rejects:  PASS",
+        "CHECK shelf slow release accepted:  PASS",
+        "CHECK shelf plop finishes within .25s: 223.50ms PASS",
+        "CHECK shelf stored splat remains pickable:  PASS",
+        "CHECK shelf live grip detaches and retains identity:  PASS",
+        "CHECK shelf compatible slow grip previews:  PASS",
+        "CHECK shelf mouse or touch release inserts:  PASS",
+        "CHECK shelf native keyboard lifts same body:  PASS",
+        "CHECK shelf escape leaves no orphan joint:  PASS",
+        "CHECK shelf arrange retains four identities:  PASS",
+        "CHECK shelf supported zero idle work: {\"before\":{\"steps\":474,\"syncs\":424,\"shadows\":276,\"supports\":28,\"atlas\":12,\"shelf\":32,\"callbacks\":12},\"after\":{\"steps\":474,\"syncs\":424,\"shadows\":276,\"supports\":28,\"atlas\":12,\"shelf\":32,\"callbacks\":12}} PASS",
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf exact supported reload <.5px: [{\"id\":\"tin\",\"px\":0,\"support\":\"shelf\",\"handle\":1e-323},{\"id\":\"rifle\",\"px\":0,\"support\":\"shelf\",\"handle\":5e-324},{\"id\":\"top\",\"px\":0,\"support\":\"shelf\",\"handle\":0},{\"id\":\"pat\",\"px\":0,\"support\":\"shelf\",\"handle\":1.5e-323}] PASS",
+        "CHECK shelf restore is quiet with four unique bodies:  PASS"
+      ]
+    },
+    {
+      "name": "first-phone",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf one unique solid stays locked:  PASS",
+        "CHECK shelf duplicate remains locked:  PASS",
+        "CHECK shelf two uniques unlock one fixed support:  PASS",
+        "CHECK shelf starts empty without moving collection:  PASS",
+        "CHECK shelf fits left and controls clear pet stroke: {\"rect\":{\"x\":14,\"y\":88,\"w\":184,\"h\":81},\"controls\":{\"x\":18,\"y\":174,\"w\":171.59375,\"h\":92},\"cat\":{\"x\":195,\"y\":354.46350694346177,\"facing\":0.9004471023526769}} PASS",
+        "CHECK shelf 44px controls:  PASS",
+        "CHECK shelf wrong bay rejects atomically:  PASS",
+        "CHECK shelf occupied bay rejects:  PASS",
+        "CHECK shelf fast release rejects:  PASS",
+        "CHECK shelf slow release accepted:  PASS",
+        "CHECK shelf plop finishes within .25s: 222.30ms PASS",
+        "CHECK shelf stored splat remains pickable:  PASS",
+        "CHECK shelf live grip detaches and retains identity:  PASS",
+        "CHECK shelf compatible slow grip previews:  FAIL",
+        "CHECK shelf mouse or touch release inserts:  FAIL",
+        "CHECK shelf native keyboard lifts same body:  PASS",
+        "CHECK shelf escape leaves no orphan joint:  PASS",
+        "CHECK shelf arrange retains four identities:  FAIL",
+        "CHECK shelf supported zero idle work: {\"before\":{\"steps\":814,\"syncs\":720,\"shadows\":561,\"supports\":14,\"atlas\":154,\"shelf\":18,\"callbacks\":13},\"after\":{\"steps\":1014,\"syncs\":820,\"shadows\":582,\"supports\":14,\"atlas\":154,\"shelf\":18,\"callbacks\":12}} FAIL",
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf exact supported reload <.5px: [{\"id\":\"tin\",\"px\":0,\"support\":\"shelf\",\"handle\":1e-323},{\"id\":\"rifle\",\"px\":0,\"support\":\"shelf\",\"handle\":5e-324},{\"id\":\"top\",\"px\":33,\"handle\":0},{\"id\":\"pat\",\"px\":0,\"support\":\"shelf\",\"handle\":1.5e-323}] FAIL",
+        "CHECK shelf restore is quiet with four unique bodies:  PASS"
+      ]
+    },
+    {
+      "name": "second-desktop",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf one unique solid stays locked:  PASS",
+        "CHECK shelf duplicate remains locked:  PASS",
+        "CHECK shelf two uniques unlock one fixed support:  PASS",
+        "CHECK shelf starts empty without moving collection:  PASS",
+        "CHECK shelf fits left and controls clear pet stroke: {\"rect\":{\"x\":16,\"y\":68,\"w\":443,\"h\":174},\"controls\":{\"x\":18,\"y\":247,\"w\":396.796875,\"h\":44},\"cat\":{\"x\":640,\"y\":398.6596559811356,\"facing\":0.9004471023526769}} PASS",
+        "CHECK shelf 44px controls:  PASS",
+        "CHECK shelf wrong bay rejects atomically:  PASS",
+        "CHECK shelf occupied bay rejects:  PASS",
+        "CHECK shelf fast release rejects:  PASS",
+        "CHECK shelf slow release accepted:  PASS",
+        "CHECK shelf plop finishes within .25s: 236.10ms PASS",
+        "CHECK shelf stored splat remains pickable:  PASS",
+        "CHECK shelf live grip detaches and retains identity:  PASS",
+        "CHECK shelf compatible slow grip previews: {\"speed\":{\"x\":-0.06250705569982529,\"y\":0.008144061081111431,\"z\":0.001982043730095029},\"candidate\":{\"id\":\"shelf\",\"name\":\"top\",\"d\":0.06285800291534352}} PASS",
+        "CHECK shelf mouse or touch release inserts:  PASS",
+        "CHECK shelf native keyboard lifts same body:  PASS",
+        "CHECK shelf escape leaves no orphan joint:  PASS",
+        "CHECK shelf arrange retains four identities:  PASS",
+        "CHECK shelf supported zero idle work: {\"before\":{\"steps\":477,\"syncs\":421,\"shadows\":274,\"supports\":29,\"atlas\":14,\"shelf\":33,\"callbacks\":12},\"after\":{\"steps\":477,\"syncs\":421,\"shadows\":274,\"supports\":29,\"atlas\":14,\"shelf\":33,\"callbacks\":12}} PASS",
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf exact supported reload <.5px: [{\"id\":\"tin\",\"px\":0,\"support\":\"shelf\",\"handle\":1e-323},{\"id\":\"rifle\",\"px\":0,\"support\":\"shelf\",\"handle\":5e-324},{\"id\":\"top\",\"px\":0,\"support\":\"shelf\",\"handle\":0},{\"id\":\"pat\",\"px\":0,\"support\":\"shelf\",\"handle\":1.5e-323}] PASS",
+        "CHECK shelf restore is quiet with four unique bodies:  PASS"
+      ]
+    },
+    {
+      "name": "second-phone",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf one unique solid stays locked:  PASS",
+        "CHECK shelf duplicate remains locked:  PASS",
+        "CHECK shelf two uniques unlock one fixed support:  PASS",
+        "CHECK shelf starts empty without moving collection:  PASS",
+        "CHECK shelf fits left and controls clear pet stroke: {\"rect\":{\"x\":14,\"y\":88,\"w\":184,\"h\":81},\"controls\":{\"x\":18,\"y\":174,\"w\":171.59375,\"h\":44},\"cat\":{\"x\":195,\"y\":365.9623666710155,\"facing\":0.9004471023526769}} PASS",
+        "CHECK shelf 44px controls:  PASS",
+        "CHECK shelf wrong bay rejects atomically:  PASS",
+        "CHECK shelf occupied bay rejects:  PASS",
+        "CHECK shelf fast release rejects:  PASS",
+        "CHECK shelf slow release accepted:  PASS",
+        "CHECK shelf plop finishes within .25s: 230.50ms PASS",
+        "CHECK shelf stored splat remains pickable:  PASS",
+        "CHECK shelf live grip detaches and retains identity:  PASS",
+        "CHECK shelf compatible slow grip previews: {\"speed\":{\"x\":-0.0010444538202136755,\"y\":0.0028533777222037315,\"z\":-0.1306522935628891},\"candidate\":{\"id\":\"shelf\",\"name\":\"top\",\"d\":0.032431157465283474}} PASS",
+        "CHECK shelf mouse or touch release inserts:  PASS",
+        "CHECK shelf native keyboard lifts same body:  PASS",
+        "CHECK shelf escape leaves no orphan joint:  PASS",
+        "CHECK shelf arrange retains four identities:  PASS",
+        "CHECK shelf supported zero idle work: {\"before\":{\"steps\":470,\"syncs\":555,\"shadows\":397,\"supports\":29,\"atlas\":148,\"shelf\":34,\"callbacks\":12},\"after\":{\"steps\":470,\"syncs\":555,\"shadows\":397,\"supports\":29,\"atlas\":148,\"shelf\":34,\"callbacks\":12}} PASS",
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf exact supported reload <.5px: [{\"id\":\"tin\",\"px\":0,\"support\":\"shelf\",\"handle\":1e-323},{\"id\":\"rifle\",\"px\":0,\"support\":\"shelf\",\"handle\":5e-324},{\"id\":\"top\",\"px\":0,\"support\":\"shelf\",\"handle\":0},{\"id\":\"pat\",\"px\":0,\"support\":\"shelf\",\"handle\":1.5e-323}] PASS",
+        "CHECK shelf restore is quiet with four unique bodies:  PASS"
+      ]
+    },
+    {
+      "name": "grip-diag",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf one unique solid stays locked:  PASS",
+        "CHECK shelf duplicate remains locked:  PASS",
+        "CHECK shelf two uniques unlock one fixed support:  PASS",
+        "CHECK shelf starts empty without moving collection:  PASS",
+        "CHECK shelf fits left and controls clear pet stroke: {\"rect\":{\"x\":14,\"y\":88,\"w\":184,\"h\":81},\"controls\":{\"x\":18,\"y\":174,\"w\":171.59375,\"h\":92},\"cat\":{\"x\":195,\"y\":351.57550218094724,\"facing\":0.9004471023526769}} PASS",
+        "CHECK shelf 44px controls:  PASS",
+        "CHECK shelf wrong bay rejects atomically:  PASS",
+        "CHECK shelf occupied bay rejects:  PASS",
+        "CHECK shelf fast release rejects:  PASS",
+        "CHECK shelf slow release accepted:  PASS",
+        "CHECK shelf plop finishes within .25s: 234.80ms PASS",
+        "CHECK shelf stored splat remains pickable:  PASS",
+        "CHECK shelf live grip detaches and retains identity:  PASS",
+        "CHECK grip diagnostic: {\"body\":{\"x\":-1.150571584701538,\"y\":1.5483760833740234,\"z\":-6.224377155303955},\"q\":{\"x\":-0.10103797912597656,\"y\":-0.7892944812774658,\"z\":0.05309421941637993,\"w\":-0.6033130288124084},\"speed\":{\"x\":-0.07571437209844589,\"y\":0.03797820210456848,\"z\":-0.013368580490350723},\"target\":{\"x\":-1.1083161189492436,\"y\":1.667304977561206,\"z\":-6.2170282216877135},\"local\":{\"x\":-0.006360480999173079,\"y\":0.12555694218507155,\"z\":0.013365196400956514},\"slot\":{\"p\":{\"x\":-1.1019556419564323,\"y\":1.5449460536802375,\"z\":-6.24819664645625},\"q\":[0.07162693416368746,0,0,0.9974314925358587]},\"candidate\":{\"id\":\"shelf\",\"name\":\"top\",\"d\":0.05424613489871824},\"screen\":{\"x\":60.00000174023224,\"y\":121.0000026580754,\"behind\":false}}",
+        "CHECK shelf mouse or touch release inserts:  PASS"
+      ]
+    },
+    {
+      "name": "cost-desktop",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf cost renderer: ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "CHECK shelf drop fixture starts without interpenetration: {\"run\":1,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK shelf production budget run: {\"run\":1,\"p95\":3.7999999970197678,\"maxReachableSevenP95\":4.5999999940395355,\"loadBefore\":[10.57,8.68,7.92],\"loadAfter\":[10.21,8.63,7.91]}",
+        "CHECK shelf drop fixture starts without interpenetration: {\"run\":2,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK shelf production budget run: {\"run\":2,\"p95\":2.6000000089406967,\"maxReachableSevenP95\":1.7999999970197678,\"loadBefore\":[10.21,8.63,7.91],\"loadAfter\":[10.21,8.63,7.91]}",
+        "CHECK shelf drop fixture starts without interpenetration: {\"run\":3,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK shelf production budget run: {\"run\":3,\"p95\":1.9000000059604645,\"maxReachableSevenP95\":1.8999999910593033,\"loadBefore\":[10.21,8.63,7.91],\"loadAfter\":[10.21,8.63,7.91]}",
+        "CHECK shelf drop fixture starts without interpenetration: {\"run\":4,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK shelf production budget run: {\"run\":4,\"p95\":2.7000000029802322,\"maxReachableSevenP95\":1.5,\"loadBefore\":[10.21,8.63,7.91],\"loadAfter\":[10.21,8.63,7.91]}",
+        "CHECK shelf drop fixture starts without interpenetration: {\"run\":5,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK shelf production budget run: {\"run\":5,\"p95\":2.2999999970197678,\"maxReachableSevenP95\":2.3999999910593033,\"loadBefore\":[10.21,8.63,7.91],\"loadAfter\":[10.21,8.63,7.91]}",
+        "CHECK shelf 20 production bodies with adapters median p95 <=2.5ms: {\"runs\":[3.7999999970197678,2.6000000089406967,1.9000000059604645,2.7000000029802322,2.2999999970197678],\"median\":2.6000000089406967,\"composition\":\"2 selected splats + 10 printed cards + 8 tin/butter meshes; 20 awake at each restart, real pictures, contact shadows, DOM sync and passive air drag; desktop CPU viewport proxy\"} FAIL",
+        "CHECK shelf all seven converted bodies moving <=2.5ms: {\"runs\":[4.5999999940395355,1.7999999970197678,1.8999999910593033,1.5,2.3999999910593033],\"median\":1.8999999910593033} PASS"
+      ]
+    },
+    {
+      "name": "cost-phone",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf cost renderer: ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "CHECK shelf drop fixture starts without interpenetration: {\"run\":1,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK shelf production budget run: {\"run\":1,\"p95\":2.7999999970197678,\"maxReachableSevenP95\":3.5,\"loadBefore\":[9.8,9.65,8.48],\"loadAfter\":[9.8,9.65,8.48]}",
+        "CHECK shelf drop fixture starts without interpenetration: {\"run\":2,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK shelf production budget run: {\"run\":2,\"p95\":2.5,\"maxReachableSevenP95\":1.4000000059604645,\"loadBefore\":[9.8,9.65,8.48],\"loadAfter\":[9.8,9.65,8.48]}",
+        "CHECK shelf drop fixture starts without interpenetration: {\"run\":3,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK shelf production budget run: {\"run\":3,\"p95\":1.4000000059604645,\"maxReachableSevenP95\":1.2999999970197678,\"loadBefore\":[9.8,9.65,8.48],\"loadAfter\":[9.8,9.65,8.48]}",
+        "CHECK shelf drop fixture starts without interpenetration: {\"run\":4,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK shelf production budget run: {\"run\":4,\"p95\":1.7000000029802322,\"maxReachableSevenP95\":1.5999999940395355,\"loadBefore\":[9.8,9.65,8.48],\"loadAfter\":[9.8,9.65,8.48]}",
+        "CHECK shelf drop fixture starts without interpenetration: {\"run\":5,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK shelf production budget run: {\"run\":5,\"p95\":1.8999999910593033,\"maxReachableSevenP95\":1.7999999970197678,\"loadBefore\":[9.8,9.65,8.48],\"loadAfter\":[9.8,9.65,8.48]}",
+        "CHECK shelf 20 production bodies with adapters median p95 <=2.5ms: {\"runs\":[2.7999999970197678,2.5,1.4000000059604645,1.7000000029802322,1.8999999910593033],\"median\":1.8999999910593033,\"composition\":\"2 selected splats + 10 printed cards + 8 tin/butter meshes; 20 awake at each restart, real pictures, contact shadows, DOM sync and passive air drag; desktop CPU viewport proxy\"} PASS",
+        "CHECK shelf all seven converted bodies moving <=2.5ms: {\"runs\":[3.5,1.4000000059604645,1.2999999970197678,1.5999999940395355,1.7999999970197678],\"median\":1.5999999940395355} PASS"
+      ]
+    },
+    {
+      "name": "solids-final-desktop",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf tin physical adapter:  PASS",
+        "CHECK shelf pat physical adapter:  PASS",
+        "CHECK shelf tin 100 drops sleep <=8s contact <=2px energy: {\"id\":\"tin\",\"failed\":[],\"worstSeconds\":3.7416666666666667,\"restGapPx\":0.3387980978061503,\"visualGapPx\":0.48340581298009977,\"minY\":-0.01164837790882068,\"maxEnergyGain\":0.008922891320416737} PASS",
+        "CHECK shelf pat 100 drops sleep <=8s contact <=2px energy: {\"id\":\"pat\",\"failed\":[],\"worstSeconds\":3.808333333333333,\"restGapPx\":0.34174522534665747,\"visualGapPx\":1.9710977916590897,\"minY\":-0.021249506510862798,\"maxEnergyGain\":0.0008848381683614279} PASS",
+        "CHECK shelf solid diagnostics: [{\"id\":\"tin\",\"failed\":[],\"worstSeconds\":3.7416666666666667,\"restGapPx\":0.3387980978061503,\"visualGapPx\":0.48340581298009977,\"minY\":-0.01164837790882068,\"maxEnergyGain\":0.008922891320416737},{\"id\":\"pat\",\"failed\":[],\"worstSeconds\":3.808333333333333,\"restGapPx\":0.34174522534665747,\"visualGapPx\":1.9710977916590897,\"minY\":-0.021249506510862798,\"maxEnergyGain\":0.0008848381683614279}]"
+      ]
+    },
+    {
+      "name": "solids-final-phone",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK shelf tin physical adapter:  PASS",
+        "CHECK shelf pat physical adapter:  PASS",
+        "CHECK shelf tin 100 drops sleep <=8s contact <=2px energy: {\"id\":\"tin\",\"failed\":[],\"worstSeconds\":3.3333333333333335,\"restGapPx\":0.19380052991216384,\"visualGapPx\":0.25401673692777593,\"minY\":-0.006415697158910438,\"maxEnergyGain\":0.008909038903587296} PASS",
+        "CHECK shelf pat 100 drops sleep <=8s contact <=2px energy: {\"id\":\"pat\",\"failed\":[],\"worstSeconds\":3.808333333333333,\"restGapPx\":0.20161976754236446,\"visualGapPx\":1.1577373114793679,\"minY\":-0.021249506510862798,\"maxEnergyGain\":0.0008848381683614279} PASS",
+        "CHECK shelf solid diagnostics: [{\"id\":\"tin\",\"failed\":[],\"worstSeconds\":3.3333333333333335,\"restGapPx\":0.19380052991216384,\"visualGapPx\":0.25401673692777593,\"minY\":-0.006415697158910438,\"maxEnergyGain\":0.008909038903587296},{\"id\":\"pat\",\"failed\":[],\"worstSeconds\":3.808333333333333,\"restGapPx\":0.20161976754236446,\"visualGapPx\":1.1577373114793679,\"minY\":-0.021249506510862798,\"maxEnergyGain\":0.0008848381683614279}]"
+      ]
+    },
+    {
+      "name": "pat-return-desktop",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK look crowded floor fixture naturally settles:  PASS",
+        "CHECK pat press measurement: {\"side\":-1,\"point\":{\"x\":722,\"y\":698.0801499173027},\"px\":{\"x\":722,\"y\":713},\"box\":{\"x\":672,\"y\":659,\"w\":100,\"h\":54},\"size\":[91.81446204736818,29.839700165394657],\"phoneScale\":1,\"resting\":false,\"held\":false,\"flight\":null,\"physics\":{\"active\":0,\"steps\":0,\"listening\":false},\"layer\":\"front\",\"candidates\":[{\"id\":\"pat\",\"gl\":true,\"order\":7,\"box\":{\"x\":672,\"y\":659,\"w\":100,\"h\":54}}],\"dom\":[\"on\",\"wash\",\"BODY\",\"HTML\"],\"sponge\":{\"pointerEvents\":\"none\",\"opacity\":\"0.531534\"}}",
+        "CHECK pat press receiver: {\"held\":[],\"calls\":[]}",
+        "CHECK pat drag calls: []",
+        "CHECK look crowded floor pat returns from left:  PASS",
+        "CHECK pat press measurement: {\"side\":1,\"point\":{\"x\":793.5,\"y\":698.0801499173027},\"px\":{\"x\":793.5,\"y\":713},\"box\":{\"x\":743,\"y\":659,\"w\":101,\"h\":54},\"size\":[91.81446204736818,29.839700165394657],\"phoneScale\":1,\"resting\":false,\"held\":false,\"flight\":null,\"physics\":{\"active\":0,\"steps\":0,\"listening\":false},\"layer\":\"front\",\"candidates\":[{\"id\":\"pat\",\"gl\":true,\"order\":7,\"box\":{\"x\":743,\"y\":659,\"w\":101,\"h\":54}}],\"dom\":[\"on\",\"wash\",\"BODY\",\"HTML\"],\"sponge\":{\"pointerEvents\":\"none\",\"opacity\":\"0.531256\"}}",
+        "CHECK pat press receiver: {\"held\":[],\"calls\":[]}",
+        "CHECK pat drag calls: []",
+        "CHECK look crowded floor pat returns from right:  PASS"
+      ]
+    },
+    {
+      "name": "landing-desktop",
+      "lines": [
+        "CHECK interaction fixture shader warm-up completes: 0 pending PASS",
+        "CHECK look butter glass landing central: centre 0.620, 0.400; 11 impact frames PASS",
+        "CHECK look butter glass landing enlarged: projected width / resting width 3.227 PASS",
+        "CHECK look galaxy sigil faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.059308, preceding wind-down max 0.112575; hold step 0.000000 vs final wind-down 0.059308 PASS",
+        "CHECK look galaxy sigil resumes home: yaw 37.25180148368833 PASS",
+        "CHECK look galaxy positive faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.038624, preceding wind-down max 0.077391; hold step 0.000000 vs final wind-down 0.038624 PASS",
+        "CHECK look galaxy positive resumes home: yaw 87.51801350385539 PASS",
+        "CHECK look galaxy negative faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.042735, preceding wind-down max 0.089845; hold step 0.000000 vs final wind-down 0.042735 PASS",
+        "CHECK look galaxy negative resumes home: yaw -119.82681685765088 PASS"
+      ]
+    }
+  ]
+}

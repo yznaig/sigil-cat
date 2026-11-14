@@ -1,0 +1,1769 @@
+{
+  "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+  "sampleRate": 48000,
+  "correctionsDb": {
+    "assets/audio/butterman/rise-yell.m4a": -1.97,
+    "assets/audio/butterman/rise-yell.mp3": -1.586,
+    "assets/audio/butterman/theme-song-1.m4a": -3.095,
+    "assets/audio/butterman/theme-song-1.mp3": -2.646,
+    "assets/audio/butterman/theme-song-2.m4a": -2.285,
+    "assets/audio/butterman/theme-song-2.mp3": -1.985,
+    "assets/audio/butterman/theme-song-3.m4a": -3.123,
+    "assets/audio/butterman/theme-song-3.mp3": -2.651,
+    "assets/audio/butterman/whisper.m4a": -3.585,
+    "assets/audio/butterman/whisper.mp3": -3.234,
+    "assets/audio/noscope-riser.mp3": -3.427,
+    "assets/audio/sfx/airhorn.mp3": -0.593,
+    "assets/audio/sfx/box-thud.mp3": -0.802,
+    "assets/audio/sfx/cast.mp3": -0.687,
+    "assets/audio/sfx/click.mp3": -0.429,
+    "assets/audio/sfx/ding.mp3": -0.585,
+    "assets/audio/sfx/drip.mp3": -0.918,
+    "assets/audio/sfx/fizzle.mp3": -1.566,
+    "assets/audio/sfx/glass-slide.mp3": -0.391,
+    "assets/audio/sfx/glass-smash.mp3": -1.922,
+    "assets/audio/sfx/hiss.mp3": -0.371,
+    "assets/audio/sfx/paper.mp3": -0.425,
+    "assets/audio/sfx/pluck.mp3": -0.351,
+    "assets/audio/sfx/purr.mp3": -0.403,
+    "assets/audio/sfx/rattle.mp3": -0.81,
+    "assets/audio/sfx/slap.mp3": -2.065,
+    "assets/audio/sfx/splat.mp3": -0.985,
+    "assets/audio/sfx/tap-blat.mp3": -0.605,
+    "assets/audio/sfx/tap-pop.mp3": -0.394,
+    "assets/audio/sfx/tap-rare.mp3": -0.377,
+    "assets/audio/sfx/tap-squeak.mp3": -0.942,
+    "assets/audio/sfx/thunder.mp3": -0.849,
+    "assets/audio/sfx/twinkle.mp3": -0.507,
+    "assets/video/noscope.mp4": -4.476,
+    "assets/audio/designed/slap.wav": -10.758613403,
+    "assets/audio/designed/bite.wav": -4.281942195,
+    "assets/audio/designed/glass-slide.wav": -7.82281673,
+    "assets/audio/designed/glass-smash.wav": -7.316090396,
+    "assets/audio/designed/choir.wav": -12.44593576,
+    "assets/audio/designed/paper.wav": -2.074959561,
+    "assets/audio/designed/twinkle.wav": -13.100492594,
+    "assets/audio/designed/click.wav": -2.079141096
+  },
+  "sounds": [
+    {
+      "name": "tap-boing",
+      "file": "assets/audio/designed/tap-boing.wav",
+      "trigger": "Random cat body tap",
+      "direction": "A rubber-band twong with a little wooden belly",
+      "old": "assets/audio/sfx/tap-boing.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 0.2
+    },
+    {
+      "name": "tap-squeak",
+      "file": "assets/audio/designed/tap-squeak.wav",
+      "trigger": "Random cat body tap",
+      "direction": "Two felt-mouse squeaks, rounded and brief",
+      "old": "assets/audio/sfx/tap-squeak.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 1.3
+    },
+    {
+      "name": "tap-bonk",
+      "file": "assets/audio/designed/tap-bonk.wav",
+      "trigger": "Random cat body tap; top-hat landing",
+      "direction": "A hollow maple bonk, with a tiny loose bead",
+      "old": "assets/audio/sfx/tap-bonk.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 2.23
+    },
+    {
+      "name": "tap-mrrp",
+      "file": "assets/audio/designed/tap-mrrp.wav",
+      "trigger": "Random cat body tap; cat enters the box",
+      "direction": "Keep the real cat: close, warm, gently filtered trill",
+      "old": "assets/audio/sfx/tap-mrrp.mp3",
+      "source": "https://freesound.org/people/MBPL/sounds/668825/",
+      "license": "CC0-1.0",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 3.21
+    },
+    {
+      "name": "tap-pop",
+      "file": "assets/audio/designed/tap-pop.wav",
+      "trigger": "Random tap; bread return; box exit; hat lift; eyes detach; Butterman encore exit",
+      "direction": "A little suction pop with a soft falling body",
+      "old": "assets/audio/sfx/tap-pop.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 4.5
+    },
+    {
+      "name": "tap-blat",
+      "file": "assets/audio/designed/tap-blat.wav",
+      "trigger": "Random cat body tap",
+      "direction": "An embarrassed miniature bassoon flutter",
+      "old": "assets/audio/sfx/tap-blat.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 5.27
+    },
+    {
+      "name": "tap-rare",
+      "file": "assets/audio/designed/tap-rare.wav",
+      "trigger": "One in fifty cat taps",
+      "direction": "A tiny ceremonial gong followed by one ridiculous bubble",
+      "old": "assets/audio/sfx/tap-rare.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 6.17
+    },
+    {
+      "name": "cast",
+      "file": "assets/audio/designed/cast.wav",
+      "trigger": "Every recognized sigil or repeated spell",
+      "direction": "Three climbing glass-and-tine notes: C, G, high C",
+      "old": "assets/audio/sfx/cast.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 8.42
+    },
+    {
+      "name": "fizzle",
+      "file": "assets/audio/designed/fizzle.wav",
+      "trigger": "Unrecognized drawn sigil",
+      "direction": "Paper sputter that folds into a question-mark chirrup",
+      "old": "assets/audio/sfx/fizzle.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 10.07
+    },
+    {
+      "name": "thunder",
+      "file": "assets/audio/designed/thunder.wav",
+      "trigger": "Lightning spell; cloud tap/drag grumble (offset .35 s, slower)",
+      "direction": "A small theatrical storm: soft crack, rolling wooden low end",
+      "old": "assets/audio/sfx/thunder.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 11.14
+    },
+    {
+      "name": "whoosh",
+      "file": "assets/audio/designed/whoosh.wav",
+      "trigger": "Circle spin, two slowed layers; spinning-top use",
+      "direction": "Felt brushing the air, a rising then falling breath",
+      "old": "assets/audio/sfx/whoosh.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 16.29
+    },
+    {
+      "name": "ding",
+      "file": "assets/audio/designed/ding.wav",
+      "trigger": "Loaf transformation; buttered-cat paradox begins",
+      "direction": "A small brass kitchen bell, one rounded strike",
+      "old": "assets/audio/sfx/ding.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 17.49
+    },
+    {
+      "name": "airhorn",
+      "file": "assets/audio/designed/airhorn.wav",
+      "trigger": "Legacy MLG horn callback; currently preloaded but montage video supersedes it",
+      "direction": "Two toy-brass honks: knowingly silly, never an alarm",
+      "old": "assets/audio/sfx/airhorn.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 19.24
+    },
+    {
+      "name": "hit",
+      "file": "assets/audio/designed/hit.wav",
+      "trigger": "Rifle keepsake tap; legacy MLG hitmarker; glass shards tap at higher pitch",
+      "direction": "Dry two-part mechanical tick with a glass fleck",
+      "old": "assets/audio/sfx/hit.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 20.62
+    },
+    {
+      "name": "slap",
+      "file": "assets/audio/designed/slap.wav",
+      "trigger": "Butterman butter slap; butter pat tap/return; paradox butter return",
+      "direction": "original, kept by Aaron \u2014 Wet towel; constant gain only (e1111-05)",
+      "old": "assets/audio/sfx/slap.mp3",
+      "source": "https://freesound.org/people/adviseme333/sounds/679391/",
+      "license": "CC0-1.0",
+      "targetRmsDbfs": -22,
+      "selection": "original, kept by Aaron",
+      "decision": "e1111-05",
+      "author": "adviseme333",
+      "channels": 1,
+      "originalCommit": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+      "originalFile": "assets/audio/sfx/slap.mp3",
+      "originalSha256": "6c764a4526477662774ac18ab9ba1f3012c0610bab590ed5c974c91c4f716540",
+      "levelCorrectionDb": -10.758613403,
+      "reelSeconds": 21.33
+    },
+    {
+      "name": "purr",
+      "file": "assets/audio/designed/purr.wav",
+      "trigger": "Petting builds a crossfaded loop",
+      "direction": "Keep the real breath and flutter; remove rumble and sharp room hiss",
+      "old": "assets/audio/sfx/purr.mp3",
+      "source": "https://freesound.org/people/aunrea/sounds/485373/",
+      "license": "CC0-1.0",
+      "targetRmsDbfs": -25,
+      "reelSeconds": 22.26
+    },
+    {
+      "name": "bite",
+      "file": "assets/audio/designed/bite.wav",
+      "trigger": "Seventh pet stroke; bread nibble",
+      "direction": "original, kept by Aaron \u2014 Toast crunch; constant gain only (e1111-05)",
+      "old": "assets/audio/sfx/bite.mp3",
+      "source": "https://freesound.org/people/qubodup/sounds/816237/",
+      "license": "CC0-1.0",
+      "targetRmsDbfs": -22,
+      "selection": "original, kept by Aaron",
+      "decision": "e1111-05",
+      "author": "qubodup",
+      "channels": 1,
+      "originalCommit": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+      "originalFile": "assets/audio/sfx/bite.mp3",
+      "originalSha256": "b41723441cf848fce9d9f401d383a652d5fbaf09744794a2c13a38c0286e0e13",
+      "levelCorrectionDb": -4.281942195,
+      "reelSeconds": 29.81
+    },
+    {
+      "name": "hiss",
+      "file": "assets/audio/designed/hiss.wav",
+      "trigger": "Bite warning, 80 ms after crunch",
+      "direction": "Keep the real cat warning, soften its high edge",
+      "old": "assets/audio/sfx/hiss.mp3",
+      "source": "https://freesound.org/people/aunrea/sounds/485952/",
+      "license": "CC0-1.0",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 30.72
+    },
+    {
+      "name": "glass-slide",
+      "file": "assets/audio/designed/glass-slide.wav",
+      "trigger": "Cat pushes glass; glass tips",
+      "direction": "original, kept by Aaron \u2014 Glass scraping table; constant gain only (e1111-05)",
+      "old": "assets/audio/sfx/glass-slide.mp3",
+      "source": "https://freesound.org/people/jedg/sounds/505965/",
+      "license": "CC0-1.0",
+      "targetRmsDbfs": -22,
+      "selection": "original, kept by Aaron",
+      "decision": "e1111-05",
+      "author": "jedg",
+      "channels": 1,
+      "originalCommit": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+      "originalFile": "assets/audio/sfx/glass-slide.mp3",
+      "originalSha256": "827e3f2c23cf017aee4ba2662f3affdff50d6415f4e9da1d7aed552921972b8e",
+      "levelCorrectionDb": -7.82281673,
+      "reelSeconds": 31.9447
+    },
+    {
+      "name": "glass-smash",
+      "file": "assets/audio/designed/glass-smash.wav",
+      "trigger": "Glass falls and breaks",
+      "direction": "original, kept by Aaron \u2014 Glass-breaking recording; constant gain only (e1111-05)",
+      "old": "assets/audio/sfx/glass-smash.mp3",
+      "source": "https://freesound.org/people/AlterKartoffelsack/sounds/465946/",
+      "license": "CC0-1.0",
+      "targetRmsDbfs": -22,
+      "selection": "original, kept by Aaron",
+      "decision": "e1111-05",
+      "author": "AlterKartoffelsack",
+      "channels": 1,
+      "originalCommit": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+      "originalFile": "assets/audio/sfx/glass-smash.mp3",
+      "originalSha256": "37304c3f82888480225c1004b1f833fcfbde868132ffec378edf2a947438640b",
+      "levelCorrectionDb": -7.316090396,
+      "reelSeconds": 34.0447
+    },
+    {
+      "name": "drip",
+      "file": "assets/audio/designed/drip.wav",
+      "trigger": "Puddle appears or is tapped",
+      "direction": "A round water droplet and a small answering ripple",
+      "old": "assets/audio/sfx/drip.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 36.0947
+    },
+    {
+      "name": "box-thud",
+      "file": "assets/audio/designed/box-thud.wav",
+      "trigger": "Cat drops into box; paradox falls",
+      "direction": "Cardboard cavity thump and a papery flap",
+      "old": "assets/audio/sfx/box-thud.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 37.0047
+    },
+    {
+      "name": "choir",
+      "file": "assets/audio/designed/choir.wav",
+      "trigger": "Googly eyes revelation",
+      "direction": "original, kept by Aaron \u2014 Human aah triad; constant gain only (e1111-05)",
+      "old": "assets/audio/sfx/choir.mp3",
+      "source": "https://freesound.org/people/bone666138/sounds/274121/",
+      "license": "CC0-1.0",
+      "targetRmsDbfs": -22,
+      "selection": "original, kept by Aaron",
+      "decision": "e1111-05",
+      "author": "bone666138",
+      "channels": 2,
+      "originalCommit": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+      "originalFile": "assets/audio/sfx/choir.mp3",
+      "originalSha256": "841d93ab60d2330e0ec1813ec75a8d4be812613d0fdf73ce19cbc5f7e297a5c8",
+      "levelCorrectionDb": -12.44593576,
+      "reelSeconds": 38.0547
+    },
+    {
+      "name": "rattle",
+      "file": "assets/audio/designed/rattle.wav",
+      "trigger": "Eyes land or loose eyes are tapped",
+      "direction": "Three irregular plastic beads skittering inside googly eyes",
+      "old": "assets/audio/sfx/rattle.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 41.8047
+    },
+    {
+      "name": "pluck",
+      "file": "assets/audio/designed/pluck.wav",
+      "trigger": "Each whisker; transposed from C4 to preserve B C B D B puzzle",
+      "direction": "Precisely tuned C4 tine and a warm wooden soundboard",
+      "old": "assets/audio/sfx/pluck.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 42.6947
+    },
+    {
+      "name": "paper",
+      "file": "assets/audio/designed/paper.wav",
+      "trigger": "Ticket, plaster tin, rejected physics paper, galaxy postcard",
+      "direction": "original, kept by Aaron \u2014 Paper rustle; constant gain only (e1111-05)",
+      "old": "assets/audio/sfx/paper.mp3",
+      "source": "https://freesound.org/people/BenjaminNelan/sounds/353125/",
+      "license": "CC0-1.0",
+      "targetRmsDbfs": -26.568,
+      "selection": "original, kept by Aaron",
+      "decision": "e1111-05",
+      "author": "BenjaminNelan",
+      "channels": 1,
+      "originalCommit": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+      "originalFile": "assets/audio/sfx/paper.mp3",
+      "originalSha256": "36118f8cd4efabf96029082cf0425283c59e498e64f3f002790dfc8be06e1b9d",
+      "levelCorrectionDb": -2.074959561,
+      "nominalTargetRmsDbfs": -22,
+      "peakCeilingDbfs": -4,
+      "loudnessExemption": "original kept by Aaron, e1111-05; transient sound, gain-only would clip",
+      "reelSeconds": 44.5947
+    },
+    {
+      "name": "splat",
+      "file": "assets/audio/designed/splat.wav",
+      "trigger": "Flung butter hits the screen",
+      "direction": "A broad soft butter splop and three sticky droplets",
+      "old": "assets/audio/sfx/splat.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 45.9447
+    },
+    {
+      "name": "sponge-wipe",
+      "file": "assets/audio/designed/sponge-wipe.wav",
+      "trigger": "Sponge slide and rub, speed changes gain/pitch, refreshed at 130 ms",
+      "direction": "Damp cellulose swish and quiet low water bubbles",
+      "old": "assets/audio/sfx/sponge-wipe.mp3",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 47.0547
+    },
+    {
+      "name": "twinkle",
+      "file": "assets/audio/designed/twinkle.wav",
+      "trigger": "Bread rocket return and crumbs",
+      "direction": "original, kept by Aaron \u2014 Small bell; constant gain only (e1111-05)",
+      "old": "assets/audio/sfx/twinkle.mp3",
+      "source": "https://freesound.org/people/steffcaffrey/sounds/452379/",
+      "license": "CC0-1.0",
+      "targetRmsDbfs": -22,
+      "selection": "original, kept by Aaron",
+      "decision": "e1111-05",
+      "author": "steffcaffrey",
+      "channels": 1,
+      "originalCommit": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+      "originalFile": "assets/audio/sfx/twinkle.mp3",
+      "originalSha256": "8ce0c272e50fe4caece11f4d39061b52ebd8d89b53dab370f4acd2bccb648f70",
+      "levelCorrectionDb": -13.100492594,
+      "reelSeconds": 48.0647
+    },
+    {
+      "name": "click",
+      "file": "assets/audio/designed/click.wav",
+      "trigger": "Unmute and volume change; optional Butterman footsteps (disabled)",
+      "direction": "original, kept by Aaron \u2014 Light switch; constant gain only (e1111-05)",
+      "old": "assets/audio/sfx/click.mp3",
+      "source": "https://freesound.org/people/tbrook/sounds/348224/",
+      "license": "CC0-1.0",
+      "targetRmsDbfs": -30.841,
+      "selection": "original, kept by Aaron",
+      "decision": "e1111-05",
+      "author": "tbrook",
+      "channels": 1,
+      "originalCommit": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+      "originalFile": "assets/audio/sfx/click.mp3",
+      "originalSha256": "1252858f55013e83a2e8a5ed2daa068db38133c4483bdc3efca87ead52f4198d",
+      "levelCorrectionDb": -2.079141096,
+      "nominalTargetRmsDbfs": -22,
+      "peakCeilingDbfs": -4,
+      "loudnessExemption": "original kept by Aaron, e1111-05; transient sound, gain-only would clip",
+      "reelSeconds": 49.6147
+    },
+    {
+      "name": "paradox-hum",
+      "file": "assets/audio/designed/paradox-hum.wav",
+      "trigger": "Buttered loaf hovers; gain follows existing start/stop",
+      "direction": "A warm wonky motor with a slow felt flutter",
+      "old": "assets/audio/reference/paradox-hum.wav",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -25,
+      "reelSeconds": 50.2647
+    },
+    {
+      "name": "galaxy-hum",
+      "file": "assets/audio/designed/galaxy-hum.wav",
+      "trigger": "Galaxy opening, hover and cutscene; gain follows aperture",
+      "direction": "Breathing low fifths with distant glass dust",
+      "old": "assets/audio/reference/galaxy-hum.wav",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -25,
+      "reelSeconds": 58.8147
+    },
+    {
+      "name": "impact-wood-small-01",
+      "file": "assets/audio/impacts/impact-wood-small-01.wav",
+      "trigger": "Small wood contact; variant 1/3 (world adapter API)",
+      "direction": "Wood body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 69.3647
+    },
+    {
+      "name": "impact-wood-small-02",
+      "file": "assets/audio/impacts/impact-wood-small-02.wav",
+      "trigger": "Small wood contact; variant 2/3 (world adapter API)",
+      "direction": "Wood body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 70.2947
+    },
+    {
+      "name": "impact-wood-small-03",
+      "file": "assets/audio/impacts/impact-wood-small-03.wav",
+      "trigger": "Small wood contact; variant 3/3 (world adapter API)",
+      "direction": "Wood body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 71.2247
+    },
+    {
+      "name": "impact-wood-medium-01",
+      "file": "assets/audio/impacts/impact-wood-medium-01.wav",
+      "trigger": "Medium wood contact; variant 1/3 (world adapter API)",
+      "direction": "Wood body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 72.1547
+    },
+    {
+      "name": "impact-wood-medium-02",
+      "file": "assets/audio/impacts/impact-wood-medium-02.wav",
+      "trigger": "Medium wood contact; variant 2/3 (world adapter API)",
+      "direction": "Wood body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 73.1987
+    },
+    {
+      "name": "impact-wood-medium-03",
+      "file": "assets/audio/impacts/impact-wood-medium-03.wav",
+      "trigger": "Medium wood contact; variant 3/3 (world adapter API)",
+      "direction": "Wood body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 74.2427
+    },
+    {
+      "name": "impact-metal-small-01",
+      "file": "assets/audio/impacts/impact-metal-small-01.wav",
+      "trigger": "Small metal contact; variant 1/3 (world adapter API)",
+      "direction": "Metal body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 75.2867
+    },
+    {
+      "name": "impact-metal-small-02",
+      "file": "assets/audio/impacts/impact-metal-small-02.wav",
+      "trigger": "Small metal contact; variant 2/3 (world adapter API)",
+      "direction": "Metal body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 76.6367
+    },
+    {
+      "name": "impact-metal-small-03",
+      "file": "assets/audio/impacts/impact-metal-small-03.wav",
+      "trigger": "Small metal contact; variant 3/3 (world adapter API)",
+      "direction": "Metal body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 77.9867
+    },
+    {
+      "name": "impact-metal-medium-01",
+      "file": "assets/audio/impacts/impact-metal-medium-01.wav",
+      "trigger": "Medium metal contact; variant 1/3 (world adapter API)",
+      "direction": "Metal body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 79.3367
+    },
+    {
+      "name": "impact-metal-medium-02",
+      "file": "assets/audio/impacts/impact-metal-medium-02.wav",
+      "trigger": "Medium metal contact; variant 2/3 (world adapter API)",
+      "direction": "Metal body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 80.9267
+    },
+    {
+      "name": "impact-metal-medium-03",
+      "file": "assets/audio/impacts/impact-metal-medium-03.wav",
+      "trigger": "Medium metal contact; variant 3/3 (world adapter API)",
+      "direction": "Metal body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 82.5167
+    },
+    {
+      "name": "impact-paper-small-01",
+      "file": "assets/audio/impacts/impact-paper-small-01.wav",
+      "trigger": "Small paper contact; variant 1/3 (world adapter API)",
+      "direction": "Paper body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 84.1067
+    },
+    {
+      "name": "impact-paper-small-02",
+      "file": "assets/audio/impacts/impact-paper-small-02.wav",
+      "trigger": "Small paper contact; variant 2/3 (world adapter API)",
+      "direction": "Paper body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 84.9467
+    },
+    {
+      "name": "impact-paper-small-03",
+      "file": "assets/audio/impacts/impact-paper-small-03.wav",
+      "trigger": "Small paper contact; variant 3/3 (world adapter API)",
+      "direction": "Paper body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 85.7867
+    },
+    {
+      "name": "impact-paper-medium-01",
+      "file": "assets/audio/impacts/impact-paper-medium-01.wav",
+      "trigger": "Medium paper contact; variant 1/3 (world adapter API)",
+      "direction": "Paper body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 86.6267
+    },
+    {
+      "name": "impact-paper-medium-02",
+      "file": "assets/audio/impacts/impact-paper-medium-02.wav",
+      "trigger": "Medium paper contact; variant 2/3 (world adapter API)",
+      "direction": "Paper body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 87.5537
+    },
+    {
+      "name": "impact-paper-medium-03",
+      "file": "assets/audio/impacts/impact-paper-medium-03.wav",
+      "trigger": "Medium paper contact; variant 3/3 (world adapter API)",
+      "direction": "Paper body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 88.4807
+    },
+    {
+      "name": "impact-butter-small-01",
+      "file": "assets/audio/impacts/impact-butter-small-01.wav",
+      "trigger": "Small butter contact; variant 1/3 (world adapter API)",
+      "direction": "Butter body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 89.4077
+    },
+    {
+      "name": "impact-butter-small-02",
+      "file": "assets/audio/impacts/impact-butter-small-02.wav",
+      "trigger": "Small butter contact; variant 2/3 (world adapter API)",
+      "direction": "Butter body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 90.2977
+    },
+    {
+      "name": "impact-butter-small-03",
+      "file": "assets/audio/impacts/impact-butter-small-03.wav",
+      "trigger": "Small butter contact; variant 3/3 (world adapter API)",
+      "direction": "Butter body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 91.1877
+    },
+    {
+      "name": "impact-butter-medium-01",
+      "file": "assets/audio/impacts/impact-butter-medium-01.wav",
+      "trigger": "Medium butter contact; variant 1/3 (world adapter API)",
+      "direction": "Butter body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 92.0777
+    },
+    {
+      "name": "impact-butter-medium-02",
+      "file": "assets/audio/impacts/impact-butter-medium-02.wav",
+      "trigger": "Medium butter contact; variant 2/3 (world adapter API)",
+      "direction": "Butter body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 93.0697
+    },
+    {
+      "name": "impact-butter-medium-03",
+      "file": "assets/audio/impacts/impact-butter-medium-03.wav",
+      "trigger": "Medium butter contact; variant 3/3 (world adapter API)",
+      "direction": "Butter body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 94.0617
+    },
+    {
+      "name": "impact-glass-small-01",
+      "file": "assets/audio/impacts/impact-glass-small-01.wav",
+      "trigger": "Small glass contact; variant 1/3 (world adapter API)",
+      "direction": "Glass body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 95.0537
+    },
+    {
+      "name": "impact-glass-small-02",
+      "file": "assets/audio/impacts/impact-glass-small-02.wav",
+      "trigger": "Small glass contact; variant 2/3 (world adapter API)",
+      "direction": "Glass body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 96.4537
+    },
+    {
+      "name": "impact-glass-small-03",
+      "file": "assets/audio/impacts/impact-glass-small-03.wav",
+      "trigger": "Small glass contact; variant 3/3 (world adapter API)",
+      "direction": "Glass body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 97.8537
+    },
+    {
+      "name": "impact-glass-medium-01",
+      "file": "assets/audio/impacts/impact-glass-medium-01.wav",
+      "trigger": "Medium glass contact; variant 1/3 (world adapter API)",
+      "direction": "Glass body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 99.2537
+    },
+    {
+      "name": "impact-glass-medium-02",
+      "file": "assets/audio/impacts/impact-glass-medium-02.wav",
+      "trigger": "Medium glass contact; variant 2/3 (world adapter API)",
+      "direction": "Glass body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 100.9087
+    },
+    {
+      "name": "impact-glass-medium-03",
+      "file": "assets/audio/impacts/impact-glass-medium-03.wav",
+      "trigger": "Medium glass contact; variant 3/3 (world adapter API)",
+      "direction": "Glass body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 102.5637
+    },
+    {
+      "name": "impact-tin-small-01",
+      "file": "assets/audio/impacts/impact-tin-small-01.wav",
+      "trigger": "Small tin contact; variant 1/3 (world adapter API)",
+      "direction": "Tin body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 104.2187
+    },
+    {
+      "name": "impact-tin-small-02",
+      "file": "assets/audio/impacts/impact-tin-small-02.wav",
+      "trigger": "Small tin contact; variant 2/3 (world adapter API)",
+      "direction": "Tin body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 105.3187
+    },
+    {
+      "name": "impact-tin-small-03",
+      "file": "assets/audio/impacts/impact-tin-small-03.wav",
+      "trigger": "Small tin contact; variant 3/3 (world adapter API)",
+      "direction": "Tin body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -24,
+      "reelSeconds": 106.4187
+    },
+    {
+      "name": "impact-tin-medium-01",
+      "file": "assets/audio/impacts/impact-tin-medium-01.wav",
+      "trigger": "Medium tin contact; variant 1/3 (world adapter API)",
+      "direction": "Tin body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 107.5187
+    },
+    {
+      "name": "impact-tin-medium-02",
+      "file": "assets/audio/impacts/impact-tin-medium-02.wav",
+      "trigger": "Medium tin contact; variant 2/3 (world adapter API)",
+      "direction": "Tin body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 108.7837
+    },
+    {
+      "name": "impact-tin-medium-03",
+      "file": "assets/audio/impacts/impact-tin-medium-03.wav",
+      "trigger": "Medium tin contact; variant 3/3 (world adapter API)",
+      "direction": "Tin body/contact modes, independent excitation and decay",
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "targetRmsDbfs": -22,
+      "reelSeconds": 110.0487
+    }
+  ],
+  "provenance": {
+    "assets/audio/sfx/tap-boing.mp3": {
+      "source": "https://freesound.org/people/stomachache/sounds/29813/",
+      "author": "stomachache",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/tap-squeak.mp3": {
+      "source": "https://freesound.org/people/Breviceps/sounds/468443/",
+      "author": "Breviceps",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/tap-bonk.mp3": {
+      "source": "https://freesound.org/people/alegemaate/sounds/364704/",
+      "author": "alegemaate",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/tap-mrrp.mp3": {
+      "source": "https://freesound.org/people/MBPL/sounds/668825/",
+      "author": "MBPL",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/tap-pop.mp3": {
+      "source": "https://freesound.org/people/milcahrawr/sounds/622150/",
+      "author": "milcahrawr",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/tap-blat.mp3": {
+      "source": "https://freesound.org/people/oldedgar/sounds/97979/",
+      "author": "oldedgar",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/tap-rare.mp3": {
+      "source": "https://freesound.org/people/cabled_mess/sounds/369428/",
+      "author": "cabled_mess",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/cast.mp3": {
+      "source": "https://freesound.org/people/qubodup/sounds/211624/",
+      "author": "qubodup",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/fizzle.mp3": {
+      "source": "https://freesound.org/people/squareal/sounds/237407/",
+      "author": "squareal",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/thunder.mp3": {
+      "source": "https://freesound.org/people/loganzsound/sounds/840628/",
+      "author": "loganzsound",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/whoosh.mp3": {
+      "source": "https://freesound.org/people/DJT4NN3R/sounds/449996/",
+      "author": "DJT4NN3R",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/ding.mp3": {
+      "source": "https://freesound.org/people/tonmayster/sounds/685111/",
+      "author": "tonmayster",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/airhorn.mp3": {
+      "source": "https://freesound.org/people/mcpable/sounds/131930/",
+      "author": "mcpable",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/hit.mp3": {
+      "source": "https://freesound.org/people/BenjaminNelan/sounds/410363/",
+      "author": "BenjaminNelan",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/slap.mp3": {
+      "source": "https://freesound.org/people/adviseme333/sounds/679391/",
+      "author": "adviseme333",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/purr.mp3": {
+      "source": "https://freesound.org/people/aunrea/sounds/485373/",
+      "author": "aunrea",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/bite.mp3": {
+      "source": "https://freesound.org/people/qubodup/sounds/816237/",
+      "author": "qubodup",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/hiss.mp3": {
+      "source": "https://freesound.org/people/aunrea/sounds/485952/",
+      "author": "aunrea",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/glass-slide.mp3": {
+      "source": "https://freesound.org/people/jedg/sounds/505965/",
+      "author": "jedg",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/glass-smash.mp3": {
+      "source": "https://freesound.org/people/AlterKartoffelsack/sounds/465946/",
+      "author": "AlterKartoffelsack",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/drip.mp3": {
+      "source": "https://freesound.org/people/magnuswaker/sounds/524216/",
+      "author": "magnuswaker",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/box-thud.mp3": {
+      "source": "https://freesound.org/people/cb9382/sounds/875202/",
+      "author": "cb9382",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/choir.mp3": {
+      "source": "https://freesound.org/people/bone666138/sounds/274121/",
+      "author": "bone666138",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/rattle.mp3": {
+      "source": "https://freesound.org/people/otoinsa/sounds/761438/",
+      "author": "otoinsa",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/pluck.mp3": {
+      "source": "https://freesound.org/people/foochie_foochie/sounds/331047/",
+      "author": "foochie_foochie",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/paper.mp3": {
+      "source": "https://freesound.org/people/BenjaminNelan/sounds/353125/",
+      "author": "BenjaminNelan",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/splat.mp3": {
+      "source": "https://freesound.org/people/nebulasnails/sounds/495118/",
+      "author": "nebulasnails",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/twinkle.mp3": {
+      "source": "https://freesound.org/people/steffcaffrey/sounds/452379/",
+      "author": "steffcaffrey",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/click.mp3": {
+      "source": "https://freesound.org/people/tbrook/sounds/348224/",
+      "author": "tbrook",
+      "license": "CC0-1.0",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/sfx/sponge-wipe.mp3": {
+      "source": "tools/audio/make-sponge.py",
+      "author": "Sigil Cat",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Legacy comparison only",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/designed/tap-boing.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Random cat body tap"
+    },
+    "assets/audio/designed/tap-squeak.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Random cat body tap"
+    },
+    "assets/audio/designed/tap-bonk.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Random cat body tap; top-hat landing"
+    },
+    "assets/audio/designed/tap-mrrp.wav": {
+      "source": "https://freesound.org/people/MBPL/sounds/668825/",
+      "license": "CC0-1.0",
+      "role": "Random cat body tap; cat enters the box"
+    },
+    "assets/audio/designed/tap-pop.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Random tap; bread return; box exit; hat lift; eyes detach; Butterman encore exit"
+    },
+    "assets/audio/designed/tap-blat.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Random cat body tap"
+    },
+    "assets/audio/designed/tap-rare.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "One in fifty cat taps"
+    },
+    "assets/audio/designed/cast.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Every recognized sigil or repeated spell"
+    },
+    "assets/audio/designed/fizzle.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Unrecognized drawn sigil"
+    },
+    "assets/audio/designed/thunder.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Lightning spell; cloud tap/drag grumble (offset .35 s, slower)"
+    },
+    "assets/audio/designed/whoosh.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Circle spin, two slowed layers; spinning-top use"
+    },
+    "assets/audio/designed/ding.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Loaf transformation; buttered-cat paradox begins"
+    },
+    "assets/audio/designed/airhorn.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Legacy MLG horn callback; currently preloaded but montage video supersedes it"
+    },
+    "assets/audio/designed/hit.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Rifle keepsake tap; legacy MLG hitmarker; glass shards tap at higher pitch"
+    },
+    "assets/audio/designed/slap.wav": {
+      "source": "https://freesound.org/people/adviseme333/sounds/679391/",
+      "license": "CC0-1.0",
+      "author": "adviseme333",
+      "selection": "original, kept by Aaron",
+      "decision": "e1111-05",
+      "originalCommit": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+      "originalFile": "assets/audio/sfx/slap.mp3",
+      "originalSha256": "6c764a4526477662774ac18ab9ba1f3012c0610bab590ed5c974c91c4f716540",
+      "levelCorrectionDb": -10.758613403,
+      "channels": 1,
+      "role": "Butterman butter slap; butter pat tap/return; paradox butter return"
+    },
+    "assets/audio/designed/purr.wav": {
+      "source": "https://freesound.org/people/aunrea/sounds/485373/",
+      "license": "CC0-1.0",
+      "role": "Petting builds a crossfaded loop"
+    },
+    "assets/audio/designed/bite.wav": {
+      "source": "https://freesound.org/people/qubodup/sounds/816237/",
+      "license": "CC0-1.0",
+      "author": "qubodup",
+      "selection": "original, kept by Aaron",
+      "decision": "e1111-05",
+      "originalCommit": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+      "originalFile": "assets/audio/sfx/bite.mp3",
+      "originalSha256": "b41723441cf848fce9d9f401d383a652d5fbaf09744794a2c13a38c0286e0e13",
+      "levelCorrectionDb": -4.281942195,
+      "channels": 1,
+      "role": "Seventh pet stroke; bread nibble"
+    },
+    "assets/audio/designed/hiss.wav": {
+      "source": "https://freesound.org/people/aunrea/sounds/485952/",
+      "license": "CC0-1.0",
+      "role": "Bite warning, 80 ms after crunch"
+    },
+    "assets/audio/designed/glass-slide.wav": {
+      "source": "https://freesound.org/people/jedg/sounds/505965/",
+      "license": "CC0-1.0",
+      "author": "jedg",
+      "selection": "original, kept by Aaron",
+      "decision": "e1111-05",
+      "originalCommit": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+      "originalFile": "assets/audio/sfx/glass-slide.mp3",
+      "originalSha256": "827e3f2c23cf017aee4ba2662f3affdff50d6415f4e9da1d7aed552921972b8e",
+      "levelCorrectionDb": -7.82281673,
+      "channels": 1,
+      "role": "Cat pushes glass; glass tips"
+    },
+    "assets/audio/designed/glass-smash.wav": {
+      "source": "https://freesound.org/people/AlterKartoffelsack/sounds/465946/",
+      "license": "CC0-1.0",
+      "author": "AlterKartoffelsack",
+      "selection": "original, kept by Aaron",
+      "decision": "e1111-05",
+      "originalCommit": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+      "originalFile": "assets/audio/sfx/glass-smash.mp3",
+      "originalSha256": "37304c3f82888480225c1004b1f833fcfbde868132ffec378edf2a947438640b",
+      "levelCorrectionDb": -7.316090396,
+      "channels": 1,
+      "role": "Glass falls and breaks"
+    },
+    "assets/audio/designed/drip.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Puddle appears or is tapped"
+    },
+    "assets/audio/designed/box-thud.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Cat drops into box; paradox falls"
+    },
+    "assets/audio/designed/choir.wav": {
+      "source": "https://freesound.org/people/bone666138/sounds/274121/",
+      "license": "CC0-1.0",
+      "author": "bone666138",
+      "selection": "original, kept by Aaron",
+      "decision": "e1111-05",
+      "originalCommit": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+      "originalFile": "assets/audio/sfx/choir.mp3",
+      "originalSha256": "841d93ab60d2330e0ec1813ec75a8d4be812613d0fdf73ce19cbc5f7e297a5c8",
+      "levelCorrectionDb": -12.44593576,
+      "channels": 2,
+      "role": "Googly eyes revelation"
+    },
+    "assets/audio/designed/rattle.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Eyes land or loose eyes are tapped"
+    },
+    "assets/audio/designed/pluck.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Each whisker; transposed from C4 to preserve B C B D B puzzle"
+    },
+    "assets/audio/designed/paper.wav": {
+      "source": "https://freesound.org/people/BenjaminNelan/sounds/353125/",
+      "license": "CC0-1.0",
+      "author": "BenjaminNelan",
+      "selection": "original, kept by Aaron",
+      "decision": "e1111-05",
+      "originalCommit": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+      "originalFile": "assets/audio/sfx/paper.mp3",
+      "originalSha256": "36118f8cd4efabf96029082cf0425283c59e498e64f3f002790dfc8be06e1b9d",
+      "levelCorrectionDb": -2.074959561,
+      "channels": 1,
+      "loudnessExemption": "original kept by Aaron, e1111-05; transient sound, gain-only would clip",
+      "nominalTargetRmsDbfs": -22,
+      "peakCeilingDbfs": -4,
+      "role": "Ticket, plaster tin, rejected physics paper, galaxy postcard"
+    },
+    "assets/audio/designed/splat.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Flung butter hits the screen"
+    },
+    "assets/audio/designed/sponge-wipe.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Sponge slide and rub, speed changes gain/pitch, refreshed at 130 ms"
+    },
+    "assets/audio/designed/twinkle.wav": {
+      "source": "https://freesound.org/people/steffcaffrey/sounds/452379/",
+      "license": "CC0-1.0",
+      "author": "steffcaffrey",
+      "selection": "original, kept by Aaron",
+      "decision": "e1111-05",
+      "originalCommit": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+      "originalFile": "assets/audio/sfx/twinkle.mp3",
+      "originalSha256": "8ce0c272e50fe4caece11f4d39061b52ebd8d89b53dab370f4acd2bccb648f70",
+      "levelCorrectionDb": -13.100492594,
+      "channels": 1,
+      "role": "Bread rocket return and crumbs"
+    },
+    "assets/audio/designed/click.wav": {
+      "source": "https://freesound.org/people/tbrook/sounds/348224/",
+      "license": "CC0-1.0",
+      "author": "tbrook",
+      "selection": "original, kept by Aaron",
+      "decision": "e1111-05",
+      "originalCommit": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4",
+      "originalFile": "assets/audio/sfx/click.mp3",
+      "originalSha256": "1252858f55013e83a2e8a5ed2daa068db38133c4483bdc3efca87ead52f4198d",
+      "levelCorrectionDb": -2.079141096,
+      "channels": 1,
+      "loudnessExemption": "original kept by Aaron, e1111-05; transient sound, gain-only would clip",
+      "nominalTargetRmsDbfs": -22,
+      "peakCeilingDbfs": -4,
+      "role": "Unmute and volume change; optional Butterman footsteps (disabled)"
+    },
+    "assets/audio/designed/paradox-hum.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Buttered loaf hovers; gain follows existing start/stop"
+    },
+    "assets/audio/designed/galaxy-hum.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Galaxy opening, hover and cutscene; gain follows aperture"
+    },
+    "assets/audio/impacts/impact-wood-small-01.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small wood contact; variant 1/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-wood-small-02.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small wood contact; variant 2/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-wood-small-03.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small wood contact; variant 3/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-wood-medium-01.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium wood contact; variant 1/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-wood-medium-02.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium wood contact; variant 2/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-wood-medium-03.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium wood contact; variant 3/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-metal-small-01.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small metal contact; variant 1/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-metal-small-02.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small metal contact; variant 2/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-metal-small-03.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small metal contact; variant 3/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-metal-medium-01.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium metal contact; variant 1/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-metal-medium-02.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium metal contact; variant 2/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-metal-medium-03.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium metal contact; variant 3/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-paper-small-01.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small paper contact; variant 1/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-paper-small-02.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small paper contact; variant 2/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-paper-small-03.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small paper contact; variant 3/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-paper-medium-01.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium paper contact; variant 1/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-paper-medium-02.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium paper contact; variant 2/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-paper-medium-03.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium paper contact; variant 3/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-butter-small-01.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small butter contact; variant 1/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-butter-small-02.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small butter contact; variant 2/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-butter-small-03.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small butter contact; variant 3/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-butter-medium-01.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium butter contact; variant 1/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-butter-medium-02.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium butter contact; variant 2/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-butter-medium-03.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium butter contact; variant 3/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-glass-small-01.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small glass contact; variant 1/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-glass-small-02.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small glass contact; variant 2/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-glass-small-03.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small glass contact; variant 3/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-glass-medium-01.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium glass contact; variant 1/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-glass-medium-02.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium glass contact; variant 2/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-glass-medium-03.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium glass contact; variant 3/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-tin-small-01.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small tin contact; variant 1/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-tin-small-02.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small tin contact; variant 2/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-tin-small-03.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Small tin contact; variant 3/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-tin-medium-01.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium tin contact; variant 1/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-tin-medium-02.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium tin contact; variant 2/3 (world adapter API)"
+    },
+    "assets/audio/impacts/impact-tin-medium-03.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Medium tin contact; variant 3/3 (world adapter API)"
+    },
+    "assets/audio/designed/party-toot.wav": {
+      "source": "tools/audio/make-party-toot.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Cake-party paper-reed blower; active RMS -22 dBFS"
+    },
+    "assets/audio/reference/paradox-hum.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Approximation of old procedural ambience; comparison only, not a browser capture"
+    },
+    "assets/audio/reference/galaxy-hum.wav": {
+      "source": "tools/audio/build-sounds.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Approximation of old procedural ambience; comparison only, not a browser capture"
+    },
+    "assets/audio/butterman/theme-song-1.m4a": {
+      "source": "Buttaman_1.m4a",
+      "author": "Aaron",
+      "license": "Original recording \u2014 supplied by Aaron for publication",
+      "role": "B sigil, butter scene, 74.17 bpm",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/butterman/theme-song-1.mp3": {
+      "source": "Buttaman_1.m4a",
+      "author": "Aaron",
+      "license": "Original recording \u2014 supplied by Aaron for publication",
+      "role": "B sigil, butter scene, 74.17 bpm",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/butterman/theme-song-3.m4a": {
+      "source": "butterman-scene2-new.m4a",
+      "author": "Aaron",
+      "license": "Original recording \u2014 supplied by Aaron for publication",
+      "role": "B sigil, looping chant scene, 66.39 bpm",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/butterman/theme-song-3.mp3": {
+      "source": "butterman-scene2-new.m4a",
+      "author": "Aaron",
+      "license": "Original recording \u2014 supplied by Aaron for publication",
+      "role": "B sigil, looping chant scene, 66.39 bpm",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/butterman/theme-song-2.m4a": {
+      "source": "Buttaman_2.m4a",
+      "author": "Aaron",
+      "license": "Original recording \u2014 supplied by Aaron for publication",
+      "role": "Whisker puzzle or ticket, encore, 82.04 bpm",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/butterman/theme-song-2.mp3": {
+      "source": "Buttaman_2.m4a",
+      "author": "Aaron",
+      "license": "Original recording \u2014 supplied by Aaron for publication",
+      "role": "Whisker puzzle or ticket, encore, 82.04 bpm",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/butterman/rise-yell.m4a": {
+      "source": "Buttaman_3.m4a",
+      "author": "Aaron",
+      "license": "Original recording \u2014 supplied by Aaron for publication",
+      "role": "B sigil, rise scene, 80 bpm",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/butterman/rise-yell.mp3": {
+      "source": "Buttaman_3.m4a",
+      "author": "Aaron",
+      "license": "Original recording \u2014 supplied by Aaron for publication",
+      "role": "B sigil, rise scene, 80 bpm",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/butterman/whisper.m4a": {
+      "source": "Buttaman_quiet.m4a",
+      "author": "Aaron",
+      "license": "Original recording \u2014 supplied by Aaron for publication",
+      "role": "Approaching butter, one whispered line per approach",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/butterman/whisper.mp3": {
+      "source": "Buttaman_quiet.m4a",
+      "author": "Aaron",
+      "license": "Original recording \u2014 supplied by Aaron for publication",
+      "role": "Approaching butter, one whispered line per approach",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/audio/noscope-riser.mp3": {
+      "source": "noscope-riser.wav",
+      "author": "Aaron",
+      "license": "Original work \u2014 supplied by Aaron for publication",
+      "role": "360 no-scope: six-second lead-in, last second overlaps video",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "assets/video/noscope.mp4": {
+      "source": "noscope-video.mov",
+      "author": "Aaron",
+      "license": "Original work \u2014 supplied by Aaron for publication",
+      "role": "360 no-scope montage, its embedded soundtrack",
+      "baseline": "27f3543caf49ee21e5005f957a8cc89b5b14a4d4"
+    },
+    "docs/sound-reel.mp3": {
+      "source": "tools/audio/build-review.py",
+      "license": "Original synthesis + CC0-1.0 recordings; see constituent files",
+      "role": "All 68 current cues in manifest order with .55 s gaps; stereo retained"
+    },
+    "assets/audio/designed/bird-flap.wav": {
+      "source": "tools/audio/make-bird.py",
+      "license": "Original synthesis \u2014 Sigil Cat",
+      "author": "Sigil Cat"
+    },
+    "assets/audio/designed/controller-pop.wav": {
+      "source": "tools/audio/make-bird.py",
+      "license": "Original synthesis \u2014 Sigil Cat",
+      "author": "Sigil Cat"
+    },
+    "assets/audio/designed/achieve.wav": {
+      "source": "tools/audio/make-achieve-chime.py",
+      "license": "Original synthesis \u2014 ours",
+      "role": "Achievement toast chime: two soft glass-and-tine notes, G5 then D6; active RMS -22 dBFS"
+    },
+    "assets/audio/arrivals/concrete-scrape-loop.wav": {
+      "source": "concrete-scrape-loop.mp3 (YouTube download supplied by Aaron)",
+      "author": "unknown (YouTube upload)",
+      "license": "Cleared for use by Aaron (e1111-56)",
+      "role": "First furniture arrival: the slide's scrape bed, fading in over 15 s",
+      "suppliedBy": "Aaron",
+      "licenceCleared": true,
+      "processing": "tools/audio/prepare-arrivals.py",
+      "decision": "e1111-56"
+    },
+    "assets/audio/arrivals/ff7r-victory-fanfare.m4a": {
+      "source": "ff7r-victory-fanfare.mp3 (YouTube download supplied by Aaron); Final Fantasy VII Remake victory fanfare",
+      "author": "Square Enix (game soundtrack)",
+      "license": "Cleared for use by Aaron (e1111-56)",
+      "role": "First furniture arrival: plays as it lands",
+      "suppliedBy": "Aaron",
+      "licenceCleared": true,
+      "processing": "tools/audio/prepare-arrivals.py",
+      "decision": "e1111-56"
+    },
+    "assets/audio/arrivals/rpg-victory-fanfare-2.m4a": {
+      "source": "fanfare-spellsword.m4a (YouTube download supplied by Aaron); https://www.youtube.com/@LuxAeterna22878",
+      "author": "Lux Aeterna Audio",
+      "license": "Free use with credit: \"RPG Victory Fanfare 2\" by Lux Aeterna Audio (credited in the grimoire)",
+      "role": "Second furniture arrival: starts with the slide, which lands on its bong at 32.14 s",
+      "suppliedBy": "Aaron",
+      "licenceCleared": false,
+      "credit": "\"RPG Victory Fanfare 2\" by Lux Aeterna Audio",
+      "processing": "tools/audio/prepare-arrivals.py"
+    },
+    "assets/audio/arrivals/ff7r-victory-fanfare.mp3": {
+      "source": "ff7r-victory-fanfare.mp3 (YouTube download supplied by Aaron); Final Fantasy VII Remake victory fanfare",
+      "author": "Square Enix (game soundtrack)",
+      "license": "Cleared for use by Aaron (e1111-56)",
+      "role": "First furniture arrival: plays as it lands",
+      "suppliedBy": "Aaron",
+      "licenceCleared": true,
+      "processing": "tools/audio/prepare-arrivals.py",
+      "decision": "e1111-56"
+    },
+    "assets/audio/arrivals/rpg-victory-fanfare-2.mp3": {
+      "source": "fanfare-spellsword.m4a (YouTube download supplied by Aaron); https://www.youtube.com/@LuxAeterna22878",
+      "author": "Lux Aeterna Audio",
+      "license": "Free use with credit: \"RPG Victory Fanfare 2\" by Lux Aeterna Audio (credited in the grimoire)",
+      "role": "Second furniture arrival: starts with the slide, which lands on its bong at 32.14 s",
+      "suppliedBy": "Aaron",
+      "licenceCleared": false,
+      "credit": "\"RPG Victory Fanfare 2\" by Lux Aeterna Audio",
+      "processing": "tools/audio/prepare-arrivals.py"
+    },
+    "assets/audio/designed/star-tink.wav": {
+      "source": "https://freesound.org/people/RutgerMuller/sounds/51038/",
+      "license": "CC0-1.0",
+      "author": "RutgerMuller",
+      "title": "Glass Tapped By Fingernail.wav",
+      "fetched": "https://cdn.freesound.org/previews/51/51038_179538-hq.mp3",
+      "fetchedSha256": "992b79c386d89d4ed586bf7070d2cca0d66a67c965b92adc6b56204133ae3ca0",
+      "checked": "2026-11-11",
+      "processing": "tools/audio/make-star-tink.py: one isolated tap at 4.465 s, 0.42 s, 250 Hz high-pass, fades, one constant gain",
+      "decision": "e1111-58",
+      "role": "Tapping the star sticker"
+    },
+    "assets/audio/designed/chest-open.wav": {
+      "source": "minecraft-chest.mp3 (Minecraft chest opening/closing sound effect, YouTube download supplied by Aaron)",
+      "author": "Mojang (Minecraft); uploader unknown",
+      "license": "Cleared for use by Aaron's choice (e1111-61)",
+      "suppliedBy": "Aaron",
+      "licenceCleared": true,
+      "inputSha256": "891c4d0de90acecb271cd6028f1712d39fd569352c42ff98cc4eeee454079b51",
+      "processing": "tools/audio/make-chest.py",
+      "steps": "cut 0.62-1.28 s, mono 48 kHz, 5/20 ms fades, one constant gain +5.120348 dB to -22 dBFS loudest-100-ms RMS",
+      "decision": "e1111-61",
+      "role": "Opening the baking box (chest screen opens)"
+    },
+    "assets/audio/designed/chest-close.wav": {
+      "source": "minecraft-chest.mp3 (Minecraft chest opening/closing sound effect, YouTube download supplied by Aaron)",
+      "author": "Mojang (Minecraft); uploader unknown",
+      "license": "Cleared for use by Aaron's choice (e1111-61)",
+      "suppliedBy": "Aaron",
+      "licenceCleared": true,
+      "inputSha256": "891c4d0de90acecb271cd6028f1712d39fd569352c42ff98cc4eeee454079b51",
+      "processing": "tools/audio/make-chest.py",
+      "steps": "cut 5.08-5.72 s, mono 48 kHz, 5/20 ms fades, one constant gain +3.907688 dB to -22 dBFS loudest-100-ms RMS",
+      "decision": "e1111-61",
+      "role": "Closing the baking box (chest screen closes)"
+    },
+    "assets/audio/designed/bird-boom.wav": {
+      "source": "cinematic-boom-high.mp3 (\"Cinematic-Boom-sound-effect-High\", supplied by Aaron from his downloads)",
+      "author": "unknown (download supplied by Aaron)",
+      "license": "Cleared for use by Aaron's choice (playtest-2, 2026-11-12)",
+      "suppliedBy": "Aaron",
+      "licenceCleared": true,
+      "inputSha256": "3e4dd0c10d053c9641bc3d035be666196594e05bc923150dde4ac830606af824",
+      "processing": "tools/audio/make-boom.py",
+      "steps": "cut 0.13-1.73 s, mono 48 kHz, 3 ms fade in / 0.75 s fade out, one constant gain -16.735000 dB to -22 dBFS loudest-100-ms RMS",
+      "role": "Each word of the YOU JUST LOST THE GAME trailer"
+    },
+    "assets/audio/designed/bread-riser.mp3": {
+      "source": "riser-sound-effect.mp3 (supplied by Aaron, playtest-2)",
+      "suppliedBy": "Aaron",
+      "author": "unknown (clip from Aaron's downloads)",
+      "licenceCleared": false,
+      "license": "Supplied by Aaron for this use (playtest-2); the clip's origin and licence are not recorded",
+      "processing": "tools/audio/make-bread-sounds.py",
+      "role": "Bread blast-off: the build, 0.15-5.29 s of Aaron's riser"
+    },
+    "assets/audio/designed/bread-pop.wav": {
+      "source": "pop-sound-effect.mp3 (supplied by Aaron, playtest-2)",
+      "suppliedBy": "Aaron",
+      "author": "unknown (clip from Aaron's downloads)",
+      "licenceCleared": false,
+      "license": "Supplied by Aaron for this use (playtest-2); the clip's origin and licence are not recorded",
+      "processing": "tools/audio/make-bread-sounds.py",
+      "role": "Bread blast-off: the launch, the clip's first pop"
+    },
+    "assets/audio/designed/achieve-space.wav": {
+      "source": "point-in-space.mp3 (\"freesound_community-point-in-space\", supplied by Aaron from his downloads, playtest-3)",
+      "suppliedBy": "Aaron",
+      "author": "unknown (clip from Aaron's downloads)",
+      "licenceCleared": false,
+      "license": "Supplied by Aaron for this use (playtest-3); the clip's origin and licence are not recorded",
+      "inputSha256": "6f69d23df2efc854671353d222dd20aa5eefd237f9ce8d23d4b8584464471269",
+      "processing": "tools/audio/make-p3-sounds.py",
+      "steps": "cut 0.060-1.700 s, stereo 48 kHz, 5 ms fade in / 0.35 s fade out, one constant gain -2.035000 dB (-22 dBFS loudest-100-ms RMS, true peak at or under -4 dBFS)",
+      "role": "Every achievement reveal (and Platinum Cat)"
+    },
+    "assets/audio/designed/bell.wav": {
+      "source": "ding-small-bell.mp3 (\"ding-small-bell-sfx\", supplied by Aaron from his downloads, playtest-3)",
+      "suppliedBy": "Aaron",
+      "author": "unknown (clip from Aaron's downloads)",
+      "licenceCleared": false,
+      "license": "Supplied by Aaron for this use (playtest-3); the clip's origin and licence are not recorded",
+      "inputSha256": "23042c7105076609d570970a379c420cb987d739e85345d69e5acfaea0868dc0",
+      "processing": "tools/audio/make-p3-sounds.py",
+      "steps": "cut 0.036-1.100 s, mono 48 kHz, 2 ms fade in / 0.30 s fade out, one constant gain +6.836000 dB (-22 dBFS loudest-100-ms RMS, true peak at or under -4 dBFS)",
+      "role": "Tapping a sticker; tapping the Platinum Cat badge"
+    },
+    "assets/audio/designed/cast-wind.wav": {
+      "source": "wind-magic.mp3 (\"yodguard-wind-magic\", supplied by Aaron from his downloads, playtest-3)",
+      "suppliedBy": "Aaron",
+      "author": "unknown (clip from Aaron's downloads)",
+      "licenceCleared": false,
+      "license": "Supplied by Aaron for this use (playtest-3); the clip's origin and licence are not recorded",
+      "inputSha256": "89942d6189ebbb95e4d67517b09121723bc9e4e89e950b4283cd6ada571fda3a",
+      "processing": "tools/audio/make-p3-sounds.py",
+      "steps": "cut 0.000-1.100 s, stereo 48 kHz, 10 ms fade in / 0.45 s fade out, one constant gain -11.921000 dB (-22 dBFS loudest-100-ms RMS, true peak at or under -4 dBFS)",
+      "role": "Every successful sigil cast (e1113-09)"
+    },
+    "assets/audio/designed/bolt-beam.wav": {
+      "source": "energy-beam-shot.mp3 (\"short-energy-beam-shot\", supplied by Aaron from his downloads, playtest-3)",
+      "suppliedBy": "Aaron",
+      "author": "unknown (clip from Aaron's downloads)",
+      "licenceCleared": false,
+      "license": "Supplied by Aaron for this use (playtest-3); the clip's origin and licence are not recorded",
+      "inputSha256": "9112dafdc637026a4696fa82265bac57b8769a8201a89b100442d693304bd1ba",
+      "processing": "tools/audio/make-p3-sounds.py",
+      "steps": "cut 0.022-1.900 s, mono 48 kHz, 2 ms fade in / 0.80 s fade out, one constant gain -14.485000 dB (-22 dBFS loudest-100-ms RMS, true peak at or under -4 dBFS)",
+      "role": "The lightning bolt striking (e1113-10)"
+    }
+  },
+  "retained": [
+    {
+      "name": "theme-song-1",
+      "file": "assets/audio/butterman/theme-song-1.mp3",
+      "trigger": "B sigil, butter scene, 74.17 bpm"
+    },
+    {
+      "name": "theme-song-3",
+      "file": "assets/audio/butterman/theme-song-3.mp3",
+      "trigger": "B sigil, looping chant scene, 66.39 bpm"
+    },
+    {
+      "name": "theme-song-2",
+      "file": "assets/audio/butterman/theme-song-2.mp3",
+      "trigger": "Whisker puzzle or ticket, encore, 82.04 bpm"
+    },
+    {
+      "name": "rise-yell",
+      "file": "assets/audio/butterman/rise-yell.mp3",
+      "trigger": "B sigil, rise scene, 80 bpm"
+    },
+    {
+      "name": "whisper",
+      "file": "assets/audio/butterman/whisper.mp3",
+      "trigger": "Approaching butter, one whispered line per approach"
+    },
+    {
+      "name": "noscope-riser",
+      "file": "assets/audio/noscope-riser.mp3",
+      "trigger": "360 no-scope: six-second lead-in, last second overlaps video"
+    },
+    {
+      "name": "noscope",
+      "file": "assets/video/noscope.mp4",
+      "trigger": "360 no-scope montage, its embedded soundtrack"
+    }
+  ]
+}

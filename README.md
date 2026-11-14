@@ -1,32 +1,50 @@
 # Sigil Cat
 
-A goofy trinket website. Live at **https://yznaig.github.io/sigil-cat/**
+A small black felt cat floating in the middle of one page. Spin him, bonk him, find his secrets.
+The full spec (what the site is for, what exists, what's still wanted): [docs/spec.md](docs/spec.md).
+Live at **https://yznaig.github.io/sigil-cat/**
 
-## How it's laid out
+## Run it on your computer
 
-- `index.html` — the home page (the "shelf").
-- `trinkets.js` — the list of trinkets shown on the shelf. One line each.
-- `trinkets/` — one HTML file per trinket. Each one is its own little page.
-
-Keeping each trinket in its own file means two people can build at the same time without stepping on each other.
-
-## Add a trinket
-
-1. Copy `trinkets/staring-cat.html` to `trinkets/your-thing.html` and make it do something silly.
-2. Add a line to `trinkets.js`: `{ emoji: "🦆", name: "Your Thing", file: "your-thing.html" },`
-3. Commit. The live site updates about a minute later.
-
-## Editing without installing anything
-
-On the repo page on github.com, press the `.` key. A full editor opens in your browser. Edit, then use the Source Control tab (left side) to commit.
-
-## Editing on your own computer
+The page loads modules, the cat and sounds, so it needs a little local web server (opening the file directly won't work):
 
 ```
 git clone https://github.com/yznaig/sigil-cat.git
 cd sigil-cat
-# open index.html in a browser to preview
-git pull          # get the other person's changes first
-git add -A && git commit -m "add duck trinket"
-git push
+python3 tools/serve.py . 8732
 ```
+
+Then open http://localhost:8732/ . Add `#debug` to the address for the pose and egg buttons, or `?perf=1` for frame
+times (handy on a phone). `python3 -m http.server` works too; `tools/serve.py` just stops the browser caching.
+
+## How it's laid out
+
+| Path | What it is |
+|---|---|
+| `index.html`, `spellbook.html` | The page, and the grimoire of what you have found. |
+| `src/main.js` | Wires everything together. Start reading here. |
+| `src/config.js` | The cat's numbers, every sound file, the page's words. Swap a sound by changing one line. |
+| `src/core/` | The cat (a Gaussian splat, drawn by our own small renderer), the stage, input, sound, saved state, keepsakes. |
+| `src/eggs/`, `src/gags/` | One file per egg or gag, each with its knobs in a config object at the top. |
+| `src/sigils/` | The shapes you can draw in the air and the recognizer. |
+| `src/finds.js`, `src/combos.js` | Everything there is to find, and what happens when two things meet. |
+| `src/ui/` | The page's look ("Hush"): the name, the counts, the row of marks, the sound control. |
+| `assets/` | Splats, sounds, the rifle model, textures. Each folder's `SOURCES.md` says where every file came from. |
+| `checks/run-all.sh` | Plays the whole page in a headless browser at desktop and phone size. Ends `ALL PASS`. |
+| `tools/` | The scripts that made the assets, and `tools/perf/measure.mjs` for the speed numbers. |
+| `prototypes/` | The experiments the site grew from. |
+| `docs/` | The spec (`spec.md`), the rebuild's brief (`revamp-brief.md`), what is waiting for review (`REVIEW.md`). |
+
+## Making a change
+
+```
+git pull                      # get the other person's changes first
+# edit, then check it in the browser
+git add -A && git commit -m "add duck sound"
+git push                      # the live site updates about a minute later
+```
+
+No build step: what's in the repo is what's served.
+
+Aaron builds on a longer local history and publishes it with `tools/publish.sh`, which pushes the current files as
+one `publish …` commit on top of `main`. If you pushed in between, it stops and asks for `git merge origin/main` first.

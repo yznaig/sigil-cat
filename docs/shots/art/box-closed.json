@@ -1,0 +1,323 @@
+{
+  "name": "box",
+  "variant": "closed",
+  "bounds": {
+    "min": [
+      -0.30399999022483826,
+      -0.0010000000474974513,
+      -0.23000000417232513
+    ],
+    "max": [
+      0.30399999022483826,
+      0.3935000003501773,
+      0.23799999475479125
+    ]
+  },
+  "triangles": 8028,
+  "meshes": 9,
+  "materials": 6,
+  "textures": [
+    [
+      256,
+      256
+    ],
+    [
+      256,
+      256
+    ],
+    [
+      512,
+      423
+    ],
+    [
+      512,
+      427
+    ]
+  ],
+  "geometryBytes": 770688,
+  "finite": true,
+  "parts": [
+    {
+      "name": "box",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "physics": {
+        "units": "cat-height units; play mass, not kg",
+        "mass": 0.25,
+        "colliders": [
+          {
+            "type": "box",
+            "size": [
+              0.6,
+              0.014,
+              0.46
+            ],
+            "position": [
+              0,
+              0.007,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "type": "box",
+            "size": [
+              0.014,
+              0.366,
+              0.46
+            ],
+            "position": [
+              -0.293,
+              0.197,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "type": "box",
+            "size": [
+              0.014,
+              0.366,
+              0.46
+            ],
+            "position": [
+              0.293,
+              0.197,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "type": "box",
+            "size": [
+              0.572,
+              0.366,
+              0.014
+            ],
+            "position": [
+              0,
+              0.197,
+              -0.223
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "type": "box",
+            "size": [
+              0.572,
+              0.366,
+              0.014
+            ],
+            "position": [
+              0,
+              0.197,
+              0.223
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "anchors": {
+          "lidHinge": [
+            0,
+            0.38,
+            -0.23
+          ]
+        }
+      }
+    },
+    {
+      "name": "lid",
+      "position": [
+        0,
+        0.38,
+        -0.23
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "physics": {
+        "units": "cat-height units; play mass, not kg",
+        "mass": 0.04,
+        "colliders": [
+          {
+            "type": "box",
+            "size": [
+              0.608,
+              0.012,
+              0.468
+            ],
+            "position": [
+              0,
+              0.006,
+              0.234
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "anchors": {}
+      }
+    }
+  ],
+  "physics": {
+    "units": "cat-height units; play mass, not kg",
+    "mass": 0.25,
+    "colliders": [
+      {
+        "type": "box",
+        "size": [
+          0.6,
+          0.014,
+          0.46
+        ],
+        "position": [
+          0,
+          0.007,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "box",
+        "size": [
+          0.014,
+          0.366,
+          0.46
+        ],
+        "position": [
+          -0.293,
+          0.197,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "box",
+        "size": [
+          0.014,
+          0.366,
+          0.46
+        ],
+        "position": [
+          0.293,
+          0.197,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "box",
+        "size": [
+          0.572,
+          0.366,
+          0.014
+        ],
+        "position": [
+          0,
+          0.197,
+          -0.223
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "box",
+        "size": [
+          0.572,
+          0.366,
+          0.014
+        ],
+        "position": [
+          0,
+          0.197,
+          0.223
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "anchors": {
+      "lidHinge": [
+        0,
+        0.38,
+        -0.23
+      ]
+    }
+  },
+  "render": [
+    {
+      "frame": 35,
+      "calls": 19,
+      "triangles": 16058,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 36,
+      "calls": 19,
+      "triangles": 16058,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 37,
+      "calls": 18,
+      "triangles": 16056,
+      "points": 0,
+      "lines": 0
+    }
+  ],
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "errors": []
+}

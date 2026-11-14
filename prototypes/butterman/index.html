@@ -1,0 +1,1246 @@
+<!doctype html>
+<!--
+  Butterman prototype (sigil-cat). Throwaway: answers "does the gag read, and is it easy to retime?"
+  Three scenes in a row (docs/ideas/butterman.md, decisions e1107-35, e1107-39): butter, cross, rise.
+  The whole gag runs on ONE tempo: BUTTERMAN.bpm. Every start and length is a whole number of beats,
+  every footfall lands on a beat, and changing bpm retimes motion, audio offsets and captions together.
+  Motion is driven from the audio clock (audioCtx.currentTime - t0); it falls back to performance.now()
+  when audio can't run (headless, no user gesture), so motion can't drift from sound.
+  URL hash: #b=12.5 freezes the gag at beat 12.5 (or #t=6.2 for seconds)  #bpm=150 overrides the tempo
+            #rm=1 forces reduced motion  #log shows the state panel.  Query: ?tune opens a lil-gui panel.
+  The cat (primitives, pose clips, lighting) is copied from ../cat-viewer at commit 59af8f7, with
+  rotation cut down to a left-right turntable (decision e1107-36).
+  Placeholder clips: audio/*.wav, written by make-placeholder-audio.py. Checks: checks/*.js.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Butterman Prototype</title>
+<style>
+  :root {
+    --bg-top: #f6f1e7;
+    --bg-bottom: #e7dfd0;
+    --ink: #1a1a1c;
+    --ink-soft: #6b665d;
+    --butter: #f3d36b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(120% 90% at 50% 35%, var(--bg-top), var(--bg-bottom));
+    color: var(--ink);
+    font: 15px/1.4 ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  canvas#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+  canvas#c.dragging { cursor: grabbing; }
+  .tag { position: fixed; top: 16px; left: 16px; margin: 0; font-size: 13px; color: var(--ink-soft); }
+  .hint { position: fixed; top: 16px; right: 16px; margin: 0; font-size: 13px; color: var(--ink-soft); }
+  .controls {
+    position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%);
+    display: flex; gap: 8px; justify-content: center; width: max-content; max-width: calc(100vw - 32px);
+  }
+  .controls button {
+    font: inherit; font-weight: 700; font-size: 16px; border: 0; border-radius: 999px; padding: 10px 20px;
+    background: var(--butter); color: var(--ink); cursor: pointer;
+    box-shadow: 0 1px 0 rgba(0,0,0,.08), 0 4px 14px rgba(0,0,0,.1);
+  }
+  .controls button:disabled { opacity: .55; cursor: default; }
+  #caption {
+    position: fixed; left: 50%; top: 24%; margin: 0; pointer-events: none; white-space: nowrap;
+    font: 900 clamp(40px, 11vw, 140px)/1 "Arial Black", Impact, system-ui, sans-serif; letter-spacing: .02em;
+    color: var(--butter); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill;
+    text-shadow: 0 6px 0 var(--ink); opacity: 0; transform: translate(-50%, -50%);
+  }
+  #log {
+    position: fixed; top: 40px; left: 16px; margin: 0; padding: 8px 10px; border-radius: 8px; max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 140px); overflow: auto;
+    background: rgba(0,0,0,.8); color: #d8f5c8; font: 11px/1.4 ui-monospace, monospace; white-space: pre; z-index: 5;
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="c" aria-label="A black cat floating in the middle of the page. Drag left or right to turn him."></canvas>
+<p class="tag">butterman, prototype</p>
+<p class="hint">Drag to turn him.</p>
+<div class="controls"><button id="go" type="button">Buttaman</button></div>
+<p id="caption" aria-live="assertive"></p>
+<pre id="log" hidden></pre>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+// ===========================================================================
+// BUTTERMAN: the one config. Every start, length, ease, clip and caption is here.
+//
+// TEMPO. `bpm` sets the beat. Every start / length / offset below is in BEATS, so changing bpm
+//   retimes the whole gag together: motion, footfalls, audio offsets, captions. He takes one step
+//   per beat, so every footfall is on the beat.
+// SCENES play in array order; reorder the array to reorder the gag.
+//   scene.start  'auto' = right after the previous scene, plus `gap` beats; a number pins it (beats from the click).
+//   scene.shift  whole beats; moves this scene and everything after it.
+//   scene.length 'auto' = until its last action ends; a number holds the next scene back (or pulls it in).
+// ACTIONS inside a scene play in order too.
+//   action.start 'auto' = right after the previous action; a number pins it (beats from the scene's start).
+//   action.shift whole beats (negative = overlap the previous action).
+//   action.length whole beats. On walks it is also the number of steps.
+//   action.easing a name from EASE below. On walks it shapes each step, so footfalls stay on the beat.
+//   action.audio { file, offset (beats into the action, or 'hit'), trimStart / trimEnd (SECONDS into the
+//                file: these trim the recording, so they don't scale with bpm; trimEnd null = to the end), gain }.
+//                The file is never edited: trims and offsets are a virtual edit. null = silent.
+//   action.caption { on, text, at (beats into the action, or 'hit'), hold (beats), size }.
+//   action.do     what the action does (walk-in, hand-up, slap, walk-out, cross, rise, open, sink). Don't rename.
+// ===========================================================================
+const BUTTERMAN = {
+  bpm: 120,
+  metronome: false,         // true = a quiet tick on every beat (accent on each scene's first beat)
+  metronomeGain: 0.12,
+  nudge: 0.0,               // SECONDS; + = motion later than sound, whole gag (Bluetooth headphones)
+  preroll: 0.12,            // SECONDS between the click and beat 0, so the first clip is never late
+  gap: 1,                   // beats between auto-packed scenes
+
+  scenes: [
+    { // 1. Butter: struts on, hand up with the butter, slaps it on the cat's head, walks back off.
+      id: 'butter', start: 'auto', shift: 0, length: 'auto',
+      from: 'right',                                   // side he enters from (and leaves by)
+      cat: { yaw: -0.45, ease: { length: 2, easing: 'sineInOut' }, pauseCycle: true },
+      actions: [
+        { id: 'walk-in', do: 'walk-in', start: 'auto', shift: 0, length: 6, easing: 'linear',
+          audio: { file: 'audio/strut.wav', offset: 0, trimStart: 0, trimEnd: null, gain: 0.7 },
+          caption: { on: false, text: '', at: 0, hold: 0, size: 1 } },
+        { id: 'hand-up', do: 'hand-up', start: 'auto', shift: 0, length: 1, easing: 'backOut',
+          raise: 0.5,       // beats for the hand to shoot up (then it hangs there, the anticipation)
+          hover: 0.25,      // how high above the head he holds the butter (world units)
+          audio: { file: 'audio/up.wav', offset: 0, trimStart: 0, trimEnd: null, gain: 0.8 },
+          caption: { on: false, text: '', at: 0, hold: 0, size: 1 } },
+        { id: 'slap', do: 'slap', start: 'auto', shift: 0, length: 1, easing: 'quadIn',
+          hit: 0,           // beats into the action the butter lands (0 = on the beat)
+          strike: 0.25,     // beats the downstroke takes, ending at the hit
+          settle: 0.5,      // beats for the butter to slide onto its spot after the hit
+          catStartle: { amount: 1, at: 'hit' },
+          audio: { file: 'audio/plop.wav', offset: 'hit', trimStart: 0, trimEnd: null, gain: 1 },
+          caption: { on: false, text: 'SLAP', at: 'hit', hold: 1, size: 0.7 } },
+        { id: 'walk-out', do: 'walk-out', start: 'auto', shift: 0, length: 6, easing: 'linear',
+          turn: 1,          // beats: the arm comes down and he about-faces, then the rest are steps away
+          audio: { file: 'audio/exit.wav', offset: 1, trimStart: 0, trimEnd: null, gain: 0.6 },
+          caption: { on: false, text: '', at: 0, hold: 0, size: 1 } },
+      ],
+    },
+    { // 2. Cross: struts all the way across, right to left, in front of the cat.
+      id: 'cross', start: 'auto', shift: 0, length: 'auto',
+      from: 'right', depth: 1.5,                       // depth: how far in front of the cat he walks
+      actions: [
+        { id: 'cross', do: 'cross', start: 'auto', shift: 0, length: 10, easing: 'linear',
+          audio: { file: 'audio/strut.wav', offset: 0, trimStart: 0, trimEnd: null, gain: 0.7 },
+          caption: { on: false, text: '', at: 0, hold: 0, size: 1 } },
+      ],
+    },
+    { // 3. Rise: slowly rises up huge in front of the screen, arms in a Y, then opens them wider twice.
+      id: 'rise', start: 'auto', shift: 0, length: 'auto',
+      fill: 0.92,                                      // how much of the screen he fills at full size
+      actions: [
+        { id: 'stage-1', do: 'rise', start: 'auto', shift: 0, length: 6, easing: 'sineInOut',
+          move: 4,          // beats the move takes (here: the slow climb); the rest of the action holds
+          arms: 28,         // degrees each arm is spread from straight up (28 = a Y)
+          shake: 0.6,       // yell tremble while holding
+          catStartle: { amount: 0.3, at: 4 },
+          audio: { file: 'audio/buttaman-1.wav', offset: 4, trimStart: 0, trimEnd: null, gain: 0.8 },
+          caption: { on: true, text: 'BUTTAMAN!', at: 4, hold: 1.8, size: 1 } },
+        { id: 'stage-2', do: 'open', start: 'auto', shift: 0, length: 2, easing: 'backOut',
+          move: 0.5, arms: 50, shake: 1.0,
+          catStartle: { amount: 0.5, at: 0 },
+          audio: { file: 'audio/buttaman-2.wav', offset: 0, trimStart: 0, trimEnd: null, gain: 0.9 },
+          caption: { on: true, text: 'BUTTAMAN!!', at: 0, hold: 1.9, size: 1.2 } },
+        { id: 'stage-3', do: 'open', start: 'auto', shift: 0, length: 3, easing: 'backOut',
+          move: 0.5, arms: 80, shake: 1.7,
+          catStartle: { amount: 0.9, at: 0 },
+          audio: { file: 'audio/buttaman-3.wav', offset: 0, trimStart: 0, trimEnd: null, gain: 1 },
+          caption: { on: true, text: 'BUTTAMAN!!!', at: 0, hold: 2.8, size: 1.45 } },
+        { id: 'sink', do: 'sink', start: 'auto', shift: 0, length: 1, easing: 'quadIn',
+          audio: { file: 'audio/sink.wav', offset: 0, trimStart: 0, trimEnd: null, gain: 0.7 },
+          caption: { on: false, text: '', at: 0, hold: 0, size: 1 } },
+      ],
+    },
+  ],
+
+  footsteps: { on: true, file: 'audio/step.wav', gain: 0.45 },   // one tick per footfall (= per beat while walking)
+
+  // The strut (Becker's proud walk + Williams' double bounce + a shrug a step). Lengths in figure units (~2 tall).
+  strut: {
+    stride: 0.62,          // shortest step; steps stretch if the walk needs more ground to get off-screen
+    bounce: 0.07,          // how far the hips drop at each bounce
+    bounceShape: 'double', // 'double' (two dips a step, the cartoon strut) | 'normal' | 'strut' (low on passing)
+    lean: 0.22,            // radians the body leans back (proud)
+    chinUp: 0.18,          // radians the head tips up
+    kneeLift: 1.0,         // 1 = normal; higher = higher knees
+    armSwing: 0.85,        // radians each arm swings either side
+    armRaise: 0.25,        // radians the swing is centred in front of the body (arms high)
+    armLead: 0.08,         // fraction of a two-step cycle the arms lead the legs (Becker: about two frames)
+    contactHold: 0.45,     // 0..0.9: how long he lingers on each contact pose (slows the body there)
+    stance: 0.6,           // fraction of a cycle each foot is planted
+    shrug: 0.07,           // how high the shoulder on the landing side pops up each step
+    shrugRoll: 0.12,       // radians the chest rolls with the shrug
+    turnToCamera: 0.35,    // radians he is turned toward the camera so limbs separate
+    blend: 0.5,            // beats to blend into a standing action's pose
+  },
+  // Background cameos (e1107-40): now and then he struts in small, far behind the cat, stands a moment,
+  // and struts back out. They stop for good on this device once the visitor has summoned him.
+  cameo: {
+    on: true,
+    chancePerSecond: 0.01,   // chance each second (checked every frame) once minGap has passed
+    duration: 2,             // SECONDS he stands there (rounded to whole beats)
+    minGap: 45,              // SECONDS between cameos (and after the page loads)
+    scale: 0.5, depth: -6,   // small and far behind the cat
+    from: 'left', stopAt: 0.7,   // stops this far from the centre toward his side (0 = centre, 1 = edge)
+    storageKey: 'butterman.summoned',
+  },
+  figure: { scale: 1.3, reach: 0.6, standInFront: 0.2 },   // reach: how far from the cat's head he stands
+  cat: { homeYaw: -0.65, startle: 1.5 },                     // startle: beats the cat's jump lasts
+  captionStyle: { slam: 0.25, fade: 0.35 },                  // beats: slam-in and fade-out of captions
+};
+
+const EASE = {
+  linear: (u) => u,
+  sineIn: (u) => 1 - Math.cos(u * Math.PI / 2),
+  sineOut: (u) => Math.sin(u * Math.PI / 2),
+  sineInOut: (u) => 0.5 - 0.5 * Math.cos(Math.PI * u),
+  quadIn: (u) => u * u,
+  quadOut: (u) => 1 - (1 - u) ** 2,
+  quadInOut: (u) => (u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2),
+  cubicOut: (u) => 1 - (1 - u) ** 3,
+  cubicInOut: (u) => (u < 0.5 ? 4 * u ** 3 : 1 - (-2 * u + 2) ** 3 / 2),
+  expoOut: (u) => (u >= 1 ? 1 : 1 - 2 ** (-10 * u)),
+  backOut: (u) => 1 + 2.70158 * (u - 1) ** 3 + 1.70158 * (u - 1) ** 2,
+  elasticOut: (u) => (u <= 0 ? 0 : u >= 1 ? 1 : 2 ** (-10 * u) * Math.sin((u * 10 - 0.75) * (2 * Math.PI / 3)) + 1),
+};
+
+// ---------------------------------------------------------------------------
+// Small maths
+// ---------------------------------------------------------------------------
+const TAU = Math.PI * 2;
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const clamp01 = (u) => clamp(u, 0, 1);
+const smooth = (u) => { u = clamp01(u); return u * u * (3 - 2 * u); };
+const ease = (name, u) => (EASE[name] || EASE.linear)(clamp01(u));
+const lerp = (a, b, u) => a + (b - a) * u;
+const frac = (x) => x - Math.floor(x);
+const lerpAngle = (a, b, u) => a + Math.atan2(Math.sin(b - a), Math.cos(b - a)) * u;
+const noise = (t, seed) => Math.sin(t * 26.1 + seed) * 0.6 + Math.sin(t * 45.7 + seed * 2.3) * 0.4;   // deterministic tremble
+const spb = () => 60 / BUTTERMAN.bpm;            // seconds per beat
+const hashParams = () => new URLSearchParams(location.hash.slice(1));
+let params = hashParams();
+if (params.has('bpm')) BUTTERMAN.bpm = Number(params.get('bpm'));
+const reducedMotion = () => params.get('rm') === '1' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------------------------------------------------------------------------
+// Renderer, camera, light (from cat-viewer)
+// ---------------------------------------------------------------------------
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.NeutralToneMapping;
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.4;
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 60);
+scene.add(new THREE.HemisphereLight(0xfff6e8, 0x3a3630, 0.7));
+const key = new THREE.DirectionalLight(0xfff1dc, 2.2); key.position.set(3, 4, 5);
+const rimA = new THREE.DirectionalLight(0xdfe8ff, 5.0); rimA.position.set(-4, 2.5, -4);
+const rimB = new THREE.DirectionalLight(0xffffff, 3.0); rimB.position.set(4, 1, -3);
+scene.add(key, rimA, rimB);
+
+// One shared material: the cat and the stick figure are the same stuff.
+const matte = new THREE.MeshPhysicalMaterial({
+  color: 0x0d0d0f, roughness: 0.78, metalness: 0,
+  sheen: 0.8, sheenRoughness: 0.5, sheenColor: new THREE.Color(0x4b505b),
+});
+
+function part(geo, x = 0, y = 0, z = 0, sx = 1, sy = 1, sz = 1) {
+  const m = new THREE.Mesh(geo, matte);
+  m.position.set(x, y, z); m.scale.set(sx, sy, sz);
+  return m;
+}
+function node(name, parent, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0) {
+  const g = new THREE.Group();
+  g.name = name; g.position.set(x, y, z); g.rotation.set(rx, ry, rz);
+  parent.add(g);
+  return g;
+}
+const sphere = (r) => new THREE.SphereGeometry(r, 32, 24);
+const capsuleX = (r, len) => new THREE.CapsuleGeometry(r, len, 8, 20).rotateZ(Math.PI / 2);
+const capsuleY = (r, len) => new THREE.CapsuleGeometry(r, len, 8, 16);
+
+// ---------------------------------------------------------------------------
+// The cat (copied from cat-viewer). Faces +X; the turntable spins it about Y only.
+// ---------------------------------------------------------------------------
+const spin = new THREE.Group();
+const floater = node('floater', spin);
+const react = node('react', floater);
+const cat = node('cat', react);
+scene.add(spin);
+
+const body = node('body', cat);
+body.add(part(sphere(0.5), 0, 0.02, 0, 1.62, 0.8, 0.8));
+body.add(part(sphere(0.25), 0.6, 0.24, 0, 1.1, 1, 1));
+const head = node('head', body, 0.84, 0.44, 0);
+head.add(part(sphere(0.33), 0, 0, 0, 1.05, 0.9, 1));
+head.add(part(sphere(0.15), 0.27, -0.09, 0, 1, 0.8, 1.15));
+for (const [name, z, tilt] of [['earL', 0.19, 0.32], ['earR', -0.19, -0.32]]) {
+  const ear = node(name, head, 0.02, 0.24, z, tilt, 0, -0.12);
+  ear.add(part(new THREE.ConeGeometry(0.12, 0.27, 20), 0, 0.11, 0, 1, 1, 0.7));
+}
+for (const [name, x, y, z] of [['legFL', 0.48, -0.2, 0.19], ['legFR', 0.48, -0.2, -0.19], ['legBL', -0.5, -0.18, 0.2], ['legBR', -0.5, -0.18, -0.2]]) {
+  const leg = node(name, body, x, y, z);
+  leg.add(part(capsuleY(0.1, 0.48), 0, -0.32, 0));
+  leg.add(part(sphere(0.11), 0.03, -0.6, 0, 1.3, 0.7, 1));
+}
+const TAIL = 7, SEG = 0.17;
+let tparent = node('tail0', body, -0.78, 0.12, 0, 0, 0, -0.75);
+tparent.add(part(capsuleX(0.075, SEG), -SEG / 2, 0, 0));
+for (let i = 1; i < TAIL; i++) {
+  const r = 0.075 - i * 0.004;
+  tparent = node('tail' + i, tparent, -SEG, 0, 0, 0, 0, -0.13);
+  tparent.add(part(sphere(r), 0, 0, 0));
+  tparent.add(part(capsuleX(r, SEG), -SEG / 2, 0, 0));
+}
+const earL = head.getObjectByName('earL'), earR = head.getObjectByName('earR');
+
+// The butter: lives in the figure's hand, then on the cat's head (Object3D.attach hand-off).
+const butter = new THREE.Mesh(
+  new RoundedBoxGeometry(0.34, 0.12, 0.22, 4, 0.025),
+  new THREE.MeshStandardMaterial({ color: 0xf3d36b, roughness: 0.42 }),
+);
+butter.name = 'butter';
+butter.visible = false;
+const BUTTER_REST = { p: new THREE.Vector3(0.05, 0.34, 0), q: new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0.18, 0.06)) };
+
+// Contact shadows
+const shadowTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d'), grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  grad.addColorStop(0, 'rgba(40,32,20,0.55)'); grad.addColorStop(1, 'rgba(40,32,20,0)');
+  g.fillStyle = grad; g.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+})();
+const GROUND = -1.55;
+function blob(w, h) {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2; m.position.y = GROUND; scene.add(m);
+  return m;
+}
+const shadow = blob(2.6, 1.3);
+const figShadow = blob(1.3, 0.7);
+
+// ---------------------------------------------------------------------------
+// Cat poses and the pose cycle (trimmed copy of cat-viewer's player: auto cycle only).
+// ---------------------------------------------------------------------------
+const REST = {};
+cat.traverse((o) => { if (o.name) REST[o.name] = { p: o.position.clone(), r: o.rotation.clone() }; });
+const TAILS = Array.from({ length: TAIL }, (_, i) => 'tail' + i);
+const PARTS = ['body', 'head', 'earL', 'earR', 'legFL', 'legFR', 'legBL', 'legBR', ...TAILS];
+const legsP = (front, back, fl = 1, bl = 1) => ({
+  legFL: { r: [0, 0, front], s: [1, fl, 1] }, legFR: { r: [0, 0, front], s: [1, fl, 1] },
+  legBL: { r: [0, 0, back], s: [1, bl, 1] }, legBR: { r: [0, 0, back], s: [1, bl, 1] },
+});
+const tailP = (base, curl) => Object.fromEntries(TAILS.map((n, i) => [n, { r: i === 0 ? base : curl }]));
+const POSE = {
+  sit: { body: { p: [-0.1, -0.12, 0], r: [0, 0, 0.6] }, head: { p: [0.02, 0, 0], r: [0, 0, -0.5] }, ...legsP(-0.6, 0.95, 1.1, 0.6), ...tailP([0, 0.9, 1.2], [0, 0.25, 0.05]) },
+  lie: { body: { p: [0, -0.22, 0], s: [1.04, 0.9, 1.1] }, head: { p: [-0.07, -0.1, 0], r: [0, 0, -0.12] }, ...legsP(-1.45, 1.45, 0.55, 0.55), ...tailP([0, 1.1, 0.55], [0, 0.28, 0.13]) },
+  sleep: { body: { p: [0, -0.26, 0], s: [1, 0.86, 1.12] }, head: { p: [-0.12, -0.24, 0.08], r: [0.25, 0.55, -0.45] }, earL: { r: [0, 0, -0.3] }, earR: { r: [0, 0, -0.3] }, ...legsP(-1.45, 1.45, 0.55, 0.55), ...tailP([0, 1.5, 0.6], [0, 0.42, 0.12]) },
+  stretch: { body: { p: [0, -0.05, 0], r: [0, 0, -0.35] }, head: { p: [0.04, -0.02, 0], r: [0, 0, 0.45] }, earL: { r: [0, 0, -0.2] }, earR: { r: [0, 0, -0.2] }, ...legsP(1.25, 0.15, 1.15, 1.05), ...tailP([0, 0, -0.55], [0, 0, 0.08]) },
+};
+const Z3 = [0, 0, 0], ONE = [1, 1, 1];
+const getP = (pose, n) => ({ p: pose[n]?.p || Z3, r: pose[n]?.r || Z3, s: pose[n]?.s || ONE });
+const mix3 = (a, b, u) => a.map((v, i) => v + (b[i] - v) * u);
+function blendCat(a, b, u, lag = 0) {
+  const out = {};
+  for (const n of PARTS) {
+    const d = n.startsWith('tail') ? lag * (1 + Number(n.slice(4)) * 0.15) : n === 'head' ? lag * 0.5 : 0;
+    const v = smooth((u - d) / (1 - d)), A = getP(a, n), B = getP(b, n);
+    out[n] = { p: mix3(A.p, B.p, v), r: mix3(A.r, B.r, v), s: mix3(A.s, B.s, v) };
+  }
+  return out;
+}
+function bake(name, duration, keys, fn) {
+  const times = Array.from({ length: keys + 1 }, (_, k) => (k / keys) * duration), frames = times.map(fn);
+  const q = new THREE.Quaternion(), e = new THREE.Euler(), tracks = [];
+  for (const n of PARTS) {
+    const rest = REST[n], P = [], R = [], S = [];
+    for (const f of frames) {
+      const { p, r, s } = getP(f, n);
+      P.push(rest.p.x + p[0], rest.p.y + p[1], rest.p.z + p[2]);
+      q.setFromEuler(e.set(rest.r.x + r[0], rest.r.y + r[1], rest.r.z + r[2]));
+      R.push(q.x, q.y, q.z, q.w); S.push(...s);
+    }
+    tracks.push(new THREE.VectorKeyframeTrack(n + '.position', times, P), new THREE.QuaternionKeyframeTrack(n + '.quaternion', times, R), new THREE.VectorKeyframeTrack(n + '.scale', times, S));
+  }
+  return new THREE.AnimationClip(name, duration, tracks);
+}
+function holdFn(pose, { period, breath, sway, look = 0 }) {
+  return (t) => {
+    const ph = t / period, f = blendCat(pose, pose, 1), b = (0.5 - 0.5 * Math.cos(TAU * ph)) * breath;
+    f.body.s = [f.body.s[0], f.body.s[1] * (1 + b), f.body.s[2] * (1 + 0.8 * b)];
+    TAILS.forEach((n, i) => { f[n].r = [f[n].r[0], f[n].r[1] + sway * Math.sin(TAU * ph - i * 0.55), f[n].r[2]]; });
+    f.head.r = [f.head.r[0], f.head.r[1] + look * Math.sin(TAU * ph), f.head.r[2]];
+    return f;
+  };
+}
+const HOLD = {
+  sit: { period: 4, fn: holdFn(POSE.sit, { period: 4, breath: 0.025, sway: 0.18, look: 0.3 }) },
+  lie: { period: 4.5, fn: holdFn(POSE.lie, { period: 4.5, breath: 0.03, sway: 0.08, look: 0.12 }) },
+  sleep: { period: 5, fn: holdFn(POSE.sleep, { period: 5, breath: 0.05, sway: 0.03 }) },
+};
+const STRETCH_LEN = 2.6;
+function stretchFn(t) {
+  if (t >= 1.8) return blendCat(POSE.stretch, HOLD.sit.fn(0), (t - 1.8) / 0.8, 0.2);
+  const f = blendCat(POSE.stretch, POSE.stretch, 1), deep = Math.sin(Math.PI * t / 1.8);
+  f.body.r = [0, 0, -0.35 - 0.12 * deep];
+  f.legFL.r = f.legFR.r = [0, 0, 1.25 + 0.15 * deep + 0.02 * Math.sin(t * 45) * deep];
+  return f;
+}
+const firstFrame = (p) => (p === 'stretch' ? stretchFn(0) : HOLD[p].fn(0));
+// The idle cycle is the cat's own behaviour, not the gag's, so its seconds stay here (as in cat-viewer).
+const CYCLE = {
+  start: 'sit',
+  poses: { sit: { hold: [4, 9], next: { lie: 3, stretch: 1 } }, lie: { hold: [3, 7], next: { sleep: 3, sit: 2, stretch: 1 } }, sleep: { hold: [8, 15], next: { lie: 1 } }, stretch: { oneShot: true, then: 'sit' } },
+  transitions: { sit_to_lie: 1.1, sit_to_stretch: 0.9, lie_to_stretch: 1.1, lie_to_sleep: 1.3, lie_to_sit: 1.0, sleep_to_lie: 1.2 },
+  fade: 0.25,
+};
+const clips = [
+  ...Object.entries(HOLD).map(([name, h]) => bake(name, h.period, 32, h.fn)),
+  bake('stretch', STRETCH_LEN, 52, stretchFn),
+  ...Object.entries(CYCLE.transitions).map(([name, len]) => {
+    const [from, to] = name.split('_to_'), A = firstFrame(from), B = firstFrame(to);
+    return bake(name, len, 24, (t) => blendCat(A, B, t / len, 0.2));
+  }),
+];
+const mixer = new THREE.AnimationMixer(cat);
+const actions = Object.fromEntries(clips.map((c) => [c.name, mixer.clipAction(c)]));
+for (const [name, a] of Object.entries(actions)) if (!(name in HOLD)) { a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true; }
+let catPose = CYCLE.start, catTarget = null, catPhase = 'hold', holdUntil = Infinity, waitingForSeam = false, playingAction = null, idleClock = 0;
+let autoCycle = true;
+function playClip(name, fade) {
+  const a = actions[name];
+  if (playingAction && playingAction !== a) playingAction.fadeOut(fade);
+  a.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).fadeIn(fade).play();
+  playingAction = a;
+}
+const rand = ([a, b]) => a + Math.random() * (b - a);
+function enterPose(p, fade) {
+  catPose = p; catTarget = null; waitingForSeam = false;
+  const spec = CYCLE.poses[p];
+  catPhase = spec.oneShot ? 'oneshot' : 'hold';
+  playClip(p, fade);
+  if (!spec.oneShot) holdUntil = idleClock + rand(spec.hold);
+}
+function moveTo(next, fade) {
+  const clip = `${catPose}_to_${next}`;
+  if (!actions[clip]) return enterPose(next, fade);
+  catPhase = 'moving'; catTarget = next; waitingForSeam = false;
+  playClip(clip, fade);
+}
+function pickNext(p) {
+  const options = Object.entries(CYCLE.poses[p].next || {});
+  let r = Math.random() * options.reduce((s, [, w]) => s + w, 0);
+  for (const [name, w] of options) if ((r -= w) <= 0) return name;
+  return options[0][0];
+}
+mixer.addEventListener('finished', (e) => {
+  if (e.action !== playingAction) return;
+  if (catPhase === 'moving') enterPose(catTarget, CYCLE.fade);
+  else if (catPhase === 'oneshot') enterPose(CYCLE.poses[catPose].then, CYCLE.fade);
+});
+mixer.addEventListener('loop', (e) => {
+  if (waitingForSeam && autoCycle && catPhase === 'hold' && e.action === playingAction) moveTo(pickNext(catPose), CYCLE.fade);
+});
+enterPose(CYCLE.start, 0);
+
+// ---------------------------------------------------------------------------
+// The stick figure: ~20 primitives in the cat's matte material. Faces local +X,
+// so its strut reads in profile. Joints are named groups, like bones.
+// Proportions in figure units (about 2.06 tall); BUTTERMAN.figure.scale sizes it.
+// ---------------------------------------------------------------------------
+const L_THIGH = 0.49, L_SHIN = 0.47, L_UPPER = 0.42, L_FORE = 0.4, ANKLE = 0.055, GRIP = 0.14, SHOULDER_Y = 0.66;
+const fig = new THREE.Group(); fig.name = 'figure'; fig.visible = false; scene.add(fig);
+const pelvis = node('pelvis', fig, 0, 0.9, 0);
+pelvis.add(part(sphere(0.075)));
+const spine = node('spine', pelvis);
+spine.add(part(capsuleY(0.06, 0.62), 0, 0.37, 0));
+const neck = node('neck', spine, 0, 0.74, 0);
+neck.add(part(capsuleY(0.04, 0.06), 0, 0.04, 0));
+const fhead = node('fhead', neck, 0, 0.1, 0);
+fhead.add(part(sphere(0.17), 0.01, 0.15, 0, 1, 1.08, 1));
+const ARMS = [1, -1].map((side) => {
+  const sh = node('shoulder', spine, 0, SHOULDER_Y, side * 0.15);
+  sh.add(part(sphere(0.05)));
+  sh.add(part(capsuleY(0.045, L_UPPER - 0.09), 0, -L_UPPER / 2, 0));
+  const el = node('elbow', sh, 0, -L_UPPER, 0);
+  el.add(part(sphere(0.045)));
+  el.add(part(capsuleY(0.04, L_FORE - 0.08), 0, -L_FORE / 2, 0));
+  const wr = node('wrist', el, 0, -L_FORE, 0);
+  wr.add(part(sphere(0.06), 0, -0.03, 0));
+  const grip = node('grip', wr, 0, -GRIP, 0);    // where the butter sits in the hand
+  return { side, sh, el, wr, grip };
+});
+const LEGS = [1, -1].map((side) => {
+  const hip = node('hip', pelvis, 0, -0.02, side * 0.1);
+  hip.add(part(capsuleY(0.05, L_THIGH - 0.1), 0, -L_THIGH / 2, 0));
+  const knee = node('knee', hip, 0, -L_THIGH, 0);
+  knee.add(part(sphere(0.05)));
+  knee.add(part(capsuleY(0.045, L_SHIN - 0.09), 0, -L_SHIN / 2, 0));
+  const ankle = node('ankle', knee, 0, -L_SHIN, 0);
+  ankle.add(part(capsuleX(0.045, 0.14), 0.06, -0.01, 0));    // the foot points the way he faces
+  return { side, hip, knee, ankle };
+});
+
+// Two-bone IK in a limb's own plane. bend +1 = joint in front (knee), -1 = joint below the line (elbow).
+function ik2(dx, dy, L1, L2, bend) {
+  const d = clamp(Math.hypot(dx, dy), Math.abs(L1 - L2) + 1e-4, L1 + L2 - 1e-4);
+  const base = Math.atan2(dx, -dy);
+  const a = Math.acos(clamp((L1 * L1 + d * d - L2 * L2) / (2 * L1 * d), -1, 1));
+  const t1 = base + bend * a, kx = L1 * Math.sin(t1), ky = -L1 * Math.cos(t1);
+  return [t1, Math.atan2(dx - kx, -(dy - ky)) - t1];
+}
+
+// A figure pose: pelvis height, lean, roll, head tilt; per leg a foot target (relative to the hip,
+// figure units) + toe angle + spread; per arm shoulder/elbow/wrist angles + spread + shrug; optional arm IK.
+const leg = (x, y, toe = 0, abd = 0.03) => ({ x, y, toe, abd });
+const arm = (sh, el, wr = 0, abd = 0.1, shrug = 0) => ({ sh, el, wr, abd, shrug });
+const CARRY = (bob = 0, shrug = 0) => arm(0.55 + bob, 1.75, Math.PI - 2.3 - bob, 0.15, shrug);   // butter held up like a waiter's tray
+function standPose(carryIdx) {
+  const ST = BUTTERMAN.strut, py = 0.9;
+  return {
+    pelvisY: py, lean: ST.lean * 0.6, roll: 0, head: ST.chinUp,
+    legs: [leg(0.1, ANKLE - py + 0.02), leg(-0.1, ANKLE - py + 0.02)],
+    arms: [0, 1].map((i) => (i === carryIdx ? CARRY() : arm(0.05, 0.3, 0, 0.12))),
+    ik: null,
+  };
+}
+function lerpPose(a, b, u, stepLift = 0) {
+  const L = (x, y) => x + (y - x) * u;
+  return {
+    pelvisY: L(a.pelvisY, b.pelvisY), lean: L(a.lean, b.lean), roll: L(a.roll, b.roll), head: L(a.head, b.head),
+    legs: a.legs.map((l, i) => {
+      const m = b.legs[i], lift = Math.abs(m.x - l.x) > 0.04 ? Math.sin(Math.PI * u) * stepLift : 0;
+      return { x: L(l.x, m.x), y: L(l.y, m.y) + lift, toe: L(l.toe, m.toe), abd: L(l.abd, m.abd) };
+    }),
+    arms: a.arms.map((r, i) => { const m = b.arms[i]; return { sh: L(r.sh, m.sh), el: L(r.el, m.el), wr: L(r.wr, m.wr), abd: L(r.abd, m.abd), shrug: L(r.shrug, m.shrug) }; }),
+    ik: b.ik ? { ...b.ik, w: b.ik.w * u } : a.ik ? { ...a.ik, w: a.ik.w * (1 - u) } : null,
+  };
+}
+
+// The strut. `fw` is steps taken (contact poses at whole numbers = on the beat), already warped by
+// contactHold, so foot plants come from distance: a planted foot never slides.
+function walkPose(fw, S, carryIdx) {
+  const ST = BUTTERMAN.strut, st = ST.stance, rm = reducedMotion();
+  const x = frac(fw);
+  const B = ST.bounceShape === 'double' ? 0.5 + 0.5 * Math.cos(2 * TAU * (x - 0.08))
+    : ST.bounceShape === 'strut' ? 0.5 - 0.5 * Math.cos(TAU * x)
+      : 0.5 + 0.5 * Math.cos(TAU * (x - 0.15));
+  const hipH = Math.min(0.91, Math.sqrt((L_THIGH + L_SHIN - 0.03) ** 2 - (st * S) ** 2) + ANKLE);
+  const pelvisY = hipH - (rm ? 0 : ST.bounce) * B;
+  const legs = [0, 1].map((i) => {
+    const ph = frac(fw / 2 + i * 0.5);
+    if (ph < st) {                                       // planted: slides back under the body
+      const peel = clamp01((ph - (st - 0.12)) / 0.12);
+      return leg(st * S - 2 * S * ph, ANKLE - pelvisY + 0.02 * peel, -0.5 * peel);
+    }
+    const v = (ph - st) / (1 - st);                       // swinging: fast pick-up, slow put-down (Williams)
+    const lift = ST.kneeLift * 0.2 * Math.sin(Math.PI * v ** 0.75);
+    return leg(-st * S + 2 * st * S * (1 - (1 - v) ** 2.2), ANKLE - pelvisY + lift, lerp(-0.6, 0.35, v));
+  });
+  // The shrug: the shoulder on the side of the foot that just landed pops up, then settles.
+  const landing = Math.floor(fw) % 2 === 0 ? 0 : 1;
+  const pop = rm ? 0 : Math.sin(Math.PI * clamp01(x / 0.7)) * (1 - x * 0.3);
+  const shr = (i) => (i === landing ? ST.shrug * pop : 0);
+  const arms = [0, 1].map((i) => {
+    if (i === carryIdx) return CARRY(0.05 * B, shr(i));
+    const ph = frac(fw / 2 + i * 0.5);                    // this arm swings against the same-side leg
+    const sh = ST.armRaise - ST.armSwing * Math.cos(TAU * (ph + ST.armLead));
+    return arm(sh, 0.35 + 0.8 * Math.max(0, sh - ST.armRaise) / Math.max(ST.armSwing, 0.01), 0, 0.1, shr(i));
+  });
+  const roll = ST.shrugRoll * pop * (landing === 0 ? 1 : -1);
+  return { pelvisY, lean: ST.lean + 0.04 * B, roll, head: ST.chinUp - 0.03 * B, legs, arms, ik: null };
+}
+const warp = (f, hold) => Math.floor(f) + (frac(f) - clamp(hold, 0, 0.9) * Math.sin(TAU * frac(f)) / TAU);
+
+const _v = new THREE.Vector3();
+function applyFigure(fs) {
+  fig.visible = !!fs;
+  if (!fs) return;
+  const s = fs.scale ?? BUTTERMAN.figure.scale, p = fs.pose;
+  fig.position.copy(fs.pos); fig.rotation.set(0, fs.yaw, 0); fig.scale.setScalar(s);
+  pelvis.position.y = p.pelvisY;
+  spine.rotation.set(p.roll, 0, p.lean);
+  fhead.rotation.set(-p.roll * 0.6, 0, p.head);
+  LEGS.forEach((L, i) => {
+    const t = p.legs[i], [a1, a2] = ik2(t.x, t.y + 0.02, L_THIGH, L_SHIN, 1);
+    L.hip.rotation.set(-L.side * t.abd, 0, a1); L.knee.rotation.z = a2; L.ankle.rotation.z = t.toe - a1 - a2;
+  });
+  ARMS.forEach((A, i) => {
+    const a = p.arms[i];
+    A.sh.position.y = SHOULDER_Y + a.shrug;
+    A.sh.rotation.set(-A.side * a.abd, 0, a.sh); A.el.rotation.z = a.el; A.wr.rotation.z = a.wr;
+  });
+  if (p.ik && p.ik.w > 0) {                               // reach a world point with one arm (the slap)
+    const A = ARMS[p.ik.i], a = p.arms[p.ik.i];
+    fig.updateMatrixWorld(true);
+    spine.worldToLocal(_v.copy(p.ik.target));
+    const [s1, s2] = ik2(_v.x - A.sh.position.x, _v.y - A.sh.position.y, L_UPPER, L_FORE, -1);
+    const w = p.ik.w, sh = lerp(a.sh, s1, w), el = lerp(a.el, s2, w);
+    A.sh.rotation.set(-A.side * lerp(a.abd, 0.05, w), 0, sh); A.el.rotation.z = el;
+    A.wr.rotation.z = lerp(a.sh + a.el + a.wr, 0, w) - sh - el;   // hand points down at full reach
+  }
+  fig.updateMatrixWorld(true);
+}
+
+// ---------------------------------------------------------------------------
+// The schedule: scenes and actions packed onto the beat grid. Everything here is in BEATS;
+// only the clock (and the audio scheduler) multiplies by seconds-per-beat.
+// ---------------------------------------------------------------------------
+const at = (a, v) => (v === 'hit' ? a.hit : v) ?? 0;
+function buildSchedule() {
+  const C = BUTTERMAN, scenes = [], acts = [];
+  let cursor = 0;
+  for (const sc of C.scenes) {
+    const s0 = (typeof sc.start === 'number' ? sc.start : cursor + (scenes.length ? C.gap : 0)) + (sc.shift || 0);
+    let bc = 0;
+    const mine = [];
+    sc.actions.forEach((a, index) => {
+      const st = (typeof a.start === 'number' ? a.start : bc) + (a.shift || 0);
+      mine.push({ id: `${sc.id}/${a.id}`, scene: sc, cfg: a, index, start: s0 + st, end: s0 + st + a.length });
+      bc = st + a.length;
+    });
+    const end = typeof sc.length === 'number' ? s0 + sc.length : Math.max(s0, ...mine.map((m) => m.end));
+    scenes.push({ id: sc.id, cfg: sc, start: s0, end, actions: mine });
+    acts.push(...mine);
+    cursor = end;
+  }
+  const slap = acts.find((a) => a.cfg.do === 'slap'), handUp = acts.find((a) => a.cfg.do === 'hand-up');
+  const walkOut = acts.find((a) => a.cfg.do === 'walk-out');
+  return {
+    scenes, actions: acts, total: Math.max(cursor, ...acts.map((a) => a.end)),
+    hitB: slap ? slap.start + slap.cfg.hit : null, slap, handUp, walkOut,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Geometry per scene, from the current camera: where he starts, stops and leaves.
+// Walks go along the way he faces (turned a little toward the camera) so feet never slide.
+// One step per beat: the action's length is its step count, and steps stretch to reach off-screen.
+// ---------------------------------------------------------------------------
+const halfFov = () => THREE.MathUtils.degToRad(camera.fov / 2);
+const yawOf = (v) => Math.atan2(-v.z, v.x);
+function offscreen(from, v, s = BUTTERMAN.figure.scale) {   // distance along v until he is fully off-screen
+  const k = Math.tan(halfFov()) * camera.aspect, sx = Math.sign(v.x) || 1;
+  const rhs = (camera.position.z - from.z) * k + 0.8 * s - sx * from.x;
+  return Math.max(1, rhs / (Math.abs(v.x) + v.z * k));
+}
+function makePath(start, dir, need, steps) {
+  const N = Math.max(1, Math.round(steps)), D = Math.max(need, N * BUTTERMAN.strut.stride * BUTTERMAN.figure.scale);
+  return { start, dir, D, N, S: D / N, yaw: yawOf(dir) };
+}
+function headAtYaw(yaw) {             // the cat's head in the world with the cat turned to `yaw`
+  const keep = spin.rotation.y;
+  spin.rotation.y = yaw; spin.updateMatrixWorld(true);
+  const p = head.getWorldPosition(new THREE.Vector3());
+  spin.rotation.y = keep; spin.updateMatrixWorld(true);
+  return p;
+}
+function geometry(sc, run) {
+  const key = `${sc.id}:${innerWidth}x${innerHeight}`;
+  if (run.geo[key]) return run.geo[key];
+  const C = BUTTERMAN, t = C.strut.turnToCamera, side = sc.from === 'left' ? -1 : 1, g = {};
+  const act = (d) => sc.actions.find((a) => a.do === d);
+  if (act('walk-in')) {
+    const h = run.heads[sc.id] || (run.heads[sc.id] = headAtYaw(sc.cat ? sc.cat.yaw : spin.rotation.y));
+    g.mark = new THREE.Vector3(h.x + side * C.figure.reach, GROUND, h.z + C.figure.standInFront);
+    const inDir = new THREE.Vector3(-side * Math.cos(t), 0, Math.sin(t)), back = inDir.clone().negate();
+    g.in = makePath(null, inDir, offscreen(g.mark, back), act('walk-in').length);
+    g.in.start = g.mark.clone().addScaledVector(back, g.in.D);
+    const wo = act('walk-out');
+    if (wo) g.out = makePath(g.mark.clone(), back, offscreen(g.mark, back), wo.length - wo.turn);   // back the way he came
+    g.carry = Math.cos(g.in.yaw) > 0 ? 0 : 1;                 // the arm nearer the camera carries the butter
+  }
+  if (act('cross')) {
+    const mid = new THREE.Vector3(0, GROUND, sc.depth ?? 1.5), dir = new THREE.Vector3(-side * Math.cos(t), 0, Math.sin(t));
+    const Db = offscreen(mid, dir.clone().negate()), Df = offscreen(mid, dir);
+    g.cross = makePath(null, dir, Db + Df, act('cross').length);
+    g.cross.start = mid.clone().addScaledVector(dir, -(Db + (g.cross.D - Db - Df) / 2));
+  }
+  if (act('rise')) {
+    // Full size: centred in front of the camera, sized so the widest arms still fit.
+    const s = C.figure.scale, tanH = Math.tan(halfFov()), fill = sc.fill ?? 0.9;
+    // frame the upper body (hips to raised hands, about 1.5 figure units) so he looms over the page
+    const dist = Math.max(1.3 * s / (2 * tanH), 1.9 * s / (2 * tanH * camera.aspect)) / fill;
+    const P = camera.position.clone().addScaledVector(camera.getWorldDirection(new THREE.Vector3()), dist);
+    g.top = new THREE.Vector3(P.x, P.y - 1.75 * s, P.z);
+    g.below = g.top.clone(); g.below.y -= dist * tanH + 4 * s;
+    g.camYaw = yawOf(new THREE.Vector3(0, 0, 1));
+  }
+  return (run.geo[key] = g);
+}
+
+// ---------------------------------------------------------------------------
+// Actions: each returns { pos, yaw, pose } for the figure at `tb` beats into the action.
+// ---------------------------------------------------------------------------
+const armsY = (deg) => Math.PI - THREE.MathUtils.degToRad(deg);   // spread from straight up -> shoulder raise
+function yellPose(spreadDeg, tremble) {
+  const py = 0.84, abd = armsY(spreadDeg);
+  return {
+    pelvisY: py, lean: 0.1 + 0.02 * tremble, roll: 0, head: 0.12 + 0.05 * tremble,
+    legs: [leg(0.03, ANKLE - py, 0, 0.32), leg(-0.03, ANKLE - py, 0, 0.32)],
+    arms: [0, 1].map((i) => arm(0.15 + 0.05 * tremble * (i ? -1 : 1), 0.15, 0, abd + 0.04 * tremble)),
+    ik: null,
+  };
+}
+// One step per beat: the beat count is the step count, and `easing` shapes the inside of each step.
+function walkAlong(path, tb, easing, carry, scale = BUTTERMAN.figure.scale) {
+  const n = clamp(tb, 0, path.N), f = Math.floor(n) + (n >= path.N ? 0 : ease(easing, frac(n)));
+  const fw = warp(f, BUTTERMAN.strut.contactHold);
+  return { pos: path.start.clone().addScaledVector(path.dir, fw * path.S), yaw: path.yaw, pose: walkPose(fw, path.S / scale, carry), scale };
+}
+// The slapping arm across hand-up, slap and walk-out, on the global beat clock:
+// shoots up on the hand-up beat, strikes down onto the head on the slap beat, comes down on the next.
+function slapReach(gb, S, g) {
+  if (!S.slap || !S.handUp || gb < S.handUp.start) return null;
+  const C = BUTTERMAN, s = C.figure.scale, hu = S.handUp.cfg, sl = S.slap.cfg;
+  const rest = head.localToWorld(BUTTER_REST.p.clone());
+  const up = ease(hu.easing, (gb - S.handUp.start) / hu.raise);
+  const strike = ease(sl.easing, (gb - (S.hitB - sl.strike)) / sl.strike);
+  const lift = GRIP * s + hu.hover * (1 - strike);
+  let w = smooth((gb - S.handUp.start) / Math.min(hu.raise, 0.5));
+  let down = 0;
+  if (S.walkOut && gb > S.walkOut.start) { down = smooth((gb - S.walkOut.start) / S.walkOut.cfg.turn); w *= 1 - down; }
+  const target = rest.addScaledVector(THREE.Object3D.DEFAULT_UP, lerp(GRIP * s + 0.2, lift, up) + 0.25 * down);
+  return { i: g.carry, target, w, strike, up };
+}
+function actionAt(a, tb, S, run) {
+  const C = BUTTERMAN, cfg = a.cfg, sc = a.scene, g = geometry(sc, run), s = C.figure.scale, rm = reducedMotion();
+  const gb = a.start + tb;
+  const holdingButter = S.hitB !== null && gb < S.hitB;
+  let out;
+  switch (cfg.do) {
+    case 'walk-in':
+      out = walkAlong(g.in, tb, cfg.easing, holdingButter ? g.carry : -1);
+      break;
+    case 'hand-up': case 'slap': {
+      const stand = standPose(holdingButter ? g.carry : -1), r = slapReach(gb, S, g);
+      if (r) {
+        stand.lean -= 0.12 * r.up + 0.22 * r.strike;          // leans in over the cat, then into the slap
+        if (gb > S.hitB) stand.lean += 0.15 * smooth((gb - S.hitB) / 0.5);   // and back, proud
+        stand.ik = r;
+      }
+      out = { pos: g.mark.clone(), yaw: g.in.yaw, pose: stand };
+      break;
+    }
+    case 'walk-out': {
+      const turn = cfg.turn;
+      if (tb < turn) {                                        // arm down + about-face with a little hop
+        const u = smooth(tb / turn), pos = g.mark.clone();
+        if (!rm) pos.y += Math.sin(Math.PI * tb / turn) * 0.06 * s;
+        const pose = lerpPose(standPose(-1), walkPose(0, g.out.S / s, -1), u);
+        pose.ik = slapReach(gb, S, g);
+        out = { pos, yaw: lerpAngle(g.in.yaw, g.out.yaw, u), pose };
+      } else out = walkAlong(g.out, tb - turn, cfg.easing, -1);
+      break;
+    }
+    case 'cross':
+      out = walkAlong(g.cross, tb, cfg.easing, -1);
+      break;
+    case 'rise': case 'open': {
+      const prev = sc.actions.slice(0, a.index).reverse().find((x) => x.arms !== undefined);
+      const m = ease(cfg.easing, tb / cfg.move);
+      const spread = cfg.do === 'rise' ? cfg.arms : lerp(prev ? prev.arms : cfg.arms, cfg.arms, m);
+      const tremble = rm ? 0 : cfg.shake * clamp01((tb - cfg.move) / 0.25) * noise(tb * spb(), a.index);
+      const pos = cfg.do === 'rise' && !rm ? g.below.clone().lerp(g.top, m) : g.top.clone();
+      if (!rm) pos.x += 0.012 * s * tremble;
+      out = { pos, yaw: g.camYaw, pose: yellPose(spread, tremble) };
+      break;
+    }
+    case 'sink': {
+      const prev = sc.actions.slice(0, a.index).reverse().find((x) => x.arms !== undefined);
+      if (rm) return tb < cfg.length * 0.5 ? { pos: g.top.clone(), yaw: g.camYaw, pose: yellPose(prev ? prev.arms : 60, 0) } : null;
+      out = { pos: g.top.clone().lerp(g.below, ease(cfg.easing, tb / cfg.length)), yaw: g.camYaw, pose: yellPose(prev ? prev.arms : 60, 0) };
+      break;
+    }
+    default: return null;
+  }
+  // Blend into standing actions from where the previous action left him (with a little step).
+  const blend = C.strut.blend;
+  if (a.index > 0 && cfg.do === 'hand-up' && tb < blend) {
+    const pa = sc.actions[a.index - 1];
+    const prev = actionAt({ ...a, cfg: pa, index: a.index - 1, start: a.start - pa.length }, pa.length, S, run);
+    if (prev) { const ik = out.pose.ik; out.pose = lerpPose(prev.pose, out.pose, smooth(tb / blend), 0.1); out.pose.ik = ik; }
+  }
+  return out;
+}
+function figureAt(gb, S, run) {
+  let cur = null;
+  for (const a of S.actions) if (a.start <= gb && (!cur || a.start >= cur.start)) cur = a;
+  if (!cur || gb >= S.total) return null;
+  if (cur.index === cur.scene.actions.length - 1 && gb > cur.end) return null;   // between scenes: off-screen
+  return actionAt(cur, Math.min(gb - cur.start, cur.cfg.length), S, run);
+}
+
+// ---------------------------------------------------------------------------
+// The cat during the gag: yaw eases to the butter scene's angle, cycle pauses, startles.
+// ---------------------------------------------------------------------------
+let userYaw = BUTTERMAN.cat.homeYaw;
+function sceneYaw(gb, S, run) {
+  let yaw = null;
+  for (const sc of S.scenes) {
+    if (!sc.cfg.cat || gb < sc.start) continue;
+    const e = sc.cfg.cat.ease;
+    yaw = lerpAngle(run.yaw0, sc.cfg.cat.yaw, ease(e.easing, (gb - sc.start) / e.length));
+  }
+  return yaw;
+}
+const catPaused = (gb, S) => S.scenes.some((sc) => sc.cfg.cat?.pauseCycle && gb >= sc.start && gb <= sc.end);
+function startleAt(gb, S) {
+  let k = 0;
+  for (const a of S.actions) {
+    const cs = a.cfg.catStartle;
+    if (!cs || !cs.amount) continue;
+    const u = (gb - (a.start + at(a.cfg, cs.at))) / BUTTERMAN.cat.startle;
+    if (u >= 0 && u <= 1) k = Math.max(k, Math.sin(Math.PI * u) * cs.amount);
+  }
+  return k;
+}
+// The mixer only writes a value when it changes, so a paused or frozen cat would keep last frame's
+// startle offsets and pile them up. Undo them before the mixer runs; redo them after.
+const STARTLED = [head, earL, earR];
+let catBase = null;
+function catAt(catTime, gb, S, run, dt) {
+  if (catBase) STARTLED.forEach((o, i) => { o.position.copy(catBase[i].p); o.quaternion.copy(catBase[i].q); });
+  // base pose: frozen frames set the time outright; live play advances (or pauses) the cycle
+  if (run && !run.live) mixer.setTime(catTime);
+  else if (S && run && gb !== null && catPaused(gb, S)) { holdUntil += dt; mixer.update(0); }
+  else {
+    idleClock += dt;
+    if (autoCycle && catPhase === 'hold' && idleClock > holdUntil) waitingForSeam = true;
+    mixer.update(dt);
+  }
+  const yaw = S && run && gb !== null ? sceneYaw(gb, S, run) : null;
+  if (yaw !== null) userYaw = yaw;
+  spin.rotation.set(0, userYaw, 0);
+  floater.position.y = Math.sin(catTime * 1.2) * 0.08;
+  floater.rotation.z = Math.sin(catTime * 0.6) * 0.03;
+  catBase = STARTLED.map((o) => ({ p: o.position.clone(), q: o.quaternion.clone() }));
+  const k = S && gb !== null ? startleAt(gb, S) : 0;
+  react.scale.set(1 + 0.04 * k, 1 + 0.1 * k, 1 + 0.04 * k);
+  if (!reducedMotion()) floater.position.y += 0.15 * k;
+  head.position.y += 0.06 * k;
+  head.rotation.z += 0.25 * k;
+  earL.rotation.z += -0.7 * k; earR.rotation.z += -0.7 * k;
+  spin.updateMatrixWorld(true);
+}
+
+// ---------------------------------------------------------------------------
+// Butter: in the hand until the hit, then head.attach(butter) keeps its world transform,
+// and it eases to its rest spot with a squash. A pure function of the beat, so seeking works.
+// ---------------------------------------------------------------------------
+function inHand(carryIdx) {
+  const s = BUTTERMAN.figure.scale;
+  ARMS[carryIdx].grip.add(butter);
+  butter.position.set(0, -0.06 / s, 0); butter.quaternion.identity(); butter.scale.setScalar(1 / s);
+}
+function placeButter(gb, S, run, fs, carryIdx) {
+  if (S.hitB === null) return;
+  const sl = S.slap.cfg, sceneStart = S.scenes.find((x) => x.cfg === S.slap.scene).start;
+  if (gb < S.hitB) { butter.visible = !!fs && gb >= sceneStart; inHand(carryIdx); return; }
+  butter.visible = true;
+  if (!run.handoff) {                                         // the hand-off, recorded once per run
+    applyFigure(figureAt(S.hitB, S, run));
+    inHand(carryIdx);
+    fig.updateMatrixWorld(true);
+    head.attach(butter);
+    run.handoff = { p: butter.position.clone(), q: butter.quaternion.clone(), s: butter.scale.clone() };
+    run.log.push({ event: 'handoff', beat: S.hitB, s: +(S.hitB * spb()).toFixed(3) });
+    applyFigure(fs);                                          // back to this frame's pose
+  }
+  if (butter.parent !== head) head.add(butter);
+  const h = run.handoff, k = ease('sineOut', (gb - S.hitB) / sl.settle);
+  butter.position.lerpVectors(h.p, BUTTER_REST.p, k);
+  butter.quaternion.slerpQuaternions(h.q, BUTTER_REST.q, k);
+  const sq = Math.sin(Math.PI * clamp01((gb - S.hitB) / (sl.settle * 1.5))) * (1 - k * 0.5) * 0.35;
+  const base = h.s.x + (1 - h.s.x) * k;
+  butter.scale.set(base * (1 + sq * 0.6), base * (1 - sq), base * (1 + sq * 0.6));
+}
+
+// ---------------------------------------------------------------------------
+// Captions: the DOM caption slams on for whichever caption started last.
+// ---------------------------------------------------------------------------
+const capEl = document.getElementById('caption');
+function captionAt(gb, S) {
+  let best = null;
+  if (S && gb !== null) for (const a of S.actions) {
+    const c = a.cfg.caption;
+    if (!c || !c.on || !c.text) continue;
+    const b0 = a.start + at(a.cfg, c.at);
+    if (gb >= b0 && gb <= b0 + c.hold && (!best || b0 >= best.b0)) best = { b0, c };
+  }
+  if (!best) { capEl.style.opacity = '0'; capEl.textContent = ''; return; }
+  const { slam, fade } = BUTTERMAN.captionStyle, u = gb - best.b0, size = best.c.size ?? 1;
+  const pop = u < slam ? lerp(2.4, 1, ease('backOut', u / slam)) : 1;
+  const shake = reducedMotion() ? 0 : 3 * noise(u * spb(), 7) * size;
+  capEl.textContent = best.c.text;
+  capEl.style.opacity = String(Math.min(1, u / Math.max(slam * 0.5, 1e-3), (best.c.hold - u) / fade));
+  capEl.style.transform = `translate(calc(-50% + ${shake.toFixed(1)}px), -50%) rotate(-6deg) scale(${(pop * size * 0.6).toFixed(3)})`;
+}
+
+// ---------------------------------------------------------------------------
+// Audio: clips decoded once at load by an OfflineAudioContext (so no AudioContext exists before
+// a gesture). At play, each action's clip is scheduled on the audio clock with
+// start(when, trimStart, length). A file that fails to load gets a synth beep instead.
+// ---------------------------------------------------------------------------
+const clipsState = {};      // file -> { loaded, fallback, duration, error }
+const buffers = {};
+const decoder = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 1, 44100);
+function synthBuffer(seconds, fn) {
+  const n = Math.floor(seconds * 44100), buf = decoder.createBuffer(1, n, 44100), d = buf.getChannelData(0);
+  let ph = 0;
+  for (let i = 0; i < n; i++) { const u = i / n, [f, amp] = fn(u); ph += TAU * f / 44100; d[i] = Math.sin(ph) * amp; }
+  return buf;
+}
+const synthFallback = (file) => synthBuffer(0.3, (u) => [300 + (file.length * 37) % 500 * (1 - 0.4 * u), Math.min(1, u * 40) * (1 - u) ** 1.5 * 0.6]);
+const TICK = synthBuffer(0.04, (u) => [1600, (1 - u) ** 3]), TOCK = synthBuffer(0.05, (u) => [2400, (1 - u) ** 3]);
+function clipFiles() {
+  const f = new Set();
+  for (const sc of BUTTERMAN.scenes) for (const a of sc.actions) if (a.audio?.file) f.add(a.audio.file);
+  if (BUTTERMAN.footsteps?.on && BUTTERMAN.footsteps.file) f.add(BUTTERMAN.footsteps.file);
+  return [...f];
+}
+async function loadClip(file) {
+  if (clipsState[file]) return;
+  clipsState[file] = { loaded: false, fallback: false };
+  try {
+    const r = await fetch(file);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    buffers[file] = await decoder.decodeAudioData(await r.arrayBuffer());
+    Object.assign(clipsState[file], { loaded: true, duration: +buffers[file].duration.toFixed(3) });
+  } catch (err) {
+    buffers[file] = synthFallback(file);
+    Object.assign(clipsState[file], { fallback: true, error: String(err.message || err) });
+    console.info('Butterman: using a synth beep for', file, '-', err.message || err);
+  }
+}
+const clipsReady = Promise.all(clipFiles().map(loadClip));
+
+let audioCtx = null, master = null;
+function getAudio(force) {
+  // Only with a real user gesture: creating one without makes browsers log an autoplay warning.
+  const ua = navigator.userActivation;
+  if (!audioCtx && !force && ua && !ua.isActive && !ua.hasBeenActive) return null;
+  if (!audioCtx) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    audioCtx = new Ctx();
+    master = audioCtx.createGain(); master.connect(audioCtx.destination);
+  }
+  return audioCtx;
+}
+function scheduleBuffer(ctx, buf, when, a, sources) {
+  const src = ctx.createBufferSource(), g = ctx.createGain();
+  src.buffer = buf; g.gain.value = a.gain ?? 1;
+  src.connect(g).connect(master);
+  const trim = a.trimStart || 0, len = Math.max(0.01, (a.trimEnd ?? buf.duration) - trim);
+  src.start(Math.max(when, ctx.currentTime), trim, len);
+  sources.push(src);
+}
+
+// Footfalls: every whole beat of every walking action (one step per beat).
+function footfallBeats(S) {
+  const out = [];
+  for (const a of S.actions) {
+    const c = a.cfg;
+    if (c.do === 'walk-in' || c.do === 'cross') for (let k = 1; k <= c.length; k++) out.push(a.start + k);
+    if (c.do === 'walk-out') for (let k = c.turn + 1; k <= c.length; k++) out.push(a.start + k);
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Play / seek
+// ---------------------------------------------------------------------------
+let S = null;          // the schedule of the current run
+let run = null;        // { live, perf0, ctx, ctxT0, clock, ... }
+let lastDone = null;   // the finished run, so the cat keeps the butter
+const logEl = document.getElementById('log');
+const goBtn = document.getElementById('go');
+const r3 = (x) => +x.toFixed(3);
+const state = {
+  get mode() { return run ? (run.live ? 'playing' : 'frozen') : lastDone ? 'done' : 'idle'; },
+  get bpm() { return (run || lastDone)?.bpm ?? BUTTERMAN.bpm; },
+  get clock() { return (run || lastDone)?.clock ?? null; },
+  get beat() { return run?.gb ?? null; },
+  get totalBeats() { return S ? S.total : null; },
+  get totalSeconds() { return S ? r3(S.total * spb()) : null; },
+  get schedule() {
+    return S ? S.actions.map((a) => ({
+      action: a.id, beat: a.start, length: a.cfg.length, s: r3(a.start * spb()),
+      audio: a.cfg.audio?.file ? { file: a.cfg.audio.file, beat: a.start + at(a.cfg, a.cfg.audio.offset), loaded: !!clipsState[a.cfg.audio.file]?.loaded } : null,
+      caption: a.cfg.caption?.on ? a.cfg.caption.text : null,
+    })) : null;
+  },
+  get log() { return (run || lastDone)?.log ?? []; },
+  get scheduled() { return (run || lastDone)?.scheduled ?? []; },
+  get footfalls() { return (run || lastDone)?.footfalls ?? 0; },
+  get audioSession() { return (run || lastDone)?.session ?? null; },
+  clips: clipsState,
+  get butterOnHead() { return butter.parent === head && butter.visible; },
+  get cameos() { return { count: cameoCount, active: !!cameo, summoned: store.get(BUTTERMAN.cameo.storageKey) === '1' }; },
+};
+
+function newRun(live) {
+  return { live, bpm: BUTTERMAN.bpm, geo: {}, heads: {}, handoff: null, log: [], scheduled: [], footfalls: 0, yaw0: userYaw, active: null, gb: null };
+}
+function play(opts = {}) {
+  // Inside the click handler, before any await: resume audio (phones stay silent otherwise)
+  // and ask iOS to play through the silent switch for the gag (decision e1107-37).
+  const ctx = getAudio(opts.forceAudio);
+  if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
+  const r = newRun(true);
+  cameo = null;
+  store.set(BUTTERMAN.cameo.storageKey, '1');                  // summoned: no more cameos for this visitor
+  if (navigator.audioSession) {
+    r.session = { before: navigator.audioSession.type };
+    try { navigator.audioSession.type = 'playback'; r.session.during = navigator.audioSession.type; } catch (e) { r.session.error = String(e); }
+  }
+  if (run?.sources) for (const src of run.sources) try { src.stop(); } catch { /* already done */ }
+  S = buildSchedule();
+  const sec = spb();
+  r.perf0 = performance.now() / 1000 + BUTTERMAN.preroll;
+  r.ctx = ctx;
+  r.ctxRead = ctx ? ctx.currentTime : 0;
+  r.ctxT0 = ctx ? ctx.currentTime + BUTTERMAN.preroll : 0;
+  r.clock = ctx ? 'pending' : 'performance';
+  r.sources = [];
+  for (const a of S.actions) {                               // the audio plan, kept even without audio
+    const au = a.cfg.audio;
+    if (!au?.file) continue;
+    const beat = a.start + at(a.cfg, au.offset);
+    const row = { action: a.id, file: au.file, beat, s: r3(beat * sec), clip: clipsState[au.file]?.loaded ? 'file' : clipsState[au.file]?.fallback ? 'synth' : 'not loaded' };
+    if (ctx && buffers[au.file]) { scheduleBuffer(ctx, buffers[au.file], r.ctxT0 + beat * sec, au, r.sources); row.scheduled = true; }
+    r.scheduled.push(row);
+  }
+  const falls = BUTTERMAN.footsteps?.on ? footfallBeats(S) : [];
+  r.footfalls = falls.length;
+  if (ctx) {
+    if (buffers[BUTTERMAN.footsteps?.file]) for (const fb of falls) scheduleBuffer(ctx, buffers[BUTTERMAN.footsteps.file], r.ctxT0 + fb * sec, BUTTERMAN.footsteps, r.sources);
+    if (BUTTERMAN.metronome) {
+      const firsts = new Set(S.scenes.map((x) => x.start));
+      for (let b = 0; b <= Math.ceil(S.total); b++) scheduleBuffer(ctx, firsts.has(b) ? TOCK : TICK, r.ctxT0 + b * sec, { gain: BUTTERMAN.metronomeGain }, r.sources);
+    }
+  }
+  run = r; lastDone = null;
+  goBtn.disabled = true;
+}
+function finish() {
+  if (run.session && navigator.audioSession) {     // tap sounds go back to respecting the switch
+    try { navigator.audioSession.type = run.session.before; run.session.restored = navigator.audioSession.type; } catch (e) { run.session.restoreError = String(e); }
+  }
+  run.log.push({ event: 'done', beat: r3(run.gb), s: r3(run.gb * spb()) });
+  lastDone = run; run = null;
+  goBtn.disabled = false;
+}
+let frozenAt = null;            // beats
+function seek(beats) {
+  S = buildSchedule();
+  const r = newRun(false);
+  r.yaw0 = BUTTERMAN.cat.homeYaw;
+  r.clock = 'seek';
+  userYaw = BUTTERMAN.cat.homeYaw;
+  autoCycle = false;
+  enterPose('sit', 0);
+  run = r; lastDone = null; frozenAt = beats;
+}
+function seekFromHash() {
+  if (params.has('b')) seek(Number(params.get('b')));
+  else if (params.has('t')) seek(Number(params.get('t')) / spb());
+}
+function gagBeat() {                                          // the clock: beats since beat 0
+  if (!run) return null;
+  if (!run.live) return frozenAt;
+  const C = BUTTERMAN, perfT = performance.now() / 1000 - run.perf0 - C.nudge, ctx = run.ctx;
+  if (run.clock === 'pending') {
+    if (ctx && ctx.state === 'running' && ctx.currentTime > run.ctxRead + 0.01) run.clock = 'audio';
+    else if (perfT + C.preroll > 0.4) run.clock = 'performance';     // audio never started (headless, blocked)
+  }
+  const t = run.clock === 'audio' ? ctx.currentTime - (ctx.outputLatency || 0) - run.ctxT0 - C.nudge : perfT;
+  return t / (60 / run.bpm);
+}
+
+goBtn.addEventListener('click', () => play());
+addEventListener('hashchange', () => { params = hashParams(); if (params.has('bpm')) BUTTERMAN.bpm = Number(params.get('bpm')); seekFromHash(); });
+
+// ---------------------------------------------------------------------------
+// Turntable: drag left-right only (decision e1107-36). The butter scene owns the yaw while it runs.
+// ---------------------------------------------------------------------------
+let press = null, yawVel = 0;
+const catOwned = () => { const gb = run?.gb; return gb !== null && gb !== undefined && S.scenes.some((sc) => sc.cfg.cat && gb >= sc.start && gb <= sc.end); };
+canvas.addEventListener('pointerdown', (e) => {
+  if (press) return;
+  press = { id: e.pointerId, lastX: e.clientX, lastT: e.timeStamp };
+  yawVel = 0;
+  try { canvas.setPointerCapture(e.pointerId); } catch { /* synthetic events */ }
+  canvas.classList.add('dragging');
+});
+canvas.addEventListener('pointermove', (e) => {
+  if (!press || e.pointerId !== press.id || catOwned()) return;
+  const dx = e.clientX - press.lastX, dt = Math.max((e.timeStamp - press.lastT) / 1000, 1 / 240);
+  userYaw += dx * 0.009;
+  yawVel = 0.6 * yawVel + 0.4 * (dx * 0.009 / dt);
+  press.lastX = e.clientX; press.lastT = e.timeStamp;
+});
+const endPress = (e) => { if (press && e.pointerId === press.id) { if (e.timeStamp - press.lastT > 100) yawVel = 0; press = null; canvas.classList.remove('dragging'); } };
+canvas.addEventListener('pointerup', endPress);
+canvas.addEventListener('pointercancel', endPress);
+
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  const dist = Math.max(6.4, 1.7 / (Math.tan(halfFov()) * camera.aspect));
+  camera.position.set(0, 0.35, dist);
+  camera.lookAt(0, -0.05, 0);
+  camera.updateProjectionMatrix();
+  camera.updateMatrixWorld();
+}
+addEventListener('resize', resize);
+resize();
+
+// ---------------------------------------------------------------------------
+// Background cameos: walk in (one step a beat), stand `duration`, about-face, walk out.
+// localStorage can be missing or throw (private mode, blocked storage): every use is guarded.
+// ---------------------------------------------------------------------------
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch { /* storage blocked: cameos just keep coming */ } },
+};
+let cameo = null, lastCameoEnd = performance.now() / 1000, cameoCount = 0;
+function startCameo(nowS) {
+  const C = BUTTERMAN.cameo, s = C.scale, t = BUTTERMAN.strut.turnToCamera, side = C.from === 'right' ? 1 : -1;
+  const halfW = (camera.position.z - C.depth) * Math.tan(halfFov()) * camera.aspect;
+  const stop = new THREE.Vector3(side * halfW * C.stopAt, GROUND, C.depth);
+  const inDir = new THREE.Vector3(-side * Math.cos(t), 0, Math.sin(t)), back = inDir.clone().negate();
+  const D = offscreen(stop, back, s), N = Math.max(2, Math.ceil(D / (BUTTERMAN.strut.stride * s)));
+  const pin = { start: stop.clone().addScaledVector(back, D), dir: inDir, D, N, S: D / N, yaw: yawOf(inDir) };
+  const pout = { start: stop.clone(), dir: back, D, N, S: D / N, yaw: yawOf(back) };
+  cameo = { t0: nowS, stop, pin, pout, stay: Math.max(1, Math.round(C.duration / spb())) };
+  cameoCount++;
+}
+function cameoAt(nowS, dt) {
+  const C = BUTTERMAN.cameo;
+  if (!cameo) {
+    const forced = params.get('cameo') === '1' && !cameoCount;
+    const allowed = C.on && !store.get(C.storageKey) && nowS - lastCameoEnd > C.minGap && Math.random() < C.chancePerSecond * dt;
+    if (forced || allowed) startCameo(nowS); else return null;
+  }
+  const c = cameo, b = (nowS - c.t0) / spb(), s = C.scale;
+  if (b < c.pin.N) return walkAlong(c.pin, b, 'linear', -1, s);
+  if (b < c.pin.N + c.stay) return { pos: c.stop.clone(), yaw: c.pin.yaw, pose: lerpPose(walkPose(0, c.pin.S / s, -1), standPose(-1), smooth((b - c.pin.N) / BUTTERMAN.strut.blend), 0.1), scale: s };
+  const bo = b - c.pin.N - c.stay;
+  if (bo < 1) return { pos: c.stop.clone(), yaw: lerpAngle(c.pin.yaw, c.pout.yaw, smooth(bo)), pose: lerpPose(standPose(-1), walkPose(0, c.pout.S / s, -1), smooth(bo)), scale: s };
+  if (bo < 1 + c.pout.N) return walkAlong(c.pout, bo - 1, 'linear', -1, s);
+  cameo = null; lastCameoEnd = nowS;
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Loop
+// ---------------------------------------------------------------------------
+let lastNow = performance.now();
+const showLog = params.has('log');
+function frame(now) {
+  const dt = Math.min((now - lastNow) / 1000, 0.1); lastNow = now;
+  const gb = gagBeat();
+  if (run) run.gb = gb;
+  if (!press && Math.abs(yawVel) > 1e-4 && !catOwned()) { userYaw += yawVel * dt; yawVel *= Math.exp(-3.5 * dt); }
+  const catTime = run && !run.live ? gb * spb() : now / 1000;
+  catAt(catTime, gb, S, run, dt);
+
+  if (run && gb !== null && gb >= 0) {
+    const fs = figureAt(gb, S, run);
+    applyFigure(fs);
+    if (S.slap) placeButter(gb, S, run, fs, geometry(S.slap.scene, run).carry ?? 0);
+    if (run.live) {
+      let active = null;
+      for (const a of S.actions) if (a.start <= gb) active = a;
+      if (active && active.id !== run.active) { run.active = active.id; run.log.push({ action: active.id, beat: active.start, s: r3(active.start * spb()), seenAt: r3(gb * spb()) }); }
+      if (gb > S.total + 0.5) finish();
+    }
+  } else {
+    applyFigure(!run ? cameoAt(now / 1000, dt) : null);
+    if (run && gb !== null && gb < 0) butter.visible = false;
+    if (!run && !lastDone) butter.visible = false;            // before the first gag: plain cat
+  }
+  captionAt(run ? gb : null, S);
+
+  body.getWorldPosition(_v);
+  const lift = clamp(_v.y + 0.1, 0, 2);
+  shadow.scale.setScalar(1 - lift * 0.25); shadow.material.opacity = 1 - lift * 0.35;
+  figShadow.visible = fig.visible;
+  if (fig.visible) {
+    figShadow.position.set(fig.position.x, GROUND + 0.001, fig.position.z);
+    figShadow.scale.setScalar(fig.scale.x / BUTTERMAN.figure.scale);
+    const up = fig.position.y - GROUND;
+    figShadow.material.opacity = up < -0.05 ? 0 : clamp(1 - up * 0.8, 0, 1);   // none while he rises from below
+  }
+  renderer.render(scene, camera);
+
+  if (showLog) logEl.hidden = false;
+  if (showLog && !logEl.dataset.force) logEl.textContent = JSON.stringify({ mode: state.mode, bpm: state.bpm, clock: state.clock, beat: gb === null ? null : +gb.toFixed(2), totalBeats: state.totalBeats, butterOnHead: state.butterOnHead, log: state.log }, null, 1);
+}
+renderer.setAnimationLoop(frame);
+seekFromHash();
+
+window.butterman = {
+  play, seek, config: BUTTERMAN, state, buildSchedule, clipsReady,
+  showText(text) { logEl.dataset.force = '1'; logEl.hidden = false; logEl.textContent = text; },
+};
+
+// ---------------------------------------------------------------------------
+// ?tune: a lil-gui panel bound straight to BUTTERMAN, with Play and Copy config.
+// ---------------------------------------------------------------------------
+if (new URLSearchParams(location.search).has('tune')) {
+  const { default: GUI } = await import('three/addons/libs/lil-gui.module.min.js');
+  const gui = new GUI({ title: 'Butterman' });
+  const eases = Object.keys(EASE);
+  gui.add(BUTTERMAN, 'bpm', 60, 200, 1); gui.add(BUTTERMAN, 'metronome');
+  gui.add(BUTTERMAN, 'nudge', -0.3, 0.3, 0.005); gui.add(BUTTERMAN, 'gap', 0, 8, 1);
+  for (const sc of BUTTERMAN.scenes) {
+    const f = gui.addFolder(`scene: ${sc.id}`).close();
+    f.add(sc, 'shift', -8, 8, 1);
+    if (sc.cat) f.add(sc.cat, 'yaw', -Math.PI, Math.PI, 0.01).name('cat yaw');
+    for (const a of sc.actions) {
+      const af = f.addFolder(a.id).close();
+      af.add(a, 'shift', -8, 8, 1); af.add(a, 'length', 1, 16, 1); af.add(a, 'easing', eases);
+      for (const k of ['raise', 'hit', 'strike', 'settle', 'move', 'turn']) if (typeof a[k] === 'number') af.add(a, k, 0, 8, 0.25);
+      for (const k of ['arms']) if (typeof a[k] === 'number') af.add(a, k, 0, 90, 1);
+      if (a.audio) { if (typeof a.audio.offset === 'number') af.add(a.audio, 'offset', -2, 8, 0.25).name('audio offset'); af.add(a.audio, 'trimStart', 0, 2, 0.005); af.add(a.audio, 'gain', 0, 2, 0.01); }
+      if (a.caption) { af.add(a.caption, 'on').name('caption'); af.add(a.caption, 'text'); }
+    }
+  }
+  const sf = gui.addFolder('strut').close();
+  for (const [k, v] of Object.entries(BUTTERMAN.strut)) if (typeof v === 'number') sf.add(BUTTERMAN.strut, k, 0, k === 'contactHold' ? 0.9 : 2, 0.01);
+  sf.add(BUTTERMAN.strut, 'bounceShape', ['double', 'normal', 'strut']);
+  gui.add({ play: () => play() }, 'play').name('Play');
+  gui.add({ copy: () => navigator.clipboard.writeText('const BUTTERMAN = ' + JSON.stringify(BUTTERMAN, null, 2) + ';') }, 'copy').name('Copy config');
+}
+</script>
+</body>
+</html>

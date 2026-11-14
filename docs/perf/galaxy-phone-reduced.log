@@ -1,0 +1,9 @@
+CHECK galaxy shader rehearsed before first play:  PASS
+CHECK galaxy page stretches only with normal motion:  PASS
+PNG docs/shots/galaxy-reduced-hold-phone.jpg
+CHECK galaxy reduced motion keeps the sky slow and cat calm:  PASS
+CHECK galaxy tuned spin hold and recede durations: {"spin":0.03330000000000011,"hold":5.01650000000004,"recede":8.0164,"closed":9.816299999999973} PASS
+CHECK galaxy portal anchor stays fixed through the spin: 0 screen pixels; buffer scale 1.75–1.75 PASS
+CHECK galaxy natural return restores page and unlocks:  PASS
+CHECK galaxy Escape eases out and restores styles:  PASS
+CHECK galaxy at rest has no visible pass or advancing sky clocks:  PASS

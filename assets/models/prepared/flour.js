@@ -1,0 +1,10 @@
+import {T,mat,mesh,box,label,sphere,finish,body,cuboid} from './core.js';
+export const physics=body(.10,[cuboid([.245,.32,.155],[0,.16,0])],{pour:[0,.34,0]});
+export const portionPhysics=body(.03,[{type:'convex',vertices:[[-.05,0,0],[.05,0,0],[0,0,-.043],[0,0,.043],[-.025,.035,0],[.025,.035,0],[0,.046,0],[0,.03,-.024],[0,.03,.024]]}]);
+export function createPortion(){const g=new T.Group();g.name='flour-portion';sphere(g,.05,mat('#ede6d4',1,0,'crumb'),[0,.023,0],[1,.46,.86]);return finish(g,portionPhysics);}
+export function create({variant}={}){if(variant==='portion')return createPortion();const g=new T.Group();g.name='flour';const paper=mat('#bda27a',.95,0,'paper',{bumpScale:.00015}),fold=mat('#94764f',.98),p=[],uv=[],idx=[],rings=20,n=32;
+ for(let j=0;j<=rings;j++){const v=j/rings,y=v*.33,puff=Math.sin(v*Math.PI)*.035,w=.087+puff-(v>.82?(v-.82)*.2:0),d=.050+puff*.6;for(let i=0;i<=n;i++){const a=i/n*Math.PI*2,c=Math.cos(a),s=Math.sin(a),wrinkle=.002*Math.sin(v*38+a*6)*Math.pow(Math.abs(s*c)*2,2);p.push(Math.sign(c)*Math.pow(Math.abs(c),.36)*(w+wrinkle),y,Math.sign(s)*Math.pow(Math.abs(s),.36)*(d+wrinkle));uv.push(i/n,v);}}
+ for(let j=0;j<rings;j++)for(let i=0;i<n;i++){const a=j*(n+1)+i,b=a+n+1;idx.push(a,b,a+1,b,b+1,a+1);}const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(p,3));geo.setAttribute('uv',new T.Float32BufferAttribute(uv,2));geo.setIndex(idx);geo.computeVertexNormals();mesh(g,geo,paper);
+ box(g,[.174,.007,.10],paper,[0,.004,0],.003);box(g,[.135,.022,.10],paper,[0,.329,0],.006);box(g,[.147,.009,.017],paper,[0,.343,0],.003);
+ label(g,.176,.207,(c,w,h)=>{c.fillStyle='#3e4d3a';c.textAlign='center';c.font=`bold ${w*.16}px Georgia`;c.fillText('FLOUR',w/2,h*.33);c.font=`${w*.061}px Georgia`;c.fillText('STONE GROUND',w/2,h*.48);c.fillText('WHEAT • 01',w/2,h*.88);c.strokeStyle='#5d684b';c.lineWidth=2;c.beginPath();c.moveTo(w*.5,h*.76);c.lineTo(w*.5,h*.54);c.stroke();for(let i=0;i<4;i++)for(const s of [-1,1]){c.beginPath();c.ellipse(w*.5+s*w*.035,h*(.58+i*.04),w*.04,h*.012,s*.5,0,Math.PI*2);c.fill();}},[0,.17,.074]);
+ return finish(g,physics);}

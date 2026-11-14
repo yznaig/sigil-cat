@@ -1,0 +1,249 @@
+{
+  "scope": "15 requested assets; variants excluded from aggregate; no runtime cost gate claim",
+  "allGeometryFinite": true,
+  "browserErrors": 0,
+  "moduleBytes": 31364,
+  "moduleGzipBytes": 15629,
+  "triangles": 71902,
+  "geometryBytes": 6902592,
+  "meshes": 84,
+  "assets": [
+    {
+      "name": "rack",
+      "variant": null,
+      "triangles": 10336,
+      "meshes": 4,
+      "geometryBytes": 992256,
+      "textures": [
+        [
+          256,
+          256
+        ],
+        [
+          256,
+          256
+        ],
+        [
+          256,
+          256
+        ]
+      ]
+    },
+    {
+      "name": "bulb",
+      "variant": null,
+      "triangles": 5872,
+      "meshes": 5,
+      "geometryBytes": 563712,
+      "textures": [
+        [
+          256,
+          256
+        ]
+      ]
+    },
+    {
+      "name": "hats",
+      "variant": "wizard",
+      "triangles": 832,
+      "meshes": 3,
+      "geometryBytes": 79872,
+      "textures": [
+        [
+          32,
+          32
+        ]
+      ]
+    },
+    {
+      "name": "hats",
+      "variant": "cone",
+      "triangles": 304,
+      "meshes": 2,
+      "geometryBytes": 29184,
+      "textures": [
+        [
+          32,
+          32
+        ]
+      ]
+    },
+    {
+      "name": "hats",
+      "variant": "party",
+      "triangles": 424,
+      "meshes": 3,
+      "geometryBytes": 40704,
+      "textures": [
+        [
+          32,
+          32
+        ]
+      ]
+    },
+    {
+      "name": "hats",
+      "variant": "crown",
+      "triangles": 480,
+      "meshes": 4,
+      "geometryBytes": 46080,
+      "textures": []
+    },
+    {
+      "name": "tin",
+      "variant": null,
+      "triangles": 1728,
+      "meshes": 8,
+      "geometryBytes": 165888,
+      "textures": [
+        [
+          256,
+          256
+        ],
+        [
+          256,
+          256
+        ],
+        [
+          512,
+          189
+        ],
+        [
+          512,
+          160
+        ]
+      ]
+    },
+    {
+      "name": "shelf",
+      "variant": null,
+      "triangles": 3940,
+      "meshes": 6,
+      "geometryBytes": 378240,
+      "textures": [
+        [
+          256,
+          256
+        ],
+        [
+          256,
+          256
+        ],
+        [
+          256,
+          256
+        ]
+      ]
+    },
+    {
+      "name": "box",
+      "variant": null,
+      "triangles": 8028,
+      "meshes": 9,
+      "geometryBytes": 770688,
+      "textures": [
+        [
+          256,
+          256
+        ],
+        [
+          256,
+          256
+        ],
+        [
+          512,
+          423
+        ],
+        [
+          512,
+          427
+        ]
+      ]
+    },
+    {
+      "name": "flour",
+      "variant": null,
+      "triangles": 1414,
+      "meshes": 2,
+      "geometryBytes": 135744,
+      "textures": [
+        [
+          256,
+          256
+        ],
+        [
+          512,
+          602
+        ]
+      ]
+    },
+    {
+      "name": "bucket",
+      "variant": null,
+      "triangles": 4472,
+      "meshes": 4,
+      "geometryBytes": 429312,
+      "textures": [
+        [
+          128,
+          128
+        ],
+        [
+          256,
+          256
+        ]
+      ]
+    },
+    {
+      "name": "pitchfork",
+      "variant": null,
+      "triangles": 1716,
+      "meshes": 3,
+      "geometryBytes": 164736,
+      "textures": [
+        [
+          256,
+          256
+        ]
+      ]
+    },
+    {
+      "name": "hay",
+      "variant": null,
+      "triangles": 9908,
+      "meshes": 4,
+      "geometryBytes": 951168,
+      "textures": []
+    },
+    {
+      "name": "cake",
+      "variant": null,
+      "triangles": 8688,
+      "meshes": 4,
+      "geometryBytes": 834048,
+      "textures": [
+        [
+          256,
+          256
+        ],
+        [
+          256,
+          256
+        ]
+      ]
+    },
+    {
+      "name": "cow",
+      "variant": null,
+      "triangles": 13760,
+      "meshes": 23,
+      "geometryBytes": 1320960,
+      "textures": [
+        [
+          256,
+          256
+        ]
+      ]
+    }
+  ]
+}

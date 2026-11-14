@@ -1,0 +1,121 @@
+{
+ "size": "desktop",
+ "gpu": "ANGLE (Microsoft Corporation, D3D12 (AMD Radeon(TM) Graphics), OpenGL ES 3.1)",
+ "rounds": 5,
+ "when": "2026-11-10T06:04:53.059Z",
+ "old": [
+  {
+   "firstCatMs": 8809,
+   "bytes": 3320114,
+   "requests": 38,
+   "restMeanMs": 9.01,
+   "restP95Ms": 11.3,
+   "startup": 250,
+   "bolt": 333,
+   "butterman": 67,
+   "galaxy": 100
+  },
+  {
+   "firstCatMs": 6358,
+   "bytes": 3297814,
+   "requests": 37,
+   "restMeanMs": 6.746,
+   "restP95Ms": 3.3,
+   "startup": 133,
+   "bolt": 100,
+   "butterman": 33,
+   "galaxy": 83
+  },
+  {
+   "firstCatMs": 3773,
+   "bytes": 3297933,
+   "requests": 37,
+   "restMeanMs": 8.671,
+   "restP95Ms": 3.5,
+   "startup": 317,
+   "bolt": 267,
+   "butterman": 50,
+   "galaxy": 67
+  },
+  {
+   "firstCatMs": 1374,
+   "bytes": 3325265,
+   "requests": 37,
+   "restMeanMs": 7.131,
+   "restP95Ms": 3.9,
+   "startup": 150,
+   "bolt": 117,
+   "butterman": 83,
+   "galaxy": 67
+  },
+  {
+   "firstCatMs": 8007,
+   "bytes": 3298094,
+   "requests": 37,
+   "restMeanMs": 7.253,
+   "restP95Ms": 3.5,
+   "startup": 200,
+   "bolt": 67,
+   "butterman": 17,
+   "galaxy": 50
+  }
+ ],
+ "new": [
+  {
+   "firstCatMs": 1796,
+   "bytes": 847532,
+   "requests": 48,
+   "restMeanMs": 2.776,
+   "restP95Ms": 4.5,
+   "startup": 67,
+   "bolt": 300,
+   "butterman": 50,
+   "galaxy": 67
+  },
+  {
+   "firstCatMs": 1031,
+   "bytes": 848047,
+   "requests": 48,
+   "restMeanMs": 11.694,
+   "restP95Ms": 3,
+   "startup": 83,
+   "bolt": 150,
+   "butterman": 67,
+   "galaxy": 50
+  },
+  {
+   "firstCatMs": 1078,
+   "bytes": 848025,
+   "requests": 48,
+   "restMeanMs": 0.814,
+   "restP95Ms": 2.9,
+   "startup": 33,
+   "bolt": 167,
+   "butterman": 67,
+   "galaxy": 50
+  },
+  {
+   "firstCatMs": 1107,
+   "bytes": 853776,
+   "requests": 49,
+   "restMeanMs": 2.923,
+   "restP95Ms": 3.8,
+   "startup": 67,
+   "bolt": 50,
+   "butterman": 33,
+   "galaxy": 50
+  },
+  {
+   "firstCatMs": 1092,
+   "bytes": 848225,
+   "requests": 48,
+   "restMeanMs": 2.267,
+   "restP95Ms": 2.9,
+   "startup": 50,
+   "bolt": 83,
+   "butterman": 33,
+   "galaxy": 33
+  }
+ ],
+ "note": "new[].bytes misses the worker's downloads (his first pose, 0.94 MB): the corrected measure gives 1.78-1.82 MB"
+}

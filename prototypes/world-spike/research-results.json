@@ -1,0 +1,1285 @@
+{
+  "engines": [
+    {
+      "name": "cannon",
+      "importMs": 1095.1999999955297,
+      "initializeWorldMs": 2.5,
+      "size": "desktop",
+      "stepMeanMs": 0.21266666665673256,
+      "stepP95Ms": 0.3999999985098839
+    },
+    {
+      "name": "rapier",
+      "importMs": 403.6000000014901,
+      "initializeWorldMs": 19.19999999552965,
+      "size": "desktop",
+      "stepMeanMs": 0.04433333332339923,
+      "stepP95Ms": 0.10000000149011612
+    },
+    {
+      "name": "jolt",
+      "importMs": 438,
+      "initializeWorldMs": 24.799999997019768,
+      "size": "desktop",
+      "stepMeanMs": 0.06966666666169961,
+      "stepP95Ms": 0.19999999552965164
+    },
+    {
+      "name": "cannon",
+      "importMs": 225.5,
+      "initializeWorldMs": 3.7000000029802322,
+      "size": "phone",
+      "stepMeanMs": 0.21083333333333334,
+      "stepP95Ms": 0.3999999985098839
+    },
+    {
+      "name": "rapier",
+      "importMs": 386.1000000014901,
+      "initializeWorldMs": 18.700000002980232,
+      "size": "phone",
+      "stepMeanMs": 0.044499999992549416,
+      "stepP95Ms": 0.10000000149011612
+    },
+    {
+      "name": "jolt",
+      "importMs": 441.19999999552965,
+      "initializeWorldMs": 23.700000002980232,
+      "size": "phone",
+      "stepMeanMs": 0.06216666667411725,
+      "stepP95Ms": 0.19999999552965164
+    }
+  ],
+  "priorArt": [
+    {
+      "url": "https://pmndrs.github.io/cannon-es/examples/threejs_mousepick",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "viewport": "390x844 DPR2 (desktop CPU)",
+      "requests": [
+        {
+          "url": "https://pmndrs.github.io/cannon-es/examples/threejs_mousepick",
+          "requestBodySize": 0,
+          "requestHeadersSize": 746,
+          "responseBodySize": 3379,
+          "responseHeadersSize": 0
+        },
+        {
+          "url": "https://pmndrs.github.io/cannon-es/examples/css/style.css",
+          "requestBodySize": 0,
+          "requestHeadersSize": 643,
+          "responseBodySize": 599,
+          "responseHeadersSize": 0
+        },
+        {
+          "url": "https://pmndrs.github.io/cannon-es/examples/js/dom-utils.js",
+          "requestBodySize": 0,
+          "requestHeadersSize": 664,
+          "responseBodySize": 708,
+          "responseHeadersSize": 0
+        },
+        {
+          "url": "https://pmndrs.github.io/cannon-es/examples/icons/code.svg",
+          "requestBodySize": 0,
+          "requestHeadersSize": 689,
+          "responseBodySize": 534,
+          "responseHeadersSize": 0
+        },
+        {
+          "url": "https://pmndrs.github.io/cannon-es/dist/cannon-es.js",
+          "requestBodySize": 0,
+          "requestHeadersSize": 650,
+          "responseBodySize": 77081,
+          "responseHeadersSize": 0
+        },
+        {
+          "url": "https://unpkg.com/three@0.122.0/examples/jsm/libs/stats.module.js",
+          "requestBodySize": 0,
+          "requestHeadersSize": 646,
+          "responseBodySize": 1445,
+          "responseHeadersSize": 0
+        },
+        {
+          "url": "https://unpkg.com/three@0.122.0/build/three.module.js",
+          "requestBodySize": 0,
+          "requestHeadersSize": 622,
+          "responseBodySize": 237977,
+          "responseHeadersSize": 0
+        }
+      ],
+      "errors": [],
+      "rafMeanMs": 16.666666666666668,
+      "rafMaxMs": 16.800000000000182
+    },
+    {
+      "url": "https://2019.bruno-simon.com/",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "viewport": "390x844 DPR2 (desktop CPU)",
+      "requests": [
+        {
+          "url": "https://2019.bruno-simon.com/",
+          "requestBodySize": 0,
+          "requestHeadersSize": 638,
+          "responseBodySize": 2180,
+          "responseHeadersSize": 282
+        },
+        {
+          "url": "https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=block",
+          "requestBodySize": 0,
+          "requestHeadersSize": 633,
+          "responseBodySize": 766,
+          "responseHeadersSize": 0
+        },
+        {
+          "url": "https://www.googletagmanager.com/gtag/js?id=UA-3966601-5",
+          "requestBodySize": 0,
+          "requestHeadersSize": 589,
+          "responseBodySize": 135934,
+          "responseHeadersSize": 0
+        },
+        {
+          "url": "https://2019.bruno-simon.com/assets/index-Du-Kq_4O.css",
+          "requestBodySize": 0,
+          "requestHeadersSize": 574,
+          "responseBodySize": 3918,
+          "responseHeadersSize": 281
+        },
+        {
+          "url": "https://www.googletagmanager.com/gtag/js?id=G-JMSN30BQ5J&cx=c&gtm=4e6b90",
+          "requestBodySize": 0,
+          "requestHeadersSize": 605,
+          "responseBodySize": 165232,
+          "responseHeadersSize": 0
+        },
+        {
+          "url": "https://2019.bruno-simon.com/assets/index-CFbVbtab.js",
+          "requestBodySize": 0,
+          "requestHeadersSize": 559,
+          "responseBodySize": 303016,
+          "responseHeadersSize": 297
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/static/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 626,
+          "responseBodySize": 39524,
+          "responseHeadersSize": 265
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/static/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 631,
+          "responseBodySize": 7396,
+          "responseHeadersSize": 264
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/instructions/labels.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 634,
+          "responseBodySize": 900,
+          "responseHeadersSize": 262
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/arrowKey/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 628,
+          "responseBodySize": 3220,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/arrowKey/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 633,
+          "responseBodySize": 1208,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/b/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 621,
+          "responseBodySize": 2452,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/r/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 621,
+          "responseBodySize": 1976,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/b/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 626,
+          "responseBodySize": 1200,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/r/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 626,
+          "responseBodySize": 1200,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/u/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 621,
+          "responseBodySize": 1900,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/u/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 626,
+          "responseBodySize": 1200,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/n/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 621,
+          "responseBodySize": 1504,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/n/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 626,
+          "responseBodySize": 1200,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/o/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 626,
+          "responseBodySize": 1200,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/o/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 621,
+          "responseBodySize": 2260,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/s/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 621,
+          "responseBodySize": 2532,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/s/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 626,
+          "responseBodySize": 1200,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/i/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 621,
+          "responseBodySize": 1304,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/i/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 626,
+          "responseBodySize": 1200,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/m/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 621,
+          "responseBodySize": 1608,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/m/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 626,
+          "responseBodySize": 1196,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/creative/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 628,
+          "responseBodySize": 4132,
+          "responseHeadersSize": 264
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/creative/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 633,
+          "responseBodySize": 1200,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/dev/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 623,
+          "responseBodySize": 2576,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/dev/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 628,
+          "responseBodySize": 1256,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/crossroads/static/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 636,
+          "responseBodySize": 5944,
+          "responseHeadersSize": 264
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/car/default/wheel.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 626,
+          "responseBodySize": 6604,
+          "responseHeadersSize": 264
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/car/default/backLightsBrake.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 636,
+          "responseBodySize": 1464,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/car/default/backLightsReverse.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 638,
+          "responseBodySize": 1460,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/car/default/antena.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 627,
+          "responseBodySize": 3736,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/car/default/chassis.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 628,
+          "responseBodySize": 32160,
+          "responseHeadersSize": 265
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/car/cyberTruck/chassis.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 631,
+          "responseBodySize": 8744,
+          "responseHeadersSize": 264
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/car/cyberTruck/wheel.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 629,
+          "responseBodySize": 6600,
+          "responseHeadersSize": 264
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/car/cyberTruck/backLightsBrake.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 639,
+          "responseBodySize": 1236,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/car/cyberTruck/backLightsReverse.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 641,
+          "responseBodySize": 1248,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/car/cyberTruck/antena.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 630,
+          "responseBodySize": 3536,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/board/structure.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 633,
+          "responseBodySize": 5748,
+          "responseHeadersSize": 264
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/board/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 633,
+          "responseBodySize": 1616,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/board/plane.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 629,
+          "responseBodySize": 1268,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/distinctions/awwwards/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 644,
+          "responseBodySize": 11800,
+          "responseHeadersSize": 265
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/distinctions/awwwards/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 649,
+          "responseBodySize": 2640,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/distinctions/fwa/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 644,
+          "responseBodySize": 1208,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/distinctions/cssda/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 641,
+          "responseBodySize": 5304,
+          "responseHeadersSize": 264
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/distinctions/fwa/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 639,
+          "responseBodySize": 23844,
+          "responseHeadersSize": 265
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/distinctions/cssda/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 646,
+          "responseBodySize": 2708,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/information/static/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 637,
+          "responseBodySize": 6244,
+          "responseHeadersSize": 264
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/information/baguette/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 634,
+          "responseBodySize": 4792,
+          "responseHeadersSize": 264
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/crossroads/static/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 631,
+          "responseBodySize": 631364,
+          "responseHeadersSize": 267
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/information/static/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 632,
+          "responseBodySize": 57352,
+          "responseHeadersSize": 265
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/information/baguette/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 639,
+          "responseBodySize": 1052,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/playground/static/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 636,
+          "responseBodySize": 8300,
+          "responseHeadersSize": 264
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/brick/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 619,
+          "responseBodySize": 2888,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/brick/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 624,
+          "responseBodySize": 1112,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/horn/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 618,
+          "responseBodySize": 8304,
+          "responseHeadersSize": 264
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/webbyTrophy/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 630,
+          "responseBodySize": 2356,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/lemon/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 619,
+          "responseBodySize": 7432,
+          "responseHeadersSize": 264
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/lemon/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 624,
+          "responseBodySize": 1740,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/horn/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 623,
+          "responseBodySize": 1956,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/bowlingBall/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 625,
+          "responseBodySize": 3084,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/bowlingBall/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 630,
+          "responseBodySize": 4364,
+          "responseHeadersSize": 264
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/playground/static/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 631,
+          "responseBodySize": 162072,
+          "responseHeadersSize": 267
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/bowlingPin/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 624,
+          "responseBodySize": 8044,
+          "responseHeadersSize": 264
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/bowlingPin/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 629,
+          "responseBodySize": 1972,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/tiles/a/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 621,
+          "responseBodySize": 1460,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/tiles/a/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 626,
+          "responseBodySize": 1072,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/tiles/b/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 621,
+          "responseBodySize": 2420,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/tiles/b/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 626,
+          "responseBodySize": 1112,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/tiles/c/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 621,
+          "responseBodySize": 1624,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/tiles/c/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 626,
+          "responseBodySize": 1072,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/tiles/d/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 621,
+          "responseBodySize": 1600,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/tiles/d/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 626,
+          "responseBodySize": 1212,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/tiles/e/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 621,
+          "responseBodySize": 2044,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/tiles/e/collision.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 626,
+          "responseBodySize": 1072,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/wigs/wig1.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 618,
+          "responseBodySize": 2868,
+          "responseHeadersSize": 263
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/wigs/wig2.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 618,
+          "responseBodySize": 9424,
+          "responseHeadersSize": 264
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/wigs/wig3.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 618,
+          "responseBodySize": 12536,
+          "responseHeadersSize": 265
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/wigs/wig4.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 618,
+          "responseBodySize": 38980,
+          "responseHeadersSize": 265
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/reveal/reveal-1.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 624,
+          "responseBodySize": 23736,
+          "responseHeadersSize": 251
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/bricks/brick-1.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 623,
+          "responseBodySize": 4653,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/bricks/brick-2.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 623,
+          "responseBodySize": 3885,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/bricks/brick-4.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 623,
+          "responseBodySize": 3117,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/bricks/brick-6.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 623,
+          "responseBodySize": 5805,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/bricks/brick-7.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 623,
+          "responseBodySize": 7725,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/bricks/brick-8.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 623,
+          "responseBodySize": 8493,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/bowling/pin-1.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 622,
+          "responseBodySize": 3425,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/bowling/pin-1.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 306,
+          "responseBodySize": -225,
+          "responseHeadersSize": 225
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/bowling/pin-1.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 306,
+          "responseBodySize": -225,
+          "responseHeadersSize": 225
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/bowling/pin-1.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 306,
+          "responseBodySize": -225,
+          "responseHeadersSize": 225
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/car-hits/car-hit-1.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 627,
+          "responseBodySize": 4641,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/car-hits/car-hit-3.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 627,
+          "responseBodySize": 4223,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/car-hits/car-hit-4.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 627,
+          "responseBodySize": 2551,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/car-hits/car-hit-5.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 627,
+          "responseBodySize": 1715,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/wood-hits/wood-hit-1.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 629,
+          "responseBodySize": 1197,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/screeches/screech-1.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 628,
+          "responseBodySize": 6335,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/ui/area-1.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 618,
+          "responseBodySize": 19651,
+          "responseHeadersSize": 251
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/car-horns/car-horn-1.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 629,
+          "responseBodySize": 3501,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/horns/horn-1.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 621,
+          "responseBodySize": 1581,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/horns/horn-2.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 621,
+          "responseBodySize": 1581,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/horns/horn-3.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 621,
+          "responseBodySize": 1581,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/car-horns/car-horn-2.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 629,
+          "responseBodySize": 24109,
+          "responseHeadersSize": 251
+        },
+        {
+          "url": "https://2019.bruno-simon.com/sounds/engines/1/low_off.mp3",
+          "requestBodySize": 0,
+          "requestHeadersSize": 626,
+          "responseBodySize": 9657,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/matcaps/black.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 686,
+          "responseBodySize": 5174,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/matcaps/orange.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 687,
+          "responseBodySize": 5402,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/matcaps/red.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 684,
+          "responseBodySize": 5079,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/matcaps/white.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 686,
+          "responseBodySize": 5152,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/matcaps/green.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 686,
+          "responseBodySize": 5232,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/webbyTrophy/base.glb",
+          "requestBodySize": 0,
+          "requestHeadersSize": 625,
+          "responseBodySize": 174640,
+          "responseHeadersSize": 267
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/matcaps/brown.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 686,
+          "responseBodySize": 5150,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/draco/draco_decoder.js",
+          "requestBodySize": 0,
+          "requestHeadersSize": 620,
+          "responseBodySize": 149861,
+          "responseHeadersSize": 296
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/matcaps/gray.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 685,
+          "responseBodySize": 5053,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/matcaps/emeraldGreen.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 693,
+          "responseBodySize": 5240,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/matcaps/purple.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 687,
+          "responseBodySize": 5055,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/matcaps/blue.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 685,
+          "responseBodySize": 5088,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/matcaps/yellow.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 687,
+          "responseBodySize": 4938,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/matcaps/metal.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 686,
+          "responseBodySize": 24690,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "blob:https://2019.bruno-simon.com/5be133d1-9077-479d-b6ad-9db60d5c30b8",
+          "requestBodySize": 0,
+          "requestHeadersSize": 93,
+          "responseBodySize": -60,
+          "responseHeadersSize": 59
+        },
+        {
+          "url": "blob:https://2019.bruno-simon.com/5be133d1-9077-479d-b6ad-9db60d5c30b8",
+          "requestBodySize": 0,
+          "requestHeadersSize": 93,
+          "responseBodySize": -60,
+          "responseHeadersSize": 59
+        },
+        {
+          "url": "blob:https://2019.bruno-simon.com/5be133d1-9077-479d-b6ad-9db60d5c30b8",
+          "requestBodySize": 0,
+          "requestHeadersSize": 93,
+          "responseBodySize": -60,
+          "responseHeadersSize": 59
+        },
+        {
+          "url": "blob:https://2019.bruno-simon.com/5be133d1-9077-479d-b6ad-9db60d5c30b8",
+          "requestBodySize": 0,
+          "requestHeadersSize": 93,
+          "responseBodySize": -60,
+          "responseHeadersSize": 59
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/static/floorShadow.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 697,
+          "responseBodySize": 24919,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/instructions/arrows.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 698,
+          "responseBodySize": 2918,
+          "responseHeadersSize": 248
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/instructions/controls.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 700,
+          "responseBodySize": 2756,
+          "responseHeadersSize": 248
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/intro/instructions/other.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 697,
+          "responseBodySize": 6279,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/crossroads/static/floorShadow.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 702,
+          "responseBodySize": 26202,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/board/floorShadow.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 699,
+          "responseBodySize": 4046,
+          "responseHeadersSize": 248
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/luni/floorTexture.webp",
+          "requestBodySize": 0,
+          "requestHeadersSize": 700,
+          "responseBodySize": 45822,
+          "responseHeadersSize": 251
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/matcaps/beige.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 686,
+          "responseBodySize": 5269,
+          "responseHeadersSize": 249
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/madbox/floorTexture.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 701,
+          "responseBodySize": 35760,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/scout/floorTexture.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 700,
+          "responseBodySize": 19770,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/chartogne/floorTexture.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 704,
+          "responseBodySize": 33979,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/priorHoldings/floorTexture.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 708,
+          "responseBodySize": 29103,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/orano/floorTexture.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 700,
+          "responseBodySize": 28574,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/information/static/floorShadow.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 703,
+          "responseBodySize": 32733,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/citrixRedbull/floorTexture.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 708,
+          "responseBodySize": 39079,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/information/static/contactTwitterLabel.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 711,
+          "responseBodySize": 650,
+          "responseHeadersSize": 247
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/information/static/contactGithubLabel.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 710,
+          "responseBodySize": 576,
+          "responseHeadersSize": 247
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/information/static/contactLinkedinLabel.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 712,
+          "responseBodySize": 629,
+          "responseHeadersSize": 247
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/information/static/contactMailLabel.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 708,
+          "responseBodySize": 1689,
+          "responseHeadersSize": 248
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/information/static/activities.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 702,
+          "responseBodySize": 12721,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/playground/static/floorShadow.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 702,
+          "responseBodySize": 28626,
+          "responseHeadersSize": 250
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/projects/threejsJourney/floorTexture.webp",
+          "requestBodySize": 0,
+          "requestHeadersSize": 710,
+          "responseBodySize": 49578,
+          "responseHeadersSize": 251
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/area/keyEnter.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 686,
+          "responseBodySize": 703,
+          "responseHeadersSize": 247
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/area/enter.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 683,
+          "responseBodySize": 753,
+          "responseHeadersSize": 247
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/area/open.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 682,
+          "responseBodySize": 809,
+          "responseHeadersSize": 247
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/area/reset.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 683,
+          "responseBodySize": 933,
+          "responseHeadersSize": 247
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/area/questionMark.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 690,
+          "responseBodySize": 512,
+          "responseHeadersSize": 247
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/konami/label.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 685,
+          "responseBodySize": 957,
+          "responseHeadersSize": 247
+        },
+        {
+          "url": "https://2019.bruno-simon.com/models/konami/label-touch.png",
+          "requestBodySize": 0,
+          "requestHeadersSize": 691,
+          "responseBodySize": 578,
+          "responseHeadersSize": 247
+        }
+      ],
+      "errors": [],
+      "rafMeanMs": 82.77666666666664,
+      "rafMaxMs": 166.70000000000073
+    },
+    {
+      "url": "https://jrouwe.github.io/JoltPhysics.js/falling_shapes.html",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "viewport": "390x844 DPR2 (desktop CPU)",
+      "requests": [
+        {
+          "url": "https://jrouwe.github.io/JoltPhysics.js/falling_shapes.html",
+          "requestBodySize": 0,
+          "requestHeadersSize": 742,
+          "responseBodySize": 2241,
+          "responseHeadersSize": 0
+        },
+        {
+          "url": "https://jrouwe.github.io/JoltPhysics.js/js/three/WebGL.js",
+          "requestBodySize": 0,
+          "requestHeadersSize": 627,
+          "responseBodySize": 805,
+          "responseHeadersSize": 0
+        },
+        {
+          "url": "https://jrouwe.github.io/JoltPhysics.js/js/three/OrbitControls.js",
+          "requestBodySize": 0,
+          "requestHeadersSize": 643,
+          "responseBodySize": 5658,
+          "responseHeadersSize": 0
+        },
+        {
+          "url": "https://jrouwe.github.io/JoltPhysics.js/js/example.js",
+          "requestBodySize": 0,
+          "requestHeadersSize": 619,
+          "responseBodySize": 5257,
+          "responseHeadersSize": 0
+        },
+        {
+          "url": "https://jrouwe.github.io/JoltPhysics.js/js/three/stats.min.js",
+          "requestBodySize": 0,
+          "requestHeadersSize": 635,
+          "responseBodySize": 1334,
+          "responseHeadersSize": 0
+        },
+        {
+          "url": "https://jrouwe.github.io/JoltPhysics.js/style.css",
+          "requestBodySize": 0,
+          "requestHeadersSize": 625,
+          "responseBodySize": 358,
+          "responseHeadersSize": 0
+        },
+        {
+          "url": "https://jrouwe.github.io/JoltPhysics.js/js/three/three.min.js",
+          "requestBodySize": 0,
+          "requestHeadersSize": 635,
+          "responseBodySize": 153714,
+          "responseHeadersSize": 0
+        },
+        {
+          "url": "https://jrouwe.github.io/JoltPhysics.js/js/jolt-physics.wasm-compat.js",
+          "requestBodySize": 0,
+          "requestHeadersSize": 684,
+          "responseBodySize": 927512,
+          "responseHeadersSize": 0
+        }
+      ],
+      "errors": [],
+      "rafMeanMs": 19.44333333333331,
+      "rafMaxMs": 33.400000000000546
+    }
+  ],
+  "matchedProps": [
+    {
+      "size": "desktop",
+      "engine": "rapier 0.19.3, CCD enabled",
+      "steps": 240,
+      "meanMs": 0.2695833333147069,
+      "p95Ms": 0.5,
+      "maxMs": 13.299999997019768
+    },
+    {
+      "size": "phone",
+      "engine": "rapier 0.19.3, CCD enabled",
+      "steps": 240,
+      "meanMs": 0.32124999997516474,
+      "p95Ms": 0.5,
+      "maxMs": 16.099999994039536
+    }
+  ]
+}

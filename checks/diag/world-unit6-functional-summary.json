@@ -1,0 +1,276 @@
+{
+  "status": "SELECTED FUNCTIONAL CHECKS PASS",
+  "decision": "e1111-21",
+  "runAll": "Not run; deferred to the orchestrator on quiet merged code.",
+  "costGates": "Not run. Core/picture/rest cost sections were omitted without editing their production assertions.",
+  "renderer": "ANGLE / D3D12 / NVIDIA GeForce RTX 5070 Ti / OpenGL ES 3.1",
+  "viewports": {
+    "desktop": [
+      1280,
+      900,
+      1
+    ],
+    "phone": [
+      390,
+      844,
+      2
+    ]
+  },
+  "phoneHardware": "Desktop CPU/GPU with phone viewport; not iPhone Safari.",
+  "caseCount": 42,
+  "passedAssertions": 512,
+  "cases": [
+    {
+      "name": "board",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "board",
+      "size": "phone",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "board-integration",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "board-integration",
+      "size": "phone",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "calm",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "calm",
+      "size": "phone",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "core",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "83e00d2e58c338d2a9ef3e1b3689e48b3ea300b4ff7a42d1e3657f2227c89bb5"
+    },
+    {
+      "name": "core",
+      "size": "phone",
+      "status": "PASS",
+      "source": "83e00d2e58c338d2a9ef3e1b3689e48b3ea300b4ff7a42d1e3657f2227c89bb5"
+    },
+    {
+      "name": "curtain",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "curtain",
+      "size": "phone",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "drag-all",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "83e00d2e58c338d2a9ef3e1b3689e48b3ea300b4ff7a42d1e3657f2227c89bb5"
+    },
+    {
+      "name": "drag-all",
+      "size": "phone",
+      "status": "PASS",
+      "source": "83e00d2e58c338d2a9ef3e1b3689e48b3ea300b4ff7a42d1e3657f2227c89bb5"
+    },
+    {
+      "name": "impacts",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "impacts",
+      "size": "phone",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "landing",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "landing",
+      "size": "phone",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "layout",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "layout",
+      "size": "phone",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "physics",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "22de68e375311f019697ff82d32540911c48679966049ab935b93529eff587c4"
+    },
+    {
+      "name": "physics",
+      "size": "phone",
+      "status": "PASS",
+      "source": "22de68e375311f019697ff82d32540911c48679966049ab935b93529eff587c4"
+    },
+    {
+      "name": "play",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "83e00d2e58c338d2a9ef3e1b3689e48b3ea300b4ff7a42d1e3657f2227c89bb5"
+    },
+    {
+      "name": "play",
+      "size": "phone",
+      "status": "PASS",
+      "source": "83e00d2e58c338d2a9ef3e1b3689e48b3ea300b4ff7a42d1e3657f2227c89bb5"
+    },
+    {
+      "name": "presentation",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "1aeabd699c3343e95d090684e53fbc56ad02236f212f93fbdc1875338d861a31"
+    },
+    {
+      "name": "presentation",
+      "size": "phone",
+      "status": "PASS",
+      "source": "1aeabd699c3343e95d090684e53fbc56ad02236f212f93fbdc1875338d861a31"
+    },
+    {
+      "name": "props",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "props",
+      "size": "phone",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "return",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "return",
+      "size": "phone",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "rotor",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "1aeabd699c3343e95d090684e53fbc56ad02236f212f93fbdc1875338d861a31"
+    },
+    {
+      "name": "rotor",
+      "size": "phone",
+      "status": "PASS",
+      "source": "1aeabd699c3343e95d090684e53fbc56ad02236f212f93fbdc1875338d861a31"
+    },
+    {
+      "name": "shelf",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "83e00d2e58c338d2a9ef3e1b3689e48b3ea300b4ff7a42d1e3657f2227c89bb5"
+    },
+    {
+      "name": "shelf",
+      "size": "phone",
+      "status": "PASS",
+      "source": "83e00d2e58c338d2a9ef3e1b3689e48b3ea300b4ff7a42d1e3657f2227c89bb5"
+    },
+    {
+      "name": "solids",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "22de68e375311f019697ff82d32540911c48679966049ab935b93529eff587c4"
+    },
+    {
+      "name": "solids",
+      "size": "phone",
+      "status": "PASS",
+      "source": "22de68e375311f019697ff82d32540911c48679966049ab935b93529eff587c4"
+    },
+    {
+      "name": "supports",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "supports",
+      "size": "phone",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "use",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "use",
+      "size": "phone",
+      "status": "PASS",
+      "source": "8c4d2f40dcb2ace3c5faf613e53c9e84ab7bd163d68a80899f82c4a493f99bf8"
+    },
+    {
+      "name": "water",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "1aeabd699c3343e95d090684e53fbc56ad02236f212f93fbdc1875338d861a31"
+    },
+    {
+      "name": "water",
+      "size": "phone",
+      "status": "PASS",
+      "source": "1aeabd699c3343e95d090684e53fbc56ad02236f212f93fbdc1875338d861a31"
+    },
+    {
+      "name": "water-reduced",
+      "size": "desktop",
+      "status": "PASS",
+      "source": "1aeabd699c3343e95d090684e53fbc56ad02236f212f93fbdc1875338d861a31"
+    },
+    {
+      "name": "water-reduced",
+      "size": "phone",
+      "status": "PASS",
+      "source": "1aeabd699c3343e95d090684e53fbc56ad02236f212f93fbdc1875338d861a31"
+    }
+  ]
+}

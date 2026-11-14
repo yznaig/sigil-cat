@@ -1,0 +1,56 @@
+{
+  "runtime": {
+    "files": [
+      {
+        "path": "src/world/hats.js",
+        "sourceBytes": 13007,
+        "gzipEstimateBytes": 5046
+      },
+      {
+        "path": "src/world/lamp.js",
+        "sourceBytes": 4995,
+        "gzipEstimateBytes": 2186
+      },
+      {
+        "path": "src/world/rack-art.js",
+        "sourceBytes": 3553,
+        "gzipEstimateBytes": 1578
+      },
+      {
+        "path": "src/gags/hat.js",
+        "sourceBytes": 2037,
+        "gzipEstimateBytes": 1025
+      }
+    ],
+    "sourceBytes": 23592,
+    "gzipEstimateBytes": 9835
+  },
+  "prepared": {
+    "files": [
+      {
+        "path": "assets/models/prepared/rack.js",
+        "sourceBytes": 2322,
+        "gzipEstimateBytes": 1154
+      },
+      {
+        "path": "assets/models/prepared/hats.js",
+        "sourceBytes": 4875,
+        "gzipEstimateBytes": 2264
+      },
+      {
+        "path": "assets/models/prepared/bulb.js",
+        "sourceBytes": 1371,
+        "gzipEstimateBytes": 767
+      },
+      {
+        "path": "assets/models/prepared/core.js",
+        "sourceBytes": 5153,
+        "gzipEstimateBytes": 2311
+      }
+    ],
+    "sourceBytes": 13721,
+    "gzipEstimateBytes": 6496
+  },
+  "method": "Separate gzip estimates, not captured CDN transfer; materials and maps generated after the visible cat and first rack/bulb discovery. Prepared art is ours/CC0. Shared Three, Rapier and room environment excluded.",
+  "sharedAddition": "src/core/world-layout.js: additive invalidateShadow method; original shadow behavior is unchanged."
+}

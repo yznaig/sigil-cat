@@ -1,0 +1,119 @@
+{
+  "name": "cloud",
+  "variant": "under",
+  "sheet": false,
+  "triangles": 18836,
+  "meshes": 1,
+  "meshDetails": [
+    {
+      "name": "ClosedCumulus",
+      "triangles": 18836,
+      "instances": 1
+    }
+  ],
+  "geometryBytes": 339096,
+  "materials": 1,
+  "textures": [],
+  "finite": true,
+  "physics": {
+    "units": "cat-height units; play mass, not kg",
+    "mass": 0.04,
+    "colliders": [
+      {
+        "type": "sphere",
+        "radius": 0.205,
+        "position": [
+          -0.26,
+          0.18,
+          0
+        ]
+      },
+      {
+        "type": "sphere",
+        "radius": 0.235,
+        "position": [
+          -0.04,
+          0.235,
+          0
+        ]
+      },
+      {
+        "type": "sphere",
+        "radius": 0.2,
+        "position": [
+          0.25,
+          0.17,
+          0
+        ]
+      }
+    ],
+    "anchors": {
+      "skyAnchor": [
+        0,
+        0.25,
+        0
+      ],
+      "eyes": [
+        0,
+        0.2,
+        0.216
+      ]
+    }
+  },
+  "parts": [
+    {
+      "name": "cloud",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "ClosedCumulus",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "renders": [
+    {
+      "label": "FRONT / THREE QUARTER",
+      "frame": 35,
+      "calls": 3,
+      "triangles": 37674,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "label": "REAR / CONSTRUCTION",
+      "frame": 36,
+      "calls": 3,
+      "triangles": 37674,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "label": "TOP / DETAIL",
+      "frame": 37,
+      "calls": 2,
+      "triangles": 37672,
+      "points": 0,
+      "lines": 0
+    }
+  ],
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "errors": []
+}

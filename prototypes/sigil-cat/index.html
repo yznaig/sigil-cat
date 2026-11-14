@@ -1,0 +1,1142 @@
+<!doctype html>
+<!--
+  Sigil Cat prototype. The real cat: built by build/ from the AI base mesh (see build/README.md), loaded as one
+  meshopt GLB with its clips and blend shapes, played through the pose-cycle player from prototypes/cat-viewer.
+  On top of the clips: springs on the ears, tail and whiskers (lagged follow-through) and a tail idle (sways and
+  flicks while he sits). Every knob is in CONFIG below.
+  Stack: vanilla three.js 0.186.1 from jsDelivr via an importmap. No build step. Serve over http (python3 -m http.server).
+  URL hash options (combine with &):
+    #pose=sleep   start in a pose          #t=1.5     freeze that moment of the start pose's clip
+    #yaw=-90      face this way (degrees)  #ui=0      hide buttons and labels (clean screenshots)
+    #debug        pose / spring readout    #tone=agx  AgX tone mapping instead of Neutral
+    #sheet=sit_to_lie&rows=6   contact sheet: rows = moments through the clip, columns = 8 angles, springs on
+    #springs=0    springs and tail idle off (the raw clips)   #idle=0  tail idle off   #model=models/x.glb  load another GLB from this folder
+  ?perf=1 (or #perf=1) shows fps, frame time, draw calls, triangles, pixel ratio, GPU. &dpr=1 pins the ratio,
+  &burn=12 wastes 12 ms a frame to fake a slow phone.
+  Checks: checks/*.js drive the page through window.sigilCat. Run with: shot 'index.html#ui=0' --js "$(cat checks/x.js)"
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sigil Cat</title>
+<style>
+  :root {
+    --bone: #f7ede3;        /* Bone Beige, the sheet's background */
+    --ink: #121212;         /* Sigil Black */
+    --ink-soft: #6b6359;
+    --pill: rgba(255, 255, 255, 0.7);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bone);
+    color: var(--ink);
+    font: 15px/1.4 ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+    overflow: hidden; overscroll-behavior: none;
+  }
+  canvas#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; }
+  canvas#c.dragging { cursor: grabbing; }
+  .tag, .hint { position: fixed; top: 16px; margin: 0; font-size: 13px; color: var(--ink-soft); }
+  .tag { left: 16px; } .hint { right: 16px; }
+  .controls {
+    position: fixed; left: 50%; bottom: 56px; transform: translateX(-50%);
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; width: max-content; max-width: calc(100vw - 32px);
+  }
+  .controls button {
+    font: inherit; font-size: 14px; border: 0; border-radius: 999px; padding: 8px 14px;
+    background: var(--pill); color: var(--ink); cursor: pointer; box-shadow: 0 1px 0 rgba(0,0,0,.05), 0 4px 14px rgba(0,0,0,.05);
+  }
+  .controls button[aria-pressed="true"] { background: var(--ink); color: var(--bone); }
+  .controls button#butter[aria-pressed="true"] { background: #f3d36b; color: var(--ink); }
+  .controls.textures { top: 44px; bottom: auto; }
+  .controls.textures span { align-self: center; font-size: 13px; color: var(--ink-soft); }
+  .controls.textures button { font-size: 13px; padding: 6px 12px; }
+  footer { position: fixed; left: 0; right: 0; bottom: 0; padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    display: flex; gap: 18px; justify-content: center; font-size: 13px; }
+  footer a { color: var(--ink-soft); text-decoration: none; }
+  #debug, #perf { position: fixed; top: 44px; left: 16px; margin: 0; padding: 8px 10px; border-radius: 8px;
+    background: rgba(0,0,0,.75); color: #e9e4d8; font: 12px/1.45 ui-monospace, monospace; white-space: pre; pointer-events: none; }
+  #perf { left: auto; right: 16px; max-width: calc(100vw - 32px); overflow: hidden; }
+  #status { position: fixed; left: 50%; top: 45%; transform: translate(-50%, -50%); color: var(--ink-soft); font-size: 14px; }
+  body.clean .tag, body.clean .hint, body.clean .controls, body.clean footer { display: none; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="c" aria-label="Sigil Cat, a black felt cat floating in the middle of the page. Drag to spin him, tap him."></canvas>
+<p class="tag">sigil cat, prototype</p>
+<p class="hint">Drag to spin him. Tap him.</p>
+<p id="status">loading the cat…</p>
+<div class="controls textures" id="textures" role="group" aria-label="Texture options"><span>Texture:</span></div>
+<div class="controls" role="group" aria-label="Cat controls">
+  <button data-pose="sit" aria-pressed="true">Sit</button>
+  <button data-pose="lie" aria-pressed="false">Loaf</button>
+  <button data-pose="sleep" aria-pressed="false">Sleep</button>
+  <button data-pose="stretch" aria-pressed="false">Stretch</button>
+  <button id="hop">Hop</button>
+  <button id="butter" aria-pressed="false">Butter</button>
+  <button id="auto" aria-pressed="true">Auto</button>
+</div>
+<footer><!-- Placeholder links: the real accounts are still to come from the brothers. -->
+  <a href="#">instagram</a><a href="#">tiktok</a><a href="#">youtube</a></footer>
+<pre id="debug" hidden></pre>
+<pre id="perf" hidden></pre>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+// ---------------------------------------------------------------------------
+// Tuning knobs. Everything worth fiddling with lives here.
+// ---------------------------------------------------------------------------
+const CONFIG = {
+  model: 'models/sigil-cat.glb',
+  look: {
+    black: '#121212',            // Sigil Black (body and whiskers)
+    roughness: 0.93,             // felt: soft, never glossy
+    sheen: 0.55,                 // velvet glow at grazing angles (reads as soft fibres)
+    sheenColor: '#4a4744',
+    sheenRoughness: 0.75,
+    // Body texture presets (Aaron, 2026-11-07: foam look, but flat, with no light-catching pores). Pick one with the
+    // Texture buttons or #tex=<key>. Every layer is a colour pattern only; only 'felt' adds a surface bump.
+    //   felt:   fine fibre grain, bump on (the first build)       tone = how strong, scale = higher is finer
+    //   cells:  soft foam cells, like a mic windscreen from arm's length
+    //   speck:  fine foam speckle (fine cells plus dots)
+    //   mottle: big soft blotches, like a cheap sponge
+    //   sheen:  sheen strength (velvet glow at the edges)
+    texture: 'sheet',
+    textures: {
+      felt:     { name: 'Felt (first build)', felt: { tone: 0.18, scale: 210, bump: 0.55 }, sheen: 0.55 },
+      softfoam: { name: 'Soft foam', felt: { tone: 0.1, scale: 210, bump: 0 }, cells: { tone: 0.5, scale: 55 }, sheen: 0.45 },
+      finefoam: { name: 'Fine foam', cells: { tone: 0.4, scale: 95 }, speck: { tone: 0.35, scale: 170 }, sheen: 0.45 },
+      sponge:   { name: 'Sponge', cells: { tone: 0.6, scale: 32 }, mottle: { tone: 0.2, scale: 5 }, speck: { tone: 0.2, scale: 300 }, sheen: 0.4 },
+      velvet:   { name: 'Velvet', felt: { tone: 0.15, scale: 210, bump: 0 }, sheen: 0.95 },
+      plain:    { name: 'Plain matte', sheen: 0.4 },
+      // Flocked: Velvet plus fine curly fibres, matched to the brother's pose sheets (soft charcoal with light
+      // squiggly fibres that show even in shade). fibers: tone = brightness, scale = higher is finer, shade = how
+      // much they show in shadow.
+      // From the sheet: the brother's own fibre texture (textures/fiber-tile.png, cut from his loaf sheet by
+      // build/make_fiber_tile.py), projected from three sides with mipmaps, so it never shimmers.
+      // image: tone = contrast, scale = tiles per model unit (higher = finer), shade = how much shows in shadow.
+      sheet:    { name: 'From the sheet', image: { tone: 0.6, scale: 10, shade: 0.006 }, sheen: 0.8, light: 'soft' },
+      // Foamy: From the sheet plus three foam tricks (Aaron, 2026-11-07: "more foamy").
+      //   wrap:  soft light wrap-around, the cheap stand-in for light soaking into foam (0 = off, 0.5 = soft)
+      //   bump:  gentle surface relief from the same mipmapped fibre image (0 = flat)
+      //   fuzz:  see-through shells above the surface for a fuzzy outline. count = layers, length = fuzz depth
+      //          as a fraction of his height, edge = how much more fuzz shows at the silhouette than face-on
+      foamy:      { name: 'Foamy', image: { tone: 0.6, scale: 10, shade: 0.006, bump: 0.35 }, sheen: 0.8, light: 'soft',
+                    wrap: 0.5, fuzz: { count: 4, length: 0.008, edge: 0.6 } },
+      foamysoft:  { name: 'Foamy, no fuzz', image: { tone: 0.6, scale: 10, shade: 0.006, bump: 0.35 }, sheen: 0.8, light: 'soft', wrap: 0.6 },
+      foamyfuzzy: { name: 'Foamy, extra fuzz', image: { tone: 0.6, scale: 10, shade: 0.006, bump: 0.35 }, sheen: 0.8, light: 'soft',
+                    wrap: 0.5, fuzz: { count: 6, length: 0.016, edge: 0.75 } },
+      // Sheet + relief: the proposal's idea (grain shows through lighting, not colour) done the web way: the same
+      // mipmapped fibre image drives a very subtle surface bump, plus a touch of roughness variation.
+      sheetrelief: { name: 'Sheet + relief', image: { tone: 0.45, scale: 10, shade: 0.004, bump: 0.25 }, sheen: 0.8, light: 'soft' },
+      sheetcoarse: { name: 'Sheet, coarser', image: { tone: 0.75, scale: 6, shade: 0.006 }, sheen: 0.8, light: 'soft' },
+      sheethard: { name: 'Sheet, original light', image: { tone: 0.6, scale: 10, shade: 0.006 }, sheen: 0.8 },
+      flocked:  { name: 'Flocked', felt: { tone: 0.12, scale: 210, bump: 0 }, fibers: { tone: 0.5, scale: 160, shade: 0.012 }, sheen: 0.95 },
+      flockedfine: { name: 'Flocked fine', felt: { tone: 0.1, scale: 210, bump: 0 }, fibers: { tone: 0.35, scale: 240, shade: 0.008 }, sheen: 0.95 },
+      flockedbold: { name: 'Flocked bold', felt: { tone: 0.12, scale: 210, bump: 0 }, fibers: { tone: 0.75, scale: 115, shade: 0.018 }, sheen: 0.9 },
+    },
+    whiskerRoughness: 0.55,      // whiskers: smooth clean strokes, no grain, a little less rough than the body
+    aoStrength: 0.9,             // baked crease shadows (needs an _AO vertex attribute in the GLB; 0 = off)
+    shadowOpacity: 0.16,         // contact shadow: #000 at 10-20% (sheet)
+    exposure: 1.0,
+  },
+  // The pose cycle (spec: docs/ideas/cat-poses.md).
+  cycle: {
+    start: 'sit',
+    poses: {
+      sit: { hold: [5, 10], next: { lie: 3, stretch: 1 } },
+      lie: { hold: [4, 8], next: { sleep: 3, sit: 2, stretch: 1 } },
+      sleep: { hold: [8, 15], next: { lie: 1 } },
+      stretch: { oneShot: true, then: 'sit' },   // stretch ends seated
+    },
+    transitions: ['sit_to_lie', 'sit_to_stretch', 'lie_to_stretch', 'lie_to_sleep', 'lie_to_sit', 'sleep_to_lie'],
+    fade: 0.12,                 // blend at each clip seam (the clips meet exactly; this only hides float rounding)
+    requestFade: 0.3,           // blend when a button cuts in mid-hold
+    rateJitter: 0.06,           // +-6% playback speed each time a hold starts, so loops never feel identical
+    // Emotes. overlay: an additive add_* clip on top of any pose. interrupt: plays a clip from the file that
+    // ends on frame 0 of `returnTo`, with an optional overlay on top (wake = the wake-up move, startled).
+    emotes: {
+      hop: { clip: 'add_hop', overlay: true },
+      startle: { clip: 'add_startle', overlay: true },
+      wake: { clip: 'sleep_to_lie', returnTo: 'lie', speed: 1.5, overlay: 'add_startle' },
+      spin: { clip: 'add_hop', overlay: true, spin: 1, cooldown: 2 },   // a hop with a full turn of the whole cat
+    },
+    actions: {
+      tap: { sleep: 'wake', default: { hop: 4, spin: 1 } },
+      butter: { default: 'startle' },
+    },
+  },
+  // Springs: lagged secondary motion layered on the clips, in world space, so spinning him, the float bob and
+  // fast moves all make ears, tail and whiskers trail and settle. freq = how fast it snaps back (Hz),
+  // damping = 1 settles with no wobble, lower wobbles more. maxDeg caps the lag per bone.
+  springs: {
+    on: true,
+    ears:     { freq: 3.4, damping: 0.32, maxDeg: 16 },
+    whiskers: { freq: 5.5, damping: 0.18, maxDeg: 12 },
+    tail:     { freq: [3.0, 1.7], damping: 0.34, maxDeg: 24 },  // freq from base to tip: the tip is loosest
+    tailNoSink: true,            // the tail lag never pushes down (into the floor) or inward (into his body)
+  },
+  // Tail idle: its own life on top of whatever pose plays. Weighted per pose; zero during transitions.
+  tailIdle: {
+    poses: { sit: 1, lie: 0.6, sleep: 0.2, stretch: 0 },
+    fade: 1.2,                   // seconds to fade in/out when the pose changes
+    sway: { deg: 7, period: [3.2, 4.6] },        // slow sideways sweep, outward only (never into the haunch)
+    flick: { deg: 34, every: [2, 6], dur: 0.34, double: 0.3, from: 4 },  // tip flick upward; from = first tail bone it bends (1-8)
+  },
+  rotate: {
+    radiansPerPixel: 0.009, damping: 3.5, tapSlop: 8, tapMs: 450,
+    homeYaw: -0.45,             // the angle he faces at rest (a slight three-quarter view)
+    returnHome: true, returnDelay: 2.5, returnSpeed: 1.6,
+  },
+  // The float bob. bpm: same tempo as Butterman (BUTTERMAN.bpm = 120), one bob every `beats` beats;
+  // null = free-running at `speed`.
+  float: { height: 0.035, lift: 0.08, bpm: 120, beats: 4, speed: 1.2 },
+  sounds: [],
+  soundVolume: 0.5,
+  perf: { maxDpr: 2, minDpr: 1, step: 0.25, sampleMs: 1000, warmupMs: 2000, lowFps: 45, highFps: 57, lowWindows: 2, highWindows: 4 },
+};
+
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const params = new URLSearchParams(location.hash.slice(1));
+const query = new URLSearchParams(location.search);
+const opt = (k) => query.get(k) ?? params.get(k);
+if (params.get('ui') === '0' || params.has('sheet')) document.body.classList.add('clean');
+if (params.get('springs') === '0') CONFIG.springs.on = false;
+if (params.get('idle') === '0') for (const k in CONFIG.tailIdle.poses) CONFIG.tailIdle.poses[k] = 0;
+const TAU = Math.PI * 2;
+const rand = ([a, b]) => a + Math.random() * (b - a);
+
+// ---------------------------------------------------------------------------
+// Renderer, camera, light. Soft studio light like the sheet: a broad key from above-front, a gentle fill,
+// a faint rim so the black silhouette never merges into its shadow.
+// ---------------------------------------------------------------------------
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: params.has('sheet') });
+const deviceDpr = Number(opt('fakedpr')) || devicePixelRatio || 1;
+const pinnedDpr = Number(opt('dpr')) || null;
+let dpr = pinnedDpr ?? Math.min(deviceDpr, CONFIG.perf.maxDpr);
+renderer.setPixelRatio(dpr);
+renderer.toneMapping = params.get('tone') === 'agx' ? THREE.AgXToneMapping : THREE.NeutralToneMapping;
+renderer.toneMappingExposure = CONFIG.look.exposure;
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.55;
+const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 40);
+const hemi = new THREE.HemisphereLight(0xfffaf2, 0x6b5f52, 0.9); scene.add(hemi);
+const key = new THREE.DirectionalLight(0xfff4e6, 2.4); key.position.set(-1.5, 3.5, 2.5);
+const fill = new THREE.DirectionalLight(0xffffff, 0.8); fill.position.set(2.5, 1.0, 2.0);
+const rim = new THREE.DirectionalLight(0xffffff, 1.6); rim.position.set(0.5, 2.0, -3.0);
+// Light rigs. 'soft' matches the sheets' studio look: frontal, low-contrast, lots of wrap-around light.
+// Each light is [intensity, x, y, z]. A texture preset picks one with light: 'soft'.
+const LIGHT_RIGS = {
+  default: { env: 0.55, hemi: 0.9, key: [2.4, -1.5, 3.5, 2.5], fill: [0.8, 2.5, 1.0, 2.0], rim: [1.6, 0.5, 2.0, -3.0] },
+  soft:    { env: 0.95, hemi: 1.5, key: [1.5, -0.3, 3.0, 3.5], fill: [1.0, 2.5, 1.2, 2.5], rim: [0.6, 0.5, 2.0, -3.0] },
+};
+function applyLights(name) {
+  const r = LIGHT_RIGS[name] || LIGHT_RIGS.default;
+  scene.environmentIntensity = r.env; hemi.intensity = r.hemi;
+  for (const [light, v] of [[key, r.key], [fill, r.fill], [rim, r.rim]]) { light.intensity = v[0]; light.position.set(v[1], v[2], v[3]); }
+}
+scene.add(key, fill, rim);
+
+// ---------------------------------------------------------------------------
+// Materials. Felt for the body: matte Sigil Black with sheen, plus a fine grain computed in the shader from
+// the bind-pose position (so it sticks to the surface while he moves; no UVs or texture download needed).
+// Whiskers: their own smooth material, no grain (Aaron: clean solid strokes).
+// ---------------------------------------------------------------------------
+const L = CONFIG.look;
+const felt = new THREE.MeshPhysicalMaterial({
+  color: L.black, roughness: L.roughness, metalness: 0,
+  sheen: L.sheen, sheenRoughness: L.sheenRoughness, sheenColor: new THREE.Color(L.sheenColor),
+});
+const grainUniforms = {
+  uFelt: { value: new THREE.Vector3() },   // tone, scale, bump
+  uCells: { value: new THREE.Vector2() },  // tone, scale
+  uSpeck: { value: new THREE.Vector2() },
+  uMottle: { value: new THREE.Vector2() },
+  uFibers: { value: new THREE.Vector3() }, // tone, scale, shade
+  uImage: { value: new THREE.Vector3() },  // tone, scale, shade
+  uFiberTex: { value: null },
+  uWrap: { value: 0 },
+  uImageBump: { value: 0 },
+  uAOStrength: { value: 1 },
+};
+{
+  const tex = new THREE.TextureLoader().load('textures/fiber-tile.png');
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.colorSpace = THREE.NoColorSpace;          // detail data, not colour
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();   // mipmaps (default) + anisotropy = no shimmer at grazing angles
+  grainUniforms.uFiberTex.value = tex;
+}
+// Fuzz shells: copies of the body drawn slightly outside it, each showing only some fibres (from the same
+// mipmapped tile), so the outline goes soft and fuzzy like foam. They share the body's skeleton and blend
+// shapes, so they follow every pose. Alpha-to-coverage keeps their edges smooth instead of sparkly.
+const fuzz = { cfg: null, body: null, shells: [] };
+function makeShellMaterial(i, n, cfg) {
+  const m = new THREE.MeshPhysicalMaterial({
+    color: L.black, roughness: L.roughness, metalness: 0,
+    sheen: L.sheen, sheenRoughness: L.sheenRoughness, sheenColor: new THREE.Color(L.sheenColor),
+    alphaToCoverage: true, transparent: false,
+    // The canvas is see-through (the page shows behind it). Keep whatever opacity is already there, or a
+    // half-covered fuzz pixel lets the beige page through as a bright speck.
+    blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.ZeroFactor,
+    blendSrcAlpha: THREE.ZeroFactor, blendDstAlpha: THREE.OneFactor,
+  });
+  m.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, grainUniforms, {
+      uShellOffset: { value: cfg.length * catHeightForFuzz() * (i + 1) / n },
+      uShellLevel: { value: (i + 1) / (n + 1) }, uShellEdge: { value: cfg.edge },
+    });
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nuniform float uShellOffset; varying vec3 vGrainPos; varying vec3 vGrainNrm;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvGrainPos = position; vGrainNrm = normal;\ntransformed += normalize(objectNormal) * uShellOffset;');
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', `#include <common>
+uniform sampler2D uFiberTex; uniform vec3 uImage; uniform float uShellLevel, uShellEdge, uWrap;
+varying vec3 vGrainPos; varying vec3 vGrainNrm;`)
+      .replace('#include <lights_physical_pars_fragment>', THREE.ShaderChunk.lights_physical_pars_fragment.replace(
+        'vec3 irradiance = dotNL * directLight.color;',
+        'vec3 irradiance = saturate( ( dot( geometryNormal, directLight.direction ) + uWrap ) / ( 1.0 + uWrap ) ) * directLight.color;'))
+      .replace('#include <alphatest_fragment>', `#include <alphatest_fragment>
+{
+  vec3 tp = vGrainPos * uImage.y * 1.7;
+  vec3 tw = pow(abs(normalize(vGrainNrm)), vec3(4.0)); tw /= (tw.x + tw.y + tw.z);
+  float f = texture2D(uFiberTex, tp.yz).r * tw.x + texture2D(uFiberTex, tp.zx + 0.37).r * tw.y + texture2D(uFiberTex, tp.xy + 0.71).r * tw.z;
+  float facing = abs(dot(normalize(vNormal), normalize(vViewPosition)));        // 1 face-on, 0 at the outline
+  float need = mix(0.5, 0.5 + uShellLevel * 0.35, mix(1.0 - uShellEdge, 1.0, facing)); // outer layers and face-on: fewer fibres
+  diffuseColor.a = smoothstep(need, need + 0.06, f);
+}`);
+  };
+  return m;
+}
+function catHeightForFuzz() { return fuzz.height || 1; }
+function buildFuzz() {
+  for (const sh of fuzz.shells) { sh.parent?.remove(sh); sh.material.dispose(); }
+  fuzz.shells = [];
+  const cfg = fuzz.cfg, b = fuzz.body;
+  if (!cfg || !b) return;
+  for (let i = 0; i < cfg.count; i++) {
+    const sh = new THREE.SkinnedMesh(b.geometry, makeShellMaterial(i, cfg.count, cfg));
+    sh.bind(b.skeleton, b.bindMatrix);
+    sh.morphTargetInfluences = b.morphTargetInfluences;     // same array: shells follow the blend shapes
+    sh.morphTargetDictionary = b.morphTargetDictionary;
+    sh.frustumCulled = false; sh.renderOrder = 1 + i;
+    b.parent.add(sh);
+    fuzz.shells.push(sh);
+  }
+}
+function setFuzz(cfg) { fuzz.cfg = cfg; buildFuzz(); }
+function applyTexture(key) {
+  const t = L.textures[key] || L.textures[L.texture];
+  const f = t.felt || {}, c = t.cells || {}, s = t.speck || {}, m = t.mottle || {}, fb = t.fibers || {}, im = t.image || {};
+  grainUniforms.uFelt.value.set(f.tone || 0, f.scale || 1, f.bump || 0);
+  grainUniforms.uCells.value.set(c.tone || 0, c.scale || 1);
+  grainUniforms.uSpeck.value.set(s.tone || 0, s.scale || 1);
+  grainUniforms.uMottle.value.set(m.tone || 0, m.scale || 1);
+  grainUniforms.uFibers.value.set(fb.tone || 0, fb.scale || 1, fb.shade || 0);
+  grainUniforms.uImage.value.set(im.tone || 0, im.scale || 1, im.shade || 0);
+  grainUniforms.uWrap.value = t.wrap || 0;
+  grainUniforms.uImageBump.value = im.bump || 0;
+  setFuzz(t.fuzz || null);
+  felt.sheen = t.sheen ?? L.sheen;
+  applyLights(t.light || 'default');
+  document.querySelectorAll('#textures button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tex === key)));
+}
+for (const [key, t] of Object.entries(L.textures)) {
+  const b = document.createElement('button');
+  b.textContent = t.name; b.dataset.tex = key; b.setAttribute('aria-pressed', 'false');
+  b.addEventListener('click', () => applyTexture(key));
+  document.getElementById('textures').appendChild(b);
+}
+applyTexture(new URLSearchParams(location.hash.slice(1)).get('tex') || L.texture);
+felt.onBeforeCompile = (sh) => {
+  Object.assign(sh.uniforms, grainUniforms);
+  sh.vertexShader = sh.vertexShader
+    .replace('#include <common>', '#include <common>\nvarying vec3 vGrainPos; varying vec3 vGrainNrm;\n#ifdef USE_BAKED_AO\nattribute float _ao; varying float vAO;\n#endif\n#ifdef USE_POSE_AO\nattribute float _aod0; attribute float _aod1;\n#endif')
+    .replace('#include <begin_vertex>', '#include <begin_vertex>\nvGrainPos = position; vGrainNrm = normal;\n#ifdef USE_BAKED_AO\nvAO = _ao;\n#endif\n#if defined(USE_POSE_AO) && defined(USE_MORPHTARGETS)\nvAO += morphTargetInfluences[0] * _aod0 + morphTargetInfluences[1] * _aod1;\n#endif');
+  sh.fragmentShader = sh.fragmentShader
+    .replace('#include <common>', `#include <common>
+varying vec3 vGrainPos; varying vec3 vGrainNrm;
+uniform sampler2D uFiberTex; uniform vec3 uImage; uniform float uWrap, uImageBump;
+#ifdef USE_BAKED_AO
+varying float vAO; uniform float uAOStrength;
+#endif
+float imageDetail;  // sheet fibre detail, -0.5..0.5
+uniform vec3 uFelt, uFibers; uniform vec2 uCells, uSpeck, uMottle;
+float fiberAmt;  // curly fibre lines, added as light so they show even in shade
+float texMul;  // pattern applied to the final lit colour, so it shows where light falls (a near-black albedo hides it)
+// Foam cells: cellular (Worley) noise. F1 = distance to the nearest random cell point. Used only as colour
+// (darker cell middles, lighter walls), never as a bump, so nothing catches the light.
+vec3 gHash3(vec3 p) { return fract(sin(vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)),
+                                         dot(p, vec3(113.5, 271.9, 124.6)))) * 43758.5453); }
+float foamF1(vec3 x) {
+  vec3 i = floor(x), f = fract(x); float d = 8.0;
+  for (int k = -1; k <= 1; k++) for (int j = -1; j <= 1; j++) for (int m = -1; m <= 1; m++) {
+    vec3 g = vec3(m, j, k); vec3 r = g + gHash3(i + g) - f; d = min(d, dot(r, r));
+  }
+  return sqrt(d);
+}
+// Height: 0 in a pore, 1 on the walls. Two pore sizes so it reads as random open-cell foam, not a grid.
+float foamHeight(vec3 p) {
+  float a = smoothstep(0.05, 0.62, foamF1(p));
+  float b = smoothstep(0.05, 0.62, foamF1(p * 2.1 + 7.3));
+  return 0.65 * a + 0.35 * b;
+}
+float gHash(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float gNoise(vec3 x) {
+  vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(gHash(i), gHash(i + vec3(1,0,0)), f.x), mix(gHash(i + vec3(0,1,0)), gHash(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(gHash(i + vec3(0,0,1)), gHash(i + vec3(1,0,1)), f.x), mix(gHash(i + vec3(0,1,1)), gHash(i + vec3(1,1,1)), f.x), f.y), f.z);
+}
+float feltGrain(vec3 p) { return 0.6 * gNoise(p) + 0.4 * gNoise(p * 2.37 + 11.0); }
+vec3 feltBump(vec3 surf_pos, vec3 n, float h, float faceDirection) {
+  vec2 dH = vec2(dFdx(h), dFdy(h));
+  vec3 sx = dFdx(surf_pos), sy = dFdy(surf_pos);
+  vec3 r1 = cross(sy, n), r2 = cross(n, sx);
+  float det = dot(sx, r1) * faceDirection;
+  vec3 grad = sign(det) * (dH.x * r1 + dH.y * r2);
+  return normalize(abs(det) * n - grad);
+}`)
+    .replace('#include <color_fragment>', `#include <color_fragment>
+// Each layer fades out where it would be smaller than a pixel, so spinning never shimmers.
+float gH = 0.5, gFade = 0.0; texMul = 1.0;
+if (uFelt.x > 0.0 || uFelt.z > 0.0) {
+  gH = feltGrain(vGrainPos * uFelt.y);
+  gFade = clamp(1.6 - length(fwidth(vGrainPos * uFelt.y)), 0.0, 1.0);
+  texMul *= 1.0 + (gH - 0.5) * uFelt.x * gFade;
+}
+if (uCells.x > 0.0) {
+  float cF = clamp(1.4 - length(fwidth(vGrainPos * uCells.y * 2.1)), 0.0, 1.0);
+  float cH = foamHeight(vGrainPos * uCells.y);
+  texMul *= 1.0 + (cH - 0.6) * uCells.x * cF;
+}
+if (uSpeck.x > 0.0) {
+  float sF = clamp(1.4 - length(fwidth(vGrainPos * uSpeck.y)), 0.0, 1.0);
+  float sH = smoothstep(0.55, 0.8, gNoise(vGrainPos * uSpeck.y));
+  texMul *= 1.0 - sH * uSpeck.x * sF;
+}
+if (uMottle.x > 0.0) {
+  float mH = 0.6 * gNoise(vGrainPos * uMottle.y) + 0.4 * gNoise(vGrainPos * uMottle.y * 2.3 + 3.1);
+  texMul *= 1.0 + (mH - 0.5) * uMottle.x * 2.0;
+}
+fiberAmt = 0.0;
+if (uFibers.x > 0.0) {
+  // Fibres = contour lines of two noise fields: thin, curly, random strokes. Line width never drops under a
+  // pixel, and the whole layer fades where the strokes would be smaller than a pixel (no shimmer when spinning).
+  vec3 fp = vGrainPos * uFibers.y;
+  float n1 = gNoise(fp), n2 = gNoise(fp * 1.7 + 5.3);
+  float w1 = max(0.035, fwidth(n1) * 1.2), w2 = max(0.035, fwidth(n2) * 1.2);
+  float l1 = 1.0 - smoothstep(0.0, w1, abs(n1 - 0.5));
+  float l2 = 1.0 - smoothstep(0.0, w2, abs(n2 - 0.5));
+  float fFade = clamp(1.8 - length(fwidth(fp)) * 1.2, 0.0, 1.0);
+  fiberAmt = max(l1, 0.7 * l2) * fFade;
+}
+imageDetail = 0.0;
+if (uImage.x > 0.0) {
+  // Triplanar: sample the tile from three directions and blend by the surface normal (no UVs needed).
+  vec3 tp = vGrainPos * uImage.y;
+  vec3 tw = pow(abs(normalize(vGrainNrm)), vec3(4.0)); tw /= (tw.x + tw.y + tw.z);
+  float tx = texture2D(uFiberTex, tp.yz).r, ty = texture2D(uFiberTex, tp.zx + 0.37).r, tz = texture2D(uFiberTex, tp.xy + 0.71).r;
+  imageDetail = (tx * tw.x + ty * tw.y + tz * tw.z) - 0.5;
+}`)
+    .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+if (uFelt.z > 0.0) normal = feltBump(-vViewPosition, normal, gH * uFelt.z * gFade * 0.004, faceDirection);
+if (uImageBump > 0.0) normal = feltBump(-vViewPosition, normal, imageDetail * uImageBump * 0.004, faceDirection);`)
+    .replace('#include <lights_physical_pars_fragment>', THREE.ShaderChunk.lights_physical_pars_fragment.replace(
+      'vec3 irradiance = dotNL * directLight.color;',
+      // Wrap lighting: light reaches past the shadow line, like light soaking into foam.
+      'vec3 irradiance = saturate( ( dot( geometryNormal, directLight.direction ) + uWrap ) / ( 1.0 + uWrap ) ) * directLight.color;'))
+    .replace('#include <opaque_fragment>', `outgoingLight *= texMul;
+outgoingLight += vec3(fiberAmt * uFibers.x) * (uFibers.z + dot(outgoingLight, vec3(0.333)) * 1.6);
+outgoingLight = outgoingLight * (1.0 + imageDetail * uImage.x * 2.0) + vec3(max(imageDetail, 0.0) * uImage.z);
+#ifdef USE_BAKED_AO
+outgoingLight *= mix(1.0, vAO, uAOStrength);   // baked crease shadows, applied to light so they show on near-black
+#endif
+#include <opaque_fragment>`);
+};
+const whiskerMat = new THREE.MeshStandardMaterial({ color: L.black, roughness: L.whiskerRoughness, metalness: 0 });
+
+// Soft contact shadow: a blurred ellipse on the floor, black at 10-20%.
+const shadowTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d'), grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  grad.addColorStop(0, 'rgba(0,0,0,1)'); grad.addColorStop(0.45, 'rgba(0,0,0,0.75)'); grad.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = grad; g.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+})();
+const shadow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1),
+  new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, opacity: L.shadowOpacity, color: 0x000000 }));
+shadow.rotation.x = -Math.PI / 2;
+shadow.renderOrder = -1;
+scene.add(shadow);
+
+// Scene graph: spin (drag) -> floater (bob) -> react (tap squash) -> cat (the GLB, the mixer root)
+const spin = new THREE.Group(), floater = new THREE.Group(), react = new THREE.Group();
+spin.add(floater); floater.add(react); scene.add(spin);
+
+const butter = new THREE.Mesh(new RoundedBoxGeometry(0.2, 0.065, 0.13, 4, 0.016),
+  new THREE.MeshStandardMaterial({ color: 0xf3d36b, roughness: 0.42 }));
+butter.visible = false;
+
+// ---------------------------------------------------------------------------
+// Load the cat
+// ---------------------------------------------------------------------------
+let cat = null, mixer = null, body = null, whiskers = null, hitArea = null, loaded = false;
+const actions = {};
+const bones = {};
+let catHeight = 1;
+const statusEl = document.getElementById('status');
+
+async function load() {
+  const asked = params.get('model');            // #model=models/x.glb: same-folder .glb files only
+  const path = asked && /^[\w\-./]+\.glb$/.test(asked) && !asked.includes('..') && !asked.startsWith('/') ? asked : CONFIG.model;
+  const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(path);
+  cat = gltf.scene;
+  cat.traverse((o) => {
+    if (o.isBone) bones[o.name] = o;
+    if (!o.isMesh) return;
+    o.material.dispose();
+    o.material = o.material.name === 'whisker_black' || o.name.includes('whisker') ? whiskerMat : felt;
+    o.frustumCulled = false;                 // a hop or a stretch never culls him
+    if (o.name.includes('whisker')) whiskers = o; else body = o;
+  });
+  react.add(cat);
+  const box = new THREE.Box3().setFromObject(cat, true);
+  catHeight = box.max.y - box.min.y;
+  shadow.scale.set(catHeight * 1.25, catHeight * 0.75, 1);
+  if (body.geometry.attributes._ao) {             // crease shadows baked in Blender (build/), if present
+    felt.defines = { ...(felt.defines || {}), USE_BAKED_AO: '' };
+    // each pose shape's own AO, as the change from the sit's (build/anim_cat.py bake_pose_ao), mixed in by the shape weights
+    if (body.geometry.attributes._aod0 && body.geometry.attributes._aod1) felt.defines.USE_POSE_AO = '';
+    grainUniforms.uAOStrength.value = params.get('ao') === '0' ? 0 : L.aoStrength;
+    felt.needsUpdate = true;
+  }
+  fuzz.body = body; fuzz.height = catHeight; buildFuzz();
+
+  mixer = new THREE.AnimationMixer(cat);
+  for (const clip of gltf.animations) {
+    if (clip.name.startsWith('add_')) {
+      // The loader shares typed arrays between clips when the file reuses an accessor (gltf-transform dedups
+      // identical tracks), and makeClipAdditive edits in place: copy first, or every clip's shared track zeroes.
+      for (const t of clip.tracks) { t.values = t.values.slice(); t.times = t.times.slice(); }
+      THREE.AnimationUtils.makeClipAdditive(clip);
+    }
+    const a = mixer.clipAction(clip);
+    if (clip.name.startsWith('add_')) a.blendMode = THREE.AdditiveAnimationBlendMode;
+    if (!(clip.name in CONFIG.cycle.poses) || CONFIG.cycle.poses[clip.name].oneShot) {
+      a.setLoop(THREE.LoopOnce, 1);
+      a.clampWhenFinished = !clip.name.startsWith('add_');
+    }
+    actions[clip.name] = a;
+  }
+  mixer.addEventListener('finished', onFinished);
+  mixer.addEventListener('loop', onLoop);
+
+  const socket = cat.getObjectByName('butter_socket');
+  (socket || bones.head).add(butter);
+  butter.position.set(0, 0.02, 0);
+  butter.rotation.set(0, 0.25, 0.05);
+
+  // Hit area: an invisible ellipsoid over him (cheap, forgiving, right in any pose).
+  hitArea = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), new THREE.MeshBasicMaterial());
+  hitArea.scale.set(0.42, catHeight * 0.52, 0.42);
+  hitArea.position.y = catHeight * 0.5;
+  hitArea.visible = false;
+  react.add(hitArea);
+
+  initSprings();
+  butter.visible = true;
+  await renderer.compileAsync(scene, camera);
+  butter.visible = false;
+  loaded = true;
+  statusEl.remove();
+}
+
+// ---------------------------------------------------------------------------
+// Pose cycle player (from prototypes/cat-viewer). hold -> (wait for the loop seam) -> transition -> hold.
+// Buttons cut in and route through the graph (sleep -> lie -> sit).
+// ---------------------------------------------------------------------------
+const cyc = CONFIG.cycle;
+let pose = cyc.start, target = null, phase = 'hold', route = [], goal = null;
+let emoteReturn = null, emoteNow = null, holdUntil = Infinity, waitingForSeam = false, playing = null;
+let auto = !reducedMotion;
+const lastFired = {}, emoteLog = [];
+let spinFx = null;
+
+function play(name, fade, speed = 1) {
+  const a = actions[name];
+  if (playing && playing !== a) playing.fadeOut(fade);
+  a.reset().setEffectiveTimeScale(speed).setEffectiveWeight(1).fadeIn(fade).play();
+  playing = a;
+}
+function enter(p, fade) {
+  pose = p; target = null; waitingForSeam = false;
+  const spec = cyc.poses[p];
+  phase = spec.oneShot ? 'oneshot' : 'hold';
+  play(p, fade, spec.oneShot ? 1 : 1 + (Math.random() * 2 - 1) * cyc.rateJitter);
+  if (!spec.oneShot) holdUntil = clock + rand(spec.hold);
+  syncButtons();
+}
+function moveTo(next, fade) {
+  waitingForSeam = false;
+  const clip = `${pose}_to_${next}`;
+  if (!actions[clip]) return enter(next, cyc.requestFade);
+  phase = 'moving'; target = next;
+  play(clip, fade);
+  syncButtons();
+}
+function neighbours(p) {
+  const spec = cyc.poses[p];
+  if (spec.oneShot) return [spec.then];
+  return cyc.transitions.filter((n) => n.startsWith(p + '_to_')).map((n) => n.split('_to_')[1]);
+}
+function pathTo(from, to) {
+  const prev = { [from]: null }, queue = [from];
+  while (queue.length) {
+    const p = queue.shift();
+    if (p === to) break;
+    for (const n of neighbours(p)) if (!(n in prev)) { prev[n] = p; queue.push(n); }
+  }
+  if (!(to in prev)) return [to];
+  const path = [];
+  for (let p = to; p !== from; p = prev[p]) path.unshift(p);
+  return path;
+}
+function landingPose() {
+  if (phase === 'moving') return target;
+  if (phase === 'emote') return emoteReturn;
+  if (phase === 'oneshot') return cyc.poses[pose].then;
+  return pose;
+}
+function request(to) {
+  if (!loaded || !cyc.poses[to]) return;
+  goal = to;
+  if (phase === 'hold') {
+    if (to === pose) { goal = null; return; }
+    route = pathTo(pose, to);
+    moveTo(route.shift(), cyc.requestFade);
+  }
+}
+function land() {
+  route = goal && goal !== pose ? pathTo(pose, goal) : [];
+  if (!route.length) goal = null;
+  route.length ? moveTo(route.shift(), cyc.fade) : enter(pose, cyc.fade);
+}
+function pickWeighted(weights) {
+  const options = Object.entries(weights);
+  let r = Math.random() * options.reduce((s, [, w]) => s + w, 0);
+  for (const [name, w] of options) if ((r -= w) <= 0) return name;
+  return options[0][0];
+}
+function overlay(clip) {
+  const a = actions[clip];
+  if (!a) return;
+  a.reset().setEffectiveWeight(1).play();
+  if (phase === 'hold') holdUntil += a.getClip().duration;
+}
+function trigger(action) {
+  const map = cyc.actions[action];
+  if (!map) return null;
+  const choice = map[landingPose()] ?? map.default;
+  return choice ? playEmote(typeof choice === 'string' ? choice : pickWeighted(choice), action) : null;
+}
+function playEmote(name, why = name) {
+  const spec = cyc.emotes[name];
+  if (!spec || !loaded) return null;
+  if (spec.cooldown && clock - (lastFired[name] ?? -Infinity) < spec.cooldown) return name === 'hop' ? null : playEmote('hop', why);
+  lastFired[name] = clock;
+  if (spec.overlay === true) {
+    overlay(spec.clip);
+    if (spec.spin) spinFx = { t: 0, turns: spec.spin };
+    emoteLog.push(`${why}: ${name} (overlay, in ${phase} ${pose})`);
+    return name;
+  }
+  if (phase !== 'hold') { emoteLog.push(`${why}: ${name} (skipped, mid ${phase})`); return null; }
+  phase = 'emote'; emoteNow = name; emoteReturn = spec.returnTo; target = null; waitingForSeam = false;
+  play(spec.clip, 0.15, spec.speed || 1);
+  if (spec.overlay) overlay(spec.overlay);
+  emoteLog.push(`${why}: ${name} (now, from ${pose})`);
+  syncButtons();
+  return name;
+}
+function onFinished(e) {
+  if (e.action !== playing) return;
+  if (phase === 'moving') pose = target;
+  else if (phase === 'oneshot') pose = cyc.poses[pose].then;
+  else if (phase === 'emote') { pose = emoteReturn; emoteNow = emoteReturn = null; }
+  else return;
+  land();
+}
+function onLoop(e) {
+  if (waitingForSeam && auto && phase === 'hold' && e.action === playing) moveTo(pickWeighted(cyc.poses[pose].next), cyc.fade);
+}
+
+// ---------------------------------------------------------------------------
+// Springs and the tail idle. After the mixer poses the bones, each spring bone's tip is a little mass on a
+// damped spring chasing the animated tip in world space. The bone is turned toward the mass, capped at maxDeg.
+// The tail idle bends the target first (sway sideways, flick the tip up), so the springs add the overshoot.
+// ---------------------------------------------------------------------------
+const chains = [];
+const V = () => new THREE.Vector3();
+const tmp = { head: V(), tip: V(), want: V(), dir: V(), dev: V(), up: new THREE.Vector3(0, 1, 0), q: new THREE.Quaternion(), qp: new THREE.Quaternion(), qb: new THREE.Quaternion(), axis: V(), radial: V(), center: V() };
+const idle = { weight: 0, swayPhase: Math.random() * TAU, swayPeriod: rand(CONFIG.tailIdle.sway.period), flickAt: 0, flickT: -1, again: false };
+
+function link(bone, tipObj, cfgName, freq, extra = {}) {
+  return { bone, tipObj, cfgName, freq, p: V(), v: V(), len: 0, ready: false, ...extra };
+}
+function initSprings() {
+  const S = CONFIG.springs;
+  for (const s of ['L', 'R']) chains.push([link(bones[`ear_${s}`], bones[`ear_${s}_end`], 'ears', S.ears.freq)]);
+  for (const s of ['L', 'R']) for (const i of [1, 2, 3]) {
+    const b = bones[`whisker_${s}${i}`];
+    if (b) chains.push([link(b, bones[`whisker_${s}${i}_end`], 'whiskers', S.whiskers.freq)]);
+  }
+  const tail = [];
+  for (let i = 1; i <= 8; i++) {
+    const f = S.tail.freq[0] + (S.tail.freq[1] - S.tail.freq[0]) * (i - 1) / 7;
+    tail.push(link(bones[`tail_${i}`], bones[i < 8 ? `tail_${i + 1}` : 'tail_8_end'], 'tail', f, { tailIndex: i }));
+  }
+  chains.push(tail);
+  idle.flickAt = clock + rand(CONFIG.tailIdle.flick.every);
+}
+function resetSprings() { for (const ch of chains) for (const l of ch) l.ready = false; }
+
+// Tail idle: the sway is a slow outward sweep, the flick a quick lift of the tip that falls back slower.
+function idleBend(l, dt) {
+  const T = CONFIG.tailIdle;
+  const i = l.tailIndex;
+  const along = (i - 1) / 7;                                     // 0 at the base, 1 at the tip
+  const sway = (0.5 - 0.5 * Math.cos(idle.swayPhase)) * T.sway.deg * along * along;
+  let flick = 0;
+  if (idle.flickT >= 0 && i >= T.flick.from) {
+    const u = idle.flickT / T.flick.dur;                          // fast up (first 35%), slower down
+    const shape = u < 0.35 ? Math.sin((u / 0.35) * Math.PI / 2) : Math.max(0, Math.cos(((u - 0.35) / 0.65) * Math.PI / 2));
+    flick = T.flick.deg * shape * (i - T.flick.from + 1) / (9 - T.flick.from);
+  }
+  return { sway: sway * idle.weight * Math.PI / 180, flick: flick * idle.weight * Math.PI / 180 };
+}
+function stepIdle(dt) {
+  const T = CONFIG.tailIdle;
+  const want = phase === 'hold' ? (T.poses[pose] ?? 0) : 0;
+  idle.weight += (want - idle.weight) * (1 - Math.exp(-dt * 3 / T.fade));
+  idle.swayPhase += TAU * dt / idle.swayPeriod;
+  if (idle.swayPhase > TAU) { idle.swayPhase -= TAU; idle.swayPeriod = rand(T.sway.period); }
+  if (idle.flickT >= 0) {
+    idle.flickT += dt;
+    if (idle.flickT > T.flick.dur) { idle.flickT = -1; if (idle.again) { idle.again = false; idle.flickT = 0; } }
+  } else if (clock > idle.flickAt) {
+    idle.flickT = 0; idle.again = Math.random() < T.flick.double;
+    idle.flickAt = clock + rand(T.flick.every);
+  }
+}
+
+// The mixer only rewrites a bone when its animated value changes, so a still bone keeps whatever the springs
+// set last frame. Keep each spring bone's clean animated rotation and restore it before every step, or the
+// spring rotations stack frame after frame and the bone drifts.
+function restoreAnimated() {
+  for (const ch of chains) for (const l of ch) {
+    if (!l.anim) { l.anim = l.bone.quaternion.clone(); l.set = l.bone.quaternion.clone(); continue; }
+    if (!l.bone.quaternion.equals(l.set)) l.anim.copy(l.bone.quaternion);   // the mixer wrote a new value
+    l.bone.quaternion.copy(l.anim);
+  }
+}
+function stepSprings(dt) {
+  const S = CONFIG.springs;
+  restoreAnimated();
+  cat.updateMatrixWorld(true);
+  cat.getWorldPosition(tmp.center);
+  const steps = Math.max(1, Math.ceil(dt / (1 / 120)));
+  const h = dt / steps;
+  for (const ch of chains) {
+    for (const l of ch) {
+      const cfg = S[l.cfgName];
+      l.bone.getWorldPosition(tmp.head);
+      l.tipObj.getWorldPosition(tmp.tip);
+      tmp.dir.subVectors(tmp.tip, tmp.head);
+      const len = tmp.dir.length();
+      if (len < 1e-6) continue;
+      tmp.dir.divideScalar(len);
+      // the idle bend turns the target direction (tail only)
+      if (l.tailIndex && idle.weight > 1e-3) {
+        const { sway, flick } = idleBend(l, dt);
+        if (flick) { tmp.axis.crossVectors(tmp.dir, tmp.up).normalize(); tmp.dir.applyAxisAngle(tmp.axis, -flick); }   // tip up
+        if (sway) {
+          tmp.radial.subVectors(tmp.head, tmp.center).setY(0).normalize();
+          const s = Math.sign(tmp.up.clone().cross(tmp.dir).dot(tmp.radial)) || 1;    // turn the way that moves the tip outward
+          tmp.dir.applyAxisAngle(tmp.up, s * sway);
+        }
+      }
+      tmp.want.copy(tmp.head).addScaledVector(tmp.dir, len);
+      if (!l.ready || !S.on) { l.p.copy(tmp.want); l.v.set(0, 0, 0); l.ready = true; }
+      else {
+        const w = TAU * l.freq, k = w * w, c = 2 * cfg.damping * w;   // per-bone freq (the tail's runs base to tip)
+        for (let s = 0; s < steps; s++) {
+          l.v.x += (k * (tmp.want.x - l.p.x) - c * l.v.x) * h; l.p.x += l.v.x * h;
+          l.v.y += (k * (tmp.want.y - l.p.y) - c * l.v.y) * h; l.p.y += l.v.y * h;
+          l.v.z += (k * (tmp.want.z - l.p.z) - c * l.v.z) * h; l.p.z += l.v.z * h;
+        }
+      }
+      // the bone's new direction: toward the mass, with the lag capped and (tail) never sinking or pushing inward.
+      // The caps shape only what is shown; the spring itself stays free (writing the clamped direction back
+      // would ratchet: every downward wobble dropped, every upward one kept, so the tail would creep up).
+      const raw = tmp.dev.subVectors(l.p, tmp.head).normalize();
+      l.p.copy(tmp.head).addScaledVector(raw, len);                 // keep the mass on the bone's length
+      const nd = raw.clone();
+      if (l.tailIndex && S.tailNoSink) {
+        const d = nd.clone().sub(tmp.dir);
+        if (d.y < 0) d.y = 0;
+        tmp.radial.subVectors(tmp.head, tmp.center).setY(0).normalize();
+        const r = d.dot(tmp.radial);
+        if (r < 0) d.addScaledVector(tmp.radial, -r);
+        nd.copy(tmp.dir).add(d).normalize();
+      }
+      const ang = tmp.dir.angleTo(nd), cap = cfg.maxDeg * Math.PI / 180;
+      if (ang > cap) { const full = nd.clone(); nd.copy(tmp.dir).lerp(full, cap / ang).normalize(); }
+      // turn the bone: world delta from the animated tip direction to the spring direction (idle bend included)
+      l.tipObj.getWorldPosition(tmp.tip);
+      const animDir = tmp.tip.sub(tmp.head).normalize();
+      tmp.q.setFromUnitVectors(animDir, nd);
+      l.bone.parent.getWorldQuaternion(tmp.qp);
+      l.bone.getWorldQuaternion(tmp.qb);
+      tmp.qb.premultiply(tmp.q);                                    // new world rotation
+      l.bone.quaternion.copy(tmp.qp.invert().multiply(tmp.qb));
+      l.set.copy(l.bone.quaternion);
+      l.bone.updateMatrixWorld(true);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Turntable (decision e1107-36): sideways drag spins him about the vertical; up-down swipes stay with the page.
+// ---------------------------------------------------------------------------
+let yaw = params.has('yaw') ? THREE.MathUtils.degToRad(Number(params.get('yaw'))) : CONFIG.rotate.homeYaw;
+const vel = { x: 0 };
+let press = null, lastTouch = performance.now(), holdYaw = params.has('yaw');
+const rotateBy = (d) => { yaw += d; spin.rotation.set(0, yaw, 0); };
+rotateBy(0);
+function easeYawTo(t, speed, dt) {
+  const d = THREE.MathUtils.euclideanModulo(t - yaw + Math.PI, TAU) - Math.PI;
+  rotateBy(d * (1 - Math.exp(-speed * dt)));
+}
+canvas.addEventListener('pointerdown', (e) => {
+  if (press) return;
+  press = { id: e.pointerId, x: e.clientX, y: e.clientY, lastX: e.clientX, t0: e.timeStamp, lastT: e.timeStamp, moved: false };
+  vel.x = 0; holdYaw = false;
+  try { canvas.setPointerCapture(e.pointerId); } catch { /* synthetic events */ }
+});
+canvas.addEventListener('pointermove', (e) => {
+  if (!press || e.pointerId !== press.id) return;
+  const dx = e.clientX - press.lastX;
+  if (!press.moved && Math.hypot(e.clientX - press.x, e.clientY - press.y) > CONFIG.rotate.tapSlop) { press.moved = true; canvas.classList.add('dragging'); }
+  if (press.moved) {
+    const k = CONFIG.rotate.radiansPerPixel, dt = Math.max((e.timeStamp - press.lastT) / 1000, 1 / 240);
+    rotateBy(dx * k);
+    vel.x = 0.6 * vel.x + 0.4 * (dx * k / dt);
+  }
+  press.lastX = e.clientX; press.lastT = e.timeStamp; lastTouch = performance.now();
+});
+function endPress(e) {
+  if (!press || e.pointerId !== press.id) return;
+  if (!press.moved && e.type === 'pointerup' && e.timeStamp - press.t0 < CONFIG.rotate.tapMs) tap(e.clientX, e.clientY);
+  if (e.timeStamp - press.lastT > 100) vel.x = 0;
+  canvas.classList.remove('dragging');
+  press = null; lastTouch = performance.now();
+}
+canvas.addEventListener('pointerup', endPress);
+canvas.addEventListener('pointercancel', endPress);
+
+// ---------------------------------------------------------------------------
+// Tap: raycast the hit area, play a sound, a springy squash, and the tap emote.
+// ---------------------------------------------------------------------------
+const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
+let squash = null, taps = 0;
+function tap(x, y) {
+  if (!loaded) return false;
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
+  raycaster.setFromCamera(ndc, camera);
+  if (!raycaster.intersectObject(hitArea, false).length) return false;
+  taps++;
+  playRandomSound();
+  squash = { t: 0 };
+  trigger('tap');
+  return true;
+}
+
+// Sound: Web Audio, decoded once, shuffle bag. Placeholder blips until real files arrive.
+let audioCtx = null, pool = [], bag = [], lastPlayed = -1;
+function unlockAudio() {
+  if (!audioCtx) {
+    try { if (navigator.audioSession) navigator.audioSession.type = 'ambient'; } catch { /* Safari only */ }
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    audioCtx = new Ctx();
+    pool = synthPlaceholders(audioCtx);
+    if (CONFIG.sounds.length) loadSounds(CONFIG.sounds);
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+async function loadSounds(urls) {
+  const decoded = await Promise.all(urls.map(async (u) => { try { return await audioCtx.decodeAudioData(await (await fetch(u)).arrayBuffer()); } catch { return null; } }));
+  const ok = decoded.filter(Boolean);
+  if (ok.length) { pool = ok; bag = []; }
+}
+function playRandomSound() {
+  const ctx = unlockAudio();
+  if (!ctx || !pool.length) return;
+  if (!bag.length) { bag = pool.map((_, i) => i).sort(() => Math.random() - 0.5); if (bag.length > 1 && bag[bag.length - 1] === lastPlayed) bag.unshift(bag.pop()); }
+  const i = bag.pop(); lastPlayed = i;
+  const src = ctx.createBufferSource(); src.buffer = pool[i]; src.playbackRate.value = 0.94 + Math.random() * 0.12;
+  const gain = ctx.createGain(); gain.gain.value = CONFIG.soundVolume;
+  src.connect(gain).connect(ctx.destination); src.start();
+}
+function synthPlaceholders(ctx) {
+  const make = (seconds, f) => {
+    const n = Math.floor(seconds * ctx.sampleRate), buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
+    let ph = 0;
+    for (let s = 0; s < n; s++) { const t = s / ctx.sampleRate, [freq, amp] = f(t, t / seconds); ph += TAU * freq / ctx.sampleRate; d[s] = Math.sin(ph) * amp; }
+    return buf;
+  };
+  const env = (u, a = 0.05) => Math.min(1, u / a) * (1 - u) ** 1.5;
+  return [
+    make(0.38, (t, u) => [520 + 380 * Math.sin(Math.PI * u) + 18 * Math.sin(t * 60), 0.6 * env(u)]),
+    make(0.6, (t, u) => [190 + 90 * Math.sin(t * 38) * (1 - u), 0.7 * env(u, 0.02)]),
+    make(0.16, (t, u) => [1200 + 1100 * u, 0.4 * env(u, 0.1)]),
+    make(0.3, (t, u) => [700 * (1 - u) + 160, 0.6 * env(u, 0.03)]),
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// UI
+// ---------------------------------------------------------------------------
+const buttons = [...document.querySelectorAll('.controls button[data-pose]')];
+const butterBtn = document.getElementById('butter'), autoBtn = document.getElementById('auto');
+function syncButtons() {
+  const showing = landingPose();
+  for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.pose === showing));
+  butterBtn.setAttribute('aria-pressed', String(butter.visible));
+  autoBtn.setAttribute('aria-pressed', String(auto));
+}
+for (const b of buttons) b.addEventListener('click', () => request(b.dataset.pose));
+document.getElementById('hop').addEventListener('click', () => playEmote('hop', 'hop button'));
+let butterAnim = null;
+function setButter(on) {
+  butter.visible = on; butterAnim = on ? { t: 0 } : null;
+  if (on) trigger('butter');
+  syncButtons();
+}
+butterBtn.addEventListener('click', () => setButter(!butter.visible));
+autoBtn.addEventListener('click', () => { auto = !auto; syncButtons(); });
+
+// Framing: keep the whole cat (and a stretch) in view on wide screens and tall phones.
+function frame() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  const half = THREE.MathUtils.degToRad(camera.fov / 2);
+  const needH = 1.9, needW = 1.7;                              // scene units around him that must stay visible
+  const dist = Math.max(needH / 2 / Math.tan(half), needW / 2 / (Math.tan(half) * camera.aspect));
+  camera.position.set(0, 0.62 + dist * 0.12, dist);
+  camera.lookAt(0, 0.5, 0);
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', frame);
+frame();
+
+// ---------------------------------------------------------------------------
+// The frame step. Also used directly by checks and the contact sheet (fixed dt, no rendering).
+// ---------------------------------------------------------------------------
+let clock = 0;
+function step(dt) {
+  clock += dt;
+  if (!loaded) return;
+  if (auto && phase === 'hold' && clock > holdUntil) waitingForSeam = true;
+  mixer.update(dt);
+  // the float bob: on Butterman's tempo when bpm is set
+  const F = CONFIG.float, amp = F.height * (reducedMotion ? 0.3 : 1);
+  const w = F.bpm ? TAU * (F.bpm / 60) / F.beats : F.speed;
+  floater.position.y = F.lift + Math.sin(clock * w) * amp;
+  // tap squash on a group above the mixer root (never fights the clips)
+  if (squash) {
+    squash.t += dt;
+    const s = Math.exp(-squash.t * 7) * Math.sin(squash.t * 28) * 0.12;
+    react.scale.set(1 + s, 1 - s, 1 + s);
+    if (squash.t > 0.8) { react.scale.set(1, 1, 1); squash = null; }
+  }
+  if (spinFx) {                                                  // the spin emote: one full turn while he hops
+    spinFx.t += dt;
+    const u = Math.min(spinFx.t / 0.75, 1);
+    react.rotation.y = TAU * spinFx.turns * (u * u * (3 - 2 * u));
+    if (u >= 1) { react.rotation.y = 0; spinFx = null; }
+  }
+  if (butterAnim && butterAnim.t < 0.5) {
+    butterAnim.t += dt;
+    const u = Math.min(butterAnim.t / 0.5, 1), bounce = 1 + Math.sin(u * Math.PI) * 0.25 * (1 - u);
+    butter.position.y = 0.02 + (1 - u) ** 2 * 0.25;
+    butter.scale.set(bounce, 2 - bounce, bounce);
+  }
+  stepIdle(dt);
+  if (CONFIG.springs.on) stepSprings(dt); else { restoreAnimated(); for (const ch of chains) for (const l of ch) l.set.copy(l.bone.quaternion); resetSprings(); }
+  // shadow: under him, smaller and fainter as he rises
+  const lift = floater.position.y;
+  shadow.position.y = 0.002;
+  shadow.material.opacity = CONFIG.look.shadowOpacity * (1 - lift * 1.5);
+  shadow.scale.set(catHeight * 1.25 * (1 - lift * 0.6), catHeight * 0.75 * (1 - lift * 0.6), 1);
+}
+
+// ---------------------------------------------------------------------------
+// Perf readout and adaptive pixel ratio (from cat-viewer)
+// ---------------------------------------------------------------------------
+const P = CONFIG.perf, perfEl = document.getElementById('perf'), showPerf = opt('perf') === '1';
+perfEl.hidden = !showPerf;
+const burnMs = Number(opt('burn')) || 0;
+const perf = { capped: false, device: (navigator.userAgent.match(/(iPhone|iPad|Android)[^;)]*[;)]?\s*[^;)]*/)?.[0] || navigator.platform || '').slice(0, 40), last: 0, start: 0, frames: 0, worst: 0, low: 0, high: 0, fps: 0, avg: 0, worstMs: 0, ceiling: P.maxDpr, lastDir: 0, events: [], gpu: '' };
+if (showPerf) {
+  const gl = renderer.getContext();
+  perf.gpu = String(gl.getParameter(gl.RENDERER));
+  if (/^WebKit WebGL$/.test(perf.gpu)) { const ext = gl.getExtension('WEBGL_debug_renderer_info'); if (ext) perf.gpu = String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)); }
+}
+function setDpr(v, why) { dpr = Math.round(v * 100) / 100; renderer.setPixelRatio(dpr); perf.events.push(`${clock.toFixed(0)}s ${why} -> ${dpr}`); if (perf.events.length > 3) perf.events.shift(); }
+function perfFrame(now) {
+  const dt = now - perf.last; perf.last = now;
+  if (dt <= 0 || dt > 1000 || now < P.warmupMs) { perf.start = now; perf.frames = 0; perf.worst = 0; return; }
+  perf.frames++; perf.worst = Math.max(perf.worst, dt);
+  if (now - perf.start < P.sampleMs) return;
+  perf.fps = (perf.frames * 1000) / (now - perf.start); perf.avg = (now - perf.start) / perf.frames; perf.worstMs = perf.worst;
+  perf.start = now; perf.frames = 0; perf.worst = 0;
+  if (pinnedDpr) return;
+  perf.capped = Math.abs(perf.avg - 33.3) < 2 && perf.worstMs < 42;
+  if (perf.capped) { perf.low = perf.high = 0; return; }
+  if (perf.fps < P.lowFps) { perf.low++; perf.high = 0; } else if (perf.fps >= P.highFps) { perf.high++; perf.low = 0; } else { perf.low = perf.high = 0; }
+  if (perf.low >= P.lowWindows && dpr > P.minDpr) { if (perf.lastDir > 0) perf.ceiling = Math.max(P.minDpr, dpr - P.step); setDpr(Math.max(P.minDpr, dpr - P.step), `slow (${perf.fps.toFixed(0)} fps)`); perf.low = 0; perf.lastDir = -1; }
+  else if (perf.high >= P.highWindows && dpr < Math.min(perf.ceiling, deviceDpr)) { setDpr(Math.min(perf.ceiling, deviceDpr, dpr + P.step), `smooth (${perf.fps.toFixed(0)} fps)`); perf.high = 0; perf.lastDir = 1; }
+}
+document.addEventListener('visibilitychange', () => { perf.last = 0; });
+
+// ---------------------------------------------------------------------------
+// Contact sheet (#sheet=clip): plays one clip from its start with springs on, and at evenly spaced moments
+// renders 8 views (camera orbiting, so the springs see a still cat) into one grid.
+// ---------------------------------------------------------------------------
+async function contactSheet(clipName, rows) {
+  const a = actions[clipName];
+  if (!a) { statusEl.textContent = 'no clip ' + clipName; document.body.appendChild(statusEl); return; }
+  auto = false;
+  const from = clipName.includes('_to_') ? clipName.split('_to_')[0] : clipName;
+  // settle the springs in the clip's first frame, then play it
+  for (const n in actions) actions[n].stop();
+  a.reset().setEffectiveWeight(1).play(); playing = a; phase = 'sheet'; pose = from;
+  a.paused = true;                                   // hold frame 0 while the springs settle
+  mixer.update(0);
+  for (let i = 0; i < 90; i++) step(1 / 60);
+  a.paused = false; a.time = 0; mixer.update(0);
+  const dur = a.getClip().duration, cell = 220, cols = 8;
+  renderer.setPixelRatio(1);
+  renderer.setSize(cell * cols, cell * rows, false);
+  canvas.style.width = cell * cols + 'px'; canvas.style.height = cell * rows + 'px';
+  renderer.setScissorTest(true);
+  renderer.autoClear = false;
+  renderer.setClearColor(0xf7ede3, 1); renderer.clear();
+  const cam = new THREE.PerspectiveCamera(30, 1, 0.05, 40);
+  let t = 0;
+  for (let r = 0; r < rows; r++) {
+    const at = (dur * r) / (rows - 1);
+    while (t < at - 1e-6) { const d = Math.min(1 / 60, at - t); step(d); t += d; }
+    for (let c = 0; c < cols; c++) {
+      cam.position.set(3.7 * Math.sin(-c * TAU / cols), 1.05, 3.7 * Math.cos(-c * TAU / cols));
+      cam.lookAt(0, 0.4, 0); cam.updateMatrixWorld();
+      const y = (rows - 1 - r) * cell;
+      renderer.setViewport(c * cell, y, cell, cell); renderer.setScissor(c * cell, y, cell, cell);
+      renderer.render(scene, cam);
+    }
+  }
+  const lab = document.createElement('pre');
+  lab.style.cssText = 'position:fixed;left:4px;top:2px;margin:0;font:11px monospace;color:#a33';
+  lab.textContent = `${clipName}  rows: ${[...Array(rows)].map((_, r) => ((dur * r) / (rows - 1)).toFixed(2) + 's').join(' ')}  cols: 0..315 deg (camera orbit)  springs ${CONFIG.springs.on ? 'on' : 'off'}`;
+  document.body.appendChild(lab);
+  window.sheetDone = true;
+}
+
+// ---------------------------------------------------------------------------
+// Loop
+// ---------------------------------------------------------------------------
+const debugEl = document.getElementById('debug'), showDebug = params.has('debug');
+debugEl.hidden = !showDebug;
+const freezeAt = params.has('t') ? Number(params.get('t')) : null;
+const timer = new THREE.Timer();
+timer.connect(document);
+const tmpSize = new THREE.Vector2();
+
+load().then(async () => {
+  if (params.has('sheet')) return contactSheet(params.get('sheet'), Number(params.get('rows')) || 6);
+  if (freezeAt !== null) auto = false;
+  enter(cyc.poses[params.get('pose')] ? params.get('pose') : cyc.start, 0);
+  if (freezeAt !== null) {                       // run up to the moment with real steps, then hold it while springs settle
+    const a = playing;
+    for (let t = 0; t < freezeAt - 1e-6; t += 1 / 60) step(Math.min(1 / 60, freezeAt - t));
+    a.time = Math.min(freezeAt, a.getClip().duration); a.paused = true; mixer.update(0);
+    for (let i = 0; i < 90; i++) step(1 / 60);
+  }
+  syncButtons();
+  renderer.setAnimationLoop(loop);
+}).catch((e) => { statusEl.textContent = 'could not load the cat: ' + e.message; console.error(e); });
+
+function loop(now) {
+  perfFrame(now);
+  if (burnMs) { const until = performance.now() + burnMs; while (performance.now() < until); }
+  timer.update(now);
+  const dt = freezeAt !== null ? 0 : Math.min(timer.getDelta(), 0.1);
+  const R = CONFIG.rotate;
+  if (!press && !holdYaw) {
+    if (Math.abs(vel.x) > 1e-3) { rotateBy(vel.x * dt); vel.x *= Math.exp(-R.damping * dt); }
+    else if (R.returnHome && performance.now() - lastTouch > R.returnDelay * 1000) easeYawTo(R.homeYaw, R.returnSpeed, dt);
+  }
+  if (dt > 0) step(dt);
+  renderer.render(scene, camera);
+  if (showPerf) {
+    const info = renderer.info.render, size = renderer.getDrawingBufferSize(tmpSize);
+    perfEl.textContent = `fps     ${perf.fps ? perf.fps.toFixed(1) : '…'}\nframe   ${perf.avg.toFixed(1)} ms avg, ${perf.worstMs.toFixed(1)} worst\n` +
+      `calls   ${info.calls}   tris ${(info.triangles / 1000).toFixed(1)}k\ndpr     ${dpr} of ${deviceDpr} ${pinnedDpr ? '(pinned)' : `(auto ${P.minDpr}-${Math.min(perf.ceiling, deviceDpr)})`}\n` +
+      `canvas  ${size.x}×${size.y}\ngpu     ${perf.gpu.slice(0, 40)}\ndevice  ${perf.device}${perf.capped ? '\nnote    steady 30 fps: Low Power Mode?' : ''}` +
+      (perf.events.length ? '\n' + perf.events.join('\n') : '');
+  }
+  if (showDebug) {
+    debugEl.textContent = `pose    ${phase} ${phase === 'emote' ? emoteNow + ' -> ' + emoteReturn : pose}${target ? ' -> ' + target : ''}${route.length ? ' (then ' + route.join(', ') + ')' : ''}\n` +
+      `next in ${phase === 'hold' && auto ? Math.max(0, holdUntil - clock).toFixed(1) + ' s' + (waitingForSeam ? ' (at seam)' : '') : '-'}\n` +
+      `tail    idle ${idle.weight.toFixed(2)}${idle.flickT >= 0 ? ' FLICK' : ''}  next flick ${Math.max(0, idle.flickAt - clock).toFixed(1)} s\n` +
+      `springs ${CONFIG.springs.on ? 'on' : 'off'}   butter ${butter.visible}   taps ${taps}\n` +
+      `calls   ${renderer.info.render.calls}  tris ${renderer.info.render.triangles}`;
+  }
+}
+
+// A handle for checks and console play.
+window.sigilCat = {
+  request, playEmote, trigger, setButter, rotateBy, tap, step, config: CONFIG,
+  get loaded() { return loaded; }, get pose() { return pose; }, get phase() { return phase; },
+  get clips() { return Object.keys(actions); }, get emoteLog() { return [...emoteLog]; },
+  get idle() { return { weight: idle.weight, flicking: idle.flickT >= 0 }; },
+  get triangles() { return [body, whiskers].reduce((n, m) => n + (m ? m.geometry.index.count / 3 : 0), 0); },
+  get yaw() { return yaw; },
+  set auto(v) { auto = v; syncButtons(); },
+  setYaw(deg) { yaw = THREE.MathUtils.degToRad(deg); holdYaw = true; rotateBy(0); },
+  bones, get mixer() { return mixer; }, get body() { return body; }, get whiskers() { return whiskers; },
+};
+</script>
+</body>
+</html>

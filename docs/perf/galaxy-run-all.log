@@ -1,0 +1,496 @@
+== rack frames
+CHECK rack frames desktop fresh: {"samples":321,"minLeft":24.19000244140625,"jump":0,"first":{"t":2138.199999988079,"x":24.19000244140625,"y":396.530029296875,"w":156.40625},"last":{"t":8637.29999999702,"x":24.19000244140625,"y":396.530029296875,"w":156.40625}} PASS
+CHECK rack frames desktop reload: {"samples":319,"minLeft":24.19000244140625,"jump":0,"first":{"t":309.29999999701977,"x":24.19000244140625,"y":396.530029296875,"w":156.40625},"last":{"t":6974.899999991059,"x":24.19000244140625,"y":396.530029296875,"w":156.40625}} PASS
+CHECK collection desktop resized: PASS
+CHECK rack frames phone fresh: {"samples":311,"minLeft":12,"jump":0,"first":{"t":1513.9000000059605,"x":12,"y":404.7799987792969,"w":94.515625},"last":{"t":8001.5,"x":12,"y":404.7799987792969,"w":94.515625}} PASS
+CHECK rack frames phone reload: {"samples":325,"minLeft":12,"jump":0,"first":{"t":235.70000000298023,"x":12,"y":404.7799987792969,"w":94.515625},"last":{"t":6919.800000011921,"x":12,"y":404.7799987792969,"w":94.515625}} PASS
+CHECK collection phone resized: PASS
+== world-layout-desktop
+CHECK world box gag returns to reserved home:  PASS
+CHECK world lower floor clears footer: floor=693.72 feet=603.72 footer=783.00 PASS
+CHECK world visible items reachable: [{"id":"paper","box":{"x":202.60956018066094,"y":436.17421441597054,"w":153.1721581784502,"h":182.43693860989458}},{"id":"postcard","box":{"x":1091.725639701777,"y":628.611153025865,"w":173.96075894136035,"h":125.11314650380349}},{"id":"ticket","box":{"x":791.2492757568103,"y":674.9969977504909,"w":153.8513617477061,"h":78.72730177917754}},{"id":"tin","box":{"x":955.1006375045165,"y":665.0867979915861,"w":126.62500219726054,"h":88.63750153808238}},{"id":"box","box":{"x":955.1617592773564,"y":387.1108548911087,"w":312.83824072264366,"h":231.50029813475632}},{"id":"rack","box":{"x":24.190439819339062,"y":396.527970843157,"w":156.41912036132183,"h":297.1963286865115}},{"id":"top","box":{"x":585.0360372314271,"y":641.9963564144387,"w":111.72794311522988,"h":111.72794311522988}},{"id":"rifle","box":{"x":202.60956018066094,"y":656.8934154964693,"w":372.42647705076627,"h":96.83088403319923}},{"id":"pat","box":{"x":706.763980346657,"y":712.7573870540843,"w":74.48529541015326,"h":40.966912475584294}}] PASS
+CHECK world default collection mostly unobstructed: [{"id":"paper","fraction":0},{"id":"postcard","fraction":0},{"id":"ticket","fraction":0},{"id":"tin","fraction":0},{"id":"box","fraction":0},{"id":"rack","fraction":0},{"id":"top","fraction":0},{"id":"rifle","fraction":0},{"id":"pat","fraction":0}] PASS
+CHECK world homes leave cat petting stroke clear:  PASS
+CHECK world rack fixed bottom left:  PASS
+CHECK world saves versioned floor poses:  PASS
+CHECK world legacy v2 ticket migrates without motion:  PASS
+CHECK world placement sleeps without updates: shadow updates=0 PASS
+CHECK world shadows attached to world plane:  PASS
+CHECK world furniture reserved:  PASS
+CHECK world saved rigid pose restores asleep: drift=0.0000px PASS
+CHECK world matched rest submission cost: {"samples":{"baseline":[0.10000000894069672,0.09999999403953552,0.09999999403953552,0.10000000894069672,0.10000000894069672],"world":[0.10000000894069672,0.10000000894069672,0.10000000894069672,0.09999999403953552,0.10000000894069672]},"delta":0,"units":"ms CPU render submission; identical cached cat, 5x120 renders"}
+CHECK world rest submission delta <=0.1ms: delta=0.000ms PASS
+CHECK world layout reload under half pixel: max=0.0171px PASS
+CHECK world restored floor idle:  PASS
+== world-core-desktop
+CHECK world no eager engine before first solid:  PASS
+CHECK world lazy engine loads after cat:  PASS
+CHECK world renderer: ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)
+CHECK world transient floor depth: {"worstDepth":{"seed":74,"step":43,"depth":-0.030855001121167888},"deepestEpisode":{"seed":74,"start":43,"steps":2,"depth":-0.030855001121167888},"longestDip":3,"worstDip":{"seed":34,"start":82,"steps":3,"depth":-0.0051345881259963755},"dips":[{"seed":1,"start":131,"steps":2,"depth":-0.0019524056786649618},{"seed":2,"start":42,"steps":2,"depth":-0.0009717181561358229},{"seed":3,"start":40,"steps":1,"depth":-0.000808813334163272},{"seed":3,"start":49,"steps":1,"depth":-0.0016238643806814126},{"seed":4,"start":44,"steps":1,"depth":-0.01910264480196039},{"seed":8,"start":87,"steps":1,"depth":-0.0005629792324683483},{"seed":10,"start":89,"steps":1,"depth":-0.0003494038740115002},{"seed":11,"start":44,"steps":1,"depth":-0.00035430650506963063},{"seed":13,"start":45,"steps":1,"depth":-0.001723750690990379},{"seed":15,"start":30,"steps":1,"depth":-0.0007410080665916571},{"seed":16,"start":47,"steps":1,"depth":-0.00006849549473086913},{"seed":19,"start":48,"steps":1,"depth":-0.0006682823579739344},{"seed":21,"start":33,"steps":2,"depth":-0.013567254341299913},{"seed":21,"start":56,"steps":2,"depth":-0.0031759605509734806},{"seed":21,"start":83,"steps":2,"depth":-0.0019402384630260207},{"seed":23,"start":48,"steps":1,"depth":-0.00003681742594920101},{"seed":24,"start":47,"steps":1,"depth":-0.017662285990402135},{"seed":24,"start":51,"steps":1,"depth":-0.0013957312802301072},{"seed":25,"start":27,"steps":1,"depth":-0.0021373442266175574},{"seed":26,"start":78,"steps":1,"depth":-0.00031714632962306574},{"seed":29,"start":71,"steps":1,"depth":-0.0010475712388794828},{"seed":32,"start":36,"steps":1,"depth":-0.0023119070933586977},{"seed":32,"start":72,"steps":2,"depth":-0.0030024716582609176},{"seed":33,"start":63,"steps":1,"depth":-0.00231767286691497},{"seed":33,"start":81,"steps":1,"depth":-0.0019554427695382195},{"seed":33,"start":102,"steps":1,"depth":-0.0001646779270438395},{"seed":34,"start":46,"steps":2,"depth":-0.011260657491740406},{"seed":34,"start":82,"steps":3,"depth":-0.0051345881259963755},{"seed":34,"start":88,"steps":1,"depth":-0.0010278288073042735},{"seed":35,"start":24,"steps":1,"depth":-0.0015080357816249085},{"seed":36,"start":33,"steps":1,"depth":-0.0006909012908401582},{"seed":37,"start":42,"steps":2,"depth":-0.006362419863372368},{"seed":39,"start":54,"steps":1,"depth":-0.001236329061619107},{"seed":40,"start":27,"steps":1,"depth":-0.0013231911345425312},{"seed":41,"start":37,"steps":1,"depth":-0.0011071529483713816},{"seed":43,"start":43,"steps":1,"depth":-0.00032969068007873345},{"seed":44,"start":40,"steps":1,"depth":-0.005242582294036874},{"seed":45,"start":24,"steps":2,"depth":-0.0028963301877100098},{"seed":47,"start":37,"steps":2,"depth":-0.012880380080595485},{"seed":48,"start":38,"steps":2,"depth":-0.004857654642569639},{"seed":50,"start":41,"steps":1,"depth":-0.0007079702137639185},{"seed":51,"start":36,"steps":1,"depth":-0.0073609409251550045},{"seed":53,"start":45,"steps":1,"depth":-0.00003653468449303643},{"seed":57,"start":36,"steps":2,"depth":-0.00859592055650929},{"seed":60,"start":30,"steps":1,"depth":-0.0001923687134037788},{"seed":61,"start":33,"steps":1,"depth":-0.0006127839500367147},{"seed":63,"start":76,"steps":2,"depth":-0.002680238190303219},{"seed":67,"start":97,"steps":1,"depth":-0.0014530662876679687},{"seed":70,"start":43,"steps":1,"depth":-0.001112689262660227},{"seed":71,"start":86,"steps":1,"depth":-0.000007268931665138645},{"seed":73,"start":38,"steps":2,"depth":-0.013959745239580101},{"seed":74,"start":43,"steps":2,"depth":-0.030855001121167888},{"seed":75,"start":45,"steps":2,"depth":-0.003349285378908072},{"seed":76,"start":34,"steps":2,"depth":-0.011541623845240469},{"seed":77,"start":38,"steps":1,"depth":-0.012623649457000133},{"seed":78,"start":38,"steps":1,"depth":-0.0038678780217044004},{"seed":78,"start":45,"steps":1,"depth":-0.002150581063350157},{"seed":79,"start":54,"steps":1,"depth":-0.004097262390905937},{"seed":84,"start":46,"steps":1,"depth":-0.01226865849608387},{"seed":85,"start":25,"steps":3,"depth":-0.009417970608480736},{"seed":86,"start":31,"steps":1,"depth":-0.000230014039716675},{"seed":86,"start":36,"steps":1,"depth":-0.001965729500159344},{"seed":89,"start":46,"steps":1,"depth":-0.022645488722179627},{"seed":89,"start":50,"steps":1,"depth":-0.0001402632403269613},{"seed":90,"start":40,"steps":1,"depth":-0.007181861016426323},{"seed":90,"start":73,"steps":1,"depth":-0.0008193419464396778},{"seed":92,"start":35,"steps":1,"depth":-0.0005570479104351211},{"seed":93,"start":44,"steps":1,"depth":-0.0013363202142242028},{"seed":93,"start":66,"steps":2,"depth":-0.003071773958804966},{"seed":94,"start":64,"steps":2,"depth":-0.004744173095677859},{"seed":96,"start":35,"steps":1,"depth":-0.008645374042760834},{"seed":96,"start":43,"steps":2,"depth":-0.003991343252061658},{"seed":99,"start":43,"steps":2,"depth":-0.0023381950087090347},{"seed":99,"start":66,"steps":2,"depth":-0.005440433689872209}]}
+CHECK world transient duration (diagnostic only, e1110-15): longest=3 steps / 25.000ms
+CHECK world check-rifle off-centre grip: error=0.001px angle=2.829 PASS
+CHECK world cancellation removes joint:  PASS
+CHECK world check-top off-centre grip: error=0.009px angle=2.562 PASS
+CHECK world cancellation removes joint:  PASS
+CHECK world blur releases input:  PASS
+CHECK world sleeping unregisters callback: steps=0 syncs=0 PASS
+CHECK world resting collider within 2px check-rifle: gap=0.686px y=0.001825 PASS
+CHECK world resting collider within 2px check-top: gap=0.982px y=0.001802 PASS
+CHECK world resting art gap: gap=0.686px height=0.00182 PASS
+CHECK world respawn waits five seconds:  PASS
+CHECK world respawn falls once from above: delay=5021ms PASS
+CHECK world budget run 1: {"p95":2,"loadBefore":[6.09,7.21,10.32],"loadAfter":[6.09,7.21,10.32]}
+CHECK world budget run 2: {"p95":2.2999999970197678,"loadBefore":[6.09,7.21,10.32],"loadAfter":[6.09,7.21,10.32]}
+CHECK world budget run 3: {"p95":1.7000000029802322,"loadBefore":[6.09,7.21,10.32],"loadAfter":[6.09,7.21,10.32]}
+CHECK world budget run 4: {"p95":2,"loadBefore":[6.09,7.21,10.32],"loadAfter":[6.09,7.21,10.32]}
+CHECK world budget run 5: {"p95":1.7000000029802322,"loadBefore":[6.09,7.21,10.32],"loadAfter":[6.09,7.21,10.32]}
+CHECK world 20 bodies desktop CPU budget: median p95=2.000ms/60Hz frame; runs=2.000,2.300,1.700,2.000,1.700; phone viewport is not iPhone hardware PASS
+CHECK world cleanup zero bodies and joints:  PASS
+== physics-desktop
+CHECK physics three heights share one floor within 0.5 px: base 693.72, floor 693.72; same/caught true, fell true, straight true PASS
+CHECK physics settles within 3.5 s and stays within 0.5 px for 1 s:  PASS
+CHECK physics unregisters all frame work at rest:  PASS
+CHECK physics exempts sky while solids settle:  PASS
+CHECK physics edge drop stays entirely on screen and on the floor:  PASS
+CHECK physics flick carries sideways then rests on screen on the floor:  PASS
+CHECK physics material measurement: {"id":"box","squash":0.930864752519718,"base":693.7242995296685,"floor":693.7242995296685,"angle":0,"resting":true,"sx":1,"sy":1}
+CHECK physics material measurement: {"id":"paper","squash":0.9884793471713654,"base":693.7242995296685,"floor":693.7242995296685,"angle":-0.12,"resting":true,"sx":1,"sy":1,"paperBottom":693.7100219726562}
+CHECK physics material measurement: {"id":"pat","squash":0.8841925451587634,"base":693.7242995296687,"floor":693.7242995296685,"angle":0,"resting":true,"sx":1,"sy":1}
+CHECK physics material measurement: {"id":"rifle","squash":1,"base":693.7242995296685,"floor":693.7242995296685,"angle":0,"resting":true,"sx":1,"sy":1,"renderBounds":{"x":384.00083022085244,"y":693.6485999038689,"w":372.49780962818744}}
+CHECK physics box upright paper leaning pat soft rifle flat after settling:  PASS
+CHECK physics layout moves one floor and every resting base together:  PASS
+CHECK physics reload restores saved x and settled floor bases without falling:  PASS
+CHECK physics old airborne saves set down quietly without a frame:  PASS
+== physics-calm-desktop
+CHECK physics reduced motion sets a real drop directly on the floor:  PASS
+== play-desktop
+CHECK first cat: pose sit, picture 720x532 px at 2x PASS
+CHECK at rest his splats are not redrawn: 0 picture draws in 1 s of floating PASS
+CHECK spin: a 150 px drag turns him: 2.04 rad PASS
+CHECK tap: bonks counted: 4 taps made, 4 counted, count 0 -> 4, shows "4 bonks" PASS
+CHECK tap: emotes: tap: hop (in hold sit) | tap: hop (in hold sit) PASS
+CHECK page hit test: on him / in the corner PASS
+CHECK keyboard: arrows turn him, Enter taps him: turned 0.31 rad, taps +1 PASS
+CHECK N1 loaf > sleep and sleep > loaf: no shake, the pop still plays: lie>sleep shake 0.000 rad, springs to 1.17x; sleep>lie shake 0.000 rad, springs to 1.17x PASS
+CHECK N1 every other pair still shakes: sit>lie 0.028 rad, lie>stretch 0.028 rad, stretch>sit 0.028 rad PASS
+CHECK zig-zag casts the bolt: one flash, and it leaves the cloud: drew zigzag; 1 flash; cloud true PASS
+CHECK N6 the circle: 20 turns in about 2 s, facing his usual way after: drew circle; 20.00 turns in 3.05 s (stroke included), 0.000 rad off home PASS
+CHECK N6 the circle opens neither the galaxy nor the 360: galaxy opened false, 360 fired 0, his own spin speed stayed 0.00 rad/s PASS
+CHECK the circle leaves the top:  PASS
+CHECK N11 a half circle casts the loaf: drew dome; he is bread PASS
+CHECK tap the bread: he is back, and there are crumbs:  PASS
+CHECK N12 loaf then star: the bread blasts off and the galaxy does not open: drew dome then star; blast-offs 1; galaxy opened false PASS
+CHECK N12 the cat pops back, a star stays: he is cat PASS
+CHECK the star alone opens the galaxy; nothing gets through while it has him: drew star; 2 presses swallowed PASS
+CHECK the galaxy leaves a postcard:  PASS
+CHECK N12 the other order (star first, loaf after): just bread: he is bread PASS
+CHECK N6 a player's own fast spin still opens the galaxy: fast for 2.0 s PASS
+CHECK noscope real flick runs the timed riser and video: black 4.985, play 5.018, full 6.034 PASS
+CHECK one flick of a whole turn fires the 360 and leaves the rifle: turned 384 degrees PASS
+CHECK B summons Butterman: scene 1 plays to his song and he butters the cat: drew butter; scene butter; clock audio; captions off PASS
+CHECK N2 scene 2: once round the cat without touching him, then out to open floor: 1 turns, nearest 0.53 from his axis (he is 0.43 wide), stands at -0.72,0.314 PASS
+CHECK N2 scene 2: still for the last second, gone in one frame as the clip ends: still for 2.452 s; last there 29.089 s, clip ends 29.109 s PASS
+CHECK his legs never clip (every scene): butter gap 0.04 poke 0.002, loop gap 0.04 poke 0.005, encore gap 0.04 poke 0.002 PASS
+CHECK scene 1: off screen 2 s or more before the clip ends: butter 2.362 s PASS
+CHECK the whisper is silent far from the butter: loop running true; far: gain 0, heard 0.0e+0; away again: 0.0e+0 PASS
+CHECK the whisper is audible near the butter, and very quiet: gain 0.045, heard 1.6e-2 PASS
+CHECK finding the whisper counts:  PASS
+CHECK gag 2 the butter is flung off: a streak on the glass and the pat at the bottom: butter on him false PASS
+CHECK gag 2 a finger wipes the streak away:  PASS
+CHECK gag 2 the pat dragged back onto him butters him again:  PASS
+CHECK gag 1 a buttered cat who becomes bread hovers and turns instead, and a rejected paper is left: drew dome PASS
+CHECK gag 1 tap the paper to read the rejection:  PASS
+CHECK gag 3 the cup: he pushes the glass off the edge; shards and a puddle are left: drew cup PASS
+CHECK gag 3 a bolt with a puddle on the floor goes through the water: struck the puddle at 647,647 PASS
+CHECK gag 4 the square: a box drops, he is in it (ears out), and the box stays: drew square PASS
+CHECK gag 4 tap the box: in one side, out the other:  PASS
+CHECK gag 5 the eight: eyes on his face, a choir, they fall off and stay on the floor: drew eight PASS
+CHECK gag 5 the eyes can be dragged onto something else (the cloud): stuck to cloud PASS
+CHECK gag 6 the triangle: a hat lands on him, the butter rides on top of it, and there is a rack: drew triangle; hat crown; butter lifted 0.15 PASS
+CHECK N11 the triangle no longer casts the loaf: it is the hat now PASS
+CHECK gag 6 tap the rack: another hat: crown -> wizard (2 taps) PASS
+CHECK gag 7 the theme plucked on his whiskers brings the encore, and a ticket: 5 plucks landed on whiskers; scene encore PASS
+CHECK gag 8 seven strokes build a purr and leave a permanent plaster and tin: purr reached 1.00; 7 strokes PASS
+CHECK the sound control mutes everything (a clip, a song, the loops): playing 1.0e-1 -> muted 0.0e+0; a song started while muted 0.0e+0; button says "sound off" PASS
+CHECK sound on again, volume set: heard 1.0e-1, volume 0.55 PASS
+CHECK a keepsake can be dragged to a new place: the tin moved 0.24 cat-heights PASS
+CHECK found: 16 of 16: all PASS
+CHECK before the reload: 14 keepsakes: cloud, top, crumbs, twinkle, postcard, rifle, paper, puddle, shards, box, eyes, rack, ticket, tin
+CHECK keepsakes survive a reload: 14 of 14 still there PASS
+CHECK and are where they were left: every one within 0.02 cat-heights PASS
+CHECK what he was wearing survives too: hat wizard, butter true, eyes on cloud PASS
+CHECK finds and bonks survive: 16 found, 6 bonks, 16 marks in the row PASS
+CHECK the sound control survives a reload (left muted, volume kept): muted true, volume 0.55, button "sound off", heard 0.0e+0 PASS
+== noscope-footer-desktop
+CHECK noscope footer slider hit during black fade:  PASS
+CHECK noscope footer slider hit during video:  PASS
+CHECK noscope footer native drag sets video gain:  PASS
+CHECK noscope footer slider tap does not skip or unlock:  PASS
+CHECK noscope footer button mutes without skipping:  PASS
+CHECK noscope footer button unmutes without unlocking:  PASS
+CHECK noscope footer remains reachable during return: {"original":{"x":173.796875,"y":863},"now":{"x":173.796875,"y":863},"hit":true,"locked":true} PASS
+CHECK noscope footer restores normal page after return:  PASS
+== noscope-video-desktop
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 54980)
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/socketserver.py", line 692, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.12/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/usr/lib/python3.12/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.12/socketserver.py", line 761, in __init__
+    self.handle()
+  File "/usr/lib/python3.12/http/server.py", line 436, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.12/http/server.py", line 424, in handle_one_request
+    method()
+  File "/usr/lib/python3.12/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+  File "/usr/lib/python3.12/http/server.py", line 878, in copyfile
+    shutil.copyfileobj(source, outputfile)
+  File "/usr/lib/python3.12/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 55000)
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/socketserver.py", line 692, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.12/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/usr/lib/python3.12/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.12/socketserver.py", line 761, in __init__
+    self.handle()
+  File "/usr/lib/python3.12/http/server.py", line 436, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.12/http/server.py", line 424, in handle_one_request
+    method()
+  File "/usr/lib/python3.12/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+  File "/usr/lib/python3.12/http/server.py", line 878, in copyfile
+    shutil.copyfileobj(source, outputfile)
+  File "/usr/lib/python3.12/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+----------------------------------------
+CHECK noscope first 360 lazily fetches video:  PASS
+CHECK noscope riser and locked fade reach black at five seconds: black 5.033 s PASS
+CHECK noscope video starts at five and fades in by six: playing 5.033, full 6.050 PASS
+CHECK noscope riser ends with video fade-in:  PASS
+CHECK noscope video advances in real time inline: 1.787937 -> 2.786395 PASS
+CHECK noscope video end restores page and rifle:  PASS
+CHECK noscope muted video and riser have zero output:  PASS
+CHECK noscope volume follows slider while page sounds stay quiet:  PASS
+CHECK noscope tap skips and restores input:  PASS
+CHECK noscope Escape skips every subsequent 360:  PASS
+== look-pet-pass-desktop
+CHECK look sub-threshold pet wiggles count nothing: 10 routed moves, 0 strokes, 0 bites PASS
+CHECK look one 300 px pet pass counts once without biting: 60 routed moves, 1 strokes, 0 bites PASS
+CHECK look seven real pet passes bite only on seventh: [{"strokes":1,"bites":0},{"strokes":2,"bites":0},{"strokes":3,"bites":0},{"strokes":4,"bites":0},{"strokes":5,"bites":0},{"strokes":6,"bites":0},{"strokes":7,"bites":1}] PASS
+== look-butterman-bite-desktop
+CHECK look Butterman butter has no caption text:  PASS
+CHECK look Butterman loop has no caption text:  PASS
+CHECK look Butterman rise has no caption text:  PASS
+CHECK look Butterman encore has no caption text:  PASS
+CHECK look Butterman rise disappears on clip end frame: last visible 10.865637188208616, first absent 10.888857142857141, decoded end 10.879999999999999 PASS
+CHECK look bite occurs on seventh stroke: after six 0, after seven 1 PASS
+CHECK look permanent plaster survives reload: saved true, cursor true PASS
+CHECK look bitten cat refuses strokes after reload: attempted 24, purr 0, bites 0 PASS
+CHECK look tin cannot remove permanent plaster:  PASS
+== look-pat-return-desktop
+CHECK pat press measurement: {"side":-1,"point":{"x":742.0066280517336,"y":673.2408432918764},"px":{"x":742.0066280517336,"y":693.7242995296685},"box":{"x":704.763980346657,"y":652.7573870540843,"w":74.48529541015326,"h":40.966912475584294},"size":[74.48529541015326,40.966912475584294],"phoneScale":1,"resting":true,"held":false,"flight":null,"contact":null,"physics":{"active":0,"steps":0,"listening":false},"layer":"front","candidates":[{"id":"pat","gl":true,"order":7,"box":{"x":704.763980346657,"y":652.7573870540843,"w":74.48529541015326,"h":40.966912475584294}}],"dom":["on","wash","BODY","HTML"],"sponge":{"pointerEvents":"none","opacity":"0.530793"}}
+CHECK pat press receiver: {"held":["pat"],"calls":["pat.dragging","pat.dragging"]}
+CHECK pat drag calls: ["pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dropped"]
+CHECK look crowded floor pat returns from left:  PASS
+CHECK pat press measurement: {"side":1,"point":{"x":793.6,"y":673.2408432918764},"px":{"x":793.6,"y":693.7242995296685},"box":{"x":756.3573522949234,"y":652.7573870540843,"w":74.48529541015326,"h":40.966912475584294},"size":[74.48529541015326,40.966912475584294],"phoneScale":1,"resting":true,"held":false,"flight":null,"contact":null,"physics":{"active":0,"steps":0,"listening":false},"layer":"front","candidates":[{"id":"pat","gl":true,"order":9,"box":{"x":756.3573522949234,"y":652.7573870540843,"w":74.48529541015326,"h":40.966912475584294}}],"dom":["on","wash","BODY","HTML"],"sponge":{"pointerEvents":"none","opacity":"0.362514"}}
+CHECK pat press receiver: {"held":["pat"],"calls":["pat.dragging","pat.dragging"]}
+CHECK pat drag calls: ["pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dropped"]
+CHECK look crowded floor pat returns from right:  PASS
+== look-use-desktop
+CHECK look top is room-lit metal with a contact shadow:  PASS
+CHECK look top follows a drag:  PASS
+CHECK look top spins then tips and rests:  PASS
+CHECK look wipe equips a sponge:  PASS
+CHECK look wipe removes sponge and streak:  PASS
+CHECK look sponge audio loads:  PASS
+CHECK look top and butter survive reload:  PASS
+== look-landing-desktop
+CHECK look butter glass landing central: centre 0.380, 0.400; 10 impact frames PASS
+CHECK look butter glass landing enlarged: projected width / resting width 3.226 PASS
+CHECK look galaxy sigil faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.063725, preceding wind-down max 0.115618; hold step 0.000000 vs final wind-down 0.063725 PASS
+CHECK look galaxy sigil resumes home: yaw 37.252718162071105 PASS
+CHECK look galaxy positive faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.036001, preceding wind-down max 0.074470; hold step 0.000000 vs final wind-down 0.036001 PASS
+CHECK look galaxy positive resumes home: yaw 87.518201196565 PASS
+CHECK look galaxy negative faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.042740, preceding wind-down max 0.091387; hold step 0.000000 vs final wind-down 0.042740 PASS
+CHECK look galaxy negative resumes home: yaw -119.82681685765085 PASS
+== look-motion-desktop
+CHECK look butter rest stable for one second: 0.000 px over 1098 ms (67 frames) PASS
+CHECK look butter handover below half a pixel: 0.000 px; largest step across 7 frames 0.116 px; frames 233 PASS
+CHECK look measured handover: [{"x":793.6007625216349,"y":673.0861768962319,"phase":"slide","anchor":693.7242995296685,"inset":117,"t":6548.100000008941},{"x":793.6001737444224,"y":673.2017774976025,"phase":"slide","anchor":693.7242995296685,"inset":117,"t":6564.20000000298},{"x":793.6000000219797,"y":673.2408377316725,"phase":"slide","anchor":693.7242995296685,"inset":117,"t":6580.4000000059605},{"x":793.5999999999999,"y":673.240843291876,"phase":"rest","anchor":693.7242995296685,"inset":117,"t":6597.4000000059605},{"x":793.5999999999999,"y":673.240843291876,"phase":"rest","anchor":693.7242995296685,"inset":117,"t":6612.300000011921},{"x":793.5999999999999,"y":673.240843291876,"phase":"rest","anchor":693.7242995296685,"inset":117,"t":6629},{"x":793.5999999999999,"y":673.240843291876,"phase":"rest","anchor":693.7242995296685,"inset":117,"t":6645.800000011921},{"x":793.5999999999999,"y":673.240843291876,"phase":"rest","anchor":693.7242995296685,"inset":117,"t":6662.4000000059605},{"x":793.5999999999999,"y":673.240843291876,"phase":"rest","anchor":693.7242995296685,"inset":117,"t":6679},{"x":793.5999999999999,"y":673.240843291876,"phase":"rest","anchor":693.7242995296685,"inset":117,"t":6695.800000011921},{"x":793.5999999999999,"y":673.240843291876,"phase":"rest","anchor":693.7242995296685,"inset":117,"t":6712.4000000059605}]
+CHECK look initial layout: {"x":621.5074756039215,"y":229.35646419897162,"phase":"slide","anchor":693.7242995296685,"inset":117,"t":2611.6000000089407}
+== grimoire-desktop
+CHECK N5 unfound cards show no shape, only ??? and a riddle: 9 unfound cards, 0 with a drawing PASS
+CHECK N5 found cards show their shape: 5 found cards, tally says 5 of 16 found on this device PASS
+CHECK N5 no unfound shape is anywhere in the page: 5 drawings for 5 found PASS
+CHECK combos stay off the page until found: cards: 14 PASS
+== calm-desktop
+CHECK reduced motion: the bolt comes without a flash or a shake: 0 flashes PASS
+CHECK reduced motion: the circle is two turns, not twenty: 2.00 turns PASS
+CHECK reduced motion: messages arrive as words:  PASS
+CHECK reduced motion: he still floats, more gently:  PASS
+== world-layout-phone
+CHECK world box gag returns to reserved home:  PASS
+CHECK world lower floor clears footer: floor=584.38 feet=499.98 footer=701.00 PASS
+CHECK world visible items reachable: [{"id":"paper","box":{"x":111.26307309418615,"y":459.68858661373747,"w":60.16657655814413,"h":71.6618879334297}},{"id":"postcard","box":{"x":241.43520114101102,"y":541.3504745471671,"w":68.33241396758466,"h":49.1448955023633}},{"id":"ticket","box":{"x":111.26307309418614,"y":559.5710017697904,"w":60.43337017151473,"h":30.92436827974013}},{"id":"tin","box":{"x":181.69644326570085,"y":555.6782395368134,"w":49.73875787531018,"h":34.81713051271712}},{"id":"box","box":{"x":255.11600995511606,"y":440.4163219139531,"w":122.88399004488397,"h":90.93415263321414}},{"id":"rack","box":{"x":12.000000000000014,"y":404.7828315933674,"w":94.52614618837228,"h":179.59967775790733}},{"id":"top","box":{"x":267.5535374333337,"y":600.4953700495304,"w":43.88713930174427,"h":43.88713930174427}},{"id":"rifle","box":{"x":111.26307309418614,"y":606.3469886230963,"w":146.29046433914758,"h":38.03552072817837}},{"id":"pat","box":{"x":321.440676735078,"y":628.2905582739685,"w":29.258092867829518,"h":16.091951077306238}}] PASS
+CHECK world default collection mostly unobstructed: [{"id":"paper","fraction":0},{"id":"postcard","fraction":0},{"id":"ticket","fraction":0},{"id":"tin","fraction":0},{"id":"box","fraction":0},{"id":"rack","fraction":0},{"id":"top","fraction":0},{"id":"rifle","fraction":0},{"id":"pat","fraction":0}] PASS
+CHECK world homes leave cat petting stroke clear:  PASS
+CHECK world rack fixed bottom left:  PASS
+CHECK world saves versioned floor poses:  PASS
+CHECK world legacy v2 ticket migrates without motion:  PASS
+CHECK world placement sleeps without updates: shadow updates=0 PASS
+CHECK world shadows attached to world plane:  PASS
+CHECK world furniture reserved:  PASS
+CHECK world saved rigid pose restores asleep: drift=0.0000px PASS
+CHECK world matched rest submission cost: {"samples":{"baseline":[0.10000000894069672,0.10000000894069672,0.09999999403953552,0.10000000894069672,0.10000000894069672],"world":[0.10000000894069672,0.10000000894069672,0.10000000894069672,0.10000000894069672,0.10000000894069672]},"delta":0,"units":"ms CPU render submission; identical cached cat, 5x120 renders"}
+CHECK world rest submission delta <=0.1ms: delta=0.000ms PASS
+CHECK world layout reload under half pixel: max=0.0096px PASS
+CHECK world restored floor idle:  PASS
+== world-core-phone
+CHECK world no eager engine before first solid:  PASS
+CHECK world lazy engine loads after cat:  PASS
+CHECK world renderer: ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)
+CHECK world transient floor depth: {"worstDepth":{"seed":74,"step":43,"depth":-0.030855001121167888},"deepestEpisode":{"seed":74,"start":43,"steps":2,"depth":-0.030855001121167888},"longestDip":3,"worstDip":{"seed":34,"start":82,"steps":3,"depth":-0.0051345881259963755},"dips":[{"seed":1,"start":131,"steps":2,"depth":-0.0019524056786649618},{"seed":2,"start":42,"steps":2,"depth":-0.0009717181561358229},{"seed":3,"start":40,"steps":1,"depth":-0.000808813334163272},{"seed":3,"start":49,"steps":1,"depth":-0.0016238643806814126},{"seed":4,"start":44,"steps":1,"depth":-0.01910264480196039},{"seed":8,"start":87,"steps":1,"depth":-0.0005629792324683483},{"seed":10,"start":89,"steps":1,"depth":-0.0003494038740115002},{"seed":11,"start":44,"steps":1,"depth":-0.00035430650506963063},{"seed":13,"start":45,"steps":1,"depth":-0.001723750690990379},{"seed":15,"start":30,"steps":1,"depth":-0.0007410080665916571},{"seed":16,"start":47,"steps":1,"depth":-0.00006849549473086913},{"seed":19,"start":48,"steps":1,"depth":-0.0006682823579739344},{"seed":21,"start":33,"steps":2,"depth":-0.013567254341299913},{"seed":21,"start":56,"steps":2,"depth":-0.0031759605509734806},{"seed":21,"start":83,"steps":2,"depth":-0.0019402384630260207},{"seed":23,"start":48,"steps":1,"depth":-0.00003681742594920101},{"seed":24,"start":47,"steps":1,"depth":-0.017662285990402135},{"seed":24,"start":51,"steps":1,"depth":-0.0013957312802301072},{"seed":25,"start":27,"steps":1,"depth":-0.0021373442266175574},{"seed":26,"start":78,"steps":1,"depth":-0.00031714632962306574},{"seed":29,"start":71,"steps":1,"depth":-0.0010475712388794828},{"seed":32,"start":36,"steps":1,"depth":-0.0023119070933586977},{"seed":32,"start":72,"steps":2,"depth":-0.0030024716582609176},{"seed":33,"start":63,"steps":1,"depth":-0.00231767286691497},{"seed":33,"start":81,"steps":1,"depth":-0.0019554427695382195},{"seed":33,"start":102,"steps":1,"depth":-0.0001646779270438395},{"seed":34,"start":46,"steps":2,"depth":-0.011260657491740406},{"seed":34,"start":82,"steps":3,"depth":-0.0051345881259963755},{"seed":34,"start":88,"steps":1,"depth":-0.0010278288073042735},{"seed":35,"start":24,"steps":1,"depth":-0.0015080357816249085},{"seed":36,"start":33,"steps":1,"depth":-0.0006909012908401582},{"seed":37,"start":42,"steps":2,"depth":-0.006362419863372368},{"seed":39,"start":54,"steps":1,"depth":-0.001236329061619107},{"seed":40,"start":27,"steps":1,"depth":-0.0013231911345425312},{"seed":41,"start":37,"steps":1,"depth":-0.0011071529483713816},{"seed":43,"start":43,"steps":1,"depth":-0.00032969068007873345},{"seed":44,"start":40,"steps":1,"depth":-0.005242582294036874},{"seed":45,"start":24,"steps":2,"depth":-0.0028963301877100098},{"seed":47,"start":37,"steps":2,"depth":-0.012880380080595485},{"seed":48,"start":38,"steps":2,"depth":-0.004857654642569639},{"seed":50,"start":41,"steps":1,"depth":-0.0007079702137639185},{"seed":51,"start":36,"steps":1,"depth":-0.0073609409251550045},{"seed":53,"start":45,"steps":1,"depth":-0.00003653468449303643},{"seed":57,"start":36,"steps":2,"depth":-0.00859592055650929},{"seed":60,"start":30,"steps":1,"depth":-0.0001923687134037788},{"seed":61,"start":33,"steps":1,"depth":-0.0006127839500367147},{"seed":63,"start":76,"steps":2,"depth":-0.002680238190303219},{"seed":67,"start":97,"steps":1,"depth":-0.0014530662876679687},{"seed":70,"start":43,"steps":1,"depth":-0.001112689262660227},{"seed":71,"start":86,"steps":1,"depth":-0.000007268931665138645},{"seed":73,"start":38,"steps":2,"depth":-0.013959745239580101},{"seed":74,"start":43,"steps":2,"depth":-0.030855001121167888},{"seed":75,"start":45,"steps":2,"depth":-0.003349285378908072},{"seed":76,"start":34,"steps":2,"depth":-0.011541623845240469},{"seed":77,"start":38,"steps":1,"depth":-0.012623649457000133},{"seed":78,"start":38,"steps":1,"depth":-0.0038678780217044004},{"seed":78,"start":45,"steps":1,"depth":-0.002150581063350157},{"seed":79,"start":54,"steps":1,"depth":-0.004097262390905937},{"seed":84,"start":46,"steps":1,"depth":-0.01226865849608387},{"seed":85,"start":25,"steps":3,"depth":-0.009417970608480736},{"seed":86,"start":31,"steps":1,"depth":-0.000230014039716675},{"seed":86,"start":36,"steps":1,"depth":-0.001965729500159344},{"seed":89,"start":46,"steps":1,"depth":-0.022645488722179627},{"seed":89,"start":50,"steps":1,"depth":-0.0001402632403269613},{"seed":90,"start":40,"steps":1,"depth":-0.007181861016426323},{"seed":90,"start":73,"steps":1,"depth":-0.0008193419464396778},{"seed":92,"start":35,"steps":1,"depth":-0.0005570479104351211},{"seed":93,"start":44,"steps":1,"depth":-0.0013363202142242028},{"seed":93,"start":66,"steps":2,"depth":-0.003071773958804966},{"seed":94,"start":64,"steps":2,"depth":-0.004744173095677859},{"seed":96,"start":35,"steps":1,"depth":-0.008645374042760834},{"seed":96,"start":43,"steps":2,"depth":-0.003991343252061658},{"seed":99,"start":43,"steps":2,"depth":-0.0023381950087090347},{"seed":99,"start":66,"steps":2,"depth":-0.005440433689872209}]}
+CHECK world transient duration (diagnostic only, e1110-15): longest=3 steps / 25.000ms
+CHECK world check-rifle off-centre grip: error=0.001px angle=3.117 PASS
+CHECK world cancellation removes joint:  PASS
+CHECK world check-top off-centre grip: error=0.006px angle=2.093 PASS
+CHECK world cancellation removes joint:  PASS
+CHECK world blur releases input:  PASS
+CHECK world sleeping unregisters callback: steps=0 syncs=0 PASS
+CHECK world resting collider within 2px check-rifle: gap=0.384px y=0.001825 PASS
+CHECK world resting collider within 2px check-top: gap=0.516px y=0.001802 PASS
+CHECK world resting art gap: gap=0.384px height=0.00183 PASS
+CHECK world respawn waits five seconds:  PASS
+CHECK world respawn falls once from above: delay=5021ms PASS
+CHECK world budget run 1: {"p95":1.800000011920929,"loadBefore":[6.45,6.93,8.81],"loadAfter":[6.45,6.93,8.81]}
+CHECK world budget run 2: {"p95":2.5,"loadBefore":[6.45,6.93,8.81],"loadAfter":[6.45,6.93,8.81]}
+CHECK world budget run 3: {"p95":1.7000000029802322,"loadBefore":[6.45,6.93,8.81],"loadAfter":[6.45,6.93,8.81]}
+CHECK world budget run 4: {"p95":2.2000000029802322,"loadBefore":[6.45,6.93,8.81],"loadAfter":[6.41,6.91,8.79]}
+CHECK world budget run 5: {"p95":2,"loadBefore":[6.41,6.91,8.79],"loadAfter":[6.41,6.91,8.79]}
+CHECK world 20 bodies desktop CPU budget: median p95=2.000ms/60Hz frame; runs=1.800,2.500,1.700,2.200,2.000; phone viewport is not iPhone hardware PASS
+CHECK world cleanup zero bodies and joints:  PASS
+== physics-phone
+CHECK physics three heights share one floor within 0.5 px: base 584.38, floor 584.38; same/caught true, fell true, straight true PASS
+CHECK physics settles within 3.5 s and stays within 0.5 px for 1 s:  PASS
+CHECK physics unregisters all frame work at rest:  PASS
+CHECK physics exempts sky while solids settle:  PASS
+CHECK physics edge drop stays entirely on screen and on the floor:  PASS
+CHECK physics flick carries sideways then rests on screen on the floor:  PASS
+CHECK physics material measurement: {"id":"box","squash":0.9305155270952581,"base":584.3825093512747,"floor":584.3825093512747,"angle":0,"resting":true,"sx":1,"sy":1}
+CHECK physics material measurement: {"id":"paper","squash":0.9884192545158763,"base":584.3825093512748,"floor":584.3825093512747,"angle":-0.12,"resting":true,"sx":1,"sy":1,"paperBottom":584.3832397460938}
+CHECK physics material measurement: {"id":"pat","squash":0.8847745875328626,"base":584.3825093512747,"floor":584.3825093512747,"angle":0,"resting":true,"sx":1,"sy":1}
+CHECK physics material measurement: {"id":"rifle","squash":1,"base":584.3825093512746,"floor":584.3825093512747,"angle":0,"resting":true,"sx":1,"sy":1,"renderBounds":{"x":117.00001668692121,"y":584.3777923056507,"w":146.29540587237767}}
+CHECK physics box upright paper leaning pat soft rifle flat after settling:  PASS
+CHECK physics layout moves one floor and every resting base together:  PASS
+CHECK physics reload restores saved x and settled floor bases without falling:  PASS
+CHECK physics old airborne saves set down quietly without a frame:  PASS
+== physics-calm-phone
+CHECK physics reduced motion sets a real drop directly on the floor:  PASS
+== play-phone
+CHECK first cat: pose sit, picture 434x319 px at 2x PASS
+CHECK at rest his splats are not redrawn: 0 picture draws in 1 s of floating PASS
+CHECK spin: a 150 px drag turns him: 2.00 rad PASS
+CHECK tap: bonks counted: 4 taps made, 4 counted, count 0 -> 4, shows "4 bonks" PASS
+CHECK tap: emotes: tap: hop (in hold sit) | tap: hop (in hold sit) PASS
+CHECK page hit test: on him / in the corner PASS
+CHECK keyboard: arrows turn him, Enter taps him: turned 0.30 rad, taps +1 PASS
+CHECK N1 loaf > sleep and sleep > loaf: no shake, the pop still plays: lie>sleep shake 0.000 rad, springs to 1.17x; sleep>lie shake 0.000 rad, springs to 1.17x PASS
+CHECK N1 every other pair still shakes: sit>lie 0.028 rad, lie>stretch 0.028 rad, stretch>sit 0.028 rad PASS
+CHECK zig-zag casts the bolt: one flash, and it leaves the cloud: drew zigzag; 1 flash; cloud true PASS
+CHECK N6 the circle: 20 turns in about 2 s, facing his usual way after: drew circle; 20.00 turns in 2.99 s (stroke included), 0.000 rad off home PASS
+CHECK N6 the circle opens neither the galaxy nor the 360: galaxy opened false, 360 fired 0, his own spin speed stayed 0.00 rad/s PASS
+CHECK the circle leaves the top:  PASS
+CHECK N11 a half circle casts the loaf: drew dome; he is bread PASS
+CHECK tap the bread: he is back, and there are crumbs:  PASS
+CHECK N12 loaf then star: the bread blasts off and the galaxy does not open: drew dome then star; blast-offs 1; galaxy opened false PASS
+CHECK N12 the cat pops back, a star stays: he is cat PASS
+CHECK the star alone opens the galaxy; nothing gets through while it has him: drew star; 2 presses swallowed PASS
+CHECK the galaxy leaves a postcard:  PASS
+CHECK N12 the other order (star first, loaf after): just bread: he is bread PASS
+CHECK N6 a player's own fast spin still opens the galaxy: fast for 2.0 s PASS
+CHECK noscope real flick runs the timed riser and video: black 4.991, play 5.008, full 6.008 PASS
+CHECK one flick of a whole turn fires the 360 and leaves the rifle: turned 384 degrees PASS
+CHECK B summons Butterman: scene 1 plays to his song and he butters the cat: drew butter; scene butter; clock audio; captions off PASS
+CHECK N2 scene 2: once round the cat without touching him, then out to open floor: 1 turns, nearest 0.53 from his axis (he is 0.43 wide), stands at -0.72,0.314 PASS
+CHECK N2 scene 2: still for the last second, gone in one frame as the clip ends: still for 2.452 s; last there 29.089 s, clip ends 29.109 s PASS
+CHECK his legs never clip (every scene): butter gap 0.04 poke 0.002, loop gap 0.04 poke 0.005, encore gap 0.04 poke 0.002 PASS
+CHECK scene 1: off screen 2 s or more before the clip ends: butter 2.789 s PASS
+CHECK the whisper is silent far from the butter: loop running true; far: gain 0, heard 0.0e+0; away again: 0.0e+0 PASS
+CHECK the whisper is audible near the butter, and very quiet: gain 0.045, heard 1.5e-2 PASS
+CHECK finding the whisper counts:  PASS
+CHECK gag 2 the butter is flung off: a streak on the glass and the pat at the bottom: butter on him false PASS
+CHECK gag 2 a finger wipes the streak away:  PASS
+CHECK gag 2 the pat dragged back onto him butters him again:  PASS
+CHECK gag 1 a buttered cat who becomes bread hovers and turns instead, and a rejected paper is left: drew dome PASS
+CHECK gag 1 tap the paper to read the rejection:  PASS
+CHECK gag 3 the cup: he pushes the glass off the edge; shards and a puddle are left: drew cup PASS
+CHECK gag 3 a bolt with a puddle on the floor goes through the water: struck the puddle at 200,553 PASS
+CHECK gag 4 the square: a box drops, he is in it (ears out), and the box stays: drew square PASS
+CHECK gag 4 tap the box: in one side, out the other:  PASS
+CHECK gag 5 the eight: eyes on his face, a choir, they fall off and stay on the floor: drew eight PASS
+CHECK gag 5 the eyes can be dragged onto something else (the cloud): stuck to cloud PASS
+CHECK gag 6 the triangle: a hat lands on him, the butter rides on top of it, and there is a rack: drew triangle; hat crown; butter lifted 0.15 PASS
+CHECK N11 the triangle no longer casts the loaf: it is the hat now PASS
+CHECK gag 6 tap the rack: another hat: crown -> wizard (2 taps) PASS
+CHECK gag 7 the theme plucked on his whiskers brings the encore, and a ticket: 5 plucks landed on whiskers; scene encore PASS
+CHECK gag 8 seven strokes build a purr and leave a permanent plaster and tin: purr reached 1.00; 7 strokes PASS
+CHECK the sound control mutes everything (a clip, a song, the loops): playing 1.0e-1 -> muted 0.0e+0; a song started while muted 0.0e+0; button says "sound off" PASS
+CHECK sound on again, volume set: heard 1.0e-1, volume 0.55 PASS
+CHECK a keepsake can be dragged to a new place: the tin moved 0.76 cat-heights PASS
+CHECK found: 16 of 16: all PASS
+CHECK before the reload: 14 keepsakes: cloud, top, crumbs, twinkle, postcard, rifle, paper, puddle, shards, box, eyes, rack, ticket, tin
+CHECK keepsakes survive a reload: 14 of 14 still there PASS
+CHECK and are where they were left: every one within 0.02 cat-heights PASS
+CHECK what he was wearing survives too: hat wizard, butter true, eyes on cloud PASS
+CHECK finds and bonks survive: 16 found, 6 bonks, 16 marks in the row PASS
+CHECK the sound control survives a reload (left muted, volume kept): muted true, volume 0.55, button "sound off", heard 0.0e+0 PASS
+== noscope-footer-phone
+CHECK noscope footer slider hit during black fade:  PASS
+CHECK noscope footer slider hit during video:  PASS
+CHECK noscope footer native drag sets video gain:  PASS
+CHECK noscope footer slider tap does not skip or unlock:  PASS
+CHECK noscope footer button mutes without skipping:  PASS
+CHECK noscope footer button unmutes without unlocking:  PASS
+CHECK noscope footer remains reachable during return: {"original":{"x":159.515625,"y":795},"now":{"x":159.515625,"y":795},"hit":true,"locked":true} PASS
+CHECK noscope footer restores normal page after return:  PASS
+== noscope-video-phone
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 34812)
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/socketserver.py", line 692, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.12/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/usr/lib/python3.12/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.12/socketserver.py", line 761, in __init__
+    self.handle()
+  File "/usr/lib/python3.12/http/server.py", line 436, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.12/http/server.py", line 424, in handle_one_request
+    method()
+  File "/usr/lib/python3.12/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+  File "/usr/lib/python3.12/http/server.py", line 878, in copyfile
+    shutil.copyfileobj(source, outputfile)
+  File "/usr/lib/python3.12/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 34830)
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/socketserver.py", line 692, in process_request_thread
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.12/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/usr/lib/python3.12/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.12/socketserver.py", line 761, in __init__
+    self.handle()
+  File "/usr/lib/python3.12/http/server.py", line 436, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.12/http/server.py", line 424, in handle_one_request
+    method()
+  File "/usr/lib/python3.12/http/server.py", line 679, in do_GET
+    self.copyfile(f, self.wfile)
+  File "/usr/lib/python3.12/http/server.py", line 878, in copyfile
+    shutil.copyfileobj(source, outputfile)
+  File "/usr/lib/python3.12/shutil.py", line 204, in copyfileobj
+    fdst_write(buf)
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+----------------------------------------
+CHECK noscope first 360 lazily fetches video:  PASS
+CHECK noscope riser and locked fade reach black at five seconds: black 5.044 s PASS
+CHECK noscope video starts at five and fades in by six: playing 5.027, full 6.044 PASS
+CHECK noscope riser ends with video fade-in:  PASS
+CHECK noscope video advances in real time inline: 1.811156 -> 2.809615 PASS
+CHECK noscope video end restores page and rifle:  PASS
+CHECK noscope muted video and riser have zero output:  PASS
+CHECK noscope volume follows slider while page sounds stay quiet:  PASS
+CHECK noscope tap skips and restores input:  PASS
+CHECK noscope Escape skips every subsequent 360:  PASS
+== look-pet-pass-phone
+CHECK look sub-threshold pet wiggles count nothing: 10 routed moves, 0 strokes, 0 bites PASS
+CHECK look one 300 px pet pass counts once without biting: 60 routed moves, 1 strokes, 0 bites PASS
+CHECK look seven real pet passes bite only on seventh: [{"strokes":1,"bites":0},{"strokes":2,"bites":0},{"strokes":3,"bites":0},{"strokes":4,"bites":0},{"strokes":5,"bites":0},{"strokes":6,"bites":0},{"strokes":7,"bites":1}] PASS
+== look-butterman-bite-phone
+CHECK look Butterman butter has no caption text:  PASS
+CHECK look Butterman loop has no caption text:  PASS
+CHECK look Butterman rise has no caption text:  PASS
+CHECK look Butterman encore has no caption text:  PASS
+CHECK look Butterman rise disappears on clip end frame: last visible 10.865637188208616, first absent 10.888857142857145, decoded end 10.879999999999999 PASS
+CHECK look bite occurs on seventh stroke: after six 0, after seven 1 PASS
+CHECK look permanent plaster survives reload: saved true, cursor true PASS
+CHECK look bitten cat refuses strokes after reload: attempted 24, purr 0, bites 0 PASS
+CHECK look tin cannot remove permanent plaster:  PASS
+== look-pat-return-phone
+CHECK pat press measurement: {"side":-1,"point":{"x":148.2,"y":563.3365338126217},"px":{"x":148.2,"y":571.3825093512748},"box":{"x":133.57095356608522,"y":555.2905582739686,"w":29.258092867829518,"h":16.091951077306238},"size":[29.258092867829518,16.091951077306238],"phoneScale":0.65,"resting":true,"held":false,"flight":null,"contact":null,"physics":{"active":0,"steps":0,"listening":false},"layer":"front","candidates":[{"id":"pat","gl":true,"order":7,"box":{"x":133.57095356608522,"y":555.2905582739686,"w":29.258092867829518,"h":16.091951077306238}}],"dom":["on","wash","BODY","HTML"],"sponge":{"pointerEvents":"none","opacity":"0.362101"}}
+CHECK pat press receiver: {"held":["pat"],"calls":["pat.dragging","pat.dragging"]}
+CHECK pat drag calls: ["pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dropped"]
+CHECK look crowded floor pat returns from left:  PASS
+CHECK pat press measurement: {"side":1,"point":{"x":218.80615470709625,"y":563.3365338126217},"px":{"x":218.80615470709625,"y":571.3825093512748},"box":{"x":204.1771082731815,"y":555.2905582739686,"w":29.258092867829518,"h":16.091951077306238},"size":[29.258092867829518,16.091951077306238],"phoneScale":0.65,"resting":true,"held":false,"flight":null,"contact":null,"physics":{"active":0,"steps":0,"listening":false},"layer":"front","candidates":[{"id":"pat","gl":true,"order":9,"box":{"x":204.1771082731815,"y":555.2905582739686,"w":29.258092867829518,"h":16.091951077306238}}],"dom":["on","wash","BODY","HTML"],"sponge":{"pointerEvents":"none","opacity":"0.361961"}}
+CHECK pat press receiver: {"held":["pat"],"calls":["pat.dragging","pat.dragging"]}
+CHECK pat drag calls: ["pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dragging","pat.dropped"]
+CHECK look crowded floor pat returns from right:  PASS
+== look-use-phone
+CHECK look top is room-lit metal with a contact shadow:  PASS
+CHECK look top follows a drag:  PASS
+CHECK look top spins then tips and rests:  PASS
+CHECK look wipe equips a sponge:  PASS
+CHECK look wipe removes sponge and streak:  PASS
+CHECK look sponge audio loads:  PASS
+CHECK look top and butter survive reload:  PASS
+== look-landing-phone
+CHECK look butter glass landing central: centre 0.380, 0.400; 10 impact frames PASS
+CHECK look butter glass landing enlarged: projected width / resting width 3.185 PASS
+CHECK look galaxy sigil faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.063325, preceding wind-down max 0.115609; hold step 0.000000 vs final wind-down 0.063325 PASS
+CHECK look galaxy sigil resumes home: yaw 37.252623639060786 PASS
+CHECK look galaxy positive faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.035996, preceding wind-down max 0.074456; hold step 0.000000 vs final wind-down 0.035996 PASS
+CHECK look galaxy positive resumes home: yaw 87.5182988719595 PASS
+CHECK look galaxy negative faces camera smoothly: yaw error 0.000000 rad; last .5s + hold max step 0.044349, preceding wind-down max 0.091983; hold step 0.000000 vs final wind-down 0.044349 PASS
+CHECK look galaxy negative resumes home: yaw -119.82691394036132 PASS
+== look-motion-phone
+CHECK look butter rest stable for one second: 0.000 px over 1098 ms (67 frames) PASS
+CHECK look butter handover below half a pixel: 0.000 px; largest step across 7 frames 0.083 px; frames 238 PASS
+CHECK look measured handover: [{"x":241.8007625216348,"y":563.2250737115594,"phase":"slide","anchor":571.3825093512748,"inset":169,"t":6290.699999988079},{"x":241.80017374442218,"y":563.3083811078297,"phase":"slide","anchor":571.3825093512748,"inset":169,"t":6307.199999988079},{"x":241.8000000054908,"y":563.336532810858,"phase":"slide","anchor":571.3825093512748,"inset":169,"t":6324.29999999702},{"x":241.79999999999995,"y":563.3365338126215,"phase":"rest","anchor":571.3825093512748,"inset":169,"t":6341},{"x":241.79999999999995,"y":563.3365338126215,"phase":"rest","anchor":571.3825093512748,"inset":169,"t":6356},{"x":241.79999999999995,"y":563.3365338126215,"phase":"rest","anchor":571.3825093512748,"inset":169,"t":6372.699999988079},{"x":241.79999999999995,"y":563.3365338126215,"phase":"rest","anchor":571.3825093512748,"inset":169,"t":6389.399999991059},{"x":241.79999999999995,"y":563.3365338126215,"phase":"rest","anchor":571.3825093512748,"inset":169,"t":6406.0999999940395},{"x":241.79999999999995,"y":563.3365338126215,"phase":"rest","anchor":571.3825093512748,"inset":169,"t":6422.899999991059},{"x":241.79999999999995,"y":563.3365338126215,"phase":"rest","anchor":571.3825093512748,"inset":169,"t":6439.5},{"x":241.79999999999995,"y":563.3365338126215,"phase":"rest","anchor":571.3825093512748,"inset":169,"t":6456}]
+CHECK look initial layout: {"x":181.9676942892422,"y":273.6327717379454,"phase":"slide","anchor":584.3825093512747,"inset":143,"t":2523}
+== grimoire-phone
+CHECK N5 unfound cards show no shape, only ??? and a riddle: 9 unfound cards, 0 with a drawing PASS
+CHECK N5 found cards show their shape: 5 found cards, tally says 5 of 16 found on this device PASS
+CHECK N5 no unfound shape is anywhere in the page: 5 drawings for 5 found PASS
+CHECK combos stay off the page until found: cards: 14 PASS
+== calm-phone
+CHECK reduced motion: the bolt comes without a flash or a shake: 0 flashes PASS
+CHECK reduced motion: the circle is two turns, not twenty: 2.00 turns PASS
+CHECK reduced motion: messages arrive as words:  PASS
+CHECK reduced motion: he still floats, more gently:  PASS
+== sigils
+PASS: all checks passed
+== files
+CHECK no file under assets/audio/placeholder/ is referenced: PASS
+CHECK every asset the code names is in the repo: PASS
+
+ALL PASS

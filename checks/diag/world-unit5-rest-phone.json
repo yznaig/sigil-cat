@@ -1,0 +1,512 @@
+{
+  "baseline": "677f535",
+  "size": "phone",
+  "viewport": [
+    390,
+    844,
+    2
+  ],
+  "method": "five alternating warmed rounds, uncapped RAF full frames and GPU elapsed queries; desktop CPU, not iPhone",
+  "results": {
+    "baseline": [
+      {
+        "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "gpu": {
+          "n": 209,
+          "median": 0.010592,
+          "p95": 1.405376
+        },
+        "submission": {
+          "n": 1101,
+          "median": 0.10000000894069672,
+          "p95": 1.300000011920929
+        },
+        "frame": {
+          "n": 1100,
+          "median": 0.5,
+          "p95": 1.8999999999996362
+        },
+        "scene": [
+          "box",
+          "cloud",
+          "crumbs",
+          "eyes",
+          "grease",
+          "paper",
+          "pat",
+          "postcard",
+          "puddle",
+          "rack",
+          "rifle",
+          "shards",
+          "ticket",
+          "tin",
+          "top",
+          "twinkle"
+        ],
+        "dpr": 2,
+        "round": 0,
+        "loadBefore": [
+          7.17,
+          6.68,
+          7.41
+        ],
+        "loadAfter": [
+          8.9,
+          7.08,
+          7.54
+        ]
+      },
+      {
+        "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "gpu": {
+          "n": 209,
+          "median": 0.010592,
+          "p95": 1.35648
+        },
+        "submission": {
+          "n": 1101,
+          "median": 0.10000000894069672,
+          "p95": 1.2000000029802322
+        },
+        "frame": {
+          "n": 1100,
+          "median": 0.4000000000014552,
+          "p95": 1.7000000000007276
+        },
+        "scene": [
+          "box",
+          "cloud",
+          "crumbs",
+          "eyes",
+          "grease",
+          "paper",
+          "pat",
+          "postcard",
+          "puddle",
+          "rack",
+          "rifle",
+          "shards",
+          "ticket",
+          "tin",
+          "top",
+          "twinkle"
+        ],
+        "dpr": 2,
+        "round": 1,
+        "loadBefore": [
+          9.56,
+          7.48,
+          7.65
+        ],
+        "loadAfter": [
+          9.69,
+          7.58,
+          7.69
+        ]
+      },
+      {
+        "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "gpu": {
+          "n": 209,
+          "median": 0.010624,
+          "p95": 0.9256
+        },
+        "submission": {
+          "n": 1101,
+          "median": 0.09999999403953552,
+          "p95": 1.199999988079071
+        },
+        "frame": {
+          "n": 1100,
+          "median": 0.5,
+          "p95": 1.7000000000007276
+        },
+        "scene": [
+          "box",
+          "cloud",
+          "crumbs",
+          "eyes",
+          "grease",
+          "paper",
+          "pat",
+          "postcard",
+          "puddle",
+          "rack",
+          "rifle",
+          "shards",
+          "ticket",
+          "tin",
+          "top",
+          "twinkle"
+        ],
+        "dpr": 2,
+        "round": 2,
+        "loadBefore": [
+          9.69,
+          7.58,
+          7.69
+        ],
+        "loadAfter": [
+          9.45,
+          7.63,
+          7.7
+        ]
+      },
+      {
+        "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "gpu": {
+          "n": 209,
+          "median": 0.010528,
+          "p95": 1.170016
+        },
+        "submission": {
+          "n": 1101,
+          "median": 0.10000000894069672,
+          "p95": 1.3999999910593033
+        },
+        "frame": {
+          "n": 1100,
+          "median": 0.5,
+          "p95": 1.7000000000007276
+        },
+        "scene": [
+          "box",
+          "cloud",
+          "crumbs",
+          "eyes",
+          "grease",
+          "paper",
+          "pat",
+          "postcard",
+          "puddle",
+          "rack",
+          "rifle",
+          "shards",
+          "ticket",
+          "tin",
+          "top",
+          "twinkle"
+        ],
+        "dpr": 2,
+        "round": 3,
+        "loadBefore": [
+          10.36,
+          8.12,
+          7.87
+        ],
+        "loadAfter": [
+          10.41,
+          8.25,
+          7.91
+        ]
+      },
+      {
+        "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "gpu": {
+          "n": 209,
+          "median": 0.01056,
+          "p95": 1.308352
+        },
+        "submission": {
+          "n": 1101,
+          "median": 0.10000000894069672,
+          "p95": 1.300000011920929
+        },
+        "frame": {
+          "n": 1100,
+          "median": 0.5,
+          "p95": 2
+        },
+        "scene": [
+          "box",
+          "cloud",
+          "crumbs",
+          "eyes",
+          "grease",
+          "paper",
+          "pat",
+          "postcard",
+          "puddle",
+          "rack",
+          "rifle",
+          "shards",
+          "ticket",
+          "tin",
+          "top",
+          "twinkle"
+        ],
+        "dpr": 2,
+        "round": 4,
+        "loadBefore": [
+          10.41,
+          8.25,
+          7.91
+        ],
+        "loadAfter": [
+          10.74,
+          8.39,
+          7.96
+        ]
+      }
+    ],
+    "converted": [
+      {
+        "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "gpu": {
+          "n": 292,
+          "median": 0.010816,
+          "p95": 1.11488
+        },
+        "submission": {
+          "n": 1101,
+          "median": 0.10000000894069672,
+          "p95": 1.4000000059604645
+        },
+        "frame": {
+          "n": 1100,
+          "median": 0.5,
+          "p95": 1.8999999999996362
+        },
+        "scene": [
+          "box",
+          "cloud",
+          "crumbs",
+          "eyes",
+          "grease",
+          "paper",
+          "pat",
+          "postcard",
+          "puddle",
+          "rack",
+          "rifle",
+          "shards",
+          "ticket",
+          "tin",
+          "top",
+          "twinkle"
+        ],
+        "dpr": 2,
+        "round": 0,
+        "loadBefore": [
+          8.9,
+          7.08,
+          7.54
+        ],
+        "loadAfter": [
+          9.37,
+          7.33,
+          7.61
+        ]
+      },
+      {
+        "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "gpu": {
+          "n": 292,
+          "median": 0.010816,
+          "p95": 1.170464
+        },
+        "submission": {
+          "n": 1101,
+          "median": 0.10000000894069672,
+          "p95": 1.6000000089406967
+        },
+        "frame": {
+          "n": 1100,
+          "median": 0.5999999999985448,
+          "p95": 2.2000000000007276
+        },
+        "scene": [
+          "box",
+          "cloud",
+          "crumbs",
+          "eyes",
+          "grease",
+          "paper",
+          "pat",
+          "postcard",
+          "puddle",
+          "rack",
+          "rifle",
+          "shards",
+          "ticket",
+          "tin",
+          "top",
+          "twinkle"
+        ],
+        "dpr": 2,
+        "round": 1,
+        "loadBefore": [
+          9.37,
+          7.33,
+          7.61
+        ],
+        "loadAfter": [
+          9.56,
+          7.48,
+          7.65
+        ]
+      },
+      {
+        "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "gpu": {
+          "n": 291,
+          "median": 0.010784,
+          "p95": 0.98672
+        },
+        "submission": {
+          "n": 1101,
+          "median": 0.10000000894069672,
+          "p95": 1.4000000059604645
+        },
+        "frame": {
+          "n": 1100,
+          "median": 0.5,
+          "p95": 2
+        },
+        "scene": [
+          "box",
+          "cloud",
+          "crumbs",
+          "eyes",
+          "grease",
+          "paper",
+          "pat",
+          "postcard",
+          "puddle",
+          "rack",
+          "rifle",
+          "shards",
+          "ticket",
+          "tin",
+          "top",
+          "twinkle"
+        ],
+        "dpr": 2,
+        "round": 2,
+        "loadBefore": [
+          9.45,
+          7.63,
+          7.7
+        ],
+        "loadAfter": [
+          10.96,
+          8.13,
+          7.86
+        ]
+      },
+      {
+        "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "gpu": {
+          "n": 292,
+          "median": 0.010816,
+          "p95": 1.186944
+        },
+        "submission": {
+          "n": 1101,
+          "median": 0.10000000894069672,
+          "p95": 1.5999999940395355
+        },
+        "frame": {
+          "n": 1100,
+          "median": 0.5999999999985448,
+          "p95": 2
+        },
+        "scene": [
+          "box",
+          "cloud",
+          "crumbs",
+          "eyes",
+          "grease",
+          "paper",
+          "pat",
+          "postcard",
+          "puddle",
+          "rack",
+          "rifle",
+          "shards",
+          "ticket",
+          "tin",
+          "top",
+          "twinkle"
+        ],
+        "dpr": 2,
+        "round": 3,
+        "loadBefore": [
+          10.96,
+          8.13,
+          7.86
+        ],
+        "loadAfter": [
+          10.36,
+          8.12,
+          7.87
+        ]
+      },
+      {
+        "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "gpu": {
+          "n": 502,
+          "median": 0.012672,
+          "p95": 2.004576
+        },
+        "submission": {
+          "n": 1101,
+          "median": 0.19999998807907104,
+          "p95": 0.5
+        },
+        "frame": {
+          "n": 1100,
+          "median": 0.8000000000010914,
+          "p95": 3.7000000000007276
+        },
+        "scene": [
+          "box",
+          "cloud",
+          "crumbs",
+          "eyes",
+          "grease",
+          "paper",
+          "pat",
+          "postcard",
+          "puddle",
+          "rack",
+          "rifle",
+          "shards",
+          "ticket",
+          "tin",
+          "top",
+          "twinkle"
+        ],
+        "dpr": 2,
+        "round": 4,
+        "loadBefore": [
+          10.74,
+          8.39,
+          7.96
+        ],
+        "loadAfter": [
+          13.07,
+          9.04,
+          8.18
+        ]
+      }
+    ]
+  },
+  "delta": {
+    "gpu": 0.0002239999999999985,
+    "submission": 0,
+    "frame": 0.09999999999854481
+  },
+  "errors": [],
+  "decision": {
+    "limitNs": 100000,
+    "deltaNs": {
+      "gpu": 224,
+      "submission": 0,
+      "frame": 100000
+    },
+    "gpuAvailable": true,
+    "pass": true
+  }
+}

@@ -1,0 +1,448 @@
+{
+  "base": "http://localhost:18746",
+  "date": "2026-11-11T06:36:30.774Z",
+  "browser": "~/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+  "sourceSha256": "4385fc3cbb6730764571cb492de8cd459eb8479609405843639d2181737cfef0",
+  "sizes": {
+    "desktop": {
+      "width": 1280,
+      "height": 900,
+      "dpr": 1,
+      "runs": [
+        {
+          "durationMs": 10089.3,
+          "frames": 574,
+          "meanMs": 17.57,
+          "p95Ms": 16.8,
+          "worstMs": 366.6,
+          "over25ms": 5,
+          "phases": {
+            "spin": {
+              "frames": 285,
+              "meanMs": 18.49,
+              "p95Ms": 16.8,
+              "worstMs": 366.6,
+              "over25ms": 5
+            },
+            "hold": {
+              "frames": 180,
+              "meanMs": 16.67,
+              "p95Ms": 16.7,
+              "worstMs": 16.8,
+              "over25ms": 0
+            },
+            "recede": {
+              "frames": 108,
+              "meanMs": 16.66,
+              "p95Ms": 16.7,
+              "worstMs": 16.8,
+              "over25ms": 0
+            },
+            "closed": {
+              "frames": 1,
+              "meanMs": 16.7,
+              "p95Ms": 16.7,
+              "worstMs": 16.7,
+              "over25ms": 0
+            }
+          },
+          "warm": {
+            "left": 0,
+            "log": [
+              "8.53s cloud 246 ms",
+              "8.91s galaxy 124 ms",
+              "9.99s glass 51 ms",
+              "10.17s puddle 17 ms",
+              "10.33s buttermanLight 408 ms",
+              "10.88s butterman 115 ms",
+              "11.38s Mesh 57 ms",
+              "11.56s handButter 79 ms",
+              "11.93s Mesh 126 ms"
+            ]
+          },
+          "longFrames": [
+            {
+              "atMs": 386.5,
+              "gapMs": 366.6,
+              "phase": "spin"
+            },
+            {
+              "atMs": 619.8,
+              "gapMs": 66.7,
+              "phase": "spin"
+            },
+            {
+              "atMs": 1536.5,
+              "gapMs": 116.7,
+              "phase": "spin"
+            }
+          ],
+          "hostLoad": [
+            22.59,
+            24.99,
+            27.92
+          ]
+        },
+        {
+          "durationMs": 9900.5,
+          "frames": 568,
+          "meanMs": 17.43,
+          "p95Ms": 16.8,
+          "worstMs": 166.7,
+          "over25ms": 11,
+          "phases": {
+            "spin": {
+              "frames": 284,
+              "meanMs": 17.84,
+              "p95Ms": 16.8,
+              "worstMs": 166.7,
+              "over25ms": 10
+            },
+            "hold": {
+              "frames": 180,
+              "meanMs": 16.67,
+              "p95Ms": 16.8,
+              "worstMs": 16.8,
+              "over25ms": 0
+            },
+            "recede": {
+              "frames": 103,
+              "meanMs": 17.64,
+              "p95Ms": 16.8,
+              "worstMs": 116.7,
+              "over25ms": 1
+            },
+            "closed": {
+              "frames": 1,
+              "meanMs": 16.6,
+              "p95Ms": 16.6,
+              "worstMs": 16.6,
+              "over25ms": 0
+            }
+          },
+          "warm": {
+            "left": 0,
+            "log": [
+              "14.85s cloud 141 ms",
+              "15.12s galaxy 106 ms",
+              "16.01s glass 54 ms",
+              "16.19s puddle 25 ms",
+              "16.35s buttermanLight 410 ms",
+              "16.89s butterman 67 ms",
+              "17.25s Mesh 42 ms",
+              "17.42s handButter 43 ms",
+              "17.69s Mesh 100 ms"
+            ]
+          },
+          "longFrames": [
+            {
+              "atMs": 1432.1,
+              "gapMs": 166.7,
+              "phase": "spin"
+            },
+            {
+              "atMs": 1515.5,
+              "gapMs": 50.1,
+              "phase": "spin"
+            },
+            {
+              "atMs": 8465.2,
+              "gapMs": 116.7,
+              "phase": "recede"
+            }
+          ],
+          "hostLoad": [
+            20.11,
+            24.09,
+            27.51
+          ]
+        },
+        {
+          "durationMs": 9808,
+          "frames": 571,
+          "meanMs": 17.17,
+          "p95Ms": 16.8,
+          "worstMs": 66.7,
+          "over25ms": 16,
+          "phases": {
+            "spin": {
+              "frames": 284,
+              "meanMs": 17.56,
+              "p95Ms": 16.8,
+              "worstMs": 66.7,
+              "over25ms": 14
+            },
+            "hold": {
+              "frames": 180,
+              "meanMs": 16.67,
+              "p95Ms": 16.8,
+              "worstMs": 16.8,
+              "over25ms": 0
+            },
+            "recede": {
+              "frames": 106,
+              "meanMs": 16.98,
+              "p95Ms": 16.8,
+              "worstMs": 33.4,
+              "over25ms": 2
+            },
+            "closed": {
+              "frames": 1,
+              "meanMs": 16.6,
+              "p95Ms": 16.6,
+              "worstMs": 16.6,
+              "over25ms": 0
+            }
+          },
+          "warm": {
+            "left": 0,
+            "log": [
+              "4.31s cloud 181 ms",
+              "4.63s galaxy 115 ms",
+              "5.59s glass 58 ms",
+              "5.78s puddle 50 ms",
+              "5.99s buttermanLight 392 ms",
+              "6.59s butterman 114 ms",
+              "7.07s Mesh 23 ms",
+              "7.23s handButter 89 ms",
+              "7.58s Mesh 120 ms"
+            ]
+          },
+          "longFrames": [
+            {
+              "atMs": 3305.2,
+              "gapMs": 66.7,
+              "phase": "spin"
+            }
+          ],
+          "hostLoad": [
+            24.81,
+            24.84,
+            27.66
+          ]
+        }
+      ],
+      "shots": [],
+      "gpu": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)"
+    },
+    "phone": {
+      "width": 390,
+      "height": 844,
+      "dpr": 2,
+      "runs": [
+        {
+          "durationMs": 10356.7,
+          "frames": 548,
+          "meanMs": 18.89,
+          "p95Ms": 16.8,
+          "worstMs": 566.7,
+          "over25ms": 20,
+          "phases": {
+            "spin": {
+              "frames": 296,
+              "meanMs": 16.84,
+              "p95Ms": 16.7,
+              "worstMs": 66.6,
+              "over25ms": 2
+            },
+            "hold": {
+              "frames": 177,
+              "meanMs": 16.95,
+              "p95Ms": 16.8,
+              "worstMs": 33.3,
+              "over25ms": 3
+            },
+            "recede": {
+              "frames": 74,
+              "meanMs": 31.76,
+              "p95Ms": 83.3,
+              "worstMs": 566.7,
+              "over25ms": 15
+            },
+            "closed": {
+              "frames": 1,
+              "meanMs": 16.7,
+              "p95Ms": 16.7,
+              "worstMs": 16.7,
+              "over25ms": 0
+            }
+          },
+          "warm": {
+            "left": 0,
+            "log": [
+              "5.94s cloud 192 ms",
+              "6.26s galaxy 85 ms",
+              "7.40s glass 63 ms",
+              "7.59s puddle 12 ms",
+              "7.72s buttermanLight 383 ms",
+              "8.24s butterman 85 ms",
+              "8.77s Mesh 16 ms",
+              "8.91s handButter 43 ms",
+              "9.20s Mesh 113 ms"
+            ]
+          },
+          "longFrames": [
+            {
+              "atMs": 3518.1,
+              "gapMs": 66.6,
+              "phase": "spin"
+            },
+            {
+              "atMs": 8384.6,
+              "gapMs": 50.1,
+              "phase": "recede"
+            },
+            {
+              "atMs": 8934.5,
+              "gapMs": 149.9,
+              "phase": "recede"
+            },
+            {
+              "atMs": 9501.2,
+              "gapMs": 566.7,
+              "phase": "recede"
+            },
+            {
+              "atMs": 9751.2,
+              "gapMs": 133.4,
+              "phase": "recede"
+            },
+            {
+              "atMs": 9934.5,
+              "gapMs": 66.7,
+              "phase": "recede"
+            },
+            {
+              "atMs": 10017.8,
+              "gapMs": 83.3,
+              "phase": "recede"
+            }
+          ],
+          "hostLoad": [
+            22.85,
+            24.37,
+            27.45
+          ]
+        },
+        {
+          "durationMs": 9788,
+          "frames": 581,
+          "meanMs": 16.84,
+          "p95Ms": 16.8,
+          "worstMs": 50,
+          "over25ms": 6,
+          "phases": {
+            "spin": {
+              "frames": 295,
+              "meanMs": 16.9,
+              "p95Ms": 16.8,
+              "worstMs": 50,
+              "over25ms": 4
+            },
+            "hold": {
+              "frames": 179,
+              "meanMs": 16.76,
+              "p95Ms": 16.8,
+              "worstMs": 33.4,
+              "over25ms": 1
+            },
+            "recede": {
+              "frames": 106,
+              "meanMs": 16.82,
+              "p95Ms": 16.7,
+              "worstMs": 33.3,
+              "over25ms": 1
+            },
+            "closed": {
+              "frames": 1,
+              "meanMs": 16.7,
+              "p95Ms": 16.7,
+              "worstMs": 16.7,
+              "over25ms": 0
+            }
+          },
+          "warm": {
+            "left": 0,
+            "log": [
+              "4.41s cloud 177 ms",
+              "4.72s galaxy 80 ms",
+              "6.12s glass 259 ms",
+              "6.50s puddle 24 ms",
+              "6.65s buttermanLight 433 ms",
+              "7.21s butterman 100 ms",
+              "7.76s Mesh 29 ms",
+              "7.92s handButter 65 ms",
+              "8.41s Mesh 129 ms"
+            ]
+          },
+          "longFrames": [],
+          "hostLoad": [
+            27.63,
+            25.35,
+            27.71
+          ]
+        },
+        {
+          "durationMs": 9787.7,
+          "frames": 586,
+          "meanMs": 16.7,
+          "p95Ms": 16.8,
+          "worstMs": 33.4,
+          "over25ms": 2,
+          "phases": {
+            "spin": {
+              "frames": 299,
+              "meanMs": 16.67,
+              "p95Ms": 16.8,
+              "worstMs": 33.4,
+              "over25ms": 1
+            },
+            "hold": {
+              "frames": 179,
+              "meanMs": 16.76,
+              "p95Ms": 16.8,
+              "worstMs": 33.3,
+              "over25ms": 1
+            },
+            "recede": {
+              "frames": 107,
+              "meanMs": 16.67,
+              "p95Ms": 16.7,
+              "worstMs": 16.8,
+              "over25ms": 0
+            },
+            "closed": {
+              "frames": 1,
+              "meanMs": 16.7,
+              "p95Ms": 16.7,
+              "worstMs": 16.7,
+              "over25ms": 0
+            }
+          },
+          "warm": {
+            "left": 0,
+            "log": [
+              "4.60s cloud 177 ms",
+              "4.92s galaxy 143 ms",
+              "5.94s glass 28 ms",
+              "6.08s puddle 44 ms",
+              "6.25s buttermanLight 369 ms",
+              "6.75s butterman 95 ms",
+              "7.22s Mesh 25 ms",
+              "7.39s handButter 46 ms",
+              "7.76s Mesh 139 ms"
+            ]
+          },
+          "longFrames": [],
+          "hostLoad": [
+            30.01,
+            26.02,
+            27.87
+          ]
+        }
+      ],
+      "shots": [],
+      "gpu": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)"
+    }
+  }
+}

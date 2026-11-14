@@ -1,0 +1,526 @@
+<!doctype html>
+<!--
+  Splat cat: four still poses that pop into each other (Aaron, 2026-11-08: "each position just sort of pops into
+  existence ... 4 still frames for each pose, linked together in a tasteful/stylized way").
+  Each pose is one Gaussian splat. Today they are STAND-INS baked in the browser from the mesh cat's own poses
+  (../sigil-cat/models/sigil-cat.glb): the posed surface is sampled into flat discs, plus a layer of lifted
+  lighter "fibre" splats for the flocked fuzz, with soft studio light baked in. When Idol splats exist they load
+  from splats/<pose>.spz instead (#src=idol). Findings: docs/research/splats.md.
+  Stack: three.js 0.186.1 + Spark 2.4.0 (sparkjs.dev) from jsDelivr via the importmap. No build step.
+  Serve the repo root over http (python3 -m http.server) and open /prototypes/splats/.
+  Hash options (combine with &):
+    #style=puff|shimmer|pop|smear  transition style        #pose=sit|loaf|sleep|stretch  start pose
+    #n=65536      Gaussians per pose (32768, 65536, 131072, 262144)   #yaw=30   face this way (degrees)
+    #auto=0       no automatic pose changes                #ui=0     hide buttons (clean screenshots)
+    #from=sit&to=loaf&u=0.5   freeze one moment (0..1) of that transition, for contact sheets
+    #view=compare  mesh cat (live prototype, iframe) on the left, splat on the right
+    #fuzz=0       no fibre layer          #src=idol   load splats/<pose>.spz (Idol output) instead of baking
+  ?perf=1 (or #perf=1): fps, frame time, Gaussians drawn, pixel ratio, GPU.  &dpr=1 pins the pixel ratio.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Splat Cat</title>
+<style>
+  :root { --bone: #f7ede3; --ink: #121212; --ink-soft: #6b6359; --pill: rgba(255,255,255,.7); --butter: #f3d36b; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bone); color: var(--ink); overflow: hidden; overscroll-behavior: none;
+    font: 15px/1.4 ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  #stage { position: fixed; inset: 0; display: flex; }
+  #stage iframe { flex: 1 1 50%; border: 0; min-width: 0; }
+  #stage canvas { flex: 1 1 50%; min-width: 0; height: 100%; display: block; touch-action: manipulation; cursor: pointer; }
+  .tag { position: fixed; top: 14px; left: 16px; margin: 0; font-size: 13px; color: var(--ink-soft); }
+  .pane-label { position: fixed; top: 14px; font-size: 13px; color: var(--ink-soft); }
+  .controls { position: fixed; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; flex-wrap: wrap;
+    justify-content: center; width: max-content; max-width: calc(100vw - 32px); }
+  .controls.row1 { bottom: 64px; } .controls.row2 { bottom: 20px; } .controls.row0 { bottom: 108px; }
+  .controls span { align-self: center; font-size: 12px; color: var(--ink-soft); margin-right: 2px; }
+  .controls button { font: inherit; font-size: 13px; border: 0; border-radius: 999px; padding: 7px 12px;
+    background: var(--pill); color: var(--ink); cursor: pointer; box-shadow: 0 1px 0 rgba(0,0,0,.05), 0 4px 14px rgba(0,0,0,.05); }
+  .controls button[aria-pressed="true"] { background: var(--ink); color: var(--bone); }
+  #perf { position: fixed; top: 40px; right: 16px; margin: 0; padding: 8px 10px; border-radius: 8px; max-width: calc(100vw - 32px);
+    background: rgba(0,0,0,.75); color: #e9e4d8; font: 12px/1.45 ui-monospace, monospace; white-space: pre; pointer-events: none; overflow: hidden; }
+  #status { position: fixed; left: 50%; top: 45%; transform: translate(-50%,-50%); color: var(--ink-soft); font-size: 14px; }
+  body.clean .tag, body.clean .controls, body.clean .pane-label { display: none; }
+  @media (max-width: 520px) { .controls button { padding: 6px 10px; font-size: 12px; } .controls.row1 { bottom: 60px; } .controls.row0 { bottom: 100px; } }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/",
+    "@sparkjsdev/spark": "https://cdn.jsdelivr.net/npm/@sparkjsdev/spark@2.4.0/dist/spark.module.min.js"
+  }
+}
+</script>
+</head>
+<body>
+<div id="stage"></div>
+<p class="tag">Splat cat · stand-in splats baked from the mesh poses</p>
+<div class="controls row0" id="poses"><span>Pose</span></div>
+<div class="controls row1" id="styles"><span>Pop</span></div>
+<div class="controls row2" id="counts"><span>Gaussians</span></div>
+<div id="status">baking the splat cat…</div>
+<pre id="perf" hidden></pre>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { SparkRenderer, SplatMesh, dyno } from '@sparkjsdev/spark';
+
+// ---------------------------------------------------------------------------
+// Options
+// ---------------------------------------------------------------------------
+const params = new URLSearchParams(location.hash.slice(1) + '&' + location.search.slice(1));
+const CONFIG = {
+  model: '../sigil-cat/models/sigil-cat.glb',
+  fibreTile: '../sigil-cat/textures/fiber-tile.png',
+  // Which moment of each clip is the still. lie = the loaf. Stretch is a one-shot: 0.45 is the long reach.
+  poses: { sit: { clip: 'sit', at: 0 }, loaf: { clip: 'lie', at: 0 }, sleep: { clip: 'sleep', at: 0 }, stretch: { clip: 'stretch', at: 0.45 } },
+  counts: [32768, 65536, 131072, 262144],
+  bpm: 80,                   // Butterman's default tempo (src/butterman-config.js): one beat = 0.75 s
+  transitionBeats: 2,        // anticipation, float + shake, pop, drop + settle
+  holdBeats: 6,              // auto: how long each pose holds
+  look: {
+    base: [0.165, 0.155, 0.148],    // lit charcoal (sRGB 0..1), sampled off the sheet's lit felt
+    fibre: [0.34, 0.32, 0.30],      // the lighter fibres that show even in shade
+    fuzzShare: 0.3,                // share of Gaussians spent on lifted fibres
+    light: [-0.35, 0.75, 0.6],      // key light: upper front left, like the sheets
+  },
+};
+const style0 = ['puff', 'shimmer', 'pop', 'smear'].includes(params.get('style')) ? params.get('style') : 'puff';
+const count0 = CONFIG.counts.includes(Number(params.get('n'))) ? Number(params.get('n')) : 65536;
+const freeze = params.has('u') && params.has('from') && params.has('to');
+const compare = params.get('view') === 'compare';
+const fuzzOn = params.get('fuzz') !== '0';
+if (params.get('ui') === '0') document.body.classList.add('clean');
+
+// ---------------------------------------------------------------------------
+// Renderer, scene, camera (same framing maths as prototypes/sigil-cat)
+// ---------------------------------------------------------------------------
+const stage = document.getElementById('stage');
+let iframe = null;
+if (compare) {
+  iframe = document.createElement('iframe');
+  stage.appendChild(iframe);
+  for (const [txt, side] of [['mesh (live prototype)', 'left'], ['splat', 'right']]) {
+    const l = document.createElement('div'); l.className = 'pane-label'; l.textContent = txt;
+    l.style[side] = side === 'left' ? '16px' : '16px'; if (side === 'left') l.style.top = '36px'; else l.style.top = '36px';
+    document.body.appendChild(l);
+  }
+}
+const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
+const dprCap = params.has('dpr') ? Number(params.get('dpr')) : Math.min(devicePixelRatio, 2);
+renderer.setPixelRatio(dprCap);
+renderer.setClearColor(0xf7ede3);
+stage.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 40);
+const spark = new SparkRenderer({ renderer });
+scene.add(spark);
+
+// Soft contact shadow, like the sheet's (black at 10-20%).
+const shadowTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d'); const gr = g.createRadialGradient(64, 64, 4, 64, 64, 64);
+  gr.addColorStop(0, 'rgba(0,0,0,0.22)'); gr.addColorStop(0.55, 'rgba(0,0,0,0.10)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c);
+})();
+const shadow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }));
+shadow.rotation.x = -Math.PI / 2; shadow.position.y = 0.001; scene.add(shadow);
+
+const spin = new THREE.Group(); scene.add(spin);         // yaw
+const rig = new THREE.Group(); spin.add(rig);            // float, shake, squash
+let yaw = THREE.MathUtils.degToRad(params.has('yaw') ? Number(params.get('yaw')) : 0);
+
+function frame() {
+  const w = compare ? Math.floor(innerWidth / 2) : innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  renderer.domElement.style.width = w + 'px'; renderer.domElement.style.height = h + 'px';
+  camera.aspect = w / h;
+  const half = THREE.MathUtils.degToRad(camera.fov / 2);
+  const needH = 1.9, needW = 1.7;
+  const dist = Math.max(needH / 2 / Math.tan(half), needW / 2 / (Math.tan(half) * camera.aspect));
+  camera.position.set(0, 0.62 + dist * 0.12, dist);
+  camera.lookAt(0, 0.5, 0);
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', frame); frame();
+
+// ---------------------------------------------------------------------------
+// Bake: posed mesh -> splats
+// ---------------------------------------------------------------------------
+async function loadFibre() {
+  const img = new Image(); img.src = CONFIG.fibreTile; await img.decode();
+  const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+  const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+  const d = g.getImageData(0, 0, c.width, c.height).data;
+  const lum = new Float32Array(c.width * c.height); let mean = 0;
+  for (let i = 0; i < lum.length; i++) { lum[i] = d[i * 4]; mean += lum[i]; }
+  mean /= lum.length;
+  for (let i = 0; i < lum.length; i++) lum[i] /= mean;   // ~1 on average
+  return { w: c.width, h: c.height, lum };
+}
+// Triplanar lookup of the fibre tile: brightness factor around 1.
+function fibreAt(f, p, n, tile = 0.22) {
+  const ax = Math.abs(n.x), ay = Math.abs(n.y), az = Math.abs(n.z), s = ax + ay + az;
+  const look = (u, v) => {
+    const x = ((Math.floor(u / tile * f.w) % f.w) + f.w) % f.w, y = ((Math.floor(v / tile * f.h) % f.h) + f.h) % f.h;
+    return f.lum[y * f.w + x];
+  };
+  return (look(p.y, p.z) * ax + look(p.x, p.z) * ay + look(p.x, p.y) * az) / s;
+}
+
+// Mulberry32: the same pose bakes the same splats every time.
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+// Posed, world-space triangles of one skinned mesh.
+function posedTriangles(mesh) {
+  const g = mesh.geometry, pos = g.attributes.position, idx = g.index;
+  const nv = pos.count, P = new Float32Array(nv * 3), N = new Float32Array(nv * 3), v = new THREE.Vector3();
+  for (let i = 0; i < nv; i++) { mesh.getVertexPosition(i, v); v.applyMatrix4(mesh.matrixWorld); P.set([v.x, v.y, v.z], i * 3); }
+  const tris = idx ? idx.array : Array.from({ length: nv }, (_, i) => i);
+  const nt = tris.length / 3, area = new Float64Array(nt);
+  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), e1 = new THREE.Vector3(), e2 = new THREE.Vector3();
+  for (let t = 0; t < nt; t++) {
+    const i0 = tris[t * 3], i1 = tris[t * 3 + 1], i2 = tris[t * 3 + 2];
+    a.fromArray(P, i0 * 3); b.fromArray(P, i1 * 3); c.fromArray(P, i2 * 3);
+    e1.subVectors(b, a); e2.subVectors(c, a); e1.cross(e2);
+    area[t] = e1.length() / 2;
+    for (const i of [i0, i1, i2]) { N[i * 3] += e1.x; N[i * 3 + 1] += e1.y; N[i * 3 + 2] += e1.z; }   // area-weighted vertex normals
+  }
+  for (let i = 0; i < nv; i++) { v.fromArray(N, i * 3).normalize(); N.set([v.x, v.y, v.z], i * 3); }
+  const cdf = new Float64Array(nt); let total = 0;
+  for (let t = 0; t < nt; t++) { total += area[t]; cdf[t] = total; }
+  return { P, N, tris, cdf, total };
+}
+
+function sampleSurface(T, rand, p, n) {
+  const r = rand() * T.total; let lo = 0, hi = T.cdf.length - 1;
+  while (lo < hi) { const m = (lo + hi) >> 1; if (T.cdf[m] < r) lo = m + 1; else hi = m; }
+  let u = rand(), w = rand(); if (u + w > 1) { u = 1 - u; w = 1 - w; }
+  const i0 = T.tris[lo * 3], i1 = T.tris[lo * 3 + 1], i2 = T.tris[lo * 3 + 2], k = 1 - u - w;
+  for (const [arr, out] of [[T.P, p], [T.N, n]]) {
+    out.set(arr[i0 * 3] * k + arr[i1 * 3] * u + arr[i2 * 3] * w, arr[i0 * 3 + 1] * k + arr[i1 * 3 + 1] * u + arr[i2 * 3 + 1] * w,
+      arr[i0 * 3 + 2] * k + arr[i1 * 3 + 2] * u + arr[i2 * 3 + 2] * w);
+  }
+  n.normalize();
+}
+
+// Soft studio light baked into the colour (splats are unlit): wrap diffuse + floor occlusion.
+const L = new THREE.Vector3(...CONFIG.look.light).normalize();
+function shade(p, n) {
+  const wrap = THREE.MathUtils.clamp((n.dot(L) + 0.6) / 1.6, 0, 1);
+  const floorAO = 0.7 + 0.3 * THREE.MathUtils.smoothstep(p.y, 0.0, 0.14);
+  const top = 0.9 + 0.1 * Math.max(n.y, 0);
+  return (0.34 + 0.9 * wrap * wrap) * floorAO * top;
+}
+
+function bakeSplats({ body, whiskers, fibre, count, seed }) {
+  const rand = rng(seed);
+  const TB = posedTriangles(body), TW = whiskers ? posedTriangles(whiskers) : null;
+  const nWhisk = TW ? Math.round(count * 0.02) : 0;
+  const nFuzz = fuzzOn ? Math.round((count - nWhisk) * CONFIG.look.fuzzShare) : 0;
+  const nSurf = count - nWhisk - nFuzz;
+  const spacing = Math.sqrt(TB.total / nSurf);
+  const p = new THREE.Vector3(), n = new THREE.Vector3(), t1 = new THREE.Vector3(), t2 = new THREE.Vector3();
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), col = new THREE.Color();
+  const up = new THREE.Vector3(0, 1, 0), side = new THREE.Vector3(1, 0, 0);
+  const frameAt = (n, ang) => {      // tangent frame around the normal, turned by ang
+    t1.crossVectors(Math.abs(n.y) < 0.9 ? up : side, n).normalize(); t2.crossVectors(n, t1);
+    const c = Math.cos(ang), si = Math.sin(ang), x = t1.clone().multiplyScalar(c).addScaledVector(t2, si);
+    t2.crossVectors(n, x); t1.copy(x);
+    m.makeBasis(t1, t2, n); q.setFromRotationMatrix(m);
+  };
+  const box = new THREE.Box3();
+  return (splats) => {
+    const [br, bg, bb] = CONFIG.look.base, [fr, fg, fb] = CONFIG.look.fibre;
+    for (let i = 0; i < nSurf; i++) {              // the felt skin: flat, overlapping, opaque discs
+      sampleSurface(TB, rand, p, n); box.expandByPoint(p);
+      frameAt(n, rand() * Math.PI);
+      const sh = shade(p, n), fib = 0.82 + 0.18 * fibreAt(fibre, p, n);
+      col.setRGB(br * sh * fib, bg * sh * fib, bb * sh * fib);
+      s.set(spacing * (0.62 + 0.2 * rand()), spacing * (0.62 + 0.2 * rand()), spacing * 0.08);
+      splats.pushSplat(p, s, q, 1, col);
+    }
+    const dirA = new THREE.Vector3(), mid = new THREE.Vector3();
+    for (let i = 0; i < nFuzz; i += 2) {           // flocked fibres: short curly strands (two bent segments), lifted a hair
+      sampleSurface(TB, rand, p, n);
+      p.addScaledVector(n, spacing * (0.1 + 0.6 * rand() * rand()));
+      let ang = rand() * Math.PI * 2;
+      const len = spacing * (0.35 + 0.35 * rand()), bend = (rand() < 0.5 ? -1 : 1) * (0.7 + 0.8 * rand());
+      const sh = shade(p, n) * (0.7 + 0.45 * fibreAt(fibre, p, n));
+      col.setRGB(fr * sh, fg * sh, fb * sh);
+      const op = 0.3 + 0.35 * rand();
+      for (let k = 0; k < 2 && i + k < nFuzz; k++) {
+        frameAt(n, ang);                           // t1 = strand direction in the tangent plane
+        dirA.copy(t1);
+        mid.copy(p).addScaledVector(dirA, len);
+        s.set(len, spacing * 0.09, spacing * 0.05);
+        splats.pushSplat(mid, s, q, op, col);
+        p.addScaledVector(dirA, len * 2); ang += bend;
+      }
+    }
+    if (TW) {                                      // whiskers: smooth Sigil Black, no fibres (cat-look.md)
+      const ws = Math.sqrt(TW.total / nWhisk);
+      for (let i = 0; i < nWhisk; i++) {
+        sampleSurface(TW, rand, p, n); frameAt(n, rand() * Math.PI);
+        const sh = 0.55 + 0.45 * THREE.MathUtils.clamp((n.dot(L) + 0.6) / 1.6, 0, 1);
+        col.setRGB(0.09 * sh, 0.088 * sh, 0.085 * sh);
+        s.set(ws * 0.7, ws * 0.7, ws * 0.1);
+        splats.pushSplat(p, s, q, 1, col);
+      }
+    }
+    splats.userBox = box;
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Transition modifier: one GPU program per pose mesh. phase 0 = fully here, 1 = fully gone.
+// Styles: 0 puff (scatter into a smoky cloud), 1 shimmer (butter-gold sparkle sweeping through),
+//         2 pop (every Gaussian blinks out with a tiny stagger), 3 smear (streaks along the move).
+// ---------------------------------------------------------------------------
+const STYLE_ID = { puff: 0, shimmer: 1, pop: 2, smear: 3 };
+function makeModifier(u) {
+  return dyno.dynoBlock({ gsplat: dyno.Gsplat }, { gsplat: dyno.Gsplat }, ({ gsplat }) => {
+    const d = new dyno.Dyno({
+      inTypes: { gsplat: dyno.Gsplat, phase: 'float', style: 'float', dir: 'float', center: 'vec3', height: 'float' },
+      outTypes: { gsplat: dyno.Gsplat },
+      globals: () => [dyno.unindent(/* glsl */ `
+        float hashU(uint x) { x ^= x >> 16; x *= 0x7feb352du; x ^= x >> 15; x *= 0x846ca68bu; x ^= x >> 16; return float(x) / 4294967295.0; }
+      `)],
+      statements: ({ inputs: i, outputs: o }) => dyno.unindentLines(/* glsl */ `
+        ${o.gsplat} = ${i.gsplat};
+        float ph = ${i.phase};
+        if (ph > 0.0) {
+          uint id = uint(${i.gsplat}.index);
+          float r1 = hashU(id * 3u + 1u), r2 = hashU(id * 3u + 2u), r3 = hashU(id * 3u + 3u);
+          vec3 c = ${i.gsplat}.center;
+          vec3 rel = c - ${i.center};
+          float hy = clamp(c.y / ${i.height}, 0.0, 1.0);
+          int st = int(${i.style} + 0.5);
+          if (st == 0) {
+            vec3 dir = normalize(rel + (vec3(r1, r2, r3) - 0.5) * 0.7 + vec3(0.0, 0.15, 0.0));
+            float k = ph * ph * (3.0 - 2.0 * ph);
+            ${o.gsplat}.center = c + dir * k * (0.12 + 0.3 * r1) + vec3(0.0, 0.1 * k * r2, 0.0);
+            ${o.gsplat}.scales = ${i.gsplat}.scales * mix(1.0, 0.35 + 0.6 * r3, k);
+            ${o.gsplat}.rgba.rgb = mix(${i.gsplat}.rgba.rgb, vec3(0.5, 0.47, 0.45), smoothstep(0.1, 0.7, ph));
+            ${o.gsplat}.rgba.a *= (1.0 - smoothstep(0.3, 0.95, ph)) * (r2 < 0.5 ? 1.0 : 1.0 - smoothstep(0.1, 0.4, ph));
+          } else if (st == 1) {
+            float thr = 0.6 * r1 + 0.4 * hy;
+            float e = ph * 1.25 - thr;
+            float edge = 1.0 - smoothstep(0.0, 0.14, abs(e));
+            ${o.gsplat}.rgba.rgb = mix(${i.gsplat}.rgba.rgb, vec3(0.98, 0.84, 0.42), edge);
+            ${o.gsplat}.scales = ${i.gsplat}.scales * (1.0 + edge * 0.9);
+            ${o.gsplat}.center = c + vec3(0.0, edge * 0.035 * ${i.dir}, 0.0);
+            if (e > 0.0) ${o.gsplat}.rgba.a = 0.0;
+          } else if (st == 2) {
+            float k = clamp((ph - r1 * 0.35) / 0.65, 0.0, 1.0);
+            ${o.gsplat}.scales = ${i.gsplat}.scales * (1.0 - k);
+            ${o.gsplat}.rgba.a *= 1.0 - k * k;
+          } else {
+            float k = clamp(ph * 1.4 - r1 * 0.4, 0.0, 1.0);
+            ${o.gsplat}.center = c + vec3(rel.x * 0.15 * k, ${i.dir} * k * k * (0.25 + 0.55 * r2) * (0.4 + hy), rel.z * 0.15 * k);
+            ${o.gsplat}.rgba.a *= 1.0 - smoothstep(0.5, 1.0, k);
+          }
+        }
+      `),
+    });
+    gsplat = d.apply({ gsplat, phase: u.phase, style: u.style, dir: u.dir, center: u.center, height: u.height }).gsplat;
+    return { gsplat };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Load the GLB, bake the four poses
+// ---------------------------------------------------------------------------
+const statusEl = document.getElementById('status');
+const poses = {};               // name -> { pivot, mesh, u, center, height }
+let count = count0, catHeight = 1;
+let gltf, fibre;
+
+async function bakeAll() {
+  for (const p of Object.values(poses)) { p.pivot.removeFromParent(); p.mesh.dispose(); }
+  const cat = gltf.scene, mixer = new THREE.AnimationMixer(cat);
+  let body, whiskers;
+  cat.traverse((o) => { if (o.isSkinnedMesh) { if (o.name.includes('whisker')) whiskers = o; else body = o; } });
+  let seed = 7;
+  for (const [name, def] of Object.entries(CONFIG.poses)) {
+    const clip = gltf.animations.find((a) => a.name === def.clip);
+    mixer.stopAllAction();
+    const act = mixer.clipAction(clip); act.reset().play();
+    mixer.setTime(def.at * clip.duration);
+    cat.updateMatrixWorld(true);
+    let mesh;
+    if (params.get('src') === 'idol') {
+      mesh = new SplatMesh({ url: `splats/${name}.spz` });
+    } else {
+      const construct = bakeSplats({ body, whiskers, fibre, count, seed: seed++ });
+      let box;
+      mesh = new SplatMesh({ maxSplats: count, constructSplats: (s) => { construct(s); box = s.userBox; } });
+      await mesh.initialized;
+      mesh.userBox = box;
+    }
+    await mesh.initialized;
+    const box = mesh.userBox || mesh.getBoundingBox();
+    const center = box.getCenter(new THREE.Vector3()), height = box.max.y;
+    const u = { phase: dyno.dynoFloat(0), style: dyno.dynoFloat(STYLE_ID[style]), dir: dyno.dynoFloat(1),
+      center: dyno.dynoVec3(center.clone()), height: dyno.dynoFloat(height) };
+    mesh.objectModifier = makeModifier(u); mesh.updateGenerator();
+    const pivot = new THREE.Group(); pivot.position.copy(center); mesh.position.copy(center).negate();
+    pivot.add(mesh); rig.add(pivot); pivot.visible = false;
+    poses[name] = { pivot, mesh, u, center, height, width: box.max.x - box.min.x };
+    catHeight = Math.max(catHeight, height);
+  }
+  mixer.stopAllAction();
+  showOnly(current);
+}
+
+// ---------------------------------------------------------------------------
+// Timeline: one pose change = 2 beats. Rubber-hose beats: anticipate, float + shake, pop, drop, overshoot, settle.
+// ---------------------------------------------------------------------------
+let style = style0, current = CONFIG.poses[params.get('pose')] ? params.get('pose') : 'sit';
+let trans = null;               // { from, to, t0 }
+const beat = 60 / CONFIG.bpm, T = CONFIG.transitionBeats * beat;
+const ease = {
+  outBack: (x, k = 1.7) => 1 + (k + 1) * Math.pow(x - 1, 3) + k * Math.pow(x - 1, 2),
+  inQuad: (x) => x * x, outQuad: (x) => 1 - (1 - x) * (1 - x), inOut: (x) => x * x * (3 - 2 * x),
+};
+const seg = (u, a, b) => THREE.MathUtils.clamp((u - a) / (b - a), 0, 1);
+const spring = (x, freq = 3, damp = 5) => Math.exp(-damp * x) * Math.cos(freq * Math.PI * 2 * x);   // 1 -> 0, wobbling
+
+function showOnly(name) { for (const [k, p] of Object.entries(poses)) { p.pivot.visible = k === name; p.u.phase.value = 0; p.pivot.scale.setScalar(1); } }
+
+function startTransition(to) {
+  if (to === current || !poses[to]) return;
+  if (trans) finishTransition();
+  trans = { from: current, to, t0: performance.now() / 1000 };
+  for (const p of Object.values(poses)) p.u.style.value = STYLE_ID[style];
+}
+function finishTransition() { current = trans.to; trans = null; showOnly(current); resetRig(); syncButtons(); }
+function resetRig() { rig.position.set(0, 0, 0); rig.rotation.set(0, 0, 0); rig.scale.set(1, 1, 1); }
+
+// u: 0..1 through the transition. Moves the rig and drives both poses' phases.
+function applyTransition(u) {
+  const A = poses[trans.from], B = poses[trans.to], h = catHeight;
+  resetRig();
+  // 1. anticipation: squash down (0 - 0.12)
+  const a = seg(u, 0, 0.12), sq = Math.sin(a * Math.PI) * 0.09;
+  // 2. float up with a little shake (0.10 - 0.42), hang while it pops, 4. drop (0.62 - 0.78)
+  const rise = ease.outBack(seg(u, 0.1, 0.4), 1.2), drop = ease.inQuad(seg(u, 0.62, 0.78));
+  const lift = 0.16 * h * rise * (1 - drop);
+  const shakeT = seg(u, 0.22, 0.5), shake = Math.sin(shakeT * Math.PI * 2 * 3.5) * Math.sin(shakeT * Math.PI) * 0.055;
+  // 5. land: squash and spring back (0.78 - 1)
+  const land = seg(u, 0.78, 1), landSq = u >= 0.78 ? 0.12 * spring(land, 2.2, 4.5) : 0;
+  const s = sq + landSq;
+  rig.position.y = lift; rig.rotation.z = shake; rig.position.x = shake * 0.12 * h;
+  rig.scale.set(1 + s * 0.6, 1 - s, 1 + s * 0.6);
+  shadow.scale.set(h * 1.25 * (1 - lift * 1.6), h * 0.75 * (1 - lift * 1.6), 1);
+  // 3. the swap (0.38 - 0.70)
+  const outP = seg(u, 0.38, 0.6), inP = 1 - seg(u, 0.46, 0.7);
+  A.u.dir.value = 1; B.u.dir.value = -1;
+  A.pivot.visible = outP < 1; B.pivot.visible = inP < 1;
+  A.u.phase.value = style === 'pop' ? ease.inQuad(outP) : outP;
+  B.u.phase.value = style === 'pop' ? ease.inQuad(inP) : ease.inOut(inP);
+  A.pivot.scale.setScalar(1); B.pivot.scale.setScalar(1);
+  if (style === 'pop') {        // the whole pose blinks out small, the next springs in big and settles
+    A.pivot.scale.setScalar(1 - 0.35 * ease.inQuad(outP));
+    // in: grow from nothing to 1.18 fast, then a damped wobble back to 1
+    const k = seg(u, 0.46, 0.86);
+    const sc = u < 0.46 ? 0.01 : k < 0.22 ? 1.18 * ease.outQuad(k / 0.22) : 1 + 0.18 * spring((k - 0.22) / 0.78, 1.4, 4);
+    B.pivot.scale.setScalar(Math.max(0.01, sc));
+  }
+  for (const p of [A, B]) p.mesh.needsUpdate = true;
+}
+
+// ---------------------------------------------------------------------------
+// UI
+// ---------------------------------------------------------------------------
+const btns = { poses: {}, styles: {}, counts: {} };
+const mk = (row, label, onClick) => { const b = document.createElement('button'); b.textContent = label; b.addEventListener('click', onClick); document.getElementById(row).appendChild(b); return b; };
+let auto = params.get('auto') !== '0' && !freeze, nextAuto = performance.now() / 1000 + CONFIG.holdBeats * beat;
+for (const name of Object.keys(CONFIG.poses)) btns.poses[name] = mk('poses', name, () => { auto = false; startTransition(name); syncButtons(); });
+btns.auto = mk('poses', 'auto', () => { auto = !auto; nextAuto = performance.now() / 1000 + 1; syncButtons(); });
+for (const s of Object.keys(STYLE_ID)) btns.styles[s] = mk('styles', s, () => { style = s; syncButtons(); });
+for (const c of CONFIG.counts) btns.counts[c] = mk('counts', c >= 1000 ? Math.round(c / 1024) + 'k' : c, async () => {
+  if (c === count) return; count = c; syncButtons(); statusEl.hidden = false; statusEl.textContent = 'baking…';
+  await new Promise((r) => setTimeout(r, 30)); await bakeAll(); statusEl.hidden = true;
+});
+function syncButtons() {
+  for (const [k, b] of Object.entries(btns.poses)) b.setAttribute('aria-pressed', String(k === (trans ? trans.to : current)));
+  btns.auto.setAttribute('aria-pressed', String(auto));
+  for (const [k, b] of Object.entries(btns.styles)) b.setAttribute('aria-pressed', String(k === style));
+  for (const [k, b] of Object.entries(btns.counts)) b.setAttribute('aria-pressed', String(Number(k) === count));
+  if (iframe) {
+    const meshPose = { sit: 'sit', loaf: 'lie', sleep: 'sleep', stretch: 'stretch' }[trans ? trans.to : current];
+    const want = `../sigil-cat/index.html#ui=0&pose=${meshPose}&yaw=${Math.round(THREE.MathUtils.radToDeg(yaw))}&t=${meshPose === 'stretch' ? 1.2 : 0}`;
+    if (!iframe.src.endsWith(want.slice(2))) iframe.src = want;
+  }
+}
+const order = Object.keys(CONFIG.poses);
+renderer.domElement.addEventListener('click', () => { auto = false; startTransition(order[(order.indexOf(current) + 1) % order.length]); syncButtons(); });
+
+// Drag to turn (left-right only, like the site).
+let drag = null;
+renderer.domElement.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, yaw, moved: false }; });
+addEventListener('pointermove', (e) => { if (!drag) return; const dx = e.clientX - drag.x; if (Math.abs(dx) > 4) drag.moved = true; yaw = drag.yaw + dx * 0.01; });
+addEventListener('pointerup', () => { drag = null; });
+renderer.domElement.addEventListener('click', (e) => { if (drag?.moved) e.stopImmediatePropagation(); }, true);
+
+// ---------------------------------------------------------------------------
+// Perf overlay
+// ---------------------------------------------------------------------------
+const perfOn = params.get('perf') === '1';
+const perfEl = document.getElementById('perf'); perfEl.hidden = !perfOn;
+const gl = renderer.getContext(), dbg = gl.getExtension('WEBGL_debug_renderer_info');
+const gpu = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : 'unknown';
+const frames = [];
+function perfTick(dt) {
+  frames.push(dt); if (frames.length > 120) frames.shift();
+  if (!perfOn || frames.length % 10) return;
+  const avg = frames.reduce((a, b) => a + b, 0) / frames.length, worst = Math.max(...frames);
+  const drawn = Object.values(poses).filter((p) => p.pivot.visible).length * count;
+  perfEl.textContent = `fps ${(1000 / avg).toFixed(0)}  avg ${avg.toFixed(1)} ms  worst ${worst.toFixed(1)} ms\n` +
+    `gaussians ${drawn.toLocaleString()} (${count.toLocaleString()}/pose)\npixel ratio ${renderer.getPixelRatio()}  ` +
+    `${renderer.domElement.width}x${renderer.domElement.height}\n${String(gpu).slice(0, 60)}`;
+}
+
+// ---------------------------------------------------------------------------
+// Go
+// ---------------------------------------------------------------------------
+[gltf, fibre] = await Promise.all([new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(CONFIG.model), loadFibre()]);
+await bakeAll();
+statusEl.hidden = true;
+if (freeze) { current = params.get('from'); showOnly(current); trans = { from: params.get('from'), to: params.get('to'), t0: 0 }; }
+syncButtons();
+requestAnimationFrame(() => requestAnimationFrame(() => { document.body.dataset.ready = '1'; }));
+
+let last = performance.now();
+renderer.setAnimationLoop(() => {
+  const nowMs = performance.now(), now = nowMs / 1000, dt = nowMs - last; last = nowMs;
+  spin.rotation.y = yaw;
+  if (freeze) {
+    applyTransition(Number(params.get('u')));
+  } else if (trans) {
+    const u = (now - trans.t0) / T;
+    if (u >= 1) { finishTransition(); nextAuto = now + CONFIG.holdBeats * beat; } else applyTransition(u);
+  } else {
+    // idle: a gentle float bob on the beat grid (one bob per 2 beats), with a breath of squash
+    const ph = (now / (2 * beat)) * Math.PI * 2;
+    const bob = params.get('bob') === '0' ? 0 : 1;
+    rig.position.y = bob * catHeight * 0.018 * (0.5 + 0.5 * Math.sin(ph));
+    const br = bob * 0.012 * Math.sin(ph + 0.6);
+    rig.scale.set(1 - br * 0.5, 1 + br, 1 - br * 0.5);
+    shadow.scale.set(catHeight * 1.25 * (1 - rig.position.y * 1.6), catHeight * 0.75 * (1 - rig.position.y * 1.6), 1);
+    if (auto && now > nextAuto) { startTransition(order[(order.indexOf(current) + 1) % order.length]); syncButtons(); }
+  }
+  renderer.render(scene, camera);
+  perfTick(dt);
+});
+window.splatCat = { poses, get current() { return current; }, startTransition, setStyle: (s) => { style = s; syncButtons(); } };
+</script>
+</body>
+</html>

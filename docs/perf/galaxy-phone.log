@@ -1,0 +1,7 @@
+CHECK galaxy shader rehearsed before first play:  PASS
+CHECK galaxy page stretches only with normal motion:  PASS
+CHECK galaxy tuned spin hold and recede durations: {"spin":0.03330000000000011,"hold":5.016400000000039,"recede":8.016399999999994,"closed":9.816299999999966} PASS
+CHECK galaxy portal anchor stays fixed through the spin: 0 buffer pixels PASS
+CHECK galaxy natural return restores page and unlocks:  PASS
+CHECK galaxy Escape eases out and restores styles:  PASS
+CHECK galaxy at rest has no visible pass or advancing sky clocks:  PASS

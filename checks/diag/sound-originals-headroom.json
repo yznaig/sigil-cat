@@ -1,0 +1,143 @@
+{
+  "starts": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "seconds": 0.3018594104308363,
+  "current": [
+    {
+      "rate": 44100,
+      "channels": 2,
+      "peakDbfs": -0.8408589672858658
+    },
+    {
+      "rate": 48000,
+      "channels": 2,
+      "peakDbfs": -1.317207217543399
+    }
+  ],
+  "sweep": [
+    {
+      "width": 0.22,
+      "rate": 44100,
+      "channels": 2,
+      "peakDbfs": -0.9540475533826592
+    },
+    {
+      "width": 0.22,
+      "rate": 48000,
+      "channels": 2,
+      "peakDbfs": -1.4161637420192523
+    },
+    {
+      "width": 0.2,
+      "rate": 44100,
+      "channels": 2,
+      "peakDbfs": -1.0789636817725758
+    },
+    {
+      "width": 0.2,
+      "rate": 48000,
+      "channels": 2,
+      "peakDbfs": -1.5255076050456473
+    },
+    {
+      "width": 0.18,
+      "rate": 44100,
+      "channels": 2,
+      "peakDbfs": -1.2171095912186052
+    },
+    {
+      "width": 0.18,
+      "rate": 48000,
+      "channels": 2,
+      "peakDbfs": -1.646631124607485
+    },
+    {
+      "width": 0.16,
+      "rate": 44100,
+      "channels": 2,
+      "peakDbfs": -1.3700614737536068
+    },
+    {
+      "width": 0.16,
+      "rate": 48000,
+      "channels": 2,
+      "peakDbfs": -1.7810433434467972
+    },
+    {
+      "width": 0.14,
+      "rate": 44100,
+      "channels": 2,
+      "peakDbfs": -1.5393600351321546
+    },
+    {
+      "width": 0.14,
+      "rate": 48000,
+      "channels": 2,
+      "peakDbfs": -1.9303000913049198
+    },
+    {
+      "width": 0.12,
+      "rate": 44100,
+      "channels": 2,
+      "peakDbfs": -1.7220456530280968
+    },
+    {
+      "width": 0.12,
+      "rate": 48000,
+      "channels": 2,
+      "peakDbfs": -2.0958392893871083
+    },
+    {
+      "width": 0.1,
+      "rate": 44100,
+      "channels": 2,
+      "peakDbfs": -1.920308070100405
+    },
+    {
+      "width": 0.1,
+      "rate": 48000,
+      "channels": 2,
+      "peakDbfs": -2.2787343039055044
+    }
+  ],
+  "sourceCommit": "897b506",
+  "sourceKnee": 0.24,
+  "selectedKnee": 0.14,
+  "reason": "Actual 32-voice stereo output exceeded the unchanged -1 dBFS ceiling after Aaron\u2019s original effects were restored; reserve oversampling-filter headroom without changing the files or the linear response below .55.",
+  "test": "checks/sounds.js",
+  "browser": "Repository standard headless Chromium; both stereo channels; 44.1 and 48 kHz",
+  "decision": "e1111-05",
+  "unchanged": "All eight delivered waveforms, all other delivered audio bytes, mute/rate-limit/silent-restore paths, linear response below .55, and -1 dBFS pass ceiling."
+}

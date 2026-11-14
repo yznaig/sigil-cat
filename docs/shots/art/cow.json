@@ -1,0 +1,325 @@
+{
+  "name": "cow",
+  "variant": null,
+  "bounds": {
+    "min": [
+      -0.562749981880188,
+      -0.0007899892330169855,
+      -0.21989725530147552
+    ],
+    "max": [
+      0.7674499905109405,
+      0.9919999849796295,
+      0.21989725530147552
+    ]
+  },
+  "triangles": 13760,
+  "meshes": 23,
+  "materials": 10,
+  "textures": [
+    [
+      256,
+      256
+    ]
+  ],
+  "geometryBytes": 1320960,
+  "finite": true,
+  "parts": [
+    {
+      "name": "cow",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "physics": {
+        "units": "cat-height units; play mass, not kg",
+        "mass": 0,
+        "colliders": [
+          {
+            "type": "box",
+            "size": [
+              0.86,
+              0.48,
+              0.39
+            ],
+            "position": [
+              0,
+              0.58,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "type": "box",
+            "size": [
+              0.41,
+              0.28,
+              0.25
+            ],
+            "position": [
+              0.52,
+              0.72,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "type": "box",
+            "size": [
+              0.08,
+              0.4,
+              0.08
+            ],
+            "position": [
+              -0.3,
+              0.22,
+              -0.15
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "type": "box",
+            "size": [
+              0.08,
+              0.4,
+              0.08
+            ],
+            "position": [
+              -0.3,
+              0.22,
+              0.15
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "type": "box",
+            "size": [
+              0.08,
+              0.4,
+              0.08
+            ],
+            "position": [
+              0.29,
+              0.22,
+              -0.15
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "type": "box",
+            "size": [
+              0.08,
+              0.4,
+              0.08
+            ],
+            "position": [
+              0.29,
+              0.22,
+              0.15
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "anchors": {
+          "milkSensor": {
+            "position": [
+              -0.22,
+              0.29,
+              0
+            ],
+            "radius": 0.16
+          },
+          "headPivot": [
+            0.35,
+            0.72,
+            0
+          ]
+        }
+      }
+    }
+  ],
+  "physics": {
+    "units": "cat-height units; play mass, not kg",
+    "mass": 0,
+    "colliders": [
+      {
+        "type": "box",
+        "size": [
+          0.86,
+          0.48,
+          0.39
+        ],
+        "position": [
+          0,
+          0.58,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "box",
+        "size": [
+          0.41,
+          0.28,
+          0.25
+        ],
+        "position": [
+          0.52,
+          0.72,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "box",
+        "size": [
+          0.08,
+          0.4,
+          0.08
+        ],
+        "position": [
+          -0.3,
+          0.22,
+          -0.15
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "box",
+        "size": [
+          0.08,
+          0.4,
+          0.08
+        ],
+        "position": [
+          -0.3,
+          0.22,
+          0.15
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "box",
+        "size": [
+          0.08,
+          0.4,
+          0.08
+        ],
+        "position": [
+          0.29,
+          0.22,
+          -0.15
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "type": "box",
+        "size": [
+          0.08,
+          0.4,
+          0.08
+        ],
+        "position": [
+          0.29,
+          0.22,
+          0.15
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "anchors": {
+      "milkSensor": {
+        "position": [
+          -0.22,
+          0.29,
+          0
+        ],
+        "radius": 0.16
+      },
+      "headPivot": [
+        0.35,
+        0.72,
+        0
+      ]
+    }
+  },
+  "render": [
+    {
+      "frame": 35,
+      "calls": 47,
+      "triangles": 27522,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 36,
+      "calls": 47,
+      "triangles": 27522,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 37,
+      "calls": 47,
+      "triangles": 27522,
+      "points": 0,
+      "lines": 0
+    }
+  ],
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "errors": []
+}

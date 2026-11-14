@@ -1,0 +1,31 @@
+const top=keepsakes.give('top');await top.worldTask;
+check('look top is selected splat with a floor shadow',top.worldReady&&!!top.picture&&site.worldLayout.shadows.has('top'));
+await until(()=>top.worldEntry.body.isSleeping(),12000);
+const old={...top.worldEntry.body.translation()},dragId=++pointerIds;
+const local=new site.THREE.Vector3().copy(top.worldEntry.body.localCom());
+const p=stage.toScreen(local.applyQuaternion(top.object.quaternion).add(top.object.position));
+fire('pointerdown',p.x,p.y,dragId);const picked=site.world.held?.entry===top.worldEntry;
+for(let n=1;n<=20;n++){await sleep(16);fire('pointermove',p.x+n*3,p.y-n*3,dragId);}
+await sleep(400);await __shot('world-unit3-pointer-grip');
+fire('pointerup',p.x+60,p.y-60,dragId,0);
+const now=top.worldEntry.body.translation();
+check('look top follows a physical drag',picked&&Math.hypot(now.x-old.x,now.y-old.y,now.z-old.z)>.03);
+await until(()=>top.worldEntry.body.isSleeping(),12000);
+top.def.tap(top);await stage.after(.3);
+check('look top tap spins physical body',new site.THREE.Vector3().copy(top.worldEntry.body.angvel()).length()>2);
+const settles=await until(()=>top.worldEntry.body.isSleeping(),12000);
+check('look top tips and rests',settles&&top.elapsed===E.circle.config.topSpin);
+cat.setButter(true,'quiet');await cat.ensureButter();await E.fling.fling();
+const g=keepsakes.get('grease'),b=g.box,id=++pointerIds;
+E.petbite.plaster(true);
+fire('pointerdown',b.x+b.w/2,b.y+4,id);await sleep(20);fire('pointermove',b.x+b.w/2,b.y+14,id);
+check('look wipe equips a sponge',!!document.querySelector('.wipe-sponge')&&document.documentElement.classList.contains('wiping')&&getComputedStyle(canvas).cursor==='none');
+for(let i=1;i<40;i++){fire('pointermove',b.x+b.w/2,b.y+4+(b.h-8)*i/39,id);await sleep(6);}
+fire('pointerup',b.x+b.w/2,b.y+b.h-4,id,0);await sleep(250);
+check('look wipe removes sponge and streak',!keepsakes.has('grease')&&!document.querySelector('.wipe-sponge')&&!document.documentElement.classList.contains('wiping'));
+E.petbite.plaster(false);
+check('look sponge audio loads',audio.status('sponge-wipe')==='loaded');
+sessionStorage.setItem('look-world-pose',JSON.stringify({position:{...top.worldEntry.body.translation()},quaternion:{...top.worldEntry.body.rotation()},box:{...top.box}}));
+await __shot('world-unit3-before-interaction-reload');
+sessionStorage.setItem('look-position',JSON.stringify({x:top.x,y:top.y}));store.flush();
+note('props restore scale before',JSON.stringify({scale:top.picture.mesh.scale.toArray(),offset:top.picture.mesh.position.toArray(),unit:keepsakes.unit,width:top.w,insets:stage.insets,layout:site.world.layoutKey(),saved:store.get('worldBodies.top')}));

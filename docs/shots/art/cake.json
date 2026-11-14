@@ -1,0 +1,115 @@
+{
+  "name": "cake",
+  "variant": null,
+  "bounds": {
+    "min": [
+      -0.16594043374061584,
+      -9.499493552889149e-11,
+      -0.16594094038009644
+    ],
+    "max": [
+      0.15152592957019806,
+      0.19660000503063202,
+      0.16600164771080017
+    ]
+  },
+  "triangles": 8688,
+  "meshes": 4,
+  "materials": 4,
+  "textures": [
+    [
+      256,
+      256
+    ],
+    [
+      256,
+      256
+    ]
+  ],
+  "geometryBytes": 834048,
+  "finite": true,
+  "parts": [
+    {
+      "name": "cake",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "physics": {
+        "units": "cat-height units; play mass, not kg",
+        "mass": 0.18,
+        "colliders": [
+          {
+            "type": "cylinder",
+            "radius": 0.167,
+            "height": 0.182,
+            "position": [
+              0,
+              0.091,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "anchors": {}
+      }
+    }
+  ],
+  "physics": {
+    "units": "cat-height units; play mass, not kg",
+    "mass": 0.18,
+    "colliders": [
+      {
+        "type": "cylinder",
+        "radius": 0.167,
+        "height": 0.182,
+        "position": [
+          0,
+          0.091,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "anchors": {}
+  },
+  "render": [
+    {
+      "frame": 35,
+      "calls": 9,
+      "triangles": 17378,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 36,
+      "calls": 9,
+      "triangles": 17378,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 37,
+      "calls": 9,
+      "triangles": 17378,
+      "points": 0,
+      "lines": 0
+    }
+  ],
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "errors": []
+}

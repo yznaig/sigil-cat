@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pick a splat</title>
+<!-- Aaron picks the loaf and sit splats here (round 2). Candidates come from tools/splats/more.sh into ./cands/;
+     all have the solid shell.
+     Drag to turn him, scroll to zoom; he spins on his own until you touch him. "now" is the pose live on the site. -->
+<style>
+  :root { --bg: #f7ede3; --ink: #2b2420; --line: #d9c8b6; --pick: #c2410c; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, sans-serif; display: grid;
+         grid-template-columns: 1fr 320px; height: 100vh; }
+  #stage { position: relative; min-width: 0; }
+  #stage canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+  #label { position: absolute; left: 16px; top: 12px; font-size: 28px; font-weight: 700; }
+  #sub { position: absolute; left: 16px; top: 50px; opacity: .7; }
+  #help { position: absolute; left: 16px; bottom: 12px; opacity: .6; }
+  #views { position: absolute; right: 12px; top: 12px; display: flex; gap: 6px; }
+  button { font: inherit; border: 1px solid var(--line); background: #fff8f0; border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+  aside { overflow-y: auto; border-left: 1px solid var(--line); padding: 10px; }
+  h2 { font-size: 15px; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: .05em; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .c { border: 2px solid transparent; border-radius: 6px; padding: 2px; text-align: center; cursor: pointer; background: #fff8f0; }
+  .c img { width: 100%; aspect-ratio: 1; object-fit: contain; display: block; }
+  .c.on { border-color: var(--pick); }
+  .c .now { aspect-ratio: 1; display: grid; place-items: center; font-size: 12px; opacity: .7; }
+  .c span { font-size: 12px; font-weight: 600; }
+  @media (max-width: 700px) { body { grid-template-columns: 1fr; grid-template-rows: 60vh 1fr; } aside { border-left: 0; border-top: 1px solid var(--line); } }
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/","@sparkjsdev/spark":"https://cdn.jsdelivr.net/npm/@sparkjsdev/spark@2.4.0/dist/spark.module.min.js"}}</script>
+</head><body>
+<div id="stage"><div id="label">…</div><div id="sub"></div>
+  <div id="views"><button data-v="0">front</button><button data-v="90">side</button><button data-v="180">back</button><button data-v="spin">spin</button></div>
+  <div id="help">drag to turn · scroll to zoom · ← → next candidate</div></div>
+<aside id="list"></aside>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { SparkRenderer, SplatMesh } from '@sparkjsdev/spark';
+
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: false });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setClearColor(0xf7ede3);
+stage.prepend(renderer.domElement);
+const scene = new THREE.Scene(); scene.add(new SparkRenderer({ renderer }));
+const cam = new THREE.PerspectiveCamera(30, 1, 0.05, 50); cam.position.set(0, 0.9, 3.2);
+const orbit = new OrbitControls(cam, renderer.domElement); orbit.target.set(0, 0.45, 0);
+orbit.enableDamping = true; orbit.autoRotate = true; orbit.autoRotateSpeed = 2.5;
+orbit.addEventListener('start', () => { orbit.autoRotate = false; });
+function size() { const r = stage.getBoundingClientRect(); renderer.setSize(r.width, r.height, false); cam.aspect = r.width / r.height; cam.updateProjectionMatrix(); }
+addEventListener('resize', size); size();
+renderer.setAnimationLoop(() => { orbit.update(); renderer.render(scene, cam); });
+
+// Candidates: cands/index.json (from more.sh). Raw Idol output is y-down, so it is turned over and stood on the floor.
+// "now" rows are the live site files (already upright, facing +z).
+const idx = await fetch('cands/index.json').then((r) => r.ok ? r.json() : []).catch(() => []);
+const items = [];
+for (const pose of ['loaf', 'sit', ...new Set(idx.map((c) => c.pose))].filter((p, i, a) => a.indexOf(p) === i)) {
+  const live = { lie: 'loaf' }[pose] ?? pose;
+  if (['loaf', 'sit'].includes(pose)) items.push({ name: `${pose} now`, pose, url: `../../assets/splats/${live}.spz`, img: null, upright: true, sub: 'what the site shows now' });
+  for (const c of idx.filter((c) => c.pose === pose)) items.push({ name: c.name, pose, url: `cands/${c.name}.spz`, upright: !!c.upright, img: `cands/${c.name}.png`,
+    sub: `input ${c.input}, seed ${c.seed}${c.cfg ? ', guidance ' + c.cfg : ''}${c.mode ? ', ' + c.mode + ' mode' : ''}` });
+}
+const list = document.getElementById('list');
+let lastPose = null, grid;
+items.forEach((it, i) => {
+  if (it.pose !== lastPose) { lastPose = it.pose; list.insertAdjacentHTML('beforeend', `<h2>${it.pose}</h2>`); grid = document.createElement('div'); grid.className = 'grid'; list.append(grid); }
+  const d = document.createElement('div'); d.className = 'c'; d.innerHTML = `${it.img ? `<img src="${it.img}" alt="">` : '<div class="now">on the site<br>now</div>'}<span>${it.name}</span>`;
+  d.onclick = () => show(i); grid.append(d); it.el = d;
+});
+
+let cur = -1, holder = null, token = 0;
+async function show(i) {
+  if (i < 0 || i >= items.length) return;
+  cur = i; const it = items[i], my = ++token;
+  items.forEach((x, k) => x.el.classList.toggle('on', k === i));
+  document.getElementById('label').textContent = it.name; document.getElementById('sub').textContent = it.sub + ' · loading…';
+  const m = new SplatMesh({ url: it.url }); await m.initialized;
+  if (my !== token) { m.dispose(); return; }
+  const fix = new THREE.Group(); if (!it.upright) fix.rotation.x = Math.PI; fix.add(m); fix.updateMatrixWorld(true);
+  const b = m.getBoundingBox().clone().applyMatrix4(fix.matrix), sz = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
+  const k = 1 / Math.max(sz.y, sz.x * 0.8, sz.z * 0.8);
+  const h = new THREE.Group(); h.add(fix); fix.scale.setScalar(k); fix.position.set(-c.x * k, -b.min.y * k, -c.z * k);
+  if (holder) { scene.remove(holder); holder.traverse((o) => o.dispose?.()); }
+  holder = h; scene.add(h);
+  document.getElementById('sub').textContent = it.sub;
+  history.replaceState(null, '', '#' + it.name.replace(' ', '-'));
+}
+document.getElementById('views').onclick = (e) => {
+  const v = e.target.dataset.v; if (v === undefined) return;
+  if (v === 'spin') { orbit.autoRotate = !orbit.autoRotate; return; }
+  orbit.autoRotate = false; const a = THREE.MathUtils.degToRad(Number(v)), r = Math.hypot(cam.position.x, cam.position.z);
+  cam.position.set(Math.sin(a) * r, cam.position.y, Math.cos(a) * r);
+};
+addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') show(cur + 1); if (e.key === 'ArrowLeft') show(cur - 1); });
+const start = items.findIndex((x) => '#' + x.name.replace(' ', '-') === location.hash);
+show(start >= 0 ? start : 0);
+document.body.dataset.ready = '1';
+</script>
+</body></html>

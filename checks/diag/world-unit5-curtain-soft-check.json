@@ -1,0 +1,9 @@
+{
+  "phase": "first focused visibility repair check; forced SwiftShader, before generic furniture conceal registration; no performance claim",
+  "checks": [
+    "CHECK board concealed physical cards cannot be picked:  PASS",
+    "CHECK board takeover conceals actual rendered pictures: 3 draws PASS",
+    "CHECK board unlock under takeover preserves tray visibility: [{\"id\":\"paper\",\"stored\":true,\"root\":false,\"art\":false,\"picture\":false,\"shadow\":false,\"masked\":false},{\"id\":\"postcard\",\"stored\":true,\"root\":false,\"art\":false,\"picture\":false,\"shadow\":false,\"masked\":false},{\"id\":\"ticket\",\"stored\":false,\"root\":true,\"art\":true,\"picture\":false,\"shadow\":true,\"masked\":false}] PASS",
+    "CHECK board takeover restore stays idle:  PASS"
+  ]
+}

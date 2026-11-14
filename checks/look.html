@@ -1,0 +1,55 @@
+<!doctype html>
+<!-- look.html: our splat renderer (src/core/splats.js) beside Spark 2.4, the renderer Aaron approved the cat in.
+     Same file, same camera, same size. window.look = { diff: mean absolute difference per channel (0-255), ... }.
+     Run: shot 'http://localhost:8732/checks/look.html#pose=sit&yaw=-0.45' (also pose=loaf|sleep|stretch|bread). -->
+<meta charset="utf-8">
+<title>splat look check</title>
+<link rel="icon" href="data:,">
+<style>body { margin: 0; background: #f7ede3; font: 12px monospace; } canvas { display: inline-block; } p { margin: 4px 8px; }</style>
+<script type="importmap">{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/",
+  "@sparkjsdev/spark": "https://cdn.jsdelivr.net/npm/@sparkjsdev/spark@2.4.0/dist/spark.module.min.js" } }</script>
+<canvas id="a" width="560" height="640"></canvas><canvas id="b" width="560" height="640"></canvas><canvas id="d" width="560" height="640"></canvas>
+<p id="out">rendering…</p>
+<script type="module">
+import * as THREE from 'three';
+import { SparkRenderer, SplatMesh } from '@sparkjsdev/spark';
+import { fetchSplat, makeSplatMesh } from '../src/core/splats.js';
+const q = new URLSearchParams(location.hash.slice(1));
+const pose = q.get('pose') || 'sit', yaw = Number(q.get('yaw') ?? -0.45), W = 560, H = 640;
+const url = new URL(`../assets/splats/${pose}.spz`, import.meta.url).href;
+const cam = new THREE.PerspectiveCamera(30, W / H, 0.05, 40);
+cam.position.set(0, 1.1, 4); cam.lookAt(0, 0.5, 0); cam.updateMatrixWorld();
+const mk = (id) => { const r = new THREE.WebGLRenderer({ canvas: document.getElementById(id), antialias: false, alpha: true, preserveDrawingBuffer: true }); r.setPixelRatio(1); r.setSize(W, H, false); r.setClearColor(0xf7ede3, 1); return r; };
+// Spark
+const ra = mk('a'), sa = new THREE.Scene(), spark = new SparkRenderer({ renderer: ra });
+sa.add(spark);
+const sm = new SplatMesh({ url }); await sm.initialized;
+const ga = new THREE.Group(); ga.rotation.y = yaw; ga.add(sm); sa.add(ga);
+for (let i = 0; i < 40; i++) { ra.render(sa, cam); await new Promise((r) => setTimeout(r, 50)); }
+// ours
+const rb = mk('b'), sb = new THREE.Scene();
+const t0 = performance.now();
+const splat = await fetchSplat(url);
+const t1 = performance.now();
+const mesh = makeSplatMesh(splat);
+const gb = new THREE.Group(); gb.rotation.y = yaw; gb.add(mesh); sb.add(gb);
+sb.updateMatrixWorld(true);
+const t2 = performance.now(); mesh.sortFor(cam); const t3 = performance.now();
+rb.render(sb, cam);
+// difference
+const read = (r) => { const gl = r.getContext(), px = new Uint8Array(W * H * 4); gl.readPixels(0, 0, W, H, gl.RGBA, gl.UNSIGNED_BYTE, px); return px; };
+const pa = read(ra), pb = read(rb), g = document.getElementById('d').getContext('2d'), img = g.createImageData(W, H);
+let sum = 0, worst = 0, over = 0;
+for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+  const i = (y * W + x) * 4, o = ((H - 1 - y) * W + x) * 4;
+  let d = 0; for (let k = 0; k < 3; k++) d += Math.abs(pa[i + k] - pb[i + k]);
+  d /= 3; sum += d; worst = Math.max(worst, d); if (d > 12) over++;
+  img.data[o] = img.data[o + 1] = img.data[o + 2] = 255 - Math.min(255, d * 8); img.data[o + 3] = 255;
+}
+g.putImageData(img, 0, 0);
+window.look = { pose, yaw, count: splat.count, diff: +(sum / (W * H)).toFixed(3), worst: +worst.toFixed(1), over12: over, parseMs: Math.round(t1 - t0), sortMs: +(t3 - t2).toFixed(2), box: [splat.box.min.toArray().map((v) => +v.toFixed(3)), splat.box.max.toArray().map((v) => +v.toFixed(3))] };
+document.getElementById('out').textContent = 'left: Spark 2.4 · middle: ours · right: difference ×8 (white = same)   ' + JSON.stringify(window.look);
+console.warn('CHECK look ' + JSON.stringify(window.look));
+</script>

@@ -1,0 +1,887 @@
+<!doctype html>
+<!--
+  Cat GLB prototype (sigil-cat). Throwaway: proves the real-model load path.
+  A rigged GLB loaded with GLTFLoader + meshopt, its clips crossfading through the pose-cycle
+  player from prototypes/cat-viewer, the matte-black material swapped onto every mesh, and the
+  butter slab attached to the head bone so it follows every clip.
+  Stack: vanilla three.js 0.186.1 from jsDelivr via an importmap. No build step.
+  URL hash options: #model=models/x.glb  #pose=sleep  #butter=1  #tone=agx  #debug  #t=1.5
+  (freeze that moment of the pose's clip)  (combine with &)
+  Checks: checks/*.js drive the page through window.catGlb and print results on the page.
+  Run one with: shot 'index.html#debug' --js "$(cat checks/load-crossfade-butter.js)"
+  Default model: Quaternius "Cat", CC0 (see models/README.md). Tap sounds are synthesized.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cat GLB</title>
+<style>
+  :root {
+    --bg-top: #f6f1e7;
+    --bg-bottom: #e7dfd0;
+    --ink: #1a1a1c;
+    --ink-soft: #6b665d;
+    --pill: rgba(255, 255, 255, 0.72);
+    --pill-on: #1a1a1c;
+    --pill-on-ink: #f6f1e7;
+    --butter: #f3d36b;
+    --warn: #8a3b12;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(120% 90% at 50% 35%, var(--bg-top), var(--bg-bottom));
+    color: var(--ink);
+    font: 15px/1.4 ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  canvas#c {
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    display: block; touch-action: pan-y; cursor: grab;   /* vertical swipes still scroll on phones */
+  }
+  canvas#c.dragging { cursor: grabbing; }
+  .tag {
+    position: fixed; top: 16px; left: 16px; margin: 0; font-size: 13px; color: var(--ink-soft);
+  }
+  .tag .standin { color: var(--warn); }
+  .hint {
+    position: fixed; top: 16px; right: 16px; margin: 0; font-size: 13px; color: var(--ink-soft);
+  }
+  @media (max-width: 560px) {
+    .hint { top: auto; right: 0; left: 0; bottom: 168px; text-align: center; }
+  }
+  .controls {
+    position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%);
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    width: max-content; max-width: calc(100vw - 32px);
+  }
+  .controls button {
+    font: inherit; font-size: 14px; border: 0; border-radius: 999px; padding: 8px 14px;
+    background: var(--pill); color: var(--ink); cursor: pointer;
+    box-shadow: 0 1px 0 rgba(0,0,0,.06), 0 4px 14px rgba(0,0,0,.06);
+    backdrop-filter: blur(6px);
+  }
+  .controls button[hidden] { display: none; }
+  .controls button[aria-pressed="true"] { background: var(--pill-on); color: var(--pill-on-ink); }
+  .controls button#butter[aria-pressed="true"] { background: var(--butter); color: var(--ink); }
+  footer {
+    position: fixed; left: 0; right: 0; bottom: 0; padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    display: flex; gap: 18px; justify-content: center; font-size: 13px;
+  }
+  footer a { color: var(--ink-soft); text-decoration: none; }
+  footer a:hover { color: var(--ink); text-decoration: underline; }
+  #debug {
+    position: fixed; top: 64px; left: 16px; margin: 0; padding: 8px 10px; border-radius: 8px;
+    background: rgba(0,0,0,.75); color: #e9e4d8; font: 12px/1.45 ui-monospace, monospace;
+    white-space: pre-wrap; max-width: min(460px, calc(100vw - 32px));
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="c" aria-label="A black cat floating in the middle of the page. Drag to spin him, tap him for a sound."></canvas>
+<p class="tag"><span id="status">cat glb, prototype: loading model…</span><br><span class="standin" id="standin" hidden></span></p>
+<p class="hint">Drag to spin him. Tap him.</p>
+<div class="controls" role="group" aria-label="Cat controls">
+  <button data-pose="sit" aria-pressed="true">Sit</button>
+  <button data-pose="lie" aria-pressed="false">Lie</button>
+  <button data-pose="sleep" aria-pressed="false">Sleep</button>
+  <button data-pose="stretch" aria-pressed="false">Stretch</button>
+  <button id="hop">Hop</button>
+  <button id="butter" aria-pressed="false">Butter</button>
+  <button id="auto" aria-pressed="true">Auto</button>
+</div>
+<footer>
+  <!-- Placeholder links: the real accounts are still to come from the brothers. -->
+  <a href="#">instagram</a><a href="#">tiktok</a><a href="#">youtube</a>
+</footer>
+<pre id="debug" hidden></pre>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+
+// ---------------------------------------------------------------------------
+// Tuning knobs. Everything worth fiddling with lives here.
+// ---------------------------------------------------------------------------
+const CONFIG = {
+  model: {
+    default: 'models/quaternius-cat.glb',
+    size: 2.6,                  // longest side of his bounding box, in scene units (about the primitive cat's length)
+    // Pose name -> clip in the file. A string names a clip; { clip, once: true } plays it once
+    // and holds the last frame. Names match exactly, or on the part after the last '|'
+    // (FBX-derived exports prefix the armature: 'AnimalArmature|...|Idle').
+    // A model with no entry here gets the identity map: pose 'sit' plays clip 'sit'.
+    clipMaps: {
+      // STAND-IN mapping: this cat has no sit/lie/sleep clips, so borrow what it has.
+      'quaternius-cat.glb': { sit: 'Idle', lie: 'Idle_Eating', sleep: { clip: 'Death', once: true }, stretch: 'Headbutt' },
+    },
+    socketName: 'butter_socket',  // preferred butter parent (an Empty on the head bone, from Blender)
+    headPattern: /head/i,         // else: the first bone whose name matches this
+  },
+  butter: {
+    scale: 1,                   // 1 = the round-1 slab (0.34 long); the model is normalized to the same size
+    sink: 0.15,                 // how far it sits into the fur, as a share of its own thickness
+  },
+  // The pose cycle (spec: docs/ideas/cat-poses.md). He holds a pose for a random
+  // time in `hold`, then picks the next by weight from `next`.
+  cycle: {
+    start: 'sit',
+    poses: {
+      sit: { hold: [4, 9], next: { lie: 3, stretch: 1 } },
+      lie: { hold: [3, 7], next: { sleep: 3, sit: 2, stretch: 1 } },
+      sleep: { hold: [8, 15], next: { lie: 1 } },
+      stretch: { oneShot: true, then: 'sit' },   // stretch ends seated
+    },
+    // The transition graph, named from_to_to. A model that ships a clip by that name
+    // plays it; otherwise the pair just crossfades. (Seconds only sized the round-1 placeholders.)
+    transitions: { sit_to_lie: 1.1, sit_to_stretch: 0.9, lie_to_stretch: 1.1, lie_to_sleep: 1.3, lie_to_sit: 1.0, sleep_to_lie: 1.2 },
+    fade: 0.25,                 // blend at each clip seam
+    requestFade: 0.35,          // blend when a button cuts in mid-hold
+    emotes: { tap: 'add_hop', butter: 'add_startle' },
+    tapWakes: 'lie',            // tapping him asleep wakes him into this pose
+  },
+  rotate: {
+    radiansPerPixel: 0.009,     // drag sensitivity
+    damping: 3.5,               // how fast a flick slows down (higher = sooner)
+    tapSlop: 8,                 // pixels a press may move and still count as a tap
+    tapMs: 450,                 // ...and how long it may last
+    settle: 0,                  // >0 slowly returns him upright when left alone (0 = off)
+  },
+  float: { height: 0.08, speed: 1.2 },
+  // Real sound files go here, e.g. ['sounds/mrrp.mp3', 'sounds/huh.mp3'].
+  // Empty = synthesized placeholder blips so the prototype needs no assets.
+  sounds: [],
+  soundVolume: 0.5,
+};
+
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const params = new URLSearchParams(location.hash.slice(1));
+// Only same-folder relative .glb paths: the hash must not load arbitrary URLs.
+const askedModel = params.get('model');
+const modelPath = askedModel && /^[\w\-./]+\.glb$/.test(askedModel) && !askedModel.includes('..') && !askedModel.startsWith('/')
+  ? askedModel : CONFIG.model.default;
+const modelFile = modelPath.split('/').pop();
+
+// ---------------------------------------------------------------------------
+// Renderer, camera, light. Matte black needs light to read: a soft environment
+// for the body, a warm key, and two strong back lights for the rim.
+// ---------------------------------------------------------------------------
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = params.get('tone') === 'agx' ? THREE.AgXToneMapping : THREE.NeutralToneMapping;
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.4;
+
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 60);
+
+scene.add(new THREE.HemisphereLight(0xfff6e8, 0x3a3630, 0.7));
+const key = new THREE.DirectionalLight(0xfff1dc, 2.2);
+key.position.set(3, 4, 5);
+const rimA = new THREE.DirectionalLight(0xdfe8ff, 5.0);
+rimA.position.set(-4, 2.5, -4);
+const rimB = new THREE.DirectionalLight(0xffffff, 3.0);
+rimB.position.set(4, 1, -3);
+scene.add(key, rimA, rimB);
+
+// The shared matte material, same as the cat viewer. Skinning needs no flag in r150+.
+const matte = new THREE.MeshPhysicalMaterial({
+  color: 0x0d0d0f, roughness: 0.78, metalness: 0,
+  sheen: 0.8, sheenRoughness: 0.5, sheenColor: new THREE.Color(0x4b505b),
+});
+
+function node(name, parent) {
+  const g = new THREE.Group();
+  g.name = name;
+  if (parent) parent.add(g);
+  return g;
+}
+
+const view = new THREE.Group();          // fixed lean toward the camera, so we see a little of his back
+view.rotation.set(0.18, 0, 0.05);
+const spin = node('spin', view);         // user rotation (drag): turntable about his own up axis
+const floater = node('floater', spin);   // procedural bob
+const react = node('react', floater);    // procedural tap squash
+const cat = node('cat', react);          // the model's frame: faces +X, centred on the drag pivot
+scene.add(view);
+
+// Butter: its own mesh, parented to a mount on the head bone (see attachButter).
+const butter = new THREE.Mesh(
+  new RoundedBoxGeometry(0.34, 0.12, 0.22, 4, 0.025),
+  new THREE.MeshStandardMaterial({ color: 0xf3d36b, roughness: 0.42 }),
+);
+butter.name = 'butter';
+butter.rotation.set(0, 0.18, 0.06);
+butter.visible = false;
+const BUTTER_REST_Y = 0.06 * (1 - 2 * CONFIG.butter.sink);   // half its thickness, minus the sink
+
+// Soft contact shadow: a blurred dot under him, in the world (not spun with him).
+const shadowTex = (() => {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  grad.addColorStop(0, 'rgba(40,32,20,0.55)');
+  grad.addColorStop(1, 'rgba(40,32,20,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+})();
+const shadow = new THREE.Mesh(
+  new THREE.PlaneGeometry(2.6, 1.3),
+  new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }),
+);
+shadow.rotation.x = -Math.PI / 2;
+shadow.position.y = -1.55;
+scene.add(shadow);
+
+// ---------------------------------------------------------------------------
+// Model state, filled in by load(). The check handle below reads these.
+// ---------------------------------------------------------------------------
+let mixer = null;
+let actions = {};            // pose / clip name -> AnimationAction
+let clipSources = {};        // pose / clip name -> the clip it plays in the file
+let standIn = false;         // true when a clip map renames clips
+let headBone = null;         // the object the butter mount hangs from
+let headHow = '';            // how headBone was found
+let headScale = 0;           // head bone's world scale at attach time (armature scale x normalization)
+let triangles = 0;
+let loaded = false;
+let loadError = null;
+let hitArea = null;
+const statusEl = document.getElementById('status');
+const standinEl = document.getElementById('standin');
+
+const TAU = Math.PI * 2;
+const rand = ([a, b]) => a + Math.random() * (b - a);
+const shortName = (n) => n.split('|').pop();
+
+// Pose names -> actions, through the clip map. Clips the map doesn't name keep their
+// own (short) name, so a model whose clips are already called sit, lie... maps to itself.
+function buildActions(root, clips) {
+  mixer = new THREE.AnimationMixer(root);
+  const byName = new Map();
+  for (const c of clips) byName.set(c.name, c);
+  for (const c of clips) if (!byName.has(shortName(c.name))) byName.set(shortName(c.name), c);
+  const map = CONFIG.model.clipMaps[modelFile] || {};
+  const used = new Set(), once = new Set();
+  const reg = (name, clip) => {
+    const c = used.has(clip) ? clip.clone() : clip;     // one action per name, even when two names share a clip
+    used.add(clip);
+    actions[name] = mixer.clipAction(c);
+    clipSources[name] = shortName(clip.name);
+  };
+  for (const [name, spec] of Object.entries(map)) {
+    const want = typeof spec === 'string' ? spec : spec.clip;
+    const clip = byName.get(want);
+    if (!clip) { console.warn(`clip map: ${modelFile} has no clip "${want}" for "${name}"`); continue; }
+    reg(name, clip);
+    if (spec.once) once.add(name);
+    if (shortName(clip.name) !== name) standIn = true;
+  }
+  for (const c of clips) if (!used.has(c) && !(shortName(c.name) in actions)) reg(shortName(c.name), c);
+
+  for (const [name, a] of Object.entries(actions)) {
+    const spec = cyc.poses[name];
+    const isHold = spec && !spec.oneShot && !once.has(name);
+    if (isHold) continue;                              // holds loop
+    if (spec || once.has(name) || name.includes('_to_') || name.startsWith('add_') || name.startsWith('emote_')) {
+      a.setLoop(THREE.LoopOnce, 1);
+      a.clampWhenFinished = !name.startsWith('add_');   // one-shots hold their last frame until the next clip takes over
+    }
+  }
+  // Additive emotes from the file must be made additive before they play.
+  for (const [name, a] of Object.entries(actions)) {
+    if (name.startsWith('add_')) THREE.AnimationUtils.makeClipAdditive(a.getClip());
+  }
+  mixer.addEventListener('finished', onFinished);
+  mixer.addEventListener('loop', onLoop);
+}
+
+// The head: prefer the Blender socket, else the first bone named like a head.
+function findHead(root) {
+  const socket = root.getObjectByName(CONFIG.model.socketName);
+  if (socket) { headHow = `object "${socket.name}"`; return socket; }
+  let found = null;
+  root.traverse((o) => { if (!found && o.isBone && CONFIG.model.headPattern.test(o.name)) found = o; });
+  if (found) { headHow = `first bone matching ${CONFIG.model.headPattern}`; return found; }
+  root.traverse((o) => { if (!found && CONFIG.model.headPattern.test(o.name)) found = o; });
+  headHow = found ? `first object matching ${CONFIG.model.headPattern} (not a bone)` : 'none found';
+  return found;
+}
+
+// Skinned vertices whose strongest joint is `bone`, in the current pose, in world space.
+function boneVertices(root, bone) {
+  const pts = [], v = new THREE.Vector3();
+  root.traverse((m) => {
+    if (!m.isSkinnedMesh) return;
+    const j = m.skeleton.bones.indexOf(bone);
+    if (j < 0) return;
+    const si = m.geometry.attributes.skinIndex, sw = m.geometry.attributes.skinWeight;
+    for (let i = 0; i < si.count; i++) {
+      let best = -1, bw = -1;
+      for (let k = 0; k < si.itemSize; k++) { const w = sw.getComponent(i, k); if (w > bw) { bw = w; best = si.getComponent(i, k); } }
+      if (best !== j) continue;
+      m.getVertexPosition(i, v);                       // applies the bone transforms
+      pts.push(v.clone().applyMatrix4(m.matrixWorld));
+    }
+  });
+  return pts;
+}
+
+// Put the butter on the head. A mount is placed in the cat's frame (on top of the skull,
+// level, at scale 1) and then attach()ed to the head: attach() multiplies by the inverse
+// of the head's world matrix, so the 100x armature scale (times the normalization scale)
+// comes out as a ~0.01 local scale on the mount and the butter keeps its round-1 size.
+// Called while `holder` is still unparented, so world space here is the cat's own frame.
+let butterSpot = '';
+function attachButter(model) {
+  const s = new THREE.Vector3();
+  headBone.updateWorldMatrix(true, false);
+  headBone.getWorldScale(s);
+  const mount = new THREE.Group();
+  mount.name = 'butter_mount';
+  if (headBone.name === CONFIG.model.socketName) {
+    headBone.getWorldPosition(mount.position);         // Blender says exactly where
+    butterSpot = 'the socket';
+  } else {
+    // Top of the skull: drop a ray straight down at the middle of the head's vertices.
+    // The midline misses the ears (they sit to the sides); whiskers don't matter.
+    const pts = boneVertices(model, headBone);
+    const mid = pts.length ? new THREE.Box3().setFromPoints(pts).getCenter(new THREE.Vector3()) : headBone.getWorldPosition(new THREE.Vector3());
+    const meshes = [];
+    model.traverse((o) => { if (o.isMesh) { if (o.isSkinnedMesh) o.computeBoundingSphere(); meshes.push(o); } });
+    const ray = new THREE.Raycaster(new THREE.Vector3(mid.x, mid.y + CONFIG.model.size, mid.z), new THREE.Vector3(0, -1, 0));
+    const hit = ray.intersectObjects(meshes, false)[0];
+    if (hit) { mount.position.copy(hit.point); butterSpot = `ray down the head midline (${pts.length} head verts)`; }
+    else { mount.position.copy(mid).y += CONFIG.model.size * 0.1; butterSpot = 'head centre + offset (ray missed)'; }
+  }
+  mount.scale.setScalar(CONFIG.butter.scale);
+  headBone.attach(mount);
+  mount.add(butter);
+  butter.position.y = BUTTER_REST_Y;
+  return s.x;
+}
+
+async function load() {
+  const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+  const gltf = await loader.loadAsync(modelPath);
+  const model = gltf.scene;
+  const holder = node('holder');                       // orientation, scale, centring; stays unparented until the end
+
+  model.traverse((o) => {
+    if (!o.isMesh) return;
+    const old = Array.isArray(o.material) ? o.material : [o.material];
+    for (const m of old) { for (const v of Object.values(m)) if (v && v.isTexture) v.dispose(); m.dispose(); }
+    o.material = Array.isArray(o.material) ? o.material.map(() => matte) : matte;
+    const g = o.geometry;
+    triangles += (g.index ? g.index.count : g.attributes.position.count) / 3;
+    if (o.isSkinnedMesh) o.frustumCulled = false;      // a jump or a stretch never culls him
+  });
+  holder.add(model);
+
+  buildActions(model, gltf.animations);
+  headBone = findHead(model);
+  console.info(`[cat-glb] ${modelPath}: head = ${headBone ? headBone.name : 'none'} (${headHow})`);
+
+  // Measure in the start pose, the one he spends most time in.
+  const first = actions[cyc.start] || Object.values(actions)[0];
+  if (first) { first.play(); mixer.update(0); }
+  holder.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(model, true);
+  const centre = box.getCenter(new THREE.Vector3());
+
+  // Face +X like the primitive cat: turn so the head points along +X, seen from above.
+  if (headBone) {
+    const h = headBone.getWorldPosition(new THREE.Vector3()).sub(centre);
+    holder.rotation.y = Math.atan2(h.z, h.x);
+  }
+  const size = box.getSize(new THREE.Vector3());
+  holder.scale.setScalar(CONFIG.model.size / Math.max(size.x, size.y, size.z));
+  holder.updateMatrixWorld(true);
+  const box2 = new THREE.Box3().setFromObject(model, true);
+  holder.position.copy(box2.getCenter(new THREE.Vector3())).negate();
+  holder.updateMatrixWorld(true);
+  box2.translate(holder.position);
+
+  if (headBone) {
+    headScale = attachButter(model);
+    console.info(`[cat-glb] head world scale ${headScale.toFixed(3)} (incl. normalization); butter mount local scale ${headBone.getObjectByName('butter_mount').scale.x.toExponential(2)}`);
+  }
+
+  // Hit area: an invisible ellipsoid over his bounding box. Cheaper than the skinned mesh.
+  const half = box2.getSize(new THREE.Vector3()).multiplyScalar(0.5 * 0.9);
+  hitArea = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), new THREE.MeshBasicMaterial());
+  hitArea.name = 'hitArea';
+  hitArea.scale.copy(half);
+  hitArea.visible = false;                             // the raycaster ignores visibility, so it still gets hit
+  cat.add(hitArea);
+  shadow.position.y = Math.min(-1.55, box2.min.y - 0.45);
+
+  cat.add(holder);
+  if (first) first.stop();
+
+  // Compile every shader now, butter included, so his first butter never hitches.
+  butter.visible = true;
+  await renderer.compileAsync(scene, camera);
+  butter.visible = false;
+
+  for (const b of buttons) b.hidden = !actions[b.dataset.pose];
+  document.getElementById('hop').hidden = !actions[cyc.emotes.tap];
+  statusEl.textContent = `cat glb, prototype: ${modelFile}`;
+  if (standIn) {
+    standinEl.hidden = false;
+    standinEl.textContent = 'stand-in clips: ' + Object.keys(cyc.poses).filter((p) => actions[p]).map((p) => `${p} = ${clipSources[p]}`).join(', ');
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Pose cycle player, from the cat viewer. hold -> (wait for the loop seam) ->
+// transition -> hold. A pair with no transition clip in the file crossfades.
+// Poses the file has no clip for are skipped.
+// ---------------------------------------------------------------------------
+const cyc = CONFIG.cycle;
+
+let pose = cyc.start;        // the pose he is in (or leaving)
+let target = null;           // the pose a transition is heading to
+let phase = 'hold';          // 'hold' | 'moving' | 'oneshot'
+let route = [];              // poses still to pass through on the way to a requested one
+let holdUntil = Infinity;
+let waitingForSeam = false;
+let playing = null;
+let auto = !reducedMotion;
+const has = (p) => !!actions[p];
+
+function play(name, fade) {
+  const a = actions[name];
+  if (playing && playing !== a) playing.fadeOut(fade);
+  a.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).fadeIn(fade).play();
+  playing = a;
+}
+function enter(p, fade) {
+  pose = p; target = null; waitingForSeam = false;
+  const spec = cyc.poses[p];
+  phase = spec.oneShot ? 'oneshot' : 'hold';
+  play(p, fade);
+  if (!spec.oneShot) holdUntil = timer.getElapsed() + rand(spec.hold);
+  syncButtons();
+}
+function moveTo(next, fade) {
+  waitingForSeam = false;
+  const clip = `${pose}_to_${next}`;
+  if (!actions[clip]) return enter(next, cyc.requestFade);
+  phase = 'moving'; target = next;
+  play(clip, fade);
+  syncButtons();
+}
+function neighbours(p) {
+  const spec = cyc.poses[p];
+  if (spec.oneShot) return [spec.then];
+  return Object.keys(cyc.transitions).filter((n) => n.startsWith(p + '_to_')).map((n) => n.split('_to_')[1]).filter(has);
+}
+function pathTo(from, to) {                         // breadth-first: fewest clips
+  const prev = { [from]: null }, queue = [from];
+  while (queue.length) {
+    const p = queue.shift();
+    if (p === to) break;
+    for (const n of neighbours(p)) if (!(n in prev)) { prev[n] = p; queue.push(n); }
+  }
+  if (!(to in prev)) return [to];                   // unreachable: crossfade straight there
+  const path = [];
+  for (let p = to; p !== from; p = prev[p]) path.unshift(p);
+  return path;
+}
+function request(to) {
+  if (!loaded || !cyc.poses[to] || !has(to)) return;
+  if (phase === 'hold') {
+    if (to === pose) return;
+    route = pathTo(pose, to);
+    moveTo(route.shift(), cyc.requestFade);
+  } else {
+    route = pathTo(phase === 'moving' ? target : pose, to);   // carry on after the current clip
+  }
+}
+function pickNext(p) {
+  const options = Object.entries(cyc.poses[p].next || {}).filter(([n]) => has(n));
+  if (!options.length) return null;
+  let r = Math.random() * options.reduce((sum, [, w]) => sum + w, 0);
+  for (const [name, w] of options) if ((r -= w) <= 0) return name;
+  return options[0][0];
+}
+function autoMove() {
+  const next = pickNext(pose);
+  if (next) moveTo(next, cyc.fade); else holdUntil = Infinity;
+}
+function emote(name) {
+  const a = actions[name];
+  if (!a) return;
+  a.reset().setEffectiveWeight(1).play();
+  holdUntil += a.getClip().duration;
+}
+
+function onFinished(e) {
+  if (e.action !== playing) return;                 // emotes, stale clips, play-once holds
+  if (phase === 'moving') {
+    pose = target;
+    if (route[0] === pose) route.shift();
+    route.length ? moveTo(route.shift(), cyc.fade) : enter(pose, cyc.fade);
+  } else if (phase === 'oneshot') {
+    pose = cyc.poses[pose].then;                    // stretch ends seated
+    if (route[0] === pose) route.shift();
+    route.length ? moveTo(route.shift(), cyc.fade) : enter(pose, cyc.fade);
+  }
+}
+// Auto moves wait for the hold to come round to frame 0, which is exactly
+// where a transition clip starts, so nothing pops.
+function onLoop(e) {
+  if (waitingForSeam && auto && phase === 'hold' && e.action === playing) autoMove();
+}
+
+// ---------------------------------------------------------------------------
+// Butter. A quick drop-in pop, separate from the mixer.
+// ---------------------------------------------------------------------------
+let butterAnim = null;
+function setButter(on) {
+  butter.visible = on;
+  butterAnim = on ? { t: 0 } : null;
+  if (on) emote(cyc.emotes.butter);
+  syncButtons();
+}
+
+// ---------------------------------------------------------------------------
+// Turntable rotation (decision e1107-36): drag spins him left-right about the
+// world's vertical axis only, no tumbling. The model turns, not the camera, so
+// lights stay put. A press that barely moves is a tap; anything more is a drag
+// with inertia.
+// ---------------------------------------------------------------------------
+const home = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -0.65);   // the lean lives on `view`
+spin.quaternion.copy(home);
+const axisUp = new THREE.Vector3(0, 1, 0), qTmp = new THREE.Quaternion();
+const vel = { x: 0 };                      // radians per second around world up
+let press = null;                          // { id, x, y, lastX, lastY, lastT, moved }
+let lastTouch = performance.now();
+
+function rotateBy(yaw) {
+  spin.quaternion.premultiply(qTmp.setFromAxisAngle(axisUp, yaw));
+  spin.quaternion.normalize();
+}
+
+canvas.addEventListener('pointerdown', (e) => {
+  if (press) return;                       // one finger drives; ignore the rest
+  press = { id: e.pointerId, x: e.clientX, y: e.clientY, lastX: e.clientX, lastY: e.clientY, t0: e.timeStamp, lastT: e.timeStamp, moved: false };
+  vel.x = 0;
+  try { canvas.setPointerCapture(e.pointerId); } catch { /* synthetic events have no capture target */ }
+});
+canvas.addEventListener('pointermove', (e) => {
+  if (!press || e.pointerId !== press.id) return;
+  const dx = e.clientX - press.lastX, dy = e.clientY - press.lastY;
+  if (!press.moved && Math.hypot(e.clientX - press.x, e.clientY - press.y) > CONFIG.rotate.tapSlop) {
+    press.moved = true;
+    canvas.classList.add('dragging');
+  }
+  if (press.moved) {
+    const k = CONFIG.rotate.radiansPerPixel;
+    rotateBy(dx * k);                             // horizontal only; dy is ignored
+    const dt = Math.max((e.timeStamp - press.lastT) / 1000, 1 / 240);
+    vel.x = 0.6 * vel.x + 0.4 * (dx * k / dt);   // smoothed flick speed
+  }
+  press.lastX = e.clientX; press.lastY = e.clientY; press.lastT = e.timeStamp;
+  lastTouch = performance.now();
+});
+function endPress(e) {
+  if (!press || e.pointerId !== press.id) return;
+  // Taps fire on pointerup: that counts as a user gesture on phones, so the
+  // very first tap can unlock audio and play a sound at once.
+  if (!press.moved && e.type === 'pointerup' && e.timeStamp - press.t0 < CONFIG.rotate.tapMs) tap(e.clientX, e.clientY);
+  if (e.timeStamp - press.lastT > 100) vel.x = 0;  // held still before letting go: no flick
+  canvas.classList.remove('dragging');
+  press = null;
+  lastTouch = performance.now();
+}
+canvas.addEventListener('pointerup', endPress);
+canvas.addEventListener('pointercancel', endPress);
+
+// ---------------------------------------------------------------------------
+// Tap: raycast against the hit area, then a random sound and a little squash.
+// ---------------------------------------------------------------------------
+const raycaster = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+let squash = null;
+let taps = 0;
+
+function tap(x, y) {
+  if (!hitArea) return false;
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
+  raycaster.setFromCamera(ndc, camera);
+  if (raycaster.intersectObject(hitArea, false).length === 0) return false;
+  taps++;
+  playRandomSound();
+  squash = { t: 0 };
+  if (pose === 'sleep' && phase === 'hold') { request(cyc.tapWakes); emote('add_startle'); }
+  else emote(cyc.emotes.tap);
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// Sound: Web Audio. Buffers are decoded once; each play is a cheap new source,
+// so taps can overlap with no lag. A shuffle bag avoids the same sound twice.
+// ---------------------------------------------------------------------------
+let audioCtx = null;
+let pool = [];
+let bag = [];
+let lastPlayed = -1;
+
+function unlockAudio() {
+  if (!audioCtx) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    audioCtx = new Ctx();
+    pool = synthPlaceholders(audioCtx);
+    if (CONFIG.sounds.length) loadSounds(CONFIG.sounds);
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+async function loadSounds(urls) {
+  const decoded = await Promise.all(urls.map(async (u) => {
+    try { return await audioCtx.decodeAudioData(await (await fetch(u)).arrayBuffer()); }
+    catch { console.warn('sound failed to load:', u); return null; }
+  }));
+  const ok = decoded.filter(Boolean);
+  if (ok.length) { pool = ok; bag = []; }
+}
+function playRandomSound() {
+  const ctx = unlockAudio();
+  if (!ctx || !pool.length) return;
+  if (!bag.length) {
+    bag = pool.map((_, i) => i).sort(() => Math.random() - 0.5);
+    if (bag.length > 1 && bag[bag.length - 1] === lastPlayed) bag.unshift(bag.pop());
+  }
+  const i = bag.pop();
+  lastPlayed = i;
+  const src = ctx.createBufferSource();
+  src.buffer = pool[i];
+  src.playbackRate.value = 0.94 + Math.random() * 0.12;   // a little variety
+  const gain = ctx.createGain();
+  gain.gain.value = CONFIG.soundVolume;
+  src.connect(gain).connect(ctx.destination);
+  src.start();
+}
+// Placeholder blips computed straight into buffers: mrrp, boing, squeak, bloop.
+function synthPlaceholders(ctx) {
+  const make = (seconds, f) => {
+    const n = Math.floor(seconds * ctx.sampleRate), buf = ctx.createBuffer(1, n, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    let phase = 0;
+    for (let s = 0; s < n; s++) {
+      const t = s / ctx.sampleRate, [freq, amp] = f(t, t / seconds);
+      phase += TAU * freq / ctx.sampleRate;
+      d[s] = Math.sin(phase) * amp;
+    }
+    return buf;
+  };
+  const env = (u, a = 0.05) => Math.min(1, u / a) * (1 - u) ** 1.5;
+  return [
+    make(0.38, (t, u) => [520 + 380 * Math.sin(Math.PI * u) + 18 * Math.sin(t * 60), 0.6 * env(u)]),
+    make(0.6, (t, u) => [190 + 90 * Math.sin(t * 38) * (1 - u), 0.7 * env(u, 0.02)]),
+    make(0.16, (t, u) => [1200 + 1100 * u, 0.4 * env(u, 0.1)]),
+    make(0.3, (t, u) => [700 * (1 - u) + 160, 0.6 * env(u, 0.03)]),
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// UI wiring
+// ---------------------------------------------------------------------------
+const buttons = [...document.querySelectorAll('.controls button[data-pose]')];
+const butterBtn = document.getElementById('butter');
+const autoBtn = document.getElementById('auto');
+function syncButtons() {
+  const showing = phase === 'moving' ? target : pose;
+  for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.pose === showing));
+  butterBtn.setAttribute('aria-pressed', String(butter.visible));
+  autoBtn.setAttribute('aria-pressed', String(auto));
+}
+for (const b of buttons) b.addEventListener('click', () => request(b.dataset.pose));
+document.getElementById('hop').addEventListener('click', () => emote(cyc.emotes.tap));
+butterBtn.addEventListener('click', () => { if (loaded) setButter(!butter.visible); });
+autoBtn.addEventListener('click', () => { auto = !auto; syncButtons(); });
+
+// ---------------------------------------------------------------------------
+// Sizing: keep the whole cat in frame on wide screens and tall phones.
+// ---------------------------------------------------------------------------
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  const halfFov = THREE.MathUtils.degToRad(camera.fov / 2);
+  const dist = Math.max(6.4, 1.7 / (Math.tan(halfFov) * camera.aspect));
+  camera.position.set(0, 0.35, dist);
+  camera.lookAt(0, -0.05, 0);
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+resize();
+
+// ---------------------------------------------------------------------------
+// Handle for automated checks and console play. Exists before the model loads,
+// so a check can wait on `loaded`.
+// ---------------------------------------------------------------------------
+const wp = (o) => (o ? o.getWorldPosition(new THREE.Vector3()).toArray().map((v) => +v.toFixed(4)) : null);
+window.catGlb = {
+  request, emote, setButter, rotateBy, tap, config: CONFIG,
+  get loaded() { return loaded; },
+  get error() { return loadError; },
+  get model() { return modelPath; },
+  get pose() { return pose; },
+  get phase() { return phase; },
+  get butter() { return butter.visible; },
+  get clips() { return Object.fromEntries(Object.entries(clipSources)); },
+  get headBone() { return headBone ? headBone.name : null; },
+  get quaternion() { return spin.quaternion.toArray().map((v) => +v.toFixed(3)); },
+  get taps() { return taps; },
+  set auto(v) { auto = v; syncButtons(); },
+  // Every running action with weight > 0 right now: { name: weight }.
+  weights() {
+    const out = {};
+    for (const [n, a] of Object.entries(actions)) {
+      const w = a.isRunning() ? a.getEffectiveWeight() : 0;
+      if (w > 0) out[n] = +w.toFixed(3);
+    }
+    return out;
+  },
+  butterWorld: () => wp(butter),
+  headWorld: () => wp(headBone),
+  // Same two points in the cat's own frame: no drag, bob or squash, only the animation.
+  inCat() {
+    const f = (o) => (o ? cat.worldToLocal(o.getWorldPosition(new THREE.Vector3())).toArray().map((v) => +v.toFixed(4)) : null);
+    return { butter: f(butter), head: f(headBone) };
+  },
+  // The head bone's rotation in the cat's frame, and the butter's position in the head
+  // bone's own frame (scaled back to scene units). If the butter rides the head, the
+  // first changes while the second stays put.
+  headPose() {
+    if (!headBone) return null;
+    const q = cat.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(headBone.getWorldQuaternion(new THREE.Quaternion()));
+    const local = headBone.worldToLocal(butter.getWorldPosition(new THREE.Vector3())).multiplyScalar(headBone.getWorldScale(new THREE.Vector3()).x);
+    return { quat: q.toArray().map((v) => +v.toFixed(5)), butterInHead: local.toArray().map((v) => +v.toFixed(5)) };
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Loop
+// ---------------------------------------------------------------------------
+const timer = new THREE.Timer();
+timer.connect(document);              // pauses cleanly while the tab is hidden
+const debugEl = document.getElementById('debug');
+const showDebug = params.has('debug');
+debugEl.hidden = !showDebug;
+let frameMs = 16.7;
+const tmpV = new THREE.Vector3();
+
+const freezeAt = params.has('t') ? Number(params.get('t')) : null;
+if (freezeAt !== null) auto = false;
+
+try {
+  await load();
+  loaded = true;
+} catch (err) {
+  loadError = String(err && err.message || err);
+  statusEl.textContent = `cat glb, prototype: could not load ${modelPath}`;
+  console.error('[cat-glb] model failed to load:', err);
+}
+
+if (loaded) {
+  const startPose = has(params.get('pose')) && cyc.poses[params.get('pose')] ? params.get('pose') : cyc.start;
+  if (has(startPose)) enter(startPose, 0);
+  syncButtons();
+  if (params.get('butter') === '1') setButter(true);
+}
+
+const clipLine = () => Object.entries(clipSources).map(([n, s]) => (n === s ? n : `${n}=${s}`)).join(' ');
+
+renderer.setAnimationLoop((now) => {
+  timer.update(now);
+  let dt = Math.min(timer.getDelta(), 0.1);     // a long stall never causes a big jump
+  let t = timer.getElapsed();
+  if (freezeAt !== null && mixer) { mixer.setTime(freezeAt); dt = 0; t = freezeAt; }
+  frameMs += (dt * 1000 - frameMs) * 0.05;
+
+  // Inertia after a flick, and the optional settle back to upright.
+  if (!press) {
+    if (Math.abs(vel.x) > 1e-4) {
+      rotateBy(vel.x * dt);
+      vel.x *= Math.exp(-CONFIG.rotate.damping * dt);
+    } else if (CONFIG.rotate.settle > 0 && performance.now() - lastTouch > 2500) {
+      spin.quaternion.slerp(home, 1 - Math.exp(-CONFIG.rotate.settle * dt));
+    }
+  }
+
+  if (loaded && auto && phase === 'hold' && t > holdUntil) {
+    // A play-once hold (clamped on its last frame) has no loop seam to wait for.
+    if (playing && playing.loop === THREE.LoopOnce) autoMove(); else waitingForSeam = true;
+  }
+  if (mixer) mixer.update(dt);
+
+  // Float bob (smaller when the visitor prefers less motion).
+  const amp = CONFIG.float.height * (reducedMotion ? 0.3 : 1);
+  floater.position.y = Math.sin(t * CONFIG.float.speed) * amp;
+  floater.rotation.z = Math.sin(t * CONFIG.float.speed * 0.5) * 0.03;
+
+  // Tap squash: a quick springy wobble on a group above the model.
+  if (squash) {
+    squash.t += dt;
+    const s = Math.exp(-squash.t * 7) * Math.sin(squash.t * 28) * 0.14;
+    react.scale.set(1 + s, 1 - s, 1 + s);
+    if (squash.t > 0.8) { react.scale.set(1, 1, 1); squash = null; }
+  }
+
+  // Butter drop-in: falls a little and overshoots its landing.
+  if (butterAnim && butterAnim.t < 0.5) {
+    butterAnim.t += freezeAt !== null ? 0.5 : dt;   // a frozen frame shows the butter landed
+    const u = Math.min(butterAnim.t / 0.5, 1);
+    const bounce = 1 + Math.sin(u * Math.PI) * 0.25 * (1 - u);
+    butter.position.y = BUTTER_REST_Y + (1 - u) ** 2 * 0.6;
+    butter.scale.set(bounce, 2 - bounce, bounce);
+  }
+
+  // Shadow follows his height: higher = smaller and fainter.
+  cat.getWorldPosition(tmpV);
+  const lift = THREE.MathUtils.clamp(tmpV.y + 0.1, 0, 2);
+  shadow.scale.setScalar(1 - lift * 0.25);
+  shadow.material.opacity = 1 - lift * 0.35;
+
+  renderer.render(scene, camera);
+
+  if (showDebug) {
+    const q = spin.quaternion;
+    debugEl.textContent =
+      `model   ${modelPath}${loadError ? '  ERROR ' + loadError : ''}\n` +
+      `clips   ${clipLine()}\n` +
+      `head    ${headBone ? headBone.name : '-'} (${headHow}), world scale ${headScale.toFixed(2)}\nbutter@ ${butterSpot}\n` +
+      `tris    ${triangles} in file; drawn ${renderer.info.render.triangles}, calls ${renderer.info.render.calls}\n` +
+      `pose    ${phase} ${pose}${target ? ' -> ' + target : ''}${route.length ? ' (then ' + route.join(', ') + ')' : ''}\n` +
+      `next in ${phase === 'hold' && auto ? Math.max(0, holdUntil - t).toFixed(1) + ' s' + (waitingForSeam ? ' (at seam)' : '') : '-'}\nbutter  ${butter.visible}\nauto    ${auto}\ntaps    ${taps}\n` +
+      `quat    ${q.x.toFixed(2)} ${q.y.toFixed(2)} ${q.z.toFixed(2)} ${q.w.toFixed(2)}\n` +
+      `frame   ${frameMs.toFixed(1)} ms`;
+  }
+});
+</script>
+</body>
+</html>

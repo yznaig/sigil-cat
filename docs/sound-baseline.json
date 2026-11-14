@@ -1,0 +1,303 @@
+{
+  "assets/audio/butterman/rise-yell.m4a": {
+    "seconds": 11.2213,
+    "peakDbfs": -2.38,
+    "truePeakDbfs": -2.38,
+    "activeRmsDbfs": -10.011,
+    "sha256": "c407ed5af0a9bba6329a4e4aaffbf461f93ea39aeb2ab802f5ca71d2c95cd64d"
+  },
+  "assets/audio/butterman/rise-yell.mp3": {
+    "seconds": 11.21,
+    "peakDbfs": -2.764,
+    "truePeakDbfs": -2.764,
+    "activeRmsDbfs": -10.455,
+    "sha256": "a67b78186ee811091e8e0f0b2aea8eab5f8d208b1075168af6fe7191a79a8030"
+  },
+  "assets/audio/butterman/theme-song-1.m4a": {
+    "seconds": 26.1547,
+    "peakDbfs": -1.258,
+    "truePeakDbfs": -1.255,
+    "activeRmsDbfs": -7.879,
+    "sha256": "df80eb8409209baf20972eccbfe3b7ceb35c7ca1770efd2acd78dbaf31079350"
+  },
+  "assets/audio/butterman/theme-song-1.mp3": {
+    "seconds": 26.139,
+    "peakDbfs": -1.71,
+    "truePeakDbfs": -1.704,
+    "activeRmsDbfs": -8.323,
+    "sha256": "33421f49909600714d34d609bf5d32016d8e7cbc82307ea1943472476d7e3e71"
+  },
+  "assets/audio/butterman/theme-song-2.m4a": {
+    "seconds": 23.2107,
+    "peakDbfs": -2.119,
+    "truePeakDbfs": -2.065,
+    "activeRmsDbfs": -10.146,
+    "sha256": "7d35b67a0a987eb6c6182640bfcbfd0f254f0c80990223490b496ecbfd2a9155"
+  },
+  "assets/audio/butterman/theme-song-2.mp3": {
+    "seconds": 23.21,
+    "peakDbfs": -2.41,
+    "truePeakDbfs": -2.365,
+    "activeRmsDbfs": -10.628,
+    "sha256": "9dd9d5513f6fa4c9c35fde2ddc1132a95840d5c6c22af4841695d61793e46eb6"
+  },
+  "assets/audio/butterman/theme-song-3.m4a": {
+    "seconds": 29.4827,
+    "peakDbfs": -1.233,
+    "truePeakDbfs": -1.227,
+    "activeRmsDbfs": -8.524,
+    "sha256": "acbdd671a2d52bb1cfddec70bb8817c64249bbe194fca1d249cd17ec7ffec651"
+  },
+  "assets/audio/butterman/theme-song-3.mp3": {
+    "seconds": 29.477,
+    "peakDbfs": -1.705,
+    "truePeakDbfs": -1.699,
+    "activeRmsDbfs": -8.921,
+    "sha256": "80b0d70d4f3db2e67c80fddb5a378d74bc7f4d13853287aa48da3b51436dc8ad"
+  },
+  "assets/audio/butterman/whisper.m4a": {
+    "seconds": 41.1947,
+    "peakDbfs": -0.766,
+    "truePeakDbfs": -0.765,
+    "activeRmsDbfs": -7.005,
+    "sha256": "d1a2c00b2f8f22abf0df0342b39d7786b20f03e8a7976bcc820d5925fd3a98ca"
+  },
+  "assets/audio/butterman/whisper.mp3": {
+    "seconds": 41.181,
+    "peakDbfs": -1.136,
+    "truePeakDbfs": -1.116,
+    "activeRmsDbfs": -7.253,
+    "sha256": "3a5650259c7e7d8980d949faaa444e4ebdb21a02ef6d164109d27800e80877c4"
+  },
+  "assets/audio/noscope-riser.mp3": {
+    "seconds": 6.0,
+    "peakDbfs": -0.923,
+    "truePeakDbfs": -0.923,
+    "activeRmsDbfs": -11.067,
+    "sha256": "f72534b329213df5f251ea6f5b444229753040cecdfe3616d7feac3d1e8959f4"
+  },
+  "assets/audio/sfx/airhorn.mp3": {
+    "seconds": 1.2,
+    "peakDbfs": -1.783,
+    "truePeakDbfs": -1.757,
+    "activeRmsDbfs": -12.532,
+    "sha256": "2ad643b69480dd3de4dc336d2c53c11da796ca3f9a26a0cc9dd301a586784a6e"
+  },
+  "assets/audio/sfx/bite.mp3": {
+    "seconds": 0.36,
+    "peakDbfs": -2.656,
+    "truePeakDbfs": -2.376,
+    "activeRmsDbfs": -17.718,
+    "sha256": "b41723441cf848fce9d9f401d383a652d5fbaf09744794a2c13a38c0286e0e13"
+  },
+  "assets/audio/sfx/box-thud.mp3": {
+    "seconds": 0.55,
+    "peakDbfs": -1.749,
+    "truePeakDbfs": -1.548,
+    "activeRmsDbfs": -7.628,
+    "sha256": "2a912df5b64d3bb203aa719c6dc029adc33bf84ae7bc839fe72f37de2f5afd62"
+  },
+  "assets/audio/sfx/cast.mp3": {
+    "seconds": 1.25,
+    "peakDbfs": -2.737,
+    "truePeakDbfs": -1.663,
+    "activeRmsDbfs": -15.946,
+    "sha256": "43fcbb61110b8f0eba136e5ff5197b86cebc9d96a339aa24083e4824eea0f641"
+  },
+  "assets/audio/sfx/choir.mp3": {
+    "seconds": 3.2,
+    "peakDbfs": -2.103,
+    "truePeakDbfs": -2.1,
+    "activeRmsDbfs": -9.554,
+    "sha256": "841d93ab60d2330e0ec1813ec75a8d4be812613d0fdf73ce19cbc5f7e297a5c8"
+  },
+  "assets/audio/sfx/click.mp3": {
+    "seconds": 0.1,
+    "peakDbfs": -2.338,
+    "truePeakDbfs": -1.921,
+    "activeRmsDbfs": -28.762,
+    "sha256": "1252858f55013e83a2e8a5ed2daa068db38133c4483bdc3efca87ead52f4198d"
+  },
+  "assets/audio/sfx/ding.mp3": {
+    "seconds": 1.0,
+    "peakDbfs": -2.378,
+    "truePeakDbfs": -1.765,
+    "activeRmsDbfs": -10.992,
+    "sha256": "d2ca11b8604789a1120b80cbb7f72091b805a53650eef0db67967c893ec12f80"
+  },
+  "assets/audio/sfx/drip.mp3": {
+    "seconds": 0.5,
+    "peakDbfs": -1.454,
+    "truePeakDbfs": -1.432,
+    "activeRmsDbfs": -16.807,
+    "sha256": "df9d1083672a02fe50eafe14030818a7dc17a3bbd39630545bf67bea756e0f0b"
+  },
+  "assets/audio/sfx/fizzle.mp3": {
+    "seconds": 0.7,
+    "peakDbfs": -2.061,
+    "truePeakDbfs": -0.784,
+    "activeRmsDbfs": -27.389,
+    "sha256": "8f669a611c6fbf43b72930824f52a9630d03c74d2d112d337a59f0413c4a0e26"
+  },
+  "assets/audio/sfx/glass-slide.mp3": {
+    "seconds": 1.55,
+    "peakDbfs": -1.965,
+    "truePeakDbfs": -1.959,
+    "activeRmsDbfs": -14.177,
+    "sha256": "827e3f2c23cf017aee4ba2662f3affdff50d6415f4e9da1d7aed552921972b8e"
+  },
+  "assets/audio/sfx/glass-smash.mp3": {
+    "seconds": 1.5,
+    "peakDbfs": -0.858,
+    "truePeakDbfs": -0.428,
+    "activeRmsDbfs": -14.684,
+    "sha256": "37304c3f82888480225c1004b1f833fcfbde868132ffec378edf2a947438640b"
+  },
+  "assets/audio/sfx/hiss.mp3": {
+    "seconds": 0.6747,
+    "peakDbfs": -1.983,
+    "truePeakDbfs": -1.979,
+    "activeRmsDbfs": -8.756,
+    "sha256": "de876368ca4660603e20aaf79aca391c32d4e0c014064b12a26d2f8811b0ec06"
+  },
+  "assets/audio/sfx/hit.mp3": {
+    "seconds": 0.1,
+    "peakDbfs": -2.263,
+    "truePeakDbfs": -2.055,
+    "activeRmsDbfs": -18.741,
+    "sha256": "9f6ecb4ff53c1fd4e4a2c989c8ec9670a00acd0f52dea781068bce2591ad47a1"
+  },
+  "assets/audio/sfx/paper.mp3": {
+    "seconds": 0.8,
+    "peakDbfs": -2.873,
+    "truePeakDbfs": -1.925,
+    "activeRmsDbfs": -24.493,
+    "sha256": "36118f8cd4efabf96029082cf0425283c59e498e64f3f002790dfc8be06e1b9d"
+  },
+  "assets/audio/sfx/pluck.mp3": {
+    "seconds": 1.8,
+    "peakDbfs": -1.999,
+    "truePeakDbfs": -1.999,
+    "activeRmsDbfs": -13.634,
+    "sha256": "06acf9fdf25b7b8e1d1638171d06cf4b68d47d1ac90e01170e1756bb78f435af"
+  },
+  "assets/audio/sfx/purr.mp3": {
+    "seconds": 7.0,
+    "peakDbfs": -1.947,
+    "truePeakDbfs": -1.947,
+    "activeRmsDbfs": -7.773,
+    "sha256": "e09c4d7f6ef20a778b5fb9c1c2af16ff563c1027046b291b9ca746090a4cf723"
+  },
+  "assets/audio/sfx/rattle.mp3": {
+    "seconds": 0.5,
+    "peakDbfs": -1.54,
+    "truePeakDbfs": -1.54,
+    "activeRmsDbfs": -13.381,
+    "sha256": "82bcb50b7fd6299922afaef6f4dddbb19ce7a4ed4131837d603771af647a027c"
+  },
+  "assets/audio/sfx/rocket.mp3": {
+    "seconds": 2.0,
+    "peakDbfs": -2.494,
+    "truePeakDbfs": -2.417,
+    "activeRmsDbfs": -15.085,
+    "sha256": "db8bbe5d04d1e21216af1a743606cab7a3b99e52f3ab2299fd5c06f624b800b8"
+  },
+  "assets/audio/sfx/slap.mp3": {
+    "seconds": 0.38,
+    "peakDbfs": -0.898,
+    "truePeakDbfs": -0.285,
+    "activeRmsDbfs": -11.241,
+    "sha256": "6c764a4526477662774ac18ab9ba1f3012c0610bab590ed5c974c91c4f716540"
+  },
+  "assets/audio/sfx/splat.mp3": {
+    "seconds": 0.46,
+    "peakDbfs": -1.621,
+    "truePeakDbfs": -1.365,
+    "activeRmsDbfs": -16.215,
+    "sha256": "1634591446b6e4a13bfb1ca0cba2c6af7cd5e21a7e79140cc598767959b101d7"
+  },
+  "assets/audio/sfx/sponge-wipe.mp3": {
+    "seconds": 0.42,
+    "peakDbfs": -8.227,
+    "truePeakDbfs": -8.225,
+    "activeRmsDbfs": -18.758,
+    "sha256": "97ed29f5bc3ff42391d32ff7a5467f93cc880c0d8df159667a93437ec1a54893"
+  },
+  "assets/audio/sfx/tap-blat.mp3": {
+    "seconds": 0.45,
+    "peakDbfs": -1.814,
+    "truePeakDbfs": -1.745,
+    "activeRmsDbfs": -14.92,
+    "sha256": "b01e902416ce4d9176314da0dee2c7122b80d1b06829d84ef82d99f0e5fc8b1f"
+  },
+  "assets/audio/sfx/tap-boing.mp3": {
+    "seconds": 0.65,
+    "peakDbfs": -2.081,
+    "truePeakDbfs": -2.031,
+    "activeRmsDbfs": -14.613,
+    "sha256": "6e563ce4a7f89bcb9268b2f924e67a341795a6d4cab987c3e1f761ad106cc918"
+  },
+  "assets/audio/sfx/tap-bonk.mp3": {
+    "seconds": 0.2388,
+    "peakDbfs": -2.029,
+    "truePeakDbfs": -2.025,
+    "activeRmsDbfs": -19.229,
+    "sha256": "8c0a6fd63ebb031ee97d88cf5ef74436ae52dbb595ec53f1e284dd2c87a40324"
+  },
+  "assets/audio/sfx/tap-mrrp.mp3": {
+    "seconds": 0.74,
+    "peakDbfs": -2.018,
+    "truePeakDbfs": -2.015,
+    "activeRmsDbfs": -14.661,
+    "sha256": "0a3788c081eec7968ff8d79d172fae6d41386d08395e7bc92d8e55866d6dd629"
+  },
+  "assets/audio/sfx/tap-pop.mp3": {
+    "seconds": 0.2413,
+    "peakDbfs": -1.96,
+    "truePeakDbfs": -1.956,
+    "activeRmsDbfs": -15.916,
+    "sha256": "8cd70ee09fac14fc984d3359bb66539382e7b72af72858c86d157572c467568f"
+  },
+  "assets/audio/sfx/tap-rare.mp3": {
+    "seconds": 1.8,
+    "peakDbfs": -1.974,
+    "truePeakDbfs": -1.973,
+    "activeRmsDbfs": -7.64,
+    "sha256": "546a5ffce419643cc1e3b3f22cd91bb733c027cc4aff8b62543325a323b3f7f2"
+  },
+  "assets/audio/sfx/tap-squeak.mp3": {
+    "seconds": 0.4375,
+    "peakDbfs": -1.705,
+    "truePeakDbfs": -1.408,
+    "activeRmsDbfs": -12.838,
+    "sha256": "25053514a57daa6cd09014bde7b389073cec647f038392c07f02b7f101814c86"
+  },
+  "assets/audio/sfx/thunder.mp3": {
+    "seconds": 5.2,
+    "peakDbfs": -1.501,
+    "truePeakDbfs": -1.501,
+    "activeRmsDbfs": -7.034,
+    "sha256": "9b7b37d7586cbc533ffe0b8a78486fd502deb23689952c30745d81daf3b08dc4"
+  },
+  "assets/audio/sfx/twinkle.mp3": {
+    "seconds": 1.0,
+    "peakDbfs": -1.924,
+    "truePeakDbfs": -1.843,
+    "activeRmsDbfs": -8.9,
+    "sha256": "8ce0c272e50fe4caece11f4d39061b52ebd8d89b53dab370f4acd2bccb648f70"
+  },
+  "assets/audio/sfx/whoosh.mp3": {
+    "seconds": 0.6,
+    "peakDbfs": -2.225,
+    "truePeakDbfs": -2.18,
+    "activeRmsDbfs": -13.614,
+    "sha256": "ef658c6de9c701a669c824094e3ddee17875d06029e06a9b74bbbb94bf8ad844"
+  },
+  "assets/video/noscope.mp4": {
+    "seconds": 27.9801,
+    "peakDbfs": -0.023,
+    "truePeakDbfs": 0.126,
+    "activeRmsDbfs": -7.913,
+    "sha256": "cb677c8c9cc7376cfc6496b0c75e6387490a1f0e1f58d138a924f729d0f6a0f9"
+  }
+}

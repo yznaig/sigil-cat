@@ -1,0 +1,5 @@
+import {T,mesh,rod,finish,body,cuboid} from './forms.js';import {patch,glassMaterial,edgeMaterial} from './glass-form.js';
+export const physics=body(.035,[cuboid([.115,.045,.145],[-.037,.0225,.030]),cuboid([.075,.035,.065],[.035,.018,.022],[.1,-.5,.08]),cuboid([.044,.025,.035],[.085,.013,-.045])]);
+export function create(){const g=new T.Group();g.name='shards';const glass=glassMaterial(),edge=edgeMaterial();for(const [i,[x,y,z,a,w,lo,hi,rx,ry,rz]] of [[-.052,.018,-.010,-.6,1.05,.06,.13,1.18,.3,-.18],[.028,.019,.025,.3,.85,.12,.19,1.42,-.6,.1],[.081,.014,-.045,1.2,.55,.03,.068,1.16,.2,.3],[-.019,.016,.069,2,.49,.07,.11,1.35,-.3,.3]].entries()){const geo=patch(a,w,lo,hi,i),o=mesh(g,geo,glass,[x,y,z],[rx,ry,rz]);o.updateMatrixWorld(true);o.position.y-=new T.Box3().setFromObject(o).min.y;
+ const e=new T.EdgesGeometry(geo,45).attributes.position;for(let j=0;j<e.count;j+=2){const a=new T.Vector3().fromBufferAttribute(e,j).applyEuler(o.rotation).add(o.position),b=new T.Vector3().fromBufferAttribute(e,j+1).applyEuler(o.rotation).add(o.position);rod(g,a.toArray(),b.toArray(),.00035,edge,.00035,4);}
+ }return finish(g,physics);}

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sigil Cat · sound listening reel</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { color-scheme: light dark; font: 16px/1.5 system-ui,sans-serif; }
+  body { max-width: 950px; margin: 2rem auto; padding: 0 1rem 5rem; }
+  h1 { font: 2.2rem Georgia,serif; } h2 { margin-top: 2rem; }
+  a { color: inherit; } button,input { font: inherit; } button { padding: .5rem .9rem; cursor: pointer; }
+  .toolbar { position: sticky; top: 0; background: Canvas; border-block: 1px solid GrayText; padding: .8rem 0; z-index: 1; }
+  article { border-bottom: 1px solid GrayText; padding: 1rem 0; scroll-margin-top: 10rem; }
+  h3 { margin: .2rem 0; } p { margin: .5rem 0; } audio { max-width: 100%; width: 300px; }
+  .pair { display: flex; flex-wrap: wrap; gap: 1rem; } label { display: block; }
+  small { color: GrayText; } #now { min-height: 1.5em; } [aria-current=true] { border-left: 4px solid #bb8a30; padding-left: .7rem; }
+  video { width: min(100%,560px); } progress { width: 100%; }
+</style>
+<h1>Sigil Cat — the tabletop orchestra</h1>
+<p>Warm wood, folded paper, glass and soft butter; a small shrine with a sense of humour.</p>
+<p><a href="sound-direction.md">Direction &amp; full trigger inventory</a> · <a href="../assets/audio/SOURCES.md">Sources &amp; licences</a> ·
+<a href="REVIEW.md">Review notes</a> · <a href="sound-reel.mp3" download>Download the current sound MP3</a></p>
+<p>Compare at a comfortable level. Old and new players match the loudest 100 ms RMS, so louder does not win by default.
+The MP3 preserves the delivered files' level relationships and has 550 ms gaps. Only one player runs at a time.</p>
+<p><strong>Aaron’s choices — e1111-05.</strong> Bite, slap, glass-slide, glass-smash (#20), choir (#23), paper (#26),
+twinkle (#29) and click (#31) are <strong>original, kept by Aaron</strong>. Every other redesigned cue stays.
+The eight originals have constant level correction only; the choir remains stereo in the page and MP3 reel.</p>
+<p>Automated checks measure levels and behaviour. Two old ambience examples are
+approximations of the old oscillators; Aaron's performances below retain their content and timing, with level corrections only.</p>
+<div class="toolbar">
+  <button id="all" disabled>Play all current sounds</button> <button id="stop">Stop</button>
+  <label>Review volume <input id="volume" type="range" min="0" max="100" value="80"></label>
+  <div id="now" role="status" aria-live="polite">Loading catalogue…</div>
+</div>
+<h2>Current palette · reference/current comparison</h2>
+<main id="sounds"></main>
+<h2>Retained performances · level corrections only</h2>
+<p>The effects MP3 ends before this section. These are the existing performances in full; their scene timing is unchanged.</p>
+<section id="retained"></section>
+<script type="module">
+const $ = id => document.getElementById(id), players = [], currentPlayers = [];
+let queued = false, timer, current = null, epoch = 0;
+const stamp = s => `${Math.floor(s/60)}:${(s%60).toFixed(2).padStart(5,'0')}`;
+function stop() {
+  epoch++;
+  queued = false; clearTimeout(timer);
+  for (const p of players) { p.pause(); p.currentTime = 0; p.closest('article').removeAttribute('aria-current'); }
+  current = null; $('now').textContent = 'Stopped';
+}
+function volume() { for (const p of players) p.volume = Number($('volume').value)/100 * Number(p.dataset.match); }
+function play(p) {
+  const request = epoch;
+  p.play().catch(error => {
+    if (error.name === 'AbortError' || request !== epoch) return; // a newer selection owns playback
+    stop(); $('now').textContent = 'Playback needs a press: ' + error.message;
+  });
+}
+function makePlayer(row, file, label, parent, levels, isCurrent=false) {
+  const box = document.createElement('label'); box.textContent = label;
+  const p = document.createElement(file.endsWith('.mp4') ? 'video' : 'audio');
+  p.controls = true; p.preload = 'none'; p.src = '../' + file;
+  p.setAttribute('aria-label', row.name + ' — ' + label);
+  const matchLevel = Math.min(-26, ...[row.file,row.old].filter(Boolean).map(f=>levels[f].activeRmsDbfs));
+  p.dataset.match = 10 ** ((matchLevel-levels[file].activeRmsDbfs)/20);
+  p.dataset.name = row.name; p.dataset.label = label;
+  p.addEventListener('play', () => {
+    if (p.paused) return; // an already-cancelled startup can still have a queued play event
+    for (const other of players) if (other !== p) { other.pause(); other.closest('article').removeAttribute('aria-current'); }
+    current = p; p.closest('article').setAttribute('aria-current','true');
+    $('now').textContent = `${row.name} · ${label} · ${row.trigger}`;
+  });
+  p.addEventListener('ended', () => {
+    if (queued && current === p) {
+      const next = currentPlayers[currentPlayers.indexOf(p)+1];
+      if (next) timer = setTimeout(() => play(next), 550); else { queued = false; $('now').textContent = `All ${currentPlayers.length} current sounds played.`; }
+    }
+  });
+  p.addEventListener('error', () => { $('now').textContent = 'Could not decode ' + file; queued=false; });
+  box.append(document.createElement('br'),p); parent.append(box); players.push(p);
+  if (isCurrent) currentPlayers.push(p);
+}
+try {
+  const response = await fetch('sound-reel.json'); if (!response.ok) throw new Error('HTTP ' + response.status);
+  const data = await response.json();
+  for (const [i,row] of data.sounds.entries()) {
+    const article=document.createElement('article'), title=document.createElement('h3'), trigger=document.createElement('p'), desc=document.createElement('p'), pair=document.createElement('div');
+    title.textContent=`${i+1}. ${row.name} · MP3 ${stamp(row.reelSeconds)}`;
+    article.dataset.name=row.name; article.dataset.selection=row.selection || 'redesigned';
+    trigger.textContent=row.trigger; desc.textContent=row.direction; pair.className='pair';
+    article.append(title,trigger,desc,pair); $('sounds').append(article);
+    if (row.old) makePlayer(row,row.old,row.old.includes('/reference/')?'Old (approximation)':'Old',pair,data.levels);
+    makePlayer(row,row.file,row.selection || 'Redesigned',pair,data.levels,true);
+    const source=document.createElement('p'), link=document.createElement('a'); link.href='../assets/audio/SOURCES.md';
+    link.textContent=row.license+' · provenance'; source.append(link); article.append(source);
+  }
+  for (const row of data.retained) {
+    const article=document.createElement('article'), title=document.createElement('h3'), trigger=document.createElement('p');
+    title.textContent=row.name; trigger.textContent=row.trigger; article.append(title,trigger); $('retained').append(article);
+    makePlayer(row,row.file,'Retained · current level',article,data.levels);
+  }
+  volume(); $('all').disabled=false; $('now').textContent=`Ready · ${data.sounds.length} current sounds · 8 originals kept · MP3 ${stamp(data.seconds)}`;
+} catch(error) { $('now').textContent='Open this page through the preview server. '+error.message; }
+$('volume').oninput=volume;
+$('all').onclick=()=>{ stop(); queued=true; play(currentPlayers[0]); };
+$('stop').onclick=stop;
+// A manual press takes over from the playlist, including during its inter-cue gap.
+document.addEventListener('pointerdown',e=>{if(e.target.matches('audio,video')){epoch++;queued=false;clearTimeout(timer);}},true);
+document.addEventListener('keydown',e=>{if(e.target.matches('audio,video')){epoch++;queued=false;clearTimeout(timer);}},true);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
+</script>
+</html>

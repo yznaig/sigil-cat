@@ -1,0 +1,1046 @@
+<!doctype html>
+<!--
+  Cat viewer prototype (sigil-cat). Throwaway: answers "does the recommended stack feel right?"
+  Stack: vanilla three.js 0.186.1 from jsDelivr via an importmap. No build step.
+  The cat is built from primitives (our own work, no license needed). Its clips are real
+  THREE.AnimationClips played by a THREE.AnimationMixer, so the state machine below carries
+  over unchanged when a rigged GLB replaces the placeholder: only the clip names change.
+  URL hash options: #pose=sleep  #butter=1  #tone=agx  #debug  #t=1.5 (freeze that moment of
+  the pose's hold, for repeatable screenshots)  (combine with &)
+  Phone check: ?perf=1 shows fps, frame time, draw calls, pixel ratio and GPU on screen, and
+  what the adaptive pixel ratio did. ?perf=1&dpr=1 pins the ratio; &burn=12 wastes 12 ms a
+  frame to fake a slow phone on a desktop. (These also work after the #.)
+  Checks: checks/*.js drive drag, tap, poses, emotes and butter through window.catViewer and print
+  the results on the page. Run one with: shot 'index.html#debug' --js "$(cat checks/pose-cycle.js)"
+  Primitive cat: our own work. Placeholder tap sounds are synthesized in code (no audio files).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cat Viewer</title>
+<style>
+  :root {
+    --bg-top: #f6f1e7;
+    --bg-bottom: #e7dfd0;
+    --ink: #1a1a1c;
+    --ink-soft: #6b665d;
+    --pill: rgba(255, 255, 255, 0.72);
+    --pill-on: #1a1a1c;
+    --pill-on-ink: #f6f1e7;
+    --butter: #f3d36b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(120% 90% at 50% 35%, var(--bg-top), var(--bg-bottom));
+    color: var(--ink);
+    font: 15px/1.4 ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  canvas#c {
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    display: block; touch-action: pan-y; cursor: grab;   /* sideways drags spin him; up-down swipes stay with the page */
+  }
+  canvas#c.dragging { cursor: grabbing; }
+  .tag {
+    position: fixed; top: 16px; left: 16px; margin: 0; font-size: 13px; color: var(--ink-soft);
+  }
+  .hint {
+    position: fixed; top: 16px; right: 16px; margin: 0; font-size: 13px; color: var(--ink-soft);
+  }
+  .controls {
+    position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%);
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    width: max-content; max-width: calc(100vw - 32px);
+  }
+  .controls button {
+    font: inherit; font-size: 14px; border: 0; border-radius: 999px; padding: 8px 14px;
+    background: var(--pill); color: var(--ink); cursor: pointer;
+    box-shadow: 0 1px 0 rgba(0,0,0,.06), 0 4px 14px rgba(0,0,0,.06);
+    backdrop-filter: blur(6px);
+  }
+  .controls button[aria-pressed="true"] { background: var(--pill-on); color: var(--pill-on-ink); }
+  .controls button#butter[aria-pressed="true"] { background: var(--butter); color: var(--ink); }
+  footer {
+    position: fixed; left: 0; right: 0; bottom: 0; padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    display: flex; gap: 18px; justify-content: center; font-size: 13px;
+  }
+  footer a { color: var(--ink-soft); text-decoration: none; }
+  footer a:hover { color: var(--ink); text-decoration: underline; }
+  #debug, #perf {
+    position: fixed; top: 44px; left: 16px; margin: 0; padding: 8px 10px; border-radius: 8px;
+    background: rgba(0,0,0,.75); color: #e9e4d8; font: 12px/1.45 ui-monospace, monospace; white-space: pre;
+    pointer-events: none;
+  }
+  #perf { left: auto; right: 16px; top: calc(44px + env(safe-area-inset-top)); max-width: calc(100vw - 32px); overflow: hidden; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="c" aria-label="A black cat floating in the middle of the page. Drag to spin him, tap him for a sound."></canvas>
+<p class="tag">cat viewer, prototype</p>
+<p class="hint">Drag to spin him. Tap him.</p>
+<div class="controls" role="group" aria-label="Cat controls">
+  <button data-pose="sit" aria-pressed="true">Sit</button>
+  <button data-pose="lie" aria-pressed="false">Lie</button>
+  <button data-pose="sleep" aria-pressed="false">Sleep</button>
+  <button data-pose="stretch" aria-pressed="false">Stretch</button>
+  <button id="hop">Hop</button>
+  <button id="butter" aria-pressed="false">Butter</button>
+  <button id="butterman">Buttaman</button>
+  <button id="auto" aria-pressed="true">Auto</button>
+</div>
+<footer>
+  <!-- Placeholder links: the real accounts are still to come from the brothers. -->
+  <a href="#">instagram</a><a href="#">tiktok</a><a href="#">youtube</a>
+</footer>
+<pre id="debug" hidden></pre>
+<pre id="perf" hidden></pre>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+// ---------------------------------------------------------------------------
+// Tuning knobs. Everything worth fiddling with lives here.
+// ---------------------------------------------------------------------------
+const CONFIG = {
+  // The pose cycle (spec: docs/ideas/cat-poses.md). He holds a pose for a random
+  // time in `hold`, then picks the next by weight from `next`.
+  cycle: {
+    start: 'sit',
+    poses: {
+      sit: { hold: [4, 9], next: { lie: 3, stretch: 1 } },
+      lie: { hold: [3, 7], next: { sleep: 3, sit: 2, stretch: 1 } },
+      sleep: { hold: [8, 15], next: { lie: 1 } },
+      stretch: { oneShot: true, then: 'sit' },   // stretch ends seated
+    },
+    // Transition clips, named from_to_to. Seconds here only size the placeholder
+    // clips; a real model's clips bring their own length.
+    transitions: { sit_to_lie: 1.1, sit_to_stretch: 0.9, lie_to_stretch: 1.1, lie_to_sleep: 1.3, lie_to_sit: 1.0, sleep_to_lie: 1.2 },
+    fade: 0.25,                 // blend at each clip seam
+    requestFade: 0.35,          // blend when a button cuts in mid-hold
+    emoteFade: 0.2,             // blend into a full emote from wherever he is
+    // Emotes. Two kinds:
+    //   overlay: an additive add_* clip that rides on top of any pose and never stops the cycle.
+    //   interrupt: an emote_* clip that takes over, plays once and ends on frame 0 of `returnTo`
+    //   (a pose name, or 'same' = the pose he was in). `cooldown` is seconds before it can fire again.
+    emotes: {
+      hop:     { clip: 'add_hop', overlay: true },
+      startle: { clip: 'add_startle', overlay: true },
+      wake:    { clip: 'emote_wake', returnTo: 'lie' },
+      spin:    { clip: 'emote_spin', returnTo: 'same', cooldown: 2 },
+      flinch:  { clip: 'emote_flinch', returnTo: 'sit' },
+    },
+    // Site actions -> emote, per pose he is in (or landing in). A weights object picks at random.
+    actions: {
+      tap:       { sleep: 'wake', default: { hop: 4, spin: 1 } },
+      butter:    { default: 'startle' },
+      butterman: { default: 'flinch' },
+    },
+    // A full emote never cuts a transition (or another emote) mid-move: it waits here.
+    // When the queue is full the newest emote replaces the last one waiting.
+    queueMax: 2,
+  },
+  rotate: {
+    radiansPerPixel: 0.009,     // drag sensitivity
+    damping: 3.5,               // how fast a flick slows down (higher = sooner)
+    tapSlop: 8,                 // pixels a press may move and still count as a tap
+    tapMs: 450,                 // ...and how long it may last
+    // Turntable only (Aaron, decision e1107-36): he spins around the vertical axis, all the way round.
+    homeYaw: -0.65,             // the angle he faces at rest (a three-quarter view), radians
+    returnHome: true,           // drift back to homeYaw after a spin (still undecided; flip to try)
+    returnDelay: 2.5,           // seconds left alone before the drift starts
+    returnSpeed: 1.6,           // how quickly he drifts back (higher = sooner)
+  },
+  float: { height: 0.08, speed: 1.2 },
+  // Real sound files go here, e.g. ['sounds/mrrp.mp3', 'sounds/huh.mp3'].
+  // Empty = synthesized placeholder blips so the prototype needs no assets.
+  sounds: [],
+  soundVolume: 0.5,
+  // Adaptive pixel ratio. Every `sampleMs` it measures real fps; after `lowWindows` slow
+  // samples in a row it steps the ratio down, after `highWindows` smooth ones it steps back up.
+  // A step up that turns out too slow sets a ceiling, so it never see-saws.
+  perf: { maxDpr: 2, minDpr: 1, step: 0.25, sampleMs: 1000, warmupMs: 2000, lowFps: 45, highFps: 57, lowWindows: 2, highWindows: 4 },
+};
+
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const params = new URLSearchParams(location.hash.slice(1));
+const query = new URLSearchParams(location.search);
+const opt = (k) => query.get(k) ?? params.get(k);     // ?perf=1 and #perf=1 both work
+
+// ---------------------------------------------------------------------------
+// Renderer, camera, light. Matte black needs light to read: a soft environment
+// for the body, a warm key, and two strong back lights for the rim.
+// ---------------------------------------------------------------------------
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+const deviceDpr = Number(opt('fakedpr')) || devicePixelRatio || 1;   // fakedpr: test the fallback on a 1x screen
+const pinnedDpr = Number(opt('dpr')) || null;          // ?dpr=1.5 turns the adaptive ratio off
+let dpr = pinnedDpr ?? Math.min(deviceDpr, CONFIG.perf.maxDpr);
+renderer.setPixelRatio(dpr);
+renderer.toneMapping = params.get('tone') === 'agx' ? THREE.AgXToneMapping : THREE.NeutralToneMapping;
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.4;
+
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 60);
+
+scene.add(new THREE.HemisphereLight(0xfff6e8, 0x3a3630, 0.7));
+const key = new THREE.DirectionalLight(0xfff1dc, 2.2);
+key.position.set(3, 4, 5);
+const rimA = new THREE.DirectionalLight(0xdfe8ff, 5.0);
+rimA.position.set(-4, 2.5, -4);
+const rimB = new THREE.DirectionalLight(0xffffff, 3.0);
+rimB.position.set(4, 1, -3);
+scene.add(key, rimA, rimB);
+
+// One shared material: the stick figure will reuse it so both read as the same stuff.
+// Sheen gives black a velvet edge at grazing angles, which is what makes it read as soft.
+const matte = new THREE.MeshPhysicalMaterial({
+  color: 0x0d0d0f, roughness: 0.78, metalness: 0,
+  sheen: 0.8, sheenRoughness: 0.5, sheenColor: new THREE.Color(0x4b505b),
+});
+
+// ---------------------------------------------------------------------------
+// The placeholder cat. Every animated part is a named Object3D, exactly like
+// bones in a rigged GLB, so AnimationClips can target them by name.
+// Faces +X. Pivot sits at the body's centre so tumbling feels balanced.
+// ---------------------------------------------------------------------------
+function part(geo, x = 0, y = 0, z = 0, sx = 1, sy = 1, sz = 1) {
+  const m = new THREE.Mesh(geo, matte);
+  m.position.set(x, y, z);
+  m.scale.set(sx, sy, sz);
+  return m;
+}
+function node(name, parent, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0) {
+  const g = new THREE.Group();
+  g.name = name;
+  g.position.set(x, y, z);
+  g.rotation.set(rx, ry, rz);
+  parent.add(g);
+  return g;
+}
+const sphere = (r) => new THREE.SphereGeometry(r, 32, 24);
+const capsuleX = (r, len) => new THREE.CapsuleGeometry(r, len, 8, 20).rotateZ(Math.PI / 2);
+const capsuleY = (r, len) => new THREE.CapsuleGeometry(r, len, 8, 16);
+
+const spin = new THREE.Group();          // user rotation (drag)
+const floater = node('floater', spin);   // procedural bob
+const react = node('react', floater);    // procedural tap squash
+const cat = node('cat', react);          // mixer root
+scene.add(spin);
+
+const body = node('body', cat);
+body.add(part(sphere(0.5), 0, 0.02, 0, 1.62, 0.8, 0.8));      // one smooth torso, no seams
+body.add(part(sphere(0.25), 0.6, 0.24, 0, 1.1, 1, 1));         // neck
+
+const head = node('head', body, 0.84, 0.44, 0);
+head.add(part(sphere(0.33), 0, 0, 0, 1.05, 0.9, 1));
+head.add(part(sphere(0.15), 0.27, -0.09, 0, 1, 0.8, 1.15));
+for (const [name, z, tilt] of [['earL', 0.19, 0.32], ['earR', -0.19, -0.32]]) {
+  const ear = node(name, head, 0.02, 0.24, z, tilt, 0, -0.12);
+  ear.add(part(new THREE.ConeGeometry(0.12, 0.27, 20), 0, 0.11, 0, 1, 1, 0.7));
+}
+
+for (const [name, x, y, z] of [
+  ['legFL', 0.48, -0.2, 0.19], ['legFR', 0.48, -0.2, -0.19],
+  ['legBL', -0.5, -0.18, 0.2], ['legBR', -0.5, -0.18, -0.2],
+]) {
+  const leg = node(name, body, x, y, z);
+  leg.add(part(capsuleY(0.1, 0.48), 0, -0.32, 0));
+  leg.add(part(sphere(0.11), 0.03, -0.6, 0, 1.3, 0.7, 1));
+}
+
+const TAIL = 7, SEG = 0.17;
+let parent = node('tail0', body, -0.78, 0.12, 0, 0, 0, -0.75);
+parent.add(part(capsuleX(0.075, SEG), -SEG / 2, 0, 0));
+for (let i = 1; i < TAIL; i++) {
+  const r = 0.075 - i * 0.004;
+  parent = node('tail' + i, parent, -SEG, 0, 0, 0, 0, -0.13);
+  parent.add(part(sphere(r), 0, 0, 0));                        // joint ball hides the bend
+  parent.add(part(capsuleX(r, SEG), -SEG / 2, 0, 0));
+}
+
+// Hit area: an invisible ellipsoid riding on the body. Taps test this, not the
+// detailed meshes: cheaper, and a tap between the ears still counts.
+const hitArea = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), matte);
+hitArea.name = 'hitArea';
+hitArea.position.set(0.1, 0.12, 0);
+hitArea.scale.set(1.35, 0.75, 0.55);
+hitArea.visible = false;                 // the raycaster ignores visibility, so it still gets hit
+body.add(hitArea);
+
+// Butter: its own mesh parented to the head, shown or hidden. With a real model
+// this becomes headBone.add(butter), same idea.
+const butter = new THREE.Mesh(
+  new RoundedBoxGeometry(0.34, 0.12, 0.22, 4, 0.025),
+  new THREE.MeshStandardMaterial({ color: 0xf3d36b, roughness: 0.42 }),
+);
+butter.name = 'butter';
+butter.position.set(0.05, 0.34, 0);
+butter.rotation.set(0, 0.18, 0.06);
+butter.visible = false;
+head.add(butter);
+
+// Soft contact shadow: a blurred dot under him, in the world (not spun with him).
+const shadowTex = (() => {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  grad.addColorStop(0, 'rgba(40,32,20,0.55)');
+  grad.addColorStop(1, 'rgba(40,32,20,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+})();
+const shadow = new THREE.Mesh(
+  new THREE.PlaneGeometry(2.6, 1.3),
+  new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }),
+);
+shadow.rotation.x = -Math.PI / 2;
+shadow.position.y = -1.55;
+scene.add(shadow);
+
+// ---------------------------------------------------------------------------
+// Poses and clips, authored in code. A real GLB ships the same clip names from
+// Blender (sit, lie, sit_to_lie, add_hop...); the player below does not care
+// where clips come from. A pose is offsets from the rest pose per named part:
+//   p = position offset, r = rotation offset (radians), s = scale.
+// ---------------------------------------------------------------------------
+const REST = {};
+cat.traverse((o) => { if (o.name) REST[o.name] = { p: o.position.clone(), r: o.rotation.clone() }; });
+const TAILS = Array.from({ length: TAIL }, (_, i) => 'tail' + i);
+const PARTS = ['body', 'head', 'earL', 'earR', 'legFL', 'legFR', 'legBL', 'legBR', ...TAILS];
+const TAU = Math.PI * 2;
+
+const legs = (front, back, frontLen = 1, backLen = 1) => ({
+  legFL: { r: [0, 0, front], s: [1, frontLen, 1] }, legFR: { r: [0, 0, front], s: [1, frontLen, 1] },
+  legBL: { r: [0, 0, back], s: [1, backLen, 1] }, legBR: { r: [0, 0, back], s: [1, backLen, 1] },
+});
+const tail = (base, curl) => Object.fromEntries(TAILS.map((n, i) => [n, { r: i === 0 ? base : curl }]));
+
+const POSE = {
+  sit: {
+    body: { p: [-0.1, -0.12, 0], r: [0, 0, 0.6] },
+    head: { p: [0.02, 0, 0], r: [0, 0, -0.5] },
+    ...legs(-0.6, 0.95, 1.1, 0.6),
+    ...tail([0, 0.9, 1.2], [0, 0.25, 0.05]),
+  },
+  lie: {                                            // the loaf
+    body: { p: [0, -0.22, 0], s: [1.04, 0.9, 1.1] },
+    head: { p: [-0.07, -0.1, 0], r: [0, 0, -0.12] },
+    ...legs(-1.45, 1.45, 0.55, 0.55),
+    ...tail([0, 1.1, 0.55], [0, 0.28, 0.13]),
+  },
+  sleep: {
+    body: { p: [0, -0.26, 0], s: [1, 0.86, 1.12] },
+    head: { p: [-0.12, -0.24, 0.08], r: [0.25, 0.55, -0.45] },
+    earL: { r: [0, 0, -0.3] }, earR: { r: [0, 0, -0.3] },
+    ...legs(-1.45, 1.45, 0.55, 0.55),
+    ...tail([0, 1.5, 0.6], [0, 0.42, 0.12]),
+  },
+  stretch: {                                        // front stretch, rear up
+    body: { p: [0, -0.05, 0], r: [0, 0, -0.35] },
+    head: { p: [0.04, -0.02, 0], r: [0, 0, 0.45] },
+    earL: { r: [0, 0, -0.2] }, earR: { r: [0, 0, -0.2] },
+    ...legs(1.25, 0.15, 1.15, 1.05),
+    ...tail([0, 0, -0.55], [0, 0, 0.08]),
+  },
+};
+
+const Z3 = [0, 0, 0], ONE = [1, 1, 1];
+const get = (pose, n) => ({ p: pose[n]?.p || Z3, r: pose[n]?.r || Z3, s: pose[n]?.s || ONE });
+const mix3 = (a, b, u) => a.map((v, i) => v + (b[i] - v) * u);
+const ease = (u) => u * u * (3 - 2 * u);
+const clamp01 = (u) => Math.min(1, Math.max(0, u));
+const rand = ([a, b]) => a + Math.random() * (b - a);
+
+// Blend pose a toward b. With lag > 0 the head and tail trail the body a little
+// (overlapping action), which is most of what makes a transition read as alive.
+function blendPose(a, b, u, lag = 0) {
+  const out = {};
+  for (const n of PARTS) {
+    const d = n.startsWith('tail') ? lag * (1 + Number(n.slice(4)) * 0.15) : n === 'head' ? lag * 0.5 : 0;
+    const v = ease(clamp01((u - d) / (1 - d)));
+    const A = get(a, n), B = get(b, n);
+    out[n] = { p: mix3(A.p, B.p, v), r: mix3(A.r, B.r, v), s: mix3(A.s, B.s, v) };
+  }
+  return out;
+}
+
+// Bake fn(time) -> pose into a clip that drives every part, so any two clips blend cleanly.
+function bake(name, duration, keys, fn) {
+  const times = Array.from({ length: keys + 1 }, (_, k) => (k / keys) * duration);
+  const frames = times.map(fn);
+  const q = new THREE.Quaternion(), e = new THREE.Euler(), tracks = [];
+  for (const n of PARTS) {
+    const rest = REST[n], P = [], R = [], S = [];
+    for (const f of frames) {
+      const { p, r, s } = get(f, n);
+      P.push(rest.p.x + p[0], rest.p.y + p[1], rest.p.z + p[2]);
+      q.setFromEuler(e.set(rest.r.x + r[0], rest.r.y + r[1], rest.r.z + r[2]));
+      R.push(q.x, q.y, q.z, q.w);
+      S.push(...s);
+    }
+    tracks.push(new THREE.VectorKeyframeTrack(n + '.position', times, P),
+      new THREE.QuaternionKeyframeTrack(n + '.quaternion', times, R),
+      new THREE.VectorKeyframeTrack(n + '.scale', times, S));
+  }
+  return new THREE.AnimationClip(name, duration, tracks);
+}
+
+// A hold: the pose plus breathing, a lazy tail and a glance. Frame 0 is what the
+// transitions start from and land on, so seams line up exactly.
+function holdFn(pose, { period, breath, sway, look = 0 }) {
+  return (t) => {
+    const ph = t / period, f = blendPose(pose, pose, 1);
+    const b = (0.5 - 0.5 * Math.cos(TAU * ph)) * breath;
+    f.body.s = [f.body.s[0], f.body.s[1] * (1 + b), f.body.s[2] * (1 + 0.8 * b)];
+    TAILS.forEach((n, i) => { f[n].r = [f[n].r[0], f[n].r[1] + sway * Math.sin(TAU * ph - i * 0.55), f[n].r[2]]; });
+    f.head.r = [f.head.r[0], f.head.r[1] + look * Math.sin(TAU * ph), f.head.r[2]];
+    return f;
+  };
+}
+const HOLD = {
+  sit: { period: 4, fn: holdFn(POSE.sit, { period: 4, breath: 0.025, sway: 0.18, look: 0.3 }) },
+  lie: { period: 4.5, fn: holdFn(POSE.lie, { period: 4.5, breath: 0.03, sway: 0.08, look: 0.12 }) },
+  sleep: { period: 5, fn: holdFn(POSE.sleep, { period: 5, breath: 0.05, sway: 0.03 }) },
+};
+
+// Stretch: push into it, tremble a little, then settle into the sit hold's first frame.
+const STRETCH_LEN = 2.6;
+function stretchFn(t) {
+  if (t >= 1.8) return blendPose(POSE.stretch, HOLD.sit.fn(0), (t - 1.8) / 0.8, 0.2);
+  const f = blendPose(POSE.stretch, POSE.stretch, 1), deep = Math.sin(Math.PI * t / 1.8);
+  f.body.r = [0, 0, -0.35 - 0.12 * deep];
+  f.legFL.r = f.legFR.r = [0, 0, 1.25 + 0.15 * deep + 0.02 * Math.sin(t * 45) * deep];
+  return f;
+}
+const firstFrame = (p) => (p === 'stretch' ? stretchFn(0) : HOLD[p].fn(0));
+
+// Additive overlays (add_*): small reactions that ride on top of whatever pose he is in.
+// Full interrupts (emote_*) are ordinary clips that end on a named pose: see EMOTE_FN below.
+function emoteClip(name, duration, fn) {
+  const clip = bake(name, duration, 24, fn);        // offsets from rest; frame 0 must be rest
+  THREE.AnimationUtils.makeClipAdditive(clip);      // now a delta from frame 0
+  return clip;
+}
+const emoteHop = emoteClip('add_hop', 0.9, (t) => {
+  const u = t / 0.9, up = Math.sin(Math.PI * clamp01((u - 0.15) / 0.6)), crouch = Math.sin(Math.PI * clamp01(u / 0.2));
+  return {
+    body: { p: [0, 0.55 * up - 0.06 * crouch, 0], s: [1, 1 + 0.08 * up - 0.1 * crouch, 1] },
+    tail0: { r: [0, 0, -0.6 * up] }, earL: { r: [0.3 * up, 0, 0] }, earR: { r: [-0.3 * up, 0, 0] },
+  };
+});
+const emoteStartle = emoteClip('add_startle', 0.8, (t) => {
+  const k = Math.sin(Math.PI * t / 0.8);
+  return {
+    head: { p: [-0.06 * k, 0.05 * k, 0], r: [0, 0, 0.25 * k] }, body: { s: [1, 1 + 0.06 * k, 1] },
+    earL: { r: [0, 0, -0.6 * k] }, earR: { r: [0, 0, -0.6 * k] }, tail0: { r: [0, 0, -0.5 * k] },
+  };
+});
+
+// Full emotes (emote_*). Each is fn(t, from, to): `from` is the pose frame he starts in,
+// `to` is frame 0 of the returnTo pose, which the clip must land on exactly so the hold
+// that follows doesn't pop. A Blender model ships one clip per returnTo (emote_wake ends
+// lying down); here they are baked on demand for whatever pair is needed.
+const EMOTE_FN = {
+  emote_wake: { len: 1.5, fn: (t, A, B) => {          // jolted awake: puff, hop, land in the loaf
+    const u = t / 1.5, k = Math.sin(Math.PI * clamp01(u / 0.55)), f = blendPose(A, B, clamp01((u - 0.1) / 0.8), 0.25);
+    f.body.p = [f.body.p[0], f.body.p[1] + 0.45 * k, f.body.p[2]];
+    f.body.s = [f.body.s[0], f.body.s[1] * (1 + 0.12 * k), f.body.s[2] * (1 + 0.1 * k)];
+    f.earL.r = f.earR.r = [0, 0, -0.7 * k];
+    f.tail0.r = [f.tail0.r[0], f.tail0.r[1], f.tail0.r[2] - 0.9 * k];
+    return f;
+  } },
+  emote_spin: { len: 1.3, fn: (t, A, B) => {          // a happy hop with a full turn
+    const u = t / 1.3, f = blendPose(A, B, u, 0.15), air = Math.sin(Math.PI * clamp01((u - 0.1) / 0.75));
+    f.body.p = [f.body.p[0], f.body.p[1] + 0.5 * air, f.body.p[2]];
+    f.body.r = [f.body.r[0], f.body.r[1] + TAU * ease(clamp01((u - 0.1) / 0.75)), f.body.r[2]];
+    f.legFL.r = f.legFR.r = [0, 0, f.legFL.r[2] + 0.5 * air];
+    return f;
+  } },
+  emote_flinch: { len: 2.0, fn: (t, A, B) => {        // ducks flat, looks up, shudders, sits back up
+    const u = t / 2.0, down = Math.sin(Math.PI * clamp01(u / 0.8)), f = blendPose(A, B, clamp01((u - 0.55) / 0.45), 0.2);
+    const duck = blendPose(f, POSE.lie, down * 0.8);
+    duck.head.r = [duck.head.r[0], duck.head.r[1], duck.head.r[2] + 0.45 * down];
+    duck.earL.r = duck.earR.r = [0, 0, -0.8 * down];
+    duck.body.r = [duck.body.r[0] + 0.06 * down * Math.sin(t * 40), duck.body.r[1], duck.body.r[2]];
+    return duck;
+  } },
+};
+
+const cyc = CONFIG.cycle;
+const clips = [
+  ...Object.entries(HOLD).map(([name, h]) => bake(name, h.period, 32, h.fn)),
+  bake('stretch', STRETCH_LEN, 52, stretchFn),
+  ...Object.entries(cyc.transitions).map(([name, len]) => {
+    const [from, to] = name.split('_to_'), A = firstFrame(from), B = firstFrame(to);
+    return bake(name, len, 24, (t) => blendPose(A, B, t / len, 0.2));
+  }),
+  emoteHop, emoteStartle,
+];
+
+// ---------------------------------------------------------------------------
+// Pose cycle player. hold -> (wait for the loop seam) -> transition -> hold.
+// A button request cuts in at once and routes through the graph if needed
+// (sleep -> lie -> sit). A pose pair with no transition clip just crossfades.
+// ---------------------------------------------------------------------------
+const mixer = new THREE.AnimationMixer(cat);
+const actions = Object.fromEntries(clips.map((c) => [c.name, mixer.clipAction(c)]));
+for (const [name, a] of Object.entries(actions)) {
+  if (name in HOLD) continue;
+  a.setLoop(THREE.LoopOnce, 1);
+  a.clampWhenFinished = !name.startsWith('add_');   // one-shots hold their last frame until the next clip takes over
+}
+
+let pose = cyc.start;        // the pose he is in (or leaving)
+let target = null;           // the pose a transition is heading to
+let phase = 'hold';          // 'hold' | 'moving' | 'oneshot' | 'emote'
+let route = [];              // poses still to pass through on the way to a requested one
+let goal = null;             // the pose a button asked for, kept across emotes
+let emoteNow = null;         // the full emote playing, and the pose it lands in
+let emoteReturn = null;
+const queue = [];            // full emotes waiting for a transition or emote to finish
+const lastFired = {};        // emote name -> time, for cooldowns
+const emoteLog = [];         // what fired, for checks and the debug readout
+let holdUntil = Infinity;
+let waitingForSeam = false;
+let playing = null;
+let auto = !reducedMotion;
+
+function play(name, fade) {
+  const a = actions[name];
+  if (playing && playing !== a) playing.fadeOut(fade);
+  a.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).fadeIn(fade).play();
+  playing = a;
+}
+function enter(p, fade) {
+  pose = p; target = null; waitingForSeam = false;
+  const spec = cyc.poses[p];
+  phase = spec.oneShot ? 'oneshot' : 'hold';
+  play(p, fade);
+  if (!spec.oneShot) holdUntil = timer.getElapsed() + rand(spec.hold);
+  syncButtons();
+}
+function moveTo(next, fade) {
+  waitingForSeam = false;
+  const clip = `${pose}_to_${next}`;
+  if (!actions[clip]) return enter(next, cyc.requestFade);
+  phase = 'moving'; target = next;
+  play(clip, fade);
+  syncButtons();
+}
+function neighbours(p) {
+  const spec = cyc.poses[p];
+  if (spec.oneShot) return [spec.then];
+  return Object.keys(cyc.transitions).filter((n) => n.startsWith(p + '_to_')).map((n) => n.split('_to_')[1]);
+}
+function pathTo(from, to) {                         // breadth-first: fewest clips
+  const prev = { [from]: null }, queue = [from];
+  while (queue.length) {
+    const p = queue.shift();
+    if (p === to) break;
+    for (const n of neighbours(p)) if (!(n in prev)) { prev[n] = p; queue.push(n); }
+  }
+  if (!(to in prev)) return [to];                   // unreachable: crossfade straight there
+  const path = [];
+  for (let p = to; p !== from; p = prev[p]) path.unshift(p);
+  return path;
+}
+function request(to) {
+  if (!cyc.poses[to]) return;
+  goal = to;
+  if (phase === 'hold') {
+    if (to === pose) { goal = null; return; }
+    route = pathTo(pose, to);
+    moveTo(route.shift(), cyc.requestFade);
+  } else {
+    route = pathTo(landingPose(), to);              // carry on after the current clip
+  }
+}
+// The pose he will be in once the current clip ends.
+function landingPose() {
+  if (phase === 'moving') return target;
+  if (phase === 'emote') return emoteReturn;
+  if (phase === 'oneshot') return cyc.poses[pose].then;
+  return pose;
+}
+// He has just arrived in `pose`: a waiting emote goes first, then any requested pose, else hold.
+function land() {
+  if (queue.length) return startEmote(queue.shift());
+  route = goal && goal !== pose ? pathTo(pose, goal) : [];
+  if (!route.length) goal = null;
+  route.length ? moveTo(route.shift(), cyc.fade) : enter(pose, cyc.fade);
+}
+function pickWeighted(weights) {
+  const options = Object.entries(weights);
+  let r = Math.random() * options.reduce((sum, [, w]) => sum + w, 0);
+  for (const [name, w] of options) if ((r -= w) <= 0) return name;
+  return options[0][0];
+}
+const pickNext = (p) => pickWeighted(cyc.poses[p].next || {});
+
+// Play an additive overlay clip (add_*) on top of whatever is playing.
+function emote(clipName) {
+  const a = actions[clipName];
+  if (!a) return;
+  a.reset().setEffectiveWeight(1).play();
+  if (phase === 'hold') holdUntil += a.getClip().duration;
+}
+
+// A site action (tap, butter, butterman...) -> the emote CONFIG.cycle.actions picks for the
+// pose he is in, or the pose he is about to land in. Returns the emote name, or null.
+function trigger(action) {
+  const map = cyc.actions[action];
+  if (!map) return null;
+  const choice = map[landingPose()] ?? map.default;
+  if (!choice) return null;
+  return playEmote(typeof choice === 'string' ? choice : pickWeighted(choice), action);
+}
+function playEmote(name, why = name) {
+  const spec = cyc.emotes[name];
+  if (!spec) return null;
+  const now = timer.getElapsed();
+  if (spec.cooldown && now - (lastFired[name] ?? -Infinity) < spec.cooldown) {
+    // On cooldown: fall back to a hop so a tap still answers.
+    return name === 'hop' ? null : playEmote('hop', why);
+  }
+  lastFired[name] = now;
+  if (spec.overlay) {
+    emote(spec.clip);
+    emoteLog.push(`${why}: ${name} (overlay, in ${phase})`);
+    return name;
+  }
+  if (phase === 'moving' || phase === 'emote') {
+    if (queue.length >= cyc.queueMax) queue[queue.length - 1] = name;   // newest wins the last slot
+    else queue.push(name);
+    emoteLog.push(`${why}: ${name} (queued behind ${phase === 'moving' ? pose + '_to_' + target : emoteNow})`);
+    return name;
+  }
+  emoteLog.push(`${why}: ${name} (now, from ${phase} ${pose})`);
+  startEmote(name);
+  return name;
+}
+// Build (once) the clip for this emote from this pose to its returnTo pose.
+function emoteAction(clipName, from, to) {
+  const key = `${clipName}@${from}>${to}`;
+  if (!actions[key]) {
+    const { len, fn } = EMOTE_FN[clipName], A = firstFrame(from), B = firstFrame(to);
+    const a = mixer.clipAction(bake(key, len, 48, (t) => fn(t, A, B)));
+    a.setLoop(THREE.LoopOnce, 1);
+    a.clampWhenFinished = true;
+    actions[key] = a;
+  }
+  return key;
+}
+function startEmote(name) {
+  const spec = cyc.emotes[name], from = pose;
+  let to = spec.returnTo === 'same' ? from : spec.returnTo;
+  if (cyc.poses[to]?.oneShot) to = cyc.poses[to].then;   // never return into the middle of a stretch
+  waitingForSeam = false;
+  phase = 'emote'; emoteNow = name; emoteReturn = to; target = null;
+  play(emoteAction(spec.clip, from, to), cyc.emoteFade);
+  syncButtons();
+}
+
+mixer.addEventListener('finished', (e) => {
+  if (e.action !== playing) return;                 // overlays and stale clips
+  if (phase === 'moving') pose = target;
+  else if (phase === 'oneshot') pose = cyc.poses[pose].then;   // stretch ends seated
+  else if (phase === 'emote') { pose = emoteReturn; emoteNow = emoteReturn = null; }
+  else return;
+  land();
+});
+// Auto moves wait for the hold to come round to frame 0, which is exactly
+// where the transition clip starts, so nothing pops.
+mixer.addEventListener('loop', (e) => {
+  if (waitingForSeam && auto && phase === 'hold' && e.action === playing) moveTo(pickNext(pose), cyc.fade);
+});
+
+// ---------------------------------------------------------------------------
+// Butter. A quick drop-in pop, separate from the mixer.
+// ---------------------------------------------------------------------------
+let butterAnim = null;
+function setButter(on, action = 'butter') {
+  butter.visible = on;
+  butterAnim = on ? { t: 0 } : null;
+  if (on) trigger(action);
+  syncButtons();
+}
+
+// ---------------------------------------------------------------------------
+// Turntable: a sideways drag spins the model (not the camera) around the
+// vertical axis, so the lights stay put. Up-down swipes are left to the page
+// (touch-action: pan-y), which cancels the press when it takes them.
+// A press that barely moves is a tap; anything more is a drag with inertia.
+// ---------------------------------------------------------------------------
+let yaw = CONFIG.rotate.homeYaw;
+let faceYaw = null;                        // set by a scene (Butterman) to hold him at an angle
+const vel = { x: 0, y: 0 };                // radians per second (x = spin; y unused, kept for checks)
+let press = null;                          // { id, x, y, lastX, lastY, lastT, moved }
+let lastTouch = performance.now();
+
+function rotateBy(dYaw) {
+  yaw += dYaw;
+  spin.rotation.set(0, yaw, 0);
+}
+rotateBy(0);
+// Ease toward `target` by the shortest way round (he may have spun several turns).
+function easeYawTo(target, speed, dt) {
+  const d = THREE.MathUtils.euclideanModulo(target - yaw + Math.PI, Math.PI * 2) - Math.PI;
+  rotateBy(d * (1 - Math.exp(-speed * dt)));
+  return Math.abs(d);
+}
+// For scenes: hold him facing `angle` (radians), or null to hand control back.
+function faceTo(angle) { faceYaw = angle; vel.x = 0; }
+
+canvas.addEventListener('pointerdown', (e) => {
+  if (press) return;                       // one finger drives; ignore the rest
+  press = { id: e.pointerId, x: e.clientX, y: e.clientY, lastX: e.clientX, lastY: e.clientY, t0: e.timeStamp, lastT: e.timeStamp, moved: false };
+  vel.x = vel.y = 0;
+  try { canvas.setPointerCapture(e.pointerId); } catch { /* synthetic events have no capture target */ }
+});
+canvas.addEventListener('pointermove', (e) => {
+  if (!press || e.pointerId !== press.id) return;
+  const dx = e.clientX - press.lastX, dy = e.clientY - press.lastY;
+  if (!press.moved && Math.hypot(e.clientX - press.x, e.clientY - press.y) > CONFIG.rotate.tapSlop) {
+    press.moved = true;
+    canvas.classList.add('dragging');
+  }
+  if (press.moved) {
+    const k = CONFIG.rotate.radiansPerPixel;
+    if (faceYaw === null) rotateBy(dx * k);
+    const dt = Math.max((e.timeStamp - press.lastT) / 1000, 1 / 240);
+    vel.x = 0.6 * vel.x + 0.4 * (dx * k / dt);   // smoothed flick speed
+  }
+  press.lastX = e.clientX; press.lastY = e.clientY; press.lastT = e.timeStamp;
+  lastTouch = performance.now();
+});
+function endPress(e) {
+  if (!press || e.pointerId !== press.id) return;
+  // Taps fire on pointerup: that counts as a user gesture on phones, so the
+  // very first tap can unlock audio and play a sound at once.
+  if (!press.moved && e.type === 'pointerup' && e.timeStamp - press.t0 < CONFIG.rotate.tapMs) tap(e.clientX, e.clientY);
+  if (e.timeStamp - press.lastT > 100) vel.x = vel.y = 0;  // held still before letting go: no flick
+  canvas.classList.remove('dragging');
+  press = null;
+  lastTouch = performance.now();
+}
+canvas.addEventListener('pointerup', endPress);
+canvas.addEventListener('pointercancel', endPress);
+
+// ---------------------------------------------------------------------------
+// Tap: raycast against the hit area, then a random sound and a little squash.
+// ---------------------------------------------------------------------------
+const raycaster = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+let squash = null;
+let taps = 0;
+
+function tap(x, y) {
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
+  raycaster.setFromCamera(ndc, camera);
+  if (raycaster.intersectObject(hitArea, false).length === 0) return false;
+  taps++;
+  playRandomSound();
+  squash = { t: 0 };
+  trigger('tap');
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// Sound: Web Audio. Buffers are decoded once; each play is a cheap new source,
+// so taps can overlap with no lag. A shuffle bag avoids the same sound twice.
+// ---------------------------------------------------------------------------
+let audioCtx = null;
+let pool = [];
+let bag = [];
+let lastPlayed = -1;
+
+// iPhone silent switch (Aaron, decision e1107-37): tap sounds respect it. 'ambient' is what iOS
+// does by default for Web Audio; setting it says so on purpose. Butterman sets 'playback' for the
+// length of the gag (so it plays on silent) and puts this back afterwards. Safari-only API.
+function setAudioSession(type) {
+  try { if (navigator.audioSession) navigator.audioSession.type = type; } catch { /* not supported */ }
+}
+function unlockAudio() {
+  if (!audioCtx) setAudioSession('ambient');
+  if (!audioCtx) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    audioCtx = new Ctx();
+    pool = synthPlaceholders(audioCtx);
+    if (CONFIG.sounds.length) loadSounds(CONFIG.sounds);
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+async function loadSounds(urls) {
+  const decoded = await Promise.all(urls.map(async (u) => {
+    try { return await audioCtx.decodeAudioData(await (await fetch(u)).arrayBuffer()); }
+    catch { console.warn('sound failed to load:', u); return null; }
+  }));
+  const ok = decoded.filter(Boolean);
+  if (ok.length) { pool = ok; bag = []; }
+}
+function playRandomSound() {
+  const ctx = unlockAudio();
+  if (!ctx || !pool.length) return;
+  if (!bag.length) {
+    bag = pool.map((_, i) => i).sort(() => Math.random() - 0.5);
+    if (bag.length > 1 && bag[bag.length - 1] === lastPlayed) bag.unshift(bag.pop());
+  }
+  const i = bag.pop();
+  lastPlayed = i;
+  const src = ctx.createBufferSource();
+  src.buffer = pool[i];
+  src.playbackRate.value = 0.94 + Math.random() * 0.12;   // a little variety
+  const gain = ctx.createGain();
+  gain.gain.value = CONFIG.soundVolume;
+  src.connect(gain).connect(ctx.destination);
+  src.start();
+}
+// Placeholder blips computed straight into buffers: mrrp, boing, squeak, bloop.
+function synthPlaceholders(ctx) {
+  const make = (seconds, f) => {
+    const n = Math.floor(seconds * ctx.sampleRate), buf = ctx.createBuffer(1, n, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    let phase = 0;
+    for (let s = 0; s < n; s++) {
+      const t = s / ctx.sampleRate, [freq, amp] = f(t, t / seconds);
+      phase += TAU * freq / ctx.sampleRate;
+      d[s] = Math.sin(phase) * amp;
+    }
+    return buf;
+  };
+  const env = (u, a = 0.05) => Math.min(1, u / a) * (1 - u) ** 1.5;
+  return [
+    make(0.38, (t, u) => [520 + 380 * Math.sin(Math.PI * u) + 18 * Math.sin(t * 60), 0.6 * env(u)]),
+    make(0.6, (t, u) => [190 + 90 * Math.sin(t * 38) * (1 - u), 0.7 * env(u, 0.02)]),
+    make(0.16, (t, u) => [1200 + 1100 * u, 0.4 * env(u, 0.1)]),
+    make(0.3, (t, u) => [700 * (1 - u) + 160, 0.6 * env(u, 0.03)]),
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// UI wiring
+// ---------------------------------------------------------------------------
+const buttons = [...document.querySelectorAll('.controls button[data-pose]')];
+const butterBtn = document.getElementById('butter');
+const autoBtn = document.getElementById('auto');
+function syncButtons() {
+  const showing = landingPose();
+  for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.pose === showing));
+  butterBtn.setAttribute('aria-pressed', String(butter.visible));
+  autoBtn.setAttribute('aria-pressed', String(auto));
+}
+for (const b of buttons) b.addEventListener('click', () => request(b.dataset.pose));
+document.getElementById('hop').addEventListener('click', () => playEmote('hop', 'hop button'));
+butterBtn.addEventListener('click', () => setButter(!butter.visible));
+// Stand-in for the Butterman gag's end (prototypes/butterman/): butter lands and he flinches.
+document.getElementById('butterman').addEventListener('click', () => setButter(true, 'butterman'));
+autoBtn.addEventListener('click', () => { auto = !auto; syncButtons(); });
+
+// ---------------------------------------------------------------------------
+// Sizing: keep the whole cat in frame on wide screens and tall phones.
+// ---------------------------------------------------------------------------
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  const halfFov = THREE.MathUtils.degToRad(camera.fov / 2);
+  const dist = Math.max(6.4, 1.7 / (Math.tan(halfFov) * camera.aspect));
+  camera.position.set(0, 0.35, dist);
+  camera.lookAt(0, -0.05, 0);
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+resize();
+
+// ---------------------------------------------------------------------------
+// Loop
+// ---------------------------------------------------------------------------
+const timer = new THREE.Timer();
+timer.connect(document);              // pauses cleanly while the tab is hidden
+const debugEl = document.getElementById('debug');
+const showDebug = params.has('debug');
+debugEl.hidden = !showDebug;
+let frameMs = 16.7;
+const tmpV = new THREE.Vector3();
+const tmpSize = new THREE.Vector2();
+
+const freezeAt = params.has('t') ? Number(params.get('t')) : null;
+if (freezeAt !== null) auto = false;
+
+enter(cyc.poses[params.get('pose')] ? params.get('pose') : cyc.start, 0);
+syncButtons();
+if (params.get('butter') === '1') setButter(true);
+
+// ---------------------------------------------------------------------------
+// Performance: the ?perf=1 readout and the adaptive pixel ratio. Measures real
+// time between frames (not the clamped animation dt). Runs whether or not the
+// readout is shown, so phones get the fallback either way.
+// ---------------------------------------------------------------------------
+const P = CONFIG.perf;
+const perfEl = document.getElementById('perf');
+const showPerf = opt('perf') === '1';
+perfEl.hidden = !showPerf;
+const burnMs = Number(opt('burn')) || 0;
+const perf = { capped: false, device: (navigator.userAgent.match(/(iPhone|iPad|Android)[^;)]*[;)]?\s*[^;)]*/)?.[0] || navigator.platform || '').slice(0, 40), last: 0, start: 0, frames: 0, worst: 0, low: 0, high: 0, fps: 0, avg: 0, worstMs: 0, ceiling: P.maxDpr, lastDir: 0, events: [], gpu: '' };
+if (showPerf) {
+  const gl = renderer.getContext();
+  perf.gpu = String(gl.getParameter(gl.RENDERER));
+  if (/^WebKit WebGL$/.test(perf.gpu)) {                // Safari hides it; the debug extension may not
+    const ext = gl.getExtension('WEBGL_debug_renderer_info');
+    if (ext) perf.gpu = String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL));
+  }
+}
+function setDpr(v, why) {
+  dpr = Math.round(v * 100) / 100;
+  renderer.setPixelRatio(dpr);
+  perf.events.push(`${timer.getElapsed().toFixed(0)}s ${why} -> ${dpr}`);
+  if (perf.events.length > 3) perf.events.shift();
+}
+function perfFrame(now) {
+  const dt = now - perf.last;
+  perf.last = now;
+  if (dt <= 0 || dt > 1000 || now < P.warmupMs) { perf.start = now; perf.frames = 0; perf.worst = 0; return; }   // hidden tab or startup
+  perf.frames++;
+  perf.worst = Math.max(perf.worst, dt);
+  if (now - perf.start < P.sampleMs) return;
+  perf.fps = (perf.frames * 1000) / (now - perf.start);
+  perf.avg = (now - perf.start) / perf.frames;
+  perf.worstMs = perf.worst;
+  perf.start = now; perf.frames = 0; perf.worst = 0;
+  if (pinnedDpr) return;
+  // iPhone Low Power Mode (and some Android battery savers) cap the page at a steady 30 fps.
+  // That is a cap, not a struggling GPU: an even 33 ms with no spikes. Don't shed pixels for it.
+  perf.capped = Math.abs(perf.avg - 33.3) < 2 && perf.worstMs < 42;
+  if (perf.capped) { perf.low = perf.high = 0; return; }
+  if (perf.fps < P.lowFps) { perf.low++; perf.high = 0; }
+  else if (perf.fps >= P.highFps) { perf.high++; perf.low = 0; }
+  else { perf.low = perf.high = 0; }
+  if (perf.low >= P.lowWindows && dpr > P.minDpr) {
+    if (perf.lastDir > 0) perf.ceiling = Math.max(P.minDpr, dpr - P.step);   // the last step up was one too many
+    setDpr(Math.max(P.minDpr, dpr - P.step), `slow (${perf.fps.toFixed(0)} fps)`);
+    perf.low = 0; perf.lastDir = -1;
+  } else if (perf.high >= P.highWindows && dpr < Math.min(perf.ceiling, deviceDpr)) {
+    setDpr(Math.min(perf.ceiling, deviceDpr, dpr + P.step), `smooth (${perf.fps.toFixed(0)} fps)`);
+    perf.high = 0; perf.lastDir = 1;
+  }
+}
+document.addEventListener('visibilitychange', () => { perf.last = 0; });
+
+renderer.setAnimationLoop((now) => {
+  perfFrame(now);
+  if (burnMs) { const until = performance.now() + burnMs; while (performance.now() < until); }   // fake a slow phone
+  timer.update(now);
+  let dt = Math.min(timer.getDelta(), 0.1);     // a long stall never causes a big jump
+  let t = timer.getElapsed();
+  if (freezeAt !== null) { mixer.setTime(freezeAt); dt = 0; t = freezeAt; }
+  frameMs += (dt * 1000 - frameMs) * 0.05;
+
+  // A scene's angle wins; else flick inertia; else the optional drift back to face front.
+  const R = CONFIG.rotate;
+  if (faceYaw !== null) easeYawTo(faceYaw, 4, dt);
+  else if (!press) {
+    if (Math.abs(vel.x) > 1e-3) {
+      rotateBy(vel.x * dt);
+      vel.x *= Math.exp(-R.damping * dt);
+    } else if (R.returnHome && performance.now() - lastTouch > R.returnDelay * 1000) {
+      easeYawTo(R.homeYaw, R.returnSpeed, dt);
+    }
+  }
+
+  if (auto && phase === 'hold' && t > holdUntil) waitingForSeam = true;
+  mixer.update(dt);
+
+  // Float bob (smaller when the visitor prefers less motion).
+  const amp = CONFIG.float.height * (reducedMotion ? 0.3 : 1);
+  floater.position.y = Math.sin(t * CONFIG.float.speed) * amp;
+  floater.rotation.z = Math.sin(t * CONFIG.float.speed * 0.5) * 0.03;
+
+  // Tap squash: a quick springy wobble on a group above the mixer root.
+  if (squash) {
+    squash.t += dt;
+    const s = Math.exp(-squash.t * 7) * Math.sin(squash.t * 28) * 0.14;
+    react.scale.set(1 + s, 1 - s, 1 + s);
+    if (squash.t > 0.8) { react.scale.set(1, 1, 1); squash = null; }
+  }
+
+  // Butter drop-in: falls a little and overshoots its landing.
+  if (butterAnim && butterAnim.t < 0.5) {
+    butterAnim.t += freezeAt !== null ? 0.5 : dt;   // a frozen frame shows the butter landed
+    const u = Math.min(butterAnim.t / 0.5, 1);
+    const bounce = 1 + Math.sin(u * Math.PI) * 0.25 * (1 - u);
+    butter.position.y = 0.34 + (1 - u) ** 2 * 0.6;
+    butter.scale.set(bounce, 2 - bounce, bounce);
+  }
+
+  // Shadow follows his height: higher = smaller and fainter.
+  body.getWorldPosition(tmpV);
+  const lift = THREE.MathUtils.clamp(tmpV.y + 0.1, 0, 2);
+  shadow.scale.setScalar(1 - lift * 0.25);
+  shadow.material.opacity = 1 - lift * 0.35;
+
+  renderer.render(scene, camera);
+
+  if (showPerf) {
+    const info = renderer.info.render, size = renderer.getDrawingBufferSize(tmpSize);
+    perfEl.textContent =
+      `fps     ${perf.fps ? perf.fps.toFixed(1) : '…'}\n` +
+      `frame   ${perf.avg.toFixed(1)} ms avg, ${perf.worstMs.toFixed(1)} worst\n` +
+      `calls   ${info.calls}   tris ${(info.triangles / 1000).toFixed(1)}k\n` +
+      `dpr     ${dpr} of ${deviceDpr} ${pinnedDpr ? '(pinned)' : `(auto ${P.minDpr}-${Math.min(perf.ceiling, deviceDpr)})`}\n` +
+      `canvas  ${size.x}×${size.y}\n` +
+      `gpu     ${perf.gpu.slice(0, 40)}\n` +
+      `device  ${perf.device}${perf.capped ? '\nnote    steady 30 fps: Low Power Mode?' : ''}` +
+      (perf.events.length ? '\n' + perf.events.join('\n') : '');
+  }
+
+  if (showDebug) {
+    const q = spin.quaternion;
+    debugEl.textContent =
+      `pose    ${phase} ${phase === 'emote' ? emoteNow + ' -> ' + emoteReturn : pose}${target ? ' -> ' + target : ''}${route.length ? ' (then ' + route.join(', ') + ')' : ''}\n` +
+      `queue   ${queue.join(', ') || '-'}\n` +
+      `next in ${phase === 'hold' && auto ? Math.max(0, holdUntil - t).toFixed(1) + ' s' + (waitingForSeam ? ' (at seam)' : '') : '-'}\nbutter  ${butter.visible}\nauto    ${auto}\ntaps    ${taps}\n` +
+      `quat    ${q.x.toFixed(2)} ${q.y.toFixed(2)} ${q.z.toFixed(2)} ${q.w.toFixed(2)}\n` +
+      `frame   ${frameMs.toFixed(1)} ms\ncalls   ${renderer.info.render.calls}  tris ${renderer.info.render.triangles}`;
+  }
+});
+
+// A small handle for automated checks and console play.
+window.catViewer = {
+  request, emote, trigger, playEmote, setButter, rotateBy, faceTo, tap, config: CONFIG,
+  get yaw() { return +yaw.toFixed(3); },
+  get pose() { return pose; },
+  get phase() { return phase; },
+  get currentEmote() { return emoteNow; },
+  get queue() { return [...queue]; },
+  get emoteLog() { return [...emoteLog]; },
+  get perf() { return { fps: +perf.fps.toFixed(1), dpr, ceiling: perf.ceiling, events: [...perf.events], gpu: perf.gpu }; },
+  get butter() { return butter.visible; },
+  get quaternion() { return spin.quaternion.toArray().map((v) => +v.toFixed(3)); },
+  get taps() { return taps; },
+  get sounds() { return pool.length; },
+  set auto(v) { auto = v; syncButtons(); },
+};
+</script>
+</body>
+</html>

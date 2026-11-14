@@ -1,0 +1,345 @@
+{
+  "method": "same corrected non-overlapping fixture; five back-to-back runs; full adapters; standard headless browser; independent percentiles are not additive",
+  "report": [
+    {
+      "size": "desktop",
+      "ref": "c45201e",
+      "viewport": [
+        1280,
+        900,
+        1
+      ],
+      "loadBefore": [
+        10.1,
+        8.8,
+        7.56
+      ],
+      "loadAfter": [
+        9.85,
+        8.79,
+        7.57
+      ],
+      "runs": [
+        {
+          "total": 4.9000000059604645,
+          "physics": 0.7000000029802322,
+          "render": 2.699999988079071,
+          "sort": 1.199999988079071,
+          "targets": 0.3999999910593033,
+          "renders": 17
+        },
+        {
+          "total": 4.200000002980232,
+          "physics": 0.5,
+          "render": 2,
+          "sort": 1.1000000089406967,
+          "targets": 0.29999999701976776,
+          "renders": 17
+        },
+        {
+          "total": 4.0999999940395355,
+          "physics": 0.4000000059604645,
+          "render": 1.5999999940395355,
+          "sort": 0.9999999850988388,
+          "targets": 0.29999998211860657,
+          "renders": 17
+        },
+        {
+          "total": 3.5,
+          "physics": 0.5,
+          "render": 1.5999999940395355,
+          "sort": 1,
+          "targets": 0.20000000298023224,
+          "renders": 17
+        },
+        {
+          "total": 3,
+          "physics": 0.4000000059604645,
+          "render": 1.2000000178813934,
+          "sort": 0.9000000059604645,
+          "targets": 0.20000000298023224,
+          "renders": 17
+        }
+      ],
+      "medians": {
+        "total": 4.0999999940395355,
+        "physics": 0.5,
+        "render": 1.5999999940395355,
+        "sort": 1,
+        "targets": 0.29999998211860657,
+        "renders": 17
+      },
+      "frames": 905,
+      "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+      "lines": [
+        "CHECK board cost renderer: ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":1,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":1,\"p95\":4.9000000059604645,\"maxReachableFiveP95\":3.2000000029802322,\"loadBefore\":[10.02,8.8,7.57],\"loadAfter\":[10.02,8.8,7.57]}",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":2,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":2,\"p95\":4.200000002980232,\"maxReachableFiveP95\":1.3999999910593033,\"loadBefore\":[10.02,8.8,7.57],\"loadAfter\":[10.02,8.8,7.57]}",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":3,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":3,\"p95\":4.0999999940395355,\"maxReachableFiveP95\":1.2000000029802322,\"loadBefore\":[10.02,8.8,7.57],\"loadAfter\":[10.02,8.8,7.57]}",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":4,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":4,\"p95\":3.5,\"maxReachableFiveP95\":1.5,\"loadBefore\":[10.02,8.8,7.57],\"loadAfter\":[9.85,8.79,7.57]}",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":5,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":5,\"p95\":3.0999999940395355,\"maxReachableFiveP95\":1.2000000029802322,\"loadBefore\":[9.85,8.79,7.57],\"loadAfter\":[9.85,8.79,7.57]}"
+      ],
+      "errors": []
+    },
+    {
+      "size": "desktop",
+      "ref": "working",
+      "viewport": [
+        1280,
+        900,
+        1
+      ],
+      "loadBefore": [
+        9.85,
+        8.79,
+        7.57
+      ],
+      "loadAfter": [
+        10.35,
+        8.91,
+        7.62
+      ],
+      "runs": [
+        {
+          "total": 3.2999999970197678,
+          "physics": 0.6000000089406967,
+          "render": 0.9000000059604645,
+          "sort": 1,
+          "targets": 0.20000000298023224,
+          "renders": 3
+        },
+        {
+          "total": 2.2999999970197678,
+          "physics": 0.5,
+          "render": 0.4000000059604645,
+          "sort": 1,
+          "targets": 0.10000000894069672,
+          "renders": 3
+        },
+        {
+          "total": 2.300000011920929,
+          "physics": 0.5,
+          "render": 0.4000000059604645,
+          "sort": 1,
+          "targets": 0.19999998807907104,
+          "renders": 3
+        },
+        {
+          "total": 2,
+          "physics": 0.5,
+          "render": 0.4000000059604645,
+          "sort": 1,
+          "targets": 0.10000000894069672,
+          "renders": 3
+        },
+        {
+          "total": 2.4000000059604645,
+          "physics": 0.5999999940395355,
+          "render": 0.40000002086162567,
+          "sort": 1,
+          "targets": 0.20000000298023224,
+          "renders": 3
+        }
+      ],
+      "medians": {
+        "total": 2.300000011920929,
+        "physics": 0.5,
+        "render": 0.4000000059604645,
+        "sort": 1,
+        "targets": 0.19999998807907104,
+        "renders": 3
+      },
+      "frames": 905,
+      "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+      "lines": [
+        "CHECK board cost renderer: ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":1,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":1,\"p95\":3.2999999970197678,\"maxReachableFiveP95\":2.9000000059604645,\"loadBefore\":[10.35,8.91,7.62],\"loadAfter\":[10.35,8.91,7.62]}",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":2,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":2,\"p95\":2.2999999970197678,\"maxReachableFiveP95\":1.5,\"loadBefore\":[10.35,8.91,7.62],\"loadAfter\":[10.35,8.91,7.62]}",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":3,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":3,\"p95\":2.300000011920929,\"maxReachableFiveP95\":3,\"loadBefore\":[10.35,8.91,7.62],\"loadAfter\":[10.35,8.91,7.62]}",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":4,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":4,\"p95\":2.0999999940395355,\"maxReachableFiveP95\":1.5,\"loadBefore\":[10.35,8.91,7.62],\"loadAfter\":[10.35,8.91,7.62]}",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":5,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":5,\"p95\":2.4000000059604645,\"maxReachableFiveP95\":1.5,\"loadBefore\":[10.35,8.91,7.62],\"loadAfter\":[10.35,8.91,7.62]}"
+      ],
+      "errors": []
+    },
+    {
+      "size": "phone",
+      "ref": "c45201e",
+      "viewport": [
+        390,
+        844,
+        2
+      ],
+      "loadBefore": [
+        10.35,
+        8.91,
+        7.62
+      ],
+      "loadAfter": [
+        10.13,
+        8.91,
+        7.63
+      ],
+      "runs": [
+        {
+          "total": 4.4000000059604645,
+          "physics": 0.4000000059604645,
+          "render": 1.9000000059604645,
+          "sort": 1,
+          "targets": 0.29999999701976776,
+          "renders": 17
+        },
+        {
+          "total": 4.199999988079071,
+          "physics": 0.5,
+          "render": 1.9999999850988388,
+          "sort": 1.0000000149011612,
+          "targets": 0.30000001192092896,
+          "renders": 17
+        },
+        {
+          "total": 4.5,
+          "physics": 0.5,
+          "render": 1.800000011920929,
+          "sort": 1.0999999940395355,
+          "targets": 0.30000001192092896,
+          "renders": 20
+        },
+        {
+          "total": 4.199999988079071,
+          "physics": 0.5999999940395355,
+          "render": 1.7000000029802322,
+          "sort": 1,
+          "targets": 0.30000001192092896,
+          "renders": 20
+        },
+        {
+          "total": 4.100000008940697,
+          "physics": 0.5,
+          "render": 1.6999999731779099,
+          "sort": 1.0999999940395355,
+          "targets": 0.29999999701976776,
+          "renders": 20
+        }
+      ],
+      "medians": {
+        "total": 4.199999988079071,
+        "physics": 0.5,
+        "render": 1.800000011920929,
+        "sort": 1.0000000149011612,
+        "targets": 0.30000001192092896,
+        "renders": 20
+      },
+      "frames": 905,
+      "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+      "lines": [
+        "CHECK board cost renderer: ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":1,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":1,\"p95\":4.4000000059604645,\"maxReachableFiveP95\":1.4000000059604645,\"loadBefore\":[10.4,8.94,7.64],\"loadAfter\":[10.4,8.94,7.64]}",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":2,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":2,\"p95\":4.199999988079071,\"maxReachableFiveP95\":1.1000000089406967,\"loadBefore\":[10.4,8.94,7.64],\"loadAfter\":[10.13,8.91,7.63]}",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":3,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":3,\"p95\":4.5,\"maxReachableFiveP95\":1.699999988079071,\"loadBefore\":[10.13,8.91,7.63],\"loadAfter\":[10.13,8.91,7.63]}",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":4,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":4,\"p95\":4.199999988079071,\"maxReachableFiveP95\":1.6000000089406967,\"loadBefore\":[10.13,8.91,7.63],\"loadAfter\":[10.13,8.91,7.63]}",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":5,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":5,\"p95\":4.100000008940697,\"maxReachableFiveP95\":1.699999988079071,\"loadBefore\":[10.13,8.91,7.63],\"loadAfter\":[10.13,8.91,7.63]}"
+      ],
+      "errors": []
+    },
+    {
+      "size": "phone",
+      "ref": "working",
+      "viewport": [
+        390,
+        844,
+        2
+      ],
+      "loadBefore": [
+        10.13,
+        8.91,
+        7.63
+      ],
+      "loadAfter": [
+        10.33,
+        9,
+        7.67
+      ],
+      "runs": [
+        {
+          "total": 3.2999999970197678,
+          "physics": 0.699999988079071,
+          "render": 0.7000000178813934,
+          "sort": 1.2000000029802322,
+          "targets": 0.20000000298023224,
+          "renders": 3
+        },
+        {
+          "total": 2.0999999940395355,
+          "physics": 0.5,
+          "render": 0.4000000059604645,
+          "sort": 1,
+          "targets": 0.19999998807907104,
+          "renders": 3
+        },
+        {
+          "total": 2.4000000059604645,
+          "physics": 0.5999999940395355,
+          "render": 0.5,
+          "sort": 1.0000000149011612,
+          "targets": 0.19999998807907104,
+          "renders": 3
+        },
+        {
+          "total": 1.7999999970197678,
+          "physics": 0.5,
+          "render": 0.30000001192092896,
+          "sort": 0.9000000059604645,
+          "targets": 0.10000000894069672,
+          "renders": 3
+        },
+        {
+          "total": 1.7000000029802322,
+          "physics": 0.5,
+          "render": 0.30000001192092896,
+          "sort": 0.9000000059604645,
+          "targets": 0.10000000894069672,
+          "renders": 3
+        }
+      ],
+      "medians": {
+        "total": 2.0999999940395355,
+        "physics": 0.5,
+        "render": 0.4000000059604645,
+        "sort": 1,
+        "targets": 0.19999998807907104,
+        "renders": 3
+      },
+      "frames": 905,
+      "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+      "lines": [
+        "CHECK board cost renderer: ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":1,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":1,\"p95\":3.2999999970197678,\"maxReachableFiveP95\":3.3999999910593033,\"loadBefore\":[10.33,9,7.67],\"loadAfter\":[10.33,9,7.67]}",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":2,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":2,\"p95\":2.0999999940395355,\"maxReachableFiveP95\":1.4000000059604645,\"loadBefore\":[10.33,9,7.67],\"loadAfter\":[10.33,9,7.67]}",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":3,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":3,\"p95\":2.4000000059604645,\"maxReachableFiveP95\":1.5,\"loadBefore\":[10.33,9,7.67],\"loadAfter\":[10.33,9,7.67]}",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":4,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":4,\"p95\":1.7999999970197678,\"maxReachableFiveP95\":1.5,\"loadBefore\":[10.33,9,7.67],\"loadAfter\":[10.33,9,7.67]}",
+        "CHECK board drop fixture starts without interpenetration: {\"run\":5,\"overlapPairs\":0,\"deepest\":0} PASS",
+        "CHECK board production budget run: {\"run\":5,\"p95\":1.7000000029802322,\"maxReachableFiveP95\":1.300000011920929,\"loadBefore\":[10.33,9,7.67],\"loadAfter\":[10.33,9,7.67]}"
+      ],
+      "errors": []
+    }
+  ]
+}

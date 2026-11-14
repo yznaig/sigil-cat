@@ -1,0 +1,8 @@
+// Shared cup profile ensures its curved fragments come from the same wall.
+import {T} from './forms.js';
+export const radius=y=>.071+.021*Math.min(1,Math.max(0,y/.22));
+export const thickness=.004;
+export function glassMaterial(){return new T.MeshPhysicalMaterial({color:'#d7e5df',roughness:.075,metalness:.12,transparent:true,opacity:.38,depthWrite:false,clearcoat:1,clearcoatRoughness:.055,side:T.FrontSide});}
+export function edgeMaterial(){return new T.MeshStandardMaterial({color:'#bdcec3',metalness:.45,roughness:.16,transparent:true,opacity:.75});}
+export function patch(theta,width,y0,y1,seed=0){const p=[],uv=[],idx=[],n=12,m=3,layer=(n+1)*(m+1);for(let k=0;k<2;k++)for(let j=0;j<=m;j++)for(let i=0;i<=n;i++){const u=i/n,v=j/m,a=theta+width*u,low=y0+.006*Math.sin(u*11+seed),high=y1+.009*Math.sin(u*14+seed*2),y=low+(high-low)*v,r=radius(y)-k*thickness;p.push(Math.sin(a)*r,y,Math.cos(a)*r);uv.push(u,v);}
+ const quad=(a,b,c,d,flip=false)=>idx.push(...(flip?[a,c,b,a,d,c]:[a,b,c,a,c,d]));for(let j=0;j<m;j++)for(let i=0;i<n;i++){const a=j*(n+1)+i,b=a+n+1;quad(a,a+1,b+1,b);quad(a+layer,a+1+layer,b+1+layer,b+layer,true);}for(let i=0;i<n;i++){quad(i,i+layer,i+1+layer,i+1);const a=m*(n+1)+i;quad(a,a+1,a+1+layer,a+layer);}for(let j=0;j<m;j++){const a=j*(n+1),b=a+n+1;quad(a,b,b+layer,a+layer);quad(a+n,a+n+layer,b+n+layer,b+n);}const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(p,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();g.computeBoundingBox();g.translate(...g.boundingBox.getCenter(new T.Vector3()).multiplyScalar(-1).toArray());return g;}

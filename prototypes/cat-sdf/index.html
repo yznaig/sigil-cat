@@ -1,0 +1,1688 @@
+<!doctype html>
+<!--
+  SDF cat prototype (sigil-cat). Throwaway: answers "can a procedural, code-only cat replace the
+  primitive placeholder with one smooth seamless body, without Blender or a bought model?"
+  Copied from ../cat-viewer/index.html: same part hierarchy (now THREE.Bones), poses, clips, cycle
+  player, emotes, turntable, tap, butter and ?perf=1 readout. Only how the body is drawn changes.
+  The shape is one signed distance field (SDF): ellipsoids and round cones attached to the parts,
+  joined with a polynomial smooth-min. Three ways to draw it, picked by hash:
+    #mode=mesh  (default) polygonize the SDF once at load in the rest pose (surface nets), auto-skin
+                it to the parts as bones from per-primitive distances, let the clips deform it.
+                #res=0.032 sets the grid cell (world units; smaller = more triangles), #blend=0.08 the
+                skin weight falloff.
+    #mode=ray   raymarch the SDF every frame in a patched MeshPhysicalMaterial on a bounding-box
+                proxy, part matrices sent as uniforms. Writes depth so the butter sits right.
+                #rayScale=0.5 marches at half resolution and composites; #rayCull=0 turns off the
+                per-primitive bounding-sphere cull; #rayHeat=1 paints march steps as a heatmap.
+    #mode=prim  the original primitive cat, for side-by-side comparison.
+  Other options as in the cat viewer: #pose=sleep #butter=1 #tone=agx #debug #t=1.5, ?perf=1.
+  Checks: checks/*.js, run with: shot 'index.html#mode=mesh&debug' --js "$(cat checks/sdf-mesh.js)"
+  All shapes are our own work; no assets.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SDF Cat</title>
+<style>
+  :root {
+    --bg-top: #f6f1e7;
+    --bg-bottom: #e7dfd0;
+    --ink: #1a1a1c;
+    --ink-soft: #6b665d;
+    --pill: rgba(255, 255, 255, 0.72);
+    --pill-on: #1a1a1c;
+    --pill-on-ink: #f6f1e7;
+    --butter: #f3d36b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(120% 90% at 50% 35%, var(--bg-top), var(--bg-bottom));
+    color: var(--ink);
+    font: 15px/1.4 ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  canvas#c {
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    display: block; touch-action: pan-y; cursor: grab;   /* sideways drags spin him; up-down swipes stay with the page */
+  }
+  canvas#c.dragging { cursor: grabbing; }
+  .tag {
+    position: fixed; top: 16px; left: 16px; margin: 0; font-size: 13px; color: var(--ink-soft);
+  }
+  .hint {
+    position: fixed; top: 16px; right: 16px; margin: 0; font-size: 13px; color: var(--ink-soft);
+  }
+  .controls {
+    position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%);
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    width: max-content; max-width: calc(100vw - 32px);
+  }
+  .controls button {
+    font: inherit; font-size: 14px; border: 0; border-radius: 999px; padding: 8px 14px;
+    background: var(--pill); color: var(--ink); cursor: pointer;
+    box-shadow: 0 1px 0 rgba(0,0,0,.06), 0 4px 14px rgba(0,0,0,.06);
+    backdrop-filter: blur(6px);
+  }
+  .controls button[aria-pressed="true"] { background: var(--pill-on); color: var(--pill-on-ink); }
+  .controls button#butter[aria-pressed="true"] { background: var(--butter); color: var(--ink); }
+  footer {
+    position: fixed; left: 0; right: 0; bottom: 0; padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+    display: flex; gap: 18px; justify-content: center; font-size: 13px;
+  }
+  footer a { color: var(--ink-soft); text-decoration: none; }
+  footer a:hover { color: var(--ink); text-decoration: underline; }
+  #debug, #perf {
+    position: fixed; top: 44px; left: 16px; margin: 0; padding: 8px 10px; border-radius: 8px;
+    background: rgba(0,0,0,.75); color: #e9e4d8; font: 12px/1.45 ui-monospace, monospace; white-space: pre;
+    pointer-events: none;
+  }
+  #perf { left: auto; right: 16px; top: calc(44px + env(safe-area-inset-top)); max-width: calc(100vw - 32px); overflow: hidden; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="c" aria-label="A black cat floating in the middle of the page. Drag to spin him, tap him for a sound."></canvas>
+<p class="tag">sdf cat, prototype <span id="modeTag"></span></p>
+<p class="hint">Drag to spin him. Tap him.</p>
+<div class="controls" role="group" aria-label="Cat controls">
+  <button data-pose="sit" aria-pressed="true">Sit</button>
+  <button data-pose="lie" aria-pressed="false">Lie</button>
+  <button data-pose="sleep" aria-pressed="false">Sleep</button>
+  <button data-pose="stretch" aria-pressed="false">Stretch</button>
+  <button id="hop">Hop</button>
+  <button id="butter" aria-pressed="false">Butter</button>
+  <button id="butterman">Buttaman</button>
+  <button id="auto" aria-pressed="true">Auto</button>
+</div>
+<footer>
+  <!-- Placeholder links: the real accounts are still to come from the brothers. -->
+  <a href="#">instagram</a><a href="#">tiktok</a><a href="#">youtube</a>
+</footer>
+<pre id="debug" hidden></pre>
+<pre id="perf" hidden></pre>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+// ---------------------------------------------------------------------------
+// Tuning knobs. Everything worth fiddling with lives here.
+// ---------------------------------------------------------------------------
+const CONFIG = {
+  // The pose cycle (spec: docs/ideas/cat-poses.md). He holds a pose for a random
+  // time in `hold`, then picks the next by weight from `next`.
+  cycle: {
+    start: 'sit',
+    poses: {
+      sit: { hold: [4, 9], next: { lie: 3, stretch: 1 } },
+      lie: { hold: [3, 7], next: { sleep: 3, sit: 2, stretch: 1 } },
+      sleep: { hold: [8, 15], next: { lie: 1 } },
+      stretch: { oneShot: true, then: 'sit' },   // stretch ends seated
+    },
+    // Transition clips, named from_to_to. Seconds here only size the placeholder
+    // clips; a real model's clips bring their own length.
+    transitions: { sit_to_lie: 1.1, sit_to_stretch: 0.9, lie_to_stretch: 1.1, lie_to_sleep: 1.3, lie_to_sit: 1.0, sleep_to_lie: 1.2 },
+    fade: 0.25,                 // blend at each clip seam
+    requestFade: 0.35,          // blend when a button cuts in mid-hold
+    emoteFade: 0.2,             // blend into a full emote from wherever he is
+    // Emotes. Two kinds:
+    //   overlay: an additive add_* clip that rides on top of any pose and never stops the cycle.
+    //   interrupt: an emote_* clip that takes over, plays once and ends on frame 0 of `returnTo`
+    //   (a pose name, or 'same' = the pose he was in). `cooldown` is seconds before it can fire again.
+    emotes: {
+      hop:     { clip: 'add_hop', overlay: true },
+      startle: { clip: 'add_startle', overlay: true },
+      wake:    { clip: 'emote_wake', returnTo: 'lie' },
+      spin:    { clip: 'emote_spin', returnTo: 'same', cooldown: 2 },
+      flinch:  { clip: 'emote_flinch', returnTo: 'sit' },
+    },
+    // Site actions -> emote, per pose he is in (or landing in). A weights object picks at random.
+    actions: {
+      tap:       { sleep: 'wake', default: { hop: 4, spin: 1 } },
+      butter:    { default: 'startle' },
+      butterman: { default: 'flinch' },
+    },
+    // A full emote never cuts a transition (or another emote) mid-move: it waits here.
+    // When the queue is full the newest emote replaces the last one waiting.
+    queueMax: 2,
+  },
+  rotate: {
+    radiansPerPixel: 0.009,     // drag sensitivity
+    damping: 3.5,               // how fast a flick slows down (higher = sooner)
+    tapSlop: 8,                 // pixels a press may move and still count as a tap
+    tapMs: 450,                 // ...and how long it may last
+    // Turntable only (Aaron, decision e1107-36): he spins around the vertical axis, all the way round.
+    homeYaw: -0.65,             // the angle he faces at rest (a three-quarter view), radians
+    returnHome: true,           // drift back to homeYaw after a spin (still undecided; flip to try)
+    returnDelay: 2.5,           // seconds left alone before the drift starts
+    returnSpeed: 1.6,           // how quickly he drifts back (higher = sooner)
+  },
+  float: { height: 0.08, speed: 1.2 },
+  // Real sound files go here, e.g. ['sounds/mrrp.mp3', 'sounds/huh.mp3'].
+  // Empty = synthesized placeholder blips so the prototype needs no assets.
+  sounds: [],
+  soundVolume: 0.5,
+  // Adaptive pixel ratio. Every `sampleMs` it measures real fps; after `lowWindows` slow
+  // samples in a row it steps the ratio down, after `highWindows` smooth ones it steps back up.
+  // A step up that turns out too slow sets a ceiling, so it never see-saws.
+  perf: { maxDpr: 2, minDpr: 1, step: 0.25, sampleMs: 1000, warmupMs: 2000, lowFps: 45, highFps: 57, lowWindows: 2, highWindows: 4 },
+};
+
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const params = new URLSearchParams(location.hash.slice(1));
+const query = new URLSearchParams(location.search);
+const opt = (k) => query.get(k) ?? params.get(k);     // ?perf=1 and #perf=1 both work
+const MODE = ['mesh', 'ray', 'prim'].includes(opt('mode')) ? opt('mode') : 'mesh';
+document.getElementById('modeTag').textContent = '· ' + MODE;
+
+// ---------------------------------------------------------------------------
+// Renderer, camera, light. Matte black needs light to read: a soft environment
+// for the body, a warm key, and two strong back lights for the rim.
+// ---------------------------------------------------------------------------
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+const deviceDpr = Number(opt('fakedpr')) || devicePixelRatio || 1;   // fakedpr: test the fallback on a 1x screen
+const pinnedDpr = Number(opt('dpr')) || null;          // ?dpr=1.5 turns the adaptive ratio off
+let dpr = pinnedDpr ?? Math.min(deviceDpr, CONFIG.perf.maxDpr);
+renderer.setPixelRatio(dpr);
+renderer.toneMapping = params.get('tone') === 'agx' ? THREE.AgXToneMapping : THREE.NeutralToneMapping;
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.4;
+
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 60);
+
+const hemi = new THREE.HemisphereLight(0xfff6e8, 0x3a3630, 0.7);
+scene.add(hemi);
+const key = new THREE.DirectionalLight(0xfff1dc, 2.2);
+key.position.set(3, 4, 5);
+const rimA = new THREE.DirectionalLight(0xdfe8ff, 5.0);
+rimA.position.set(-4, 2.5, -4);
+const rimB = new THREE.DirectionalLight(0xffffff, 3.0);
+rimB.position.set(4, 1, -3);
+scene.add(key, rimA, rimB);
+
+// One shared material: the stick figure will reuse it so both read as the same stuff.
+// Sheen gives black a velvet edge at grazing angles, which is what makes it read as soft.
+const matte = new THREE.MeshPhysicalMaterial({
+  color: 0x0d0d0f, roughness: 0.78, metalness: 0,
+  sheen: 0.8, sheenRoughness: 0.5, sheenColor: new THREE.Color(0x4b505b),
+});
+
+// ---------------------------------------------------------------------------
+// The placeholder cat. Every animated part is a named Object3D, exactly like
+// bones in a rigged GLB, so AnimationClips can target them by name.
+// Faces +X. Pivot sits at the body's centre so tumbling feels balanced.
+// ---------------------------------------------------------------------------
+const primMeshes = [];                   // the old primitive body, shown only in #mode=prim
+function part(geo, x = 0, y = 0, z = 0, sx = 1, sy = 1, sz = 1) {
+  const m = new THREE.Mesh(geo, matte);
+  m.position.set(x, y, z);
+  m.scale.set(sx, sy, sz);
+  primMeshes.push(m);
+  return m;
+}
+// Named parts are THREE.Bones so the generated skinned mesh can use them directly as its skeleton.
+// The mixer still finds them by name, exactly as before.
+function node(name, parent, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0) {
+  const g = new THREE.Bone();
+  g.name = name;
+  g.position.set(x, y, z);
+  g.rotation.set(rx, ry, rz);
+  parent.add(g);
+  return g;
+}
+const sphere = (r) => new THREE.SphereGeometry(r, 32, 24);
+const capsuleX = (r, len) => new THREE.CapsuleGeometry(r, len, 8, 20).rotateZ(Math.PI / 2);
+const capsuleY = (r, len) => new THREE.CapsuleGeometry(r, len, 8, 16);
+
+const spin = new THREE.Group();          // user rotation (drag)
+const floater = node('floater', spin);   // procedural bob
+const react = node('react', floater);    // procedural tap squash
+const cat = node('cat', react);          // mixer root
+scene.add(spin);
+
+const body = node('body', cat);
+body.add(part(sphere(0.5), 0, 0.02, 0, 1.62, 0.8, 0.8));      // one smooth torso, no seams
+body.add(part(sphere(0.25), 0.6, 0.24, 0, 1.1, 1, 1));         // neck
+
+const head = node('head', body, 0.84, 0.44, 0);
+head.add(part(sphere(0.33), 0, 0, 0, 1.05, 0.9, 1));
+head.add(part(sphere(0.15), 0.27, -0.09, 0, 1, 0.8, 1.15));
+for (const [name, z, tilt] of [['earL', 0.19, 0.32], ['earR', -0.19, -0.32]]) {
+  const ear = node(name, head, 0.02, 0.24, z, tilt, 0, -0.12);
+  ear.add(part(new THREE.ConeGeometry(0.12, 0.27, 20), 0, 0.11, 0, 1, 1, 0.7));
+}
+
+for (const [name, x, y, z] of [
+  ['legFL', 0.48, -0.2, 0.19], ['legFR', 0.48, -0.2, -0.19],
+  ['legBL', -0.5, -0.18, 0.2], ['legBR', -0.5, -0.18, -0.2],
+]) {
+  const leg = node(name, body, x, y, z);
+  leg.add(part(capsuleY(0.1, 0.48), 0, -0.32, 0));
+  leg.add(part(sphere(0.11), 0.03, -0.6, 0, 1.3, 0.7, 1));
+}
+
+const TAIL = 7, SEG = 0.17;
+let parent = node('tail0', body, -0.78, 0.12, 0, 0, 0, -0.75);
+parent.add(part(capsuleX(0.075, SEG), -SEG / 2, 0, 0));
+for (let i = 1; i < TAIL; i++) {
+  const r = 0.075 - i * 0.004;
+  parent = node('tail' + i, parent, -SEG, 0, 0, 0, 0, -0.13);
+  parent.add(part(sphere(r), 0, 0, 0));                        // joint ball hides the bend
+  parent.add(part(capsuleX(r, SEG), -SEG / 2, 0, 0));
+}
+
+// Hit area: an invisible ellipsoid riding on the body. Taps test this, not the
+// detailed meshes: cheaper, and a tap between the ears still counts.
+const hitArea = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), matte);
+hitArea.name = 'hitArea';
+hitArea.position.set(0.1, 0.12, 0);
+hitArea.scale.set(1.35, 0.75, 0.55);
+hitArea.visible = false;                 // the raycaster ignores visibility, so it still gets hit
+body.add(hitArea);
+
+// Butter: its own mesh parented to the head, shown or hidden. With a real model
+// this becomes headBone.add(butter), same idea.
+const butter = new THREE.Mesh(
+  new RoundedBoxGeometry(0.34, 0.12, 0.22, 4, 0.025),
+  new THREE.MeshStandardMaterial({ color: 0xf3d36b, roughness: 0.42 }),
+);
+butter.name = 'butter';
+butter.position.set(0.05, 0.34, 0);
+butter.rotation.set(0, 0.18, 0.06);
+butter.visible = false;
+head.add(butter);
+
+// Soft contact shadow: a blurred dot under him, in the world (not spun with him).
+const shadowTex = (() => {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  grad.addColorStop(0, 'rgba(40,32,20,0.55)');
+  grad.addColorStop(1, 'rgba(40,32,20,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+})();
+const shadow = new THREE.Mesh(
+  new THREE.PlaneGeometry(2.6, 1.3),
+  new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }),
+);
+shadow.rotation.x = -Math.PI / 2;
+shadow.position.y = -1.55;
+scene.add(shadow);
+
+// ===========================================================================
+// THE SDF CAT. One shape, written as a signed distance field: ellipsoids and
+// round cones pinned to the parts (in each part's local frame, rest pose),
+// joined with a polynomial smooth-min so every joint blends without a seam.
+// The same packed numbers feed the CPU polygonizer (mesh mode) and the GPU
+// raymarcher (ray mode), so both modes draw exactly the same cat.
+// ===========================================================================
+const BONES = ['body', 'head', 'earL', 'earR', 'legFL', 'legFR', 'legBL', 'legBR', ...Array.from({ length: TAIL }, (_, i) => 'tail' + i)];
+const boneObj = Object.fromEntries(BONES.map((n) => [n, cat.getObjectByName(n)]));
+const tailR = (i) => 0.068 - i * 0.0047;              // tail radius at joint i (tip ~0.035)
+const EAR_FLAT = 0.62;
+const TAIL_SUB = 2;                                    // cones per tail bone                                  // ears are thin front-to-back
+const SHAPE = {
+  // Ellipsoids: part, centre, radii, blend k (how soft its join with everything before it is).
+  ell: [
+    { part: 'body', c: [0.3, 0.04, 0], r: [0.47, 0.36, 0.33], k: 0.1 },           // chest
+    { part: 'body', c: [-0.35, 0.03, 0], r: [0.5, 0.37, 0.36], k: 0.2 },          // belly and hips
+    { part: 'head', c: [-0.01, 0.02, 0], r: [0.28, 0.26, 0.3], k: 0.1 },          // skull
+    { part: 'head', c: [0.06, -0.09, 0], r: [0.22, 0.18, 0.3], k: 0.1 },          // cheeks
+    { part: 'head', c: [0.21, -0.1, 0], r: [0.11, 0.085, 0.13], k: 0.06 },        // muzzle
+    ...['legBL', 'legBR'].map((part) => ({ part, c: [0.03, -0.1, 0], r: [0.19, 0.25, 0.13], k: 0.12 })),   // haunches
+    ...['legFL', 'legFR', 'legBL', 'legBR'].map((part) => ({ part, c: [0.04, -0.6, 0], r: [0.12, 0.07, 0.095], k: 0.06 })),   // paws
+  ],
+  // Ears: a round cone up the ear's local y, flattened front-to-back.
+  ear: ['earL', 'earR'].map((part) => ({ part, y0: -0.06, h: 0.25, rb: 0.12, rt: 0.03, k: 0.035 })),
+  // Round cones between two points, each point pinned to its own part (the neck spans body -> head).
+  cone: [
+    { a: ['body', [0.46, 0.18, 0]], ra: 0.18, b: ['head', [-0.1, -0.07, 0]], rb: 0.16, k: 0.12 },   // neck
+    ...['legFL', 'legFR', 'legBL', 'legBR'].map((leg) => ({ a: [leg, [0, -0.02, 0]], ra: 0.095, b: [leg, [0.01, -0.55, 0]], rb: 0.075, k: 0.09 })),
+    // Tail: TAIL_SUB short cones per tail bone, laid along a Catmull-Rom curve through the joints, so a
+    // curled tail is a smooth curve, not a chain of straight sticks. Joints share round ends: no blend.
+    ...Array.from({ length: TAIL * TAIL_SUB }, (_, n) => {
+      const i = Math.floor(n / TAIL_SUB), u0 = (n % TAIL_SUB) / TAIL_SUB, u1 = u0 + 1 / TAIL_SUB;
+      const r = (u) => tailR(i) + (tailR(i + 1) - tailR(i)) * u;
+      return { tail: [i, u0, u1], a: ['tail' + i], b: ['tail' + i], ra: r(u0), rb: r(u1), k: n ? 0.002 : 0.1 };
+    }),
+  ],
+};
+const NE = SHAPE.ell.length, NR = SHAPE.ear.length, NC = SHAPE.cone.length, NP = NE + NR + NC;
+// A primitive can still shape the surface while a LATER primitive's blend is wider than its own,
+// so the ray cull grows each bounding sphere by the widest blend from it onward.
+const KREACH = (() => {
+  const ks = [...SHAPE.ell, ...SHAPE.ear, ...SHAPE.cone].map((e) => e.k);
+  for (let i = ks.length - 2; i >= 0; i--) ks[i] = Math.max(ks[i], ks[i + 1]);
+  return ks;
+})();
+
+// Pack the shape for one pose. matOf(name) gives a part's matrix in the space we work in
+// (cat space for the mesh, world space for the raymarcher). Per primitive:
+//   E (ellipsoid, 5 vec4): 3 rows of world->local, (radii, k), bounding sphere
+//   R (ear, 5 vec4): 3 rows of world->local, (h, r base, r tip, k), bounding sphere
+//   C (cone, 4 vec4): (a, ra), (b, rb), (k, -, -, -), bounding sphere
+function makePack() {
+  return { E: new Float32Array(NE * 20), R: new Float32Array(NR * 20), C: new Float32Array(NC * 16), lo: new THREE.Vector3(), hi: new THREE.Vector3() };
+}
+const _p = new THREE.Vector3(), _q = new THREE.Quaternion(), _s = new THREE.Vector3(), _a = new THREE.Vector3(), _b = new THREE.Vector3();
+const _m4 = new THREE.Matrix4(), ONE3 = new THREE.Vector3(1, 1, 1);
+function rows(arr, o, m) {
+  const e = m.elements;
+  arr[o] = e[0]; arr[o + 1] = e[4]; arr[o + 2] = e[8]; arr[o + 3] = e[12];
+  arr[o + 4] = e[1]; arr[o + 5] = e[5]; arr[o + 6] = e[9]; arr[o + 7] = e[13];
+  arr[o + 8] = e[2]; arr[o + 9] = e[6]; arr[o + 10] = e[10]; arr[o + 11] = e[14];
+}
+const tailJ = Array.from({ length: TAIL + 3 }, () => new THREE.Vector3());
+// Point on the tail curve in segment j (joint j to j+1) at u in 0..1. tailJ is offset by one (ghost ends).
+function catmull(j, u, out) {
+  const p0 = tailJ[j], p1 = tailJ[j + 1], p2 = tailJ[j + 2], p3 = tailJ[j + 3], u2 = u * u, u3 = u2 * u;
+  const f = (a, b, c, d) => 0.5 * (2 * b + (-a + c) * u + (2 * a - 5 * b + 4 * c - d) * u2 + (-a + 3 * b - 3 * c + d) * u3);
+  return out.set(f(p0.x, p1.x, p2.x, p3.x), f(p0.y, p1.y, p2.y, p3.y), f(p0.z, p1.z, p2.z, p3.z));
+}
+function packShape(matOf, out) {
+  out.lo.setScalar(Infinity); out.hi.setScalar(-Infinity);
+  const grow = (c, r) => { out.lo.min(_p.copy(c).subScalar(r)); out.hi.max(_p.copy(c).addScalar(r)); };
+  SHAPE.ell.forEach((e, i) => {
+    const M = matOf(e.part), o = i * 20;
+    M.decompose(_p, _q, _s);
+    _a.fromArray(e.c).applyMatrix4(M);
+    const rx = e.r[0] * _s.x, ry = e.r[1] * _s.y, rz = e.r[2] * _s.z, R = Math.max(rx, ry, rz);
+    rows(out.E, o, _m4.compose(_a, _q, ONE3).invert());
+    out.E[o + 12] = rx; out.E[o + 13] = ry; out.E[o + 14] = rz; out.E[o + 15] = e.k;
+    out.E[o + 16] = _a.x; out.E[o + 17] = _a.y; out.E[o + 18] = _a.z; out.E[o + 19] = R + KREACH[i];
+    grow(_a, R);
+  });
+  SHAPE.ear.forEach((e, i) => {
+    const M = matOf(e.part), o = i * 20;
+    M.decompose(_p, _q, _s);
+    const s = (_s.x + _s.y + _s.z) / 3, h = e.h * s;
+    _a.set(0, e.y0, 0).applyMatrix4(M);
+    rows(out.R, o, _m4.compose(_a, _q, ONE3).invert());
+    out.R[o + 12] = h; out.R[o + 13] = e.rb * s; out.R[o + 14] = e.rt * s; out.R[o + 15] = e.k;
+    _b.set(0, e.y0 + e.h / 2, 0).applyMatrix4(M);
+    out.R[o + 16] = _b.x; out.R[o + 17] = _b.y; out.R[o + 18] = _b.z; out.R[o + 19] = h / 2 + e.rb * s + KREACH[NE + i];
+    grow(_b, h / 2 + e.rb * s);
+  });
+  // Tail joints J0..J7 (J0 starts a little inside the body), for the curve.
+  for (let i = 0; i <= TAIL; i++) {
+    const M = matOf('tail' + Math.min(i, TAIL - 1));
+    tailJ[i + 1].set(i === 0 ? 0.08 : i === TAIL ? -SEG : 0, 0, 0).applyMatrix4(M);
+  }
+  tailJ[0].copy(tailJ[1]).multiplyScalar(2).sub(tailJ[2]);
+  tailJ[TAIL + 2].copy(tailJ[TAIL + 1]).multiplyScalar(2).sub(tailJ[TAIL]);
+  SHAPE.cone.forEach((e, i) => {
+    const o = i * 16;
+    if (e.tail) {
+      const [j, u0, u1] = e.tail;
+      catmull(j, u0, _a); catmull(j, u1, _b);
+      out.C[o] = _a.x; out.C[o + 1] = _a.y; out.C[o + 2] = _a.z; out.C[o + 3] = e.ra;
+      out.C[o + 4] = _b.x; out.C[o + 5] = _b.y; out.C[o + 6] = _b.z; out.C[o + 7] = e.rb;
+      out.C[o + 8] = e.k;
+      const R = _a.distanceTo(_b) / 2 + Math.max(e.ra, e.rb);
+      _a.add(_b).multiplyScalar(0.5);
+      out.C[o + 12] = _a.x; out.C[o + 13] = _a.y; out.C[o + 14] = _a.z; out.C[o + 15] = R + KREACH[NE + NR + i];
+      grow(_a, R);
+      return;
+    }
+    let M = matOf(e.a[0]);
+    M.decompose(_p, _q, _s);
+    const ra = e.ra * (_s.x + _s.z) / 2;
+    _a.fromArray(e.a[1]).applyMatrix4(M);
+    M = matOf(e.b[0]);
+    M.decompose(_p, _q, _s);
+    const rb = e.rb * (_s.x + _s.z) / 2;
+    _b.fromArray(e.b[1]).applyMatrix4(M);
+    out.C[o] = _a.x; out.C[o + 1] = _a.y; out.C[o + 2] = _a.z; out.C[o + 3] = ra;
+    out.C[o + 4] = _b.x; out.C[o + 5] = _b.y; out.C[o + 6] = _b.z; out.C[o + 7] = rb;
+    out.C[o + 8] = e.k;
+    const R = _a.distanceTo(_b) / 2 + Math.max(ra, rb);
+    _a.add(_b).multiplyScalar(0.5);
+    out.C[o + 12] = _a.x; out.C[o + 13] = _a.y; out.C[o + 14] = _a.z; out.C[o + 15] = R + KREACH[NE + NR + i];
+    grow(_a, R);
+  });
+  return out;
+}
+
+// --- The distance functions (Inigo Quilez's), in JS for the polygonizer. The GLSL copy is RAY_GLSL.
+const smin = (a, b, k) => { const h = Math.max(k - Math.abs(a - b), 0) / k; return Math.min(a, b) - h * h * k * 0.25; };
+function sdEll(x, y, z, rx, ry, rz) {
+  const ax = x / rx, ay = y / ry, az = z / rz, bx = ax / rx, by = ay / ry, bz = az / rz;
+  const k0 = Math.sqrt(ax * ax + ay * ay + az * az), k1 = Math.sqrt(bx * bx + by * by + bz * bz);
+  return k0 * (k0 - 1) / Math.max(k1, 1e-9);
+}
+function sdRoundConeY(x, y, z, r1, r2, h) {
+  const b = (r1 - r2) / h, a = Math.sqrt(1 - b * b), qx = Math.sqrt(x * x + z * z), qy = y;
+  const k = -b * qx + a * qy;
+  if (k < 0) return Math.sqrt(qx * qx + qy * qy) - r1;
+  if (k > a * h) return Math.sqrt(qx * qx + (qy - h) * (qy - h)) - r2;
+  return qx * a + qy * b - r1;
+}
+// Returns the distance and, via tOut, the 0..1 position of the closest point along the axis.
+function sdRoundCone(px, py, pz, ax, ay, az, bx, by, bz, r1, r2) {
+  const bax = bx - ax, bay = by - ay, baz = bz - az, l2 = bax * bax + bay * bay + baz * baz;
+  const rr = r1 - r2, a2 = l2 - rr * rr, il2 = 1 / l2;
+  const pax = px - ax, pay = py - ay, paz = pz - az, y = pax * bax + pay * bay + paz * baz, z = y - l2;
+  const xx = pax * l2 - bax * y, xy = pay * l2 - bay * y, xz = paz * l2 - baz * y;
+  const x2 = xx * xx + xy * xy + xz * xz, y2 = y * y * l2, z2 = z * z * l2;
+  const k = Math.sign(rr) * rr * rr * x2;
+  coneT = Math.min(1, Math.max(0, y * il2));
+  if (Math.sign(z) * a2 * z2 > k) return Math.sqrt(x2 + z2) * il2 - r2;
+  if (Math.sign(y) * a2 * y2 < k) return Math.sqrt(x2 + y2) * il2 - r1;
+  return (Math.sqrt(x2 * a2 * il2) + y * rr) * il2 - r1;
+}
+let coneT = 0;
+// Exact skip: outside the grown bounding sphere by more than the running distance, a primitive
+// can't change the result (its distance is beyond every blend that comes after it).
+function far(x, y, z, A, o, d) {
+  const dx = x - A[o], dy = y - A[o + 1], dz = z - A[o + 2], r = A[o + 3] + d;
+  return d < 1e2 && dx * dx + dy * dy + dz * dz > r * r;
+}
+// The whole field. With `per`, also records each primitive's own distance (and cone t), for skinning.
+function sdf(S, x, y, z, per, perT) {
+  let d = 1e3;
+  const E = S.E, R = S.R, C = S.C;
+  for (let i = 0, o = 0; i < NE; i++, o += 20) {
+    if (!per && far(x, y, z, E, o + 16, d)) continue;
+    const qx = E[o] * x + E[o + 1] * y + E[o + 2] * z + E[o + 3];
+    const qy = E[o + 4] * x + E[o + 5] * y + E[o + 6] * z + E[o + 7];
+    const qz = E[o + 8] * x + E[o + 9] * y + E[o + 10] * z + E[o + 11];
+    const di = sdEll(qx, qy, qz, E[o + 12], E[o + 13], E[o + 14]);
+    if (per) per[i] = di;
+    d = smin(d, di, E[o + 15]);
+  }
+  for (let i = 0, o = 0; i < NR; i++, o += 20) {
+    if (!per && far(x, y, z, R, o + 16, d)) continue;
+    const qx = (R[o] * x + R[o + 1] * y + R[o + 2] * z + R[o + 3]) / EAR_FLAT;
+    const qy = R[o + 4] * x + R[o + 5] * y + R[o + 6] * z + R[o + 7];
+    const qz = R[o + 8] * x + R[o + 9] * y + R[o + 10] * z + R[o + 11];
+    const di = sdRoundConeY(qx, qy, qz, R[o + 13], R[o + 14], R[o + 12]) * EAR_FLAT;
+    if (per) per[NE + i] = di;
+    d = smin(d, di, R[o + 15]);
+  }
+  for (let i = 0, o = 0; i < NC; i++, o += 16) {
+    if (!per && far(x, y, z, C, o + 12, d)) continue;
+    const di = sdRoundCone(x, y, z, C[o], C[o + 1], C[o + 2], C[o + 4], C[o + 5], C[o + 6], C[o + 3], C[o + 7]);
+    if (per) { per[NE + NR + i] = di; perT[i] = coneT; }
+    d = smin(d, di, C[o + 8]);
+  }
+  return d;
+}
+
+// --- Surface nets: sample the field on a grid, one vertex per cell the surface crosses,
+// one quad per grid edge it crosses. A coarse pass (blocks of 4x4x4 cells) skips the
+// fine samples far from the surface, which is most of the box.
+function surfaceNets(field, lo, hi, h) {
+  const nx = Math.ceil((hi.x - lo.x) / h) + 1, ny = Math.ceil((hi.y - lo.y) / h) + 1, nz = Math.ceil((hi.z - lo.z) / h) + 1;
+  const F = new Float32Array(nx * ny * nz), id = (i, j, k) => i + nx * (j + ny * k);
+  const B = 4, cx = Math.ceil((nx - 1) / B) + 1, cy = Math.ceil((ny - 1) / B) + 1, cz = Math.ceil((nz - 1) / B) + 1;
+  const Cf = new Float32Array(cx * cy * cz), cid = (i, j, k) => i + cx * (j + cy * k);
+  let evals = 0;
+  for (let k = 0; k < cz; k++) for (let j = 0; j < cy; j++) for (let i = 0; i < cx; i++) {
+    Cf[cid(i, j, k)] = field(lo.x + i * B * h, lo.y + j * B * h, lo.z + k * B * h); evals++;
+  }
+  const thr = B * h * Math.sqrt(3) * 1.3;
+  for (let bk = 0; bk < cz - 1; bk++) for (let bj = 0; bj < cy - 1; bj++) for (let bi = 0; bi < cx - 1; bi++) {
+    let minAbs = Infinity, neg = 0;
+    for (let c = 0; c < 8; c++) {
+      const v = Cf[cid(bi + (c & 1), bj + ((c >> 1) & 1), bk + (c >> 2))];
+      minAbs = Math.min(minAbs, Math.abs(v)); if (v < 0) neg++;
+    }
+    const near = minAbs < thr || (neg > 0 && neg < 8);
+    const fill = neg === 8 ? -thr : thr;
+    const i1 = Math.min(bi * B + B, nx), j1 = Math.min(bj * B + B, ny), k1 = Math.min(bk * B + B, nz);
+    const lastI = bi === cx - 2, lastJ = bj === cy - 2, lastK = bk === cz - 2;
+    for (let k = bk * B; k < (lastK ? nz : k1); k++) for (let j = bj * B; j < (lastJ ? ny : j1); j++) for (let i = bi * B; i < (lastI ? nx : i1); i++) {
+      if (near) { F[id(i, j, k)] = field(lo.x + i * h, lo.y + j * h, lo.z + k * h); evals++; }
+      else F[id(i, j, k)] = fill;
+    }
+  }
+  const cellV = new Int32Array(nx * ny * nz).fill(-1), P = [];
+  const v = new Float32Array(8);
+  const EDGES = [0, 1, 2, 3, 4, 5, 6, 7, 0, 2, 1, 3, 4, 6, 5, 7, 0, 4, 1, 5, 2, 6, 3, 7];
+  for (let k = 0; k < nz - 1; k++) for (let j = 0; j < ny - 1; j++) for (let i = 0; i < nx - 1; i++) {
+    let mask = 0;
+    for (let c = 0; c < 8; c++) { v[c] = F[id(i + (c & 1), j + ((c >> 1) & 1), k + (c >> 2))]; if (v[c] < 0) mask |= 1 << c; }
+    if (mask === 0 || mask === 255) continue;
+    let sx = 0, sy = 0, sz = 0, n = 0;
+    for (let e = 0; e < 24; e += 2) {
+      const a = EDGES[e], b = EDGES[e + 1];
+      if ((v[a] < 0) === (v[b] < 0)) continue;
+      const t = v[a] / (v[a] - v[b]);
+      sx += (a & 1) + t * ((b & 1) - (a & 1)); sy += ((a >> 1) & 1) + t * (((b >> 1) & 1) - ((a >> 1) & 1)); sz += (a >> 2) + t * ((b >> 2) - (a >> 2));
+      n++;
+    }
+    cellV[id(i, j, k)] = P.length / 3;
+    P.push(lo.x + (i + sx / n) * h, lo.y + (j + sy / n) * h, lo.z + (k + sz / n) * h);
+  }
+  const idx = [];
+  const quad = (c0, c1, c2, c3, flip) => {
+    const q = flip ? [c3, c2, c1, c0] : [c0, c1, c2, c3];
+    const d02 = (P[q[0] * 3] - P[q[2] * 3]) ** 2 + (P[q[0] * 3 + 1] - P[q[2] * 3 + 1]) ** 2 + (P[q[0] * 3 + 2] - P[q[2] * 3 + 2]) ** 2;
+    const d13 = (P[q[1] * 3] - P[q[3] * 3]) ** 2 + (P[q[1] * 3 + 1] - P[q[3] * 3 + 1]) ** 2 + (P[q[1] * 3 + 2] - P[q[3] * 3 + 2]) ** 2;
+    if (d02 < d13) idx.push(q[0], q[1], q[2], q[0], q[2], q[3]);
+    else idx.push(q[0], q[1], q[3], q[1], q[2], q[3]);
+  };
+  for (let k = 1; k < nz - 1; k++) for (let j = 1; j < ny - 1; j++) for (let i = 1; i < nx - 1; i++) {
+    const f0 = F[id(i, j, k)], in0 = f0 < 0;
+    if (in0 !== (F[id(i + 1, j, k)] < 0))   // x edge: cells around it share i
+      quad(cellV[id(i, j - 1, k - 1)], cellV[id(i, j, k - 1)], cellV[id(i, j, k)], cellV[id(i, j - 1, k)], !in0);
+    if (in0 !== (F[id(i, j + 1, k)] < 0))   // y edge
+      quad(cellV[id(i - 1, j, k - 1)], cellV[id(i - 1, j, k)], cellV[id(i, j, k)], cellV[id(i, j, k - 1)], !in0);
+    if (in0 !== (F[id(i, j, k + 1)] < 0))   // z edge
+      quad(cellV[id(i - 1, j - 1, k)], cellV[id(i, j - 1, k)], cellV[id(i, j, k)], cellV[id(i - 1, j, k)], !in0);
+  }
+  return { P, idx, grid: [nx, ny, nz], evals };
+}
+
+// --- Build the skinned mesh: polygonize in the rest pose, snap to the surface, skin to the parts.
+const SKIN = {
+  cell: Number(opt('res')) || 0.032,   // grid cell, world units; the cat is ~3.3 long
+  blend: Number(opt('blend')) || 0.08,                        // how far (in field units) a part's pull reaches past the nearest part
+};
+function buildSkinnedCat() {
+  const T0 = performance.now();
+  scene.updateMatrixWorld(true);
+  const catInv = cat.matrixWorld.clone().invert();
+  const restMat = Object.fromEntries(BONES.map((n) => [n, new THREE.Matrix4().multiplyMatrices(catInv, boneObj[n].matrixWorld)]));
+  const S = packShape((n) => restMat[n], makePack());
+  const pad = SKIN.cell * 3, lo = S.lo.clone().subScalar(pad), hi = S.hi.clone().addScalar(pad);
+  const field = (x, y, z) => sdf(S, x, y, z);
+  const nets = surfaceNets(field, lo, hi, SKIN.cell);
+  const T1 = performance.now();
+
+  // Snap each vertex onto the surface (two Newton steps) and take the gradient as its normal.
+  const P = nets.P, nV = P.length / 3, N = new Float32Array(nV * 3), e = SKIN.cell * 0.1;
+  for (let v = 0; v < nV; v++) {
+    let x = P[v * 3], y = P[v * 3 + 1], z = P[v * 3 + 2], gx = 0, gy = 0, gz = 1;
+    for (let it = 0; it < 2; it++) {
+      const d = field(x, y, z);
+      gx = field(x + e, y, z) - field(x - e, y, z); gy = field(x, y + e, z) - field(x, y - e, z); gz = field(x, y, z + e) - field(x, y, z - e);
+      const g2 = (gx * gx + gy * gy + gz * gz) / (4 * e * e);
+      if (it === 1 || g2 < 1e-8) break;
+      const step = d / g2 / (2 * e);
+      x -= gx * step; y -= gy * step; z -= gz * step;
+    }
+    const gl = Math.hypot(gx, gy, gz) || 1;
+    P[v * 3] = x; P[v * 3 + 1] = y; P[v * 3 + 2] = z;
+    N[v * 3] = gx / gl; N[v * 3 + 1] = gy / gl; N[v * 3 + 2] = gz / gl;
+  }
+  const T2 = performance.now();
+
+  // Auto-skin. Each primitive pulls on its part (a cone spanning two parts splits its pull
+  // along its length). Pull = how close this primitive is compared with the closest one:
+  // (1 - (d_i - d_min) / blend)^2. Keep the 4 strongest parts and normalize.
+  const boneOf = (name) => BONES.indexOf(name);
+  const primBones = [
+    ...SHAPE.ell.map((e) => [boneOf(e.part), boneOf(e.part)]),
+    ...SHAPE.ear.map((e) => [boneOf(e.part), boneOf(e.part)]),
+    ...SHAPE.cone.map((e) => [boneOf(e.a[0]), boneOf(e.b[0])]),
+  ];
+  const per = new Float32Array(NP), perT = new Float32Array(NC), pull = new Float32Array(BONES.length);
+  const skinIndex = new Uint16Array(nV * 4), skinWeight = new Float32Array(nV * 4);
+  let maxInf = 0, sumErr = 0;
+  for (let v = 0; v < nV; v++) {
+    sdf(S, P[v * 3], P[v * 3 + 1], P[v * 3 + 2], per, perT);
+    let dmin = Infinity;
+    for (let p = 0; p < NP; p++) dmin = Math.min(dmin, per[p]);
+    pull.fill(0);
+    for (let p = 0; p < NP; p++) {
+      let f = 1 - (per[p] - dmin) / SKIN.blend;
+      if (f <= 0) continue;
+      f *= f;
+      const [A, Bn] = primBones[p];
+      if (A === Bn) { pull[A] = Math.max(pull[A], f); continue; }
+      const t = perT[p - NE - NR], s = t * t * (3 - 2 * t);
+      pull[A] = Math.max(pull[A], f * (1 - s));
+      pull[Bn] = Math.max(pull[Bn], f * s);
+    }
+    const order = [...pull.keys()].sort((a, b) => pull[b] - pull[a]).slice(0, 4);
+    let sum = 0;
+    for (const b of order) sum += pull[b];
+    let inf = 0;
+    order.forEach((b, s) => {
+      const w = sum > 0 ? pull[b] / sum : (s === 0 ? 1 : 0);
+      skinIndex[v * 4 + s] = sum > 0 ? b : 0;
+      skinWeight[v * 4 + s] = w;
+      if (w > 0) inf++;
+    });
+    maxInf = Math.max(maxInf, inf);
+    sumErr = Math.max(sumErr, Math.abs(skinWeight[v * 4] + skinWeight[v * 4 + 1] + skinWeight[v * 4 + 2] + skinWeight[v * 4 + 3] - 1));
+  }
+  const T3 = performance.now();
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+  geo.setAttribute('normal', new THREE.BufferAttribute(N, 3));
+  geo.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(skinIndex, 4));
+  geo.setAttribute('skinWeight', new THREE.Float32BufferAttribute(skinWeight, 4));
+  geo.setIndex(nV < 65536 ? new THREE.Uint16BufferAttribute(nets.idx, 1) : new THREE.Uint32BufferAttribute(nets.idx, 1));
+  geo.computeBoundingSphere();
+  const mesh = new THREE.SkinnedMesh(geo, matte);
+  mesh.name = 'sdfCat';
+  mesh.frustumCulled = false;                 // poses move him outside the rest-pose bounds
+  cat.add(mesh);
+  mesh.bind(new THREE.Skeleton(BONES.map((n) => boneObj[n])));
+  const T4 = performance.now();
+  return {
+    mesh,
+    stats: {
+      tris: nets.idx.length / 3, verts: nV, bones: BONES.length, maxInfluences: maxInf, weightSumError: +sumErr.toExponential(1), primitives: NP,
+      grid: nets.grid.join('x'), cell: SKIN.cell, fieldEvals: nets.evals,
+      genMs: +(T4 - T0).toFixed(1),
+      split: { netsMs: +(T1 - T0).toFixed(1), snapMs: +(T2 - T1).toFixed(1), skinMs: +(T3 - T2).toFixed(1), uploadMs: +(T4 - T3).toFixed(1) },
+    },
+  };
+}
+
+// --- Raymarcher: a box around the cat drawn with the cat's own MeshPhysicalMaterial, patched so
+// each pixel marches the SDF and hands three.js the hit's position and normal. Lighting, sheen,
+// environment and tone mapping are then three.js's own, identical to the mesh.
+const RAY = {
+  steps: 96,
+  scale: Math.min(1, Math.max(0.25, Number(opt('rayScale')) || 1)),
+  cull: opt('rayCull') !== '0',
+  heat: opt('rayHeat') === '1',
+};
+const rayUniforms = {
+  uE: { value: new Float32Array(NE * 20) }, uR: { value: new Float32Array(NR * 20) }, uC: { value: new Float32Array(NC * 16) },
+  uProj: { value: camera.projectionMatrix }, uTMax: { value: 4 }, uCull: { value: RAY.cull ? 1 : 0 },
+  uPix: { value: 0.001 },          // world size of one pixel at distance 1 (set per frame)
+};
+const RAY_GLSL = /* glsl */`
+#define NE ${NE}
+#define NR ${NR}
+#define NC ${NC}
+#define RM_STEPS ${RAY.steps}
+#define EAR_FLAT ${EAR_FLAT.toFixed(3)}
+uniform vec4 uE[NE * 5];
+uniform vec4 uR[NR * 5];
+uniform vec4 uC[NC * 4];
+uniform mat4 uProj;
+uniform float uTMax;
+uniform int uCull;
+varying vec3 vRmWorld;
+uniform float uPix;
+vec3 rmViewPos; vec3 rmNormal; bool rmMiss; float rmSteps; float rmActive; float rmCover; uint rmMask;
+#define vViewPosition rmViewPos
+float rmSmin(float a, float b, float k) { float h = max(k - abs(a - b), 0.0) / k; return min(a, b) - h * h * k * 0.25; }
+float rmEll(vec3 p, vec3 r) { float k0 = length(p / r); float k1 = length(p / (r * r)); return k0 * (k0 - 1.0) / max(k1, 1e-6); }
+float rmConeY(vec3 p, float r1, float r2, float h) {
+  float b = (r1 - r2) / h; float a = sqrt(1.0 - b * b);
+  vec2 q = vec2(length(p.xz), p.y);
+  float k = dot(q, vec2(-b, a));
+  if (k < 0.0) return length(q) - r1;
+  if (k > a * h) return length(q - vec2(0.0, h)) - r2;
+  return dot(q, vec2(a, b)) - r1;
+}
+float rmCone(vec3 p, vec3 a, vec3 b, float r1, float r2) {
+  vec3 ba = b - a; float l2 = dot(ba, ba); float rr = r1 - r2; float a2 = l2 - rr * rr; float il2 = 1.0 / l2;
+  vec3 pa = p - a; float y = dot(pa, ba); float z = y - l2;
+  vec3 xv = pa * l2 - ba * y; float x2 = dot(xv, xv); float y2 = y * y * l2; float z2 = z * z * l2;
+  float k = sign(rr) * rr * rr * x2;
+  if (sign(z) * a2 * z2 > k) return sqrt(x2 + z2) * il2 - r2;
+  if (sign(y) * a2 * y2 < k) return sqrt(x2 + y2) * il2 - r1;
+  return (sqrt(x2 * a2 * il2) + y * rr) * il2 - r1;
+}
+vec3 rmFrame(vec4 r0, vec4 r1, vec4 r2, vec3 p) { vec4 q = vec4(p, 1.0); return vec3(dot(r0, q), dot(r1, q), dot(r2, q)); }
+bool rmOn(int bit) { return (rmMask & (1u << uint(bit))) != 0u; }
+float rmMap(vec3 p) {
+  float d = 1e3;
+  for (int i = 0; i < NE; i++) {
+    if (!rmOn(i)) continue;
+    vec4 rk = uE[i * 5 + 3];
+    d = rmSmin(d, rmEll(rmFrame(uE[i * 5], uE[i * 5 + 1], uE[i * 5 + 2], p), rk.xyz), rk.w);
+  }
+  for (int i = 0; i < NR; i++) {
+    if (!rmOn(NE + i)) continue;
+    vec3 q = rmFrame(uR[i * 5], uR[i * 5 + 1], uR[i * 5 + 2], p); q.x /= EAR_FLAT;
+    vec4 c = uR[i * 5 + 3];
+    d = rmSmin(d, rmConeY(q, c.y, c.z, c.x) * EAR_FLAT, c.w);
+  }
+  for (int i = 0; i < NC; i++) {
+    if (!rmOn(NE + NR + i)) continue;
+    vec4 a = uC[i * 4]; vec4 b = uC[i * 4 + 1];
+    d = rmSmin(d, rmCone(p, a.xyz, b.xyz, a.w, b.w), uC[i * 4 + 2].x);
+  }
+  return d;
+}
+// Per-pixel cull: only primitives whose bounding sphere (grown by its blend radius) this ray passes.
+bool rmRayHits(vec3 ro, vec3 rd, vec4 s) { vec3 oc = s.xyz - ro; float tca = dot(oc, rd); return dot(oc, oc) - tca * tca < s.w * s.w; }
+void rmBuildMask(vec3 ro, vec3 rd) {
+  rmMask = 0u; rmActive = 0.0;
+  for (int i = 0; i < NE; i++) if (uCull == 0 || rmRayHits(ro, rd, uE[i * 5 + 4])) { rmMask |= 1u << uint(i); rmActive += 1.0; }
+  for (int i = 0; i < NR; i++) if (uCull == 0 || rmRayHits(ro, rd, uR[i * 5 + 4])) { rmMask |= 1u << uint(NE + i); rmActive += 1.0; }
+  for (int i = 0; i < NC; i++) if (uCull == 0 || rmRayHits(ro, rd, uC[i * 4 + 3])) { rmMask |= 1u << uint(NE + NR + i); rmActive += 1.0; }
+}
+vec3 rmNormalAt(vec3 p) {
+  const vec2 e = vec2(1.0, -1.0) * 0.002;
+  return normalize(e.xyy * rmMap(p + e.xyy) + e.yyx * rmMap(p + e.yyx) + e.yxy * rmMap(p + e.yxy) + e.xxx * rmMap(p + e.xxx));
+}
+void rmRun() {
+  vec3 ro = cameraPosition, rd = normalize(vRmWorld - cameraPosition);
+  float t = length(vRmWorld - cameraPosition), tEnd = t + uTMax;
+  rmBuildMask(ro, rd);
+  rmMiss = true; rmSteps = 0.0;
+  vec3 p = vRmWorld, pBest = p; float dBest = 1e3;
+  if (rmMask != 0u) {
+    for (int i = 0; i < RM_STEPS; i++) {
+      p = ro + rd * t;
+      float d = rmMap(p);
+      rmSteps += 1.0;
+      if (d < dBest) { dBest = d; pBest = p; }
+      if (d < 0.0003 * t) { rmMiss = false; break; }   // about half a pixel at DPR 2
+      t += d * 0.9;                                    // the ellipsoid distance is approximate: step a bit short
+      if (t > tEnd) break;
+    }
+  }
+  // Edge coverage: a ray that just misses still covers part of its pixel. With alpha-to-coverage
+  // (MSAA) that gives the raymarched silhouette the same smooth edge as a mesh.
+  rmCover = rmMiss ? clamp(1.0 - dBest / (uPix * t), 0.0, 1.0) : 1.0;
+  if (rmMiss) p = pBest;
+  // A miss still gets a normal near the silhouette, so screen-space derivatives stay sane there.
+  vec3 n = (!rmMiss || dBest < 0.05) ? rmNormalAt(p) : -rd;
+  rmNormal = normalize(mat3(viewMatrix) * n);
+  rmViewPos = -(viewMatrix * vec4(p, 1.0)).xyz;
+  vec4 clip = uProj * viewMatrix * vec4(p, 1.0);
+  gl_FragDepth = clamp(clip.z / clip.w * 0.5 + 0.5, 0.0, 1.0);
+}
+`;
+function makeRayMaterial(variant = '') {          // '' | 'heat' | 'stats'
+  const m = matte.clone();
+  m.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, rayUniforms);
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vRmWorld;')
+      .replace('#include <project_vertex>', '#include <project_vertex>\n\tvRmWorld = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    const tail = variant === 'stats'
+      ? '\tgl_FragColor = vec4(rmSteps, rmActive * (rmSteps + (rmMiss ? 0.0 : 4.0)), rmMiss ? 0.0 : 1.0, 1.0);'
+      : variant === 'heat'
+        ? '\tfloat hv = rmSteps / 48.0; gl_FragColor = vec4(clamp(vec3(hv * 2.0, 2.0 - abs(hv * 2.0 - 1.5) * 2.0, 1.0 - hv * 2.0), 0.0, 1.0) * (rmMiss ? 0.45 : 1.0), 1.0);'
+        : '\tif (rmCover <= 0.0) discard;\n\tgl_FragColor.a = rmCover;';
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\n' + RAY_GLSL)
+      .replace('void main() {', 'void main() {\n\trmRun();')
+      .replace('#include <normal_fragment_begin>', '#include <normal_fragment_begin>\n\tnormal = rmNormal; nonPerturbedNormal = normal;')
+      .replace('#include <dithering_fragment>', '#include <dithering_fragment>\n' + tail);
+  };
+  m.alphaToCoverage = variant === '';
+  m.customProgramCacheKey = () => 'sdf-ray-' + variant;
+  return m;
+}
+let rayProxy = null, rayPack = null, rayRT = null, rayComp = null;
+function buildRay() {
+  rayPack = makePack();
+  rayProxy = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), makeRayMaterial(RAY.heat ? 'heat' : ''));
+  rayProxy.name = 'rayProxy';
+  rayProxy.frustumCulled = false;
+  scene.add(rayProxy);
+  if (RAY.scale < 1) {
+    // Half-res: march into a small target on layer 1, then a full-screen pass copies colour and
+    // depth up to the screen (tone mapped there), and the rest of the scene draws on top.
+    rayProxy.layers.set(1);
+    for (const l of [key, rimA, rimB, hemi]) l.layers.enableAll();
+    rayRT = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, depthTexture: new THREE.DepthTexture(1, 1) });
+    const mat = new THREE.ShaderMaterial({
+      transparent: true,
+      uniforms: { tC: { value: rayRT.texture }, tD: { value: rayRT.depthTexture } },
+      vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+      fragmentShader: `uniform sampler2D tC; uniform sampler2D tD; varying vec2 vUv;
+        void main() {
+          vec4 c = texture2D(tC, vUv);
+          if (c.a < 0.02) discard;
+          gl_FragColor = vec4(c.rgb / c.a, 1.0);
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
+          gl_FragColor.a = smoothstep(0.0, 1.0, c.a);   // soft, upsampled edge
+          gl_FragDepth = texture2D(tD, vUv).r;
+        }`,
+    });
+    rayComp = { scene: new THREE.Scene(), cam: new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1) };
+    const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
+    quad.frustumCulled = false;
+    rayComp.scene.add(quad);
+  }
+}
+// Every frame: part world matrices -> uniforms, and fit the box to this pose.
+function updateRay() {
+  spin.updateMatrixWorld(true);
+  packShape((n) => boneObj[n].matrixWorld, rayPack);
+  rayUniforms.uE.value.set(rayPack.E); rayUniforms.uR.value.set(rayPack.R); rayUniforms.uC.value.set(rayPack.C);
+  const lo = rayPack.lo.subScalar(0.06), hi = rayPack.hi.addScalar(0.06);
+  rayProxy.position.addVectors(lo, hi).multiplyScalar(0.5);
+  rayProxy.scale.subVectors(hi, lo);
+  rayUniforms.uTMax.value = rayProxy.scale.length();
+  const bufH = renderer.getDrawingBufferSize(tmpSize2).y * (rayRT ? RAY.scale : 1);
+  rayUniforms.uPix.value = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / bufH;
+}
+function renderRayScaled() {
+  const size = renderer.getDrawingBufferSize(tmpSize2);
+  const w = Math.max(1, Math.round(size.x * RAY.scale)), h = Math.max(1, Math.round(size.y * RAY.scale));
+  if (rayRT.width !== w || rayRT.height !== h) rayRT.setSize(w, h);
+  camera.layers.set(1);
+  renderer.setRenderTarget(rayRT);
+  renderer.clear();
+  renderer.render(scene, camera);
+  renderer.setRenderTarget(null);
+  renderer.clear();
+  renderer.render(rayComp.scene, rayComp.cam);
+  camera.layers.set(0);
+  renderer.autoClear = false;
+  renderer.render(scene, camera);
+  renderer.autoClear = true;
+}
+const tmpSize2 = new THREE.Vector2();
+// Measure the real per-pixel cost of this frame: march steps and primitive evaluations, read back.
+function rayStats() {
+  if (!rayProxy) return null;
+  updateRay();
+  const size = renderer.getDrawingBufferSize(new THREE.Vector2());
+  const w = Math.round(size.x * RAY.scale), h = Math.round(size.y * RAY.scale);
+  const rt = new THREE.WebGLRenderTarget(w, h, { type: THREE.FloatType });
+  const keep = rayProxy.material, keepLayers = camera.layers.mask, keepTarget = renderer.getRenderTarget();
+  rayProxy.material = makeRayMaterial('stats');
+  camera.layers.mask = rayProxy.layers.mask;
+  const hidden = [];
+  scene.traverse((o) => { if (o.isMesh && o !== rayProxy && o.visible) { hidden.push(o); o.visible = false; } });
+  renderer.setRenderTarget(rt); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(scene, camera);
+  const px = new Float32Array(w * h * 4);
+  renderer.readRenderTargetPixels(rt, 0, 0, w, h, px);
+  renderer.setRenderTarget(keepTarget);
+  hidden.forEach((o) => { o.visible = true; });
+  rayProxy.material.dispose(); rayProxy.material = keep; camera.layers.mask = keepLayers; rt.dispose();
+  let box = 0, hit = 0, steps = 0, evals = 0, maxSteps = 0, catSteps = 0, catEvals = 0;
+  for (let i = 0; i < w * h; i++) {
+    if (px[i * 4 + 3] < 0.5) continue;
+    box++; steps += px[i * 4]; evals += px[i * 4 + 1]; hit += px[i * 4 + 2];
+    if (px[i * 4 + 2] > 0.5) { catSteps += px[i * 4]; catEvals += px[i * 4 + 1]; }
+    maxSteps = Math.max(maxSteps, px[i * 4]);
+  }
+  return {
+    target: `${w}x${h}`, pixels: w * h, boxPixels: box, catPixels: hit,
+    boxShare: +(box / (w * h)).toFixed(3), catShare: +(hit / (w * h)).toFixed(3),
+    avgSteps: +(steps / box).toFixed(1), maxSteps, avgPrimEvalsPerBoxPixel: +(evals / box).toFixed(1),
+    avgStepsOnCat: +(catSteps / hit).toFixed(1), avgPrimEvalsPerCatPixel: +(catEvals / hit).toFixed(1),
+    primEvalsPerFrame: Math.round(evals), cull: RAY.cull, primitives: NP,
+  };
+}
+
+let sdfStats = null, sdfMesh = null;
+primMeshes.forEach((m) => { m.visible = MODE === 'prim'; });
+if (MODE === 'mesh') ({ mesh: sdfMesh, stats: sdfStats } = buildSkinnedCat());
+if (MODE === 'ray') buildRay();
+
+// ---------------------------------------------------------------------------
+// Poses and clips, authored in code. A real GLB ships the same clip names from
+// Blender (sit, lie, sit_to_lie, add_hop...); the player below does not care
+// where clips come from. A pose is offsets from the rest pose per named part:
+//   p = position offset, r = rotation offset (radians), s = scale.
+// ---------------------------------------------------------------------------
+const REST = {};
+cat.traverse((o) => { if (o.name) REST[o.name] = { p: o.position.clone(), r: o.rotation.clone() }; });
+const TAILS = Array.from({ length: TAIL }, (_, i) => 'tail' + i);
+const PARTS = ['body', 'head', 'earL', 'earR', 'legFL', 'legFR', 'legBL', 'legBR', ...TAILS];
+const TAU = Math.PI * 2;
+
+const legs = (front, back, frontLen = 1, backLen = 1) => ({
+  legFL: { r: [0, 0, front], s: [1, frontLen, 1] }, legFR: { r: [0, 0, front], s: [1, frontLen, 1] },
+  legBL: { r: [0, 0, back], s: [1, backLen, 1] }, legBR: { r: [0, 0, back], s: [1, backLen, 1] },
+});
+const tail = (base, curl) => Object.fromEntries(TAILS.map((n, i) => [n, { r: i === 0 ? base : curl }]));
+
+const POSE = {
+  sit: {
+    body: { p: [-0.1, -0.12, 0], r: [0, 0, 0.6] },
+    head: { p: [0.02, 0, 0], r: [0, 0, -0.5] },
+    ...legs(-0.6, 0.95, 1.1, 0.6),
+    ...tail([0, 0.9, 1.2], [0, 0.25, 0.05]),
+  },
+  lie: {                                            // the loaf
+    body: { p: [0, -0.22, 0], s: [1.04, 0.9, 1.1] },
+    head: { p: [-0.07, -0.1, 0], r: [0, 0, -0.12] },
+    ...legs(-1.45, 1.45, 0.55, 0.55),
+    ...tail([0, 1.1, 0.55], [0, 0.28, 0.13]),
+  },
+  sleep: {
+    body: { p: [0, -0.26, 0], s: [1, 0.86, 1.12] },
+    head: { p: [-0.12, -0.24, 0.08], r: [0.25, 0.55, -0.45] },
+    earL: { r: [0, 0, -0.3] }, earR: { r: [0, 0, -0.3] },
+    ...legs(-1.45, 1.45, 0.55, 0.55),
+    ...tail([0, 1.5, 0.6], [0, 0.42, 0.12]),
+  },
+  stretch: {                                        // front stretch, rear up
+    body: { p: [0, -0.05, 0], r: [0, 0, -0.35] },
+    head: { p: [0.04, -0.02, 0], r: [0, 0, 0.45] },
+    earL: { r: [0, 0, -0.2] }, earR: { r: [0, 0, -0.2] },
+    ...legs(1.25, 0.15, 1.15, 1.05),
+    ...tail([0, 0, -0.55], [0, 0, 0.08]),
+  },
+};
+
+const Z3 = [0, 0, 0], ONE = [1, 1, 1];
+const get = (pose, n) => ({ p: pose[n]?.p || Z3, r: pose[n]?.r || Z3, s: pose[n]?.s || ONE });
+const mix3 = (a, b, u) => a.map((v, i) => v + (b[i] - v) * u);
+const ease = (u) => u * u * (3 - 2 * u);
+const clamp01 = (u) => Math.min(1, Math.max(0, u));
+const rand = ([a, b]) => a + Math.random() * (b - a);
+
+// Blend pose a toward b. With lag > 0 the head and tail trail the body a little
+// (overlapping action), which is most of what makes a transition read as alive.
+function blendPose(a, b, u, lag = 0) {
+  const out = {};
+  for (const n of PARTS) {
+    const d = n.startsWith('tail') ? lag * (1 + Number(n.slice(4)) * 0.15) : n === 'head' ? lag * 0.5 : 0;
+    const v = ease(clamp01((u - d) / (1 - d)));
+    const A = get(a, n), B = get(b, n);
+    out[n] = { p: mix3(A.p, B.p, v), r: mix3(A.r, B.r, v), s: mix3(A.s, B.s, v) };
+  }
+  return out;
+}
+
+// Bake fn(time) -> pose into a clip that drives every part, so any two clips blend cleanly.
+function bake(name, duration, keys, fn) {
+  const times = Array.from({ length: keys + 1 }, (_, k) => (k / keys) * duration);
+  const frames = times.map(fn);
+  const q = new THREE.Quaternion(), e = new THREE.Euler(), tracks = [];
+  for (const n of PARTS) {
+    const rest = REST[n], P = [], R = [], S = [];
+    for (const f of frames) {
+      const { p, r, s } = get(f, n);
+      P.push(rest.p.x + p[0], rest.p.y + p[1], rest.p.z + p[2]);
+      q.setFromEuler(e.set(rest.r.x + r[0], rest.r.y + r[1], rest.r.z + r[2]));
+      R.push(q.x, q.y, q.z, q.w);
+      S.push(...s);
+    }
+    tracks.push(new THREE.VectorKeyframeTrack(n + '.position', times, P),
+      new THREE.QuaternionKeyframeTrack(n + '.quaternion', times, R),
+      new THREE.VectorKeyframeTrack(n + '.scale', times, S));
+  }
+  return new THREE.AnimationClip(name, duration, tracks);
+}
+
+// A hold: the pose plus breathing, a lazy tail and a glance. Frame 0 is what the
+// transitions start from and land on, so seams line up exactly.
+function holdFn(pose, { period, breath, sway, look = 0 }) {
+  return (t) => {
+    const ph = t / period, f = blendPose(pose, pose, 1);
+    const b = (0.5 - 0.5 * Math.cos(TAU * ph)) * breath;
+    f.body.s = [f.body.s[0], f.body.s[1] * (1 + b), f.body.s[2] * (1 + 0.8 * b)];
+    TAILS.forEach((n, i) => { f[n].r = [f[n].r[0], f[n].r[1] + sway * Math.sin(TAU * ph - i * 0.55), f[n].r[2]]; });
+    f.head.r = [f.head.r[0], f.head.r[1] + look * Math.sin(TAU * ph), f.head.r[2]];
+    return f;
+  };
+}
+const HOLD = {
+  sit: { period: 4, fn: holdFn(POSE.sit, { period: 4, breath: 0.025, sway: 0.18, look: 0.3 }) },
+  lie: { period: 4.5, fn: holdFn(POSE.lie, { period: 4.5, breath: 0.03, sway: 0.08, look: 0.12 }) },
+  sleep: { period: 5, fn: holdFn(POSE.sleep, { period: 5, breath: 0.05, sway: 0.03 }) },
+};
+
+// Stretch: push into it, tremble a little, then settle into the sit hold's first frame.
+const STRETCH_LEN = 2.6;
+function stretchFn(t) {
+  if (t >= 1.8) return blendPose(POSE.stretch, HOLD.sit.fn(0), (t - 1.8) / 0.8, 0.2);
+  const f = blendPose(POSE.stretch, POSE.stretch, 1), deep = Math.sin(Math.PI * t / 1.8);
+  f.body.r = [0, 0, -0.35 - 0.12 * deep];
+  f.legFL.r = f.legFR.r = [0, 0, 1.25 + 0.15 * deep + 0.02 * Math.sin(t * 45) * deep];
+  return f;
+}
+const firstFrame = (p) => (p === 'stretch' ? stretchFn(0) : HOLD[p].fn(0));
+
+// Additive overlays (add_*): small reactions that ride on top of whatever pose he is in.
+// Full interrupts (emote_*) are ordinary clips that end on a named pose: see EMOTE_FN below.
+function emoteClip(name, duration, fn) {
+  const clip = bake(name, duration, 24, fn);        // offsets from rest; frame 0 must be rest
+  THREE.AnimationUtils.makeClipAdditive(clip);      // now a delta from frame 0
+  return clip;
+}
+const emoteHop = emoteClip('add_hop', 0.9, (t) => {
+  const u = t / 0.9, up = Math.sin(Math.PI * clamp01((u - 0.15) / 0.6)), crouch = Math.sin(Math.PI * clamp01(u / 0.2));
+  return {
+    body: { p: [0, 0.55 * up - 0.06 * crouch, 0], s: [1, 1 + 0.08 * up - 0.1 * crouch, 1] },
+    tail0: { r: [0, 0, -0.6 * up] }, earL: { r: [0.3 * up, 0, 0] }, earR: { r: [-0.3 * up, 0, 0] },
+  };
+});
+const emoteStartle = emoteClip('add_startle', 0.8, (t) => {
+  const k = Math.sin(Math.PI * t / 0.8);
+  return {
+    head: { p: [-0.06 * k, 0.05 * k, 0], r: [0, 0, 0.25 * k] }, body: { s: [1, 1 + 0.06 * k, 1] },
+    earL: { r: [0, 0, -0.6 * k] }, earR: { r: [0, 0, -0.6 * k] }, tail0: { r: [0, 0, -0.5 * k] },
+  };
+});
+
+// Full emotes (emote_*). Each is fn(t, from, to): `from` is the pose frame he starts in,
+// `to` is frame 0 of the returnTo pose, which the clip must land on exactly so the hold
+// that follows doesn't pop. A Blender model ships one clip per returnTo (emote_wake ends
+// lying down); here they are baked on demand for whatever pair is needed.
+const EMOTE_FN = {
+  emote_wake: { len: 1.5, fn: (t, A, B) => {          // jolted awake: puff, hop, land in the loaf
+    const u = t / 1.5, k = Math.sin(Math.PI * clamp01(u / 0.55)), f = blendPose(A, B, clamp01((u - 0.1) / 0.8), 0.25);
+    f.body.p = [f.body.p[0], f.body.p[1] + 0.45 * k, f.body.p[2]];
+    f.body.s = [f.body.s[0], f.body.s[1] * (1 + 0.12 * k), f.body.s[2] * (1 + 0.1 * k)];
+    f.earL.r = f.earR.r = [0, 0, -0.7 * k];
+    f.tail0.r = [f.tail0.r[0], f.tail0.r[1], f.tail0.r[2] - 0.9 * k];
+    return f;
+  } },
+  emote_spin: { len: 1.3, fn: (t, A, B) => {          // a happy hop with a full turn
+    const u = t / 1.3, f = blendPose(A, B, u, 0.15), air = Math.sin(Math.PI * clamp01((u - 0.1) / 0.75));
+    f.body.p = [f.body.p[0], f.body.p[1] + 0.5 * air, f.body.p[2]];
+    f.body.r = [f.body.r[0], f.body.r[1] + TAU * ease(clamp01((u - 0.1) / 0.75)), f.body.r[2]];
+    f.legFL.r = f.legFR.r = [0, 0, f.legFL.r[2] + 0.5 * air];
+    return f;
+  } },
+  emote_flinch: { len: 2.0, fn: (t, A, B) => {        // ducks flat, looks up, shudders, sits back up
+    const u = t / 2.0, down = Math.sin(Math.PI * clamp01(u / 0.8)), f = blendPose(A, B, clamp01((u - 0.55) / 0.45), 0.2);
+    const duck = blendPose(f, POSE.lie, down * 0.8);
+    duck.head.r = [duck.head.r[0], duck.head.r[1], duck.head.r[2] + 0.45 * down];
+    duck.earL.r = duck.earR.r = [0, 0, -0.8 * down];
+    duck.body.r = [duck.body.r[0] + 0.06 * down * Math.sin(t * 40), duck.body.r[1], duck.body.r[2]];
+    return duck;
+  } },
+};
+
+const cyc = CONFIG.cycle;
+const clips = [
+  ...Object.entries(HOLD).map(([name, h]) => bake(name, h.period, 32, h.fn)),
+  bake('stretch', STRETCH_LEN, 52, stretchFn),
+  ...Object.entries(cyc.transitions).map(([name, len]) => {
+    const [from, to] = name.split('_to_'), A = firstFrame(from), B = firstFrame(to);
+    return bake(name, len, 24, (t) => blendPose(A, B, t / len, 0.2));
+  }),
+  emoteHop, emoteStartle,
+];
+
+// ---------------------------------------------------------------------------
+// Pose cycle player. hold -> (wait for the loop seam) -> transition -> hold.
+// A button request cuts in at once and routes through the graph if needed
+// (sleep -> lie -> sit). A pose pair with no transition clip just crossfades.
+// ---------------------------------------------------------------------------
+const mixer = new THREE.AnimationMixer(cat);
+const actions = Object.fromEntries(clips.map((c) => [c.name, mixer.clipAction(c)]));
+for (const [name, a] of Object.entries(actions)) {
+  if (name in HOLD) continue;
+  a.setLoop(THREE.LoopOnce, 1);
+  a.clampWhenFinished = !name.startsWith('add_');   // one-shots hold their last frame until the next clip takes over
+}
+
+let pose = cyc.start;        // the pose he is in (or leaving)
+let target = null;           // the pose a transition is heading to
+let phase = 'hold';          // 'hold' | 'moving' | 'oneshot' | 'emote'
+let route = [];              // poses still to pass through on the way to a requested one
+let goal = null;             // the pose a button asked for, kept across emotes
+let emoteNow = null;         // the full emote playing, and the pose it lands in
+let emoteReturn = null;
+const queue = [];            // full emotes waiting for a transition or emote to finish
+const lastFired = {};        // emote name -> time, for cooldowns
+const emoteLog = [];         // what fired, for checks and the debug readout
+let holdUntil = Infinity;
+let waitingForSeam = false;
+let playing = null;
+let auto = !reducedMotion;
+
+function play(name, fade) {
+  const a = actions[name];
+  if (playing && playing !== a) playing.fadeOut(fade);
+  a.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).fadeIn(fade).play();
+  playing = a;
+}
+function enter(p, fade) {
+  pose = p; target = null; waitingForSeam = false;
+  const spec = cyc.poses[p];
+  phase = spec.oneShot ? 'oneshot' : 'hold';
+  play(p, fade);
+  if (!spec.oneShot) holdUntil = timer.getElapsed() + rand(spec.hold);
+  syncButtons();
+}
+function moveTo(next, fade) {
+  waitingForSeam = false;
+  const clip = `${pose}_to_${next}`;
+  if (!actions[clip]) return enter(next, cyc.requestFade);
+  phase = 'moving'; target = next;
+  play(clip, fade);
+  syncButtons();
+}
+function neighbours(p) {
+  const spec = cyc.poses[p];
+  if (spec.oneShot) return [spec.then];
+  return Object.keys(cyc.transitions).filter((n) => n.startsWith(p + '_to_')).map((n) => n.split('_to_')[1]);
+}
+function pathTo(from, to) {                         // breadth-first: fewest clips
+  const prev = { [from]: null }, queue = [from];
+  while (queue.length) {
+    const p = queue.shift();
+    if (p === to) break;
+    for (const n of neighbours(p)) if (!(n in prev)) { prev[n] = p; queue.push(n); }
+  }
+  if (!(to in prev)) return [to];                   // unreachable: crossfade straight there
+  const path = [];
+  for (let p = to; p !== from; p = prev[p]) path.unshift(p);
+  return path;
+}
+function request(to) {
+  if (!cyc.poses[to]) return;
+  goal = to;
+  if (phase === 'hold') {
+    if (to === pose) { goal = null; return; }
+    route = pathTo(pose, to);
+    moveTo(route.shift(), cyc.requestFade);
+  } else {
+    route = pathTo(landingPose(), to);              // carry on after the current clip
+  }
+}
+// The pose he will be in once the current clip ends.
+function landingPose() {
+  if (phase === 'moving') return target;
+  if (phase === 'emote') return emoteReturn;
+  if (phase === 'oneshot') return cyc.poses[pose].then;
+  return pose;
+}
+// He has just arrived in `pose`: a waiting emote goes first, then any requested pose, else hold.
+function land() {
+  if (queue.length) return startEmote(queue.shift());
+  route = goal && goal !== pose ? pathTo(pose, goal) : [];
+  if (!route.length) goal = null;
+  route.length ? moveTo(route.shift(), cyc.fade) : enter(pose, cyc.fade);
+}
+function pickWeighted(weights) {
+  const options = Object.entries(weights);
+  let r = Math.random() * options.reduce((sum, [, w]) => sum + w, 0);
+  for (const [name, w] of options) if ((r -= w) <= 0) return name;
+  return options[0][0];
+}
+const pickNext = (p) => pickWeighted(cyc.poses[p].next || {});
+
+// Play an additive overlay clip (add_*) on top of whatever is playing.
+function emote(clipName) {
+  const a = actions[clipName];
+  if (!a) return;
+  a.reset().setEffectiveWeight(1).play();
+  if (phase === 'hold') holdUntil += a.getClip().duration;
+}
+
+// A site action (tap, butter, butterman...) -> the emote CONFIG.cycle.actions picks for the
+// pose he is in, or the pose he is about to land in. Returns the emote name, or null.
+function trigger(action) {
+  const map = cyc.actions[action];
+  if (!map) return null;
+  const choice = map[landingPose()] ?? map.default;
+  if (!choice) return null;
+  return playEmote(typeof choice === 'string' ? choice : pickWeighted(choice), action);
+}
+function playEmote(name, why = name) {
+  const spec = cyc.emotes[name];
+  if (!spec) return null;
+  const now = timer.getElapsed();
+  if (spec.cooldown && now - (lastFired[name] ?? -Infinity) < spec.cooldown) {
+    // On cooldown: fall back to a hop so a tap still answers.
+    return name === 'hop' ? null : playEmote('hop', why);
+  }
+  lastFired[name] = now;
+  if (spec.overlay) {
+    emote(spec.clip);
+    emoteLog.push(`${why}: ${name} (overlay, in ${phase})`);
+    return name;
+  }
+  if (phase === 'moving' || phase === 'emote') {
+    if (queue.length >= cyc.queueMax) queue[queue.length - 1] = name;   // newest wins the last slot
+    else queue.push(name);
+    emoteLog.push(`${why}: ${name} (queued behind ${phase === 'moving' ? pose + '_to_' + target : emoteNow})`);
+    return name;
+  }
+  emoteLog.push(`${why}: ${name} (now, from ${phase} ${pose})`);
+  startEmote(name);
+  return name;
+}
+// Build (once) the clip for this emote from this pose to its returnTo pose.
+function emoteAction(clipName, from, to) {
+  const key = `${clipName}@${from}>${to}`;
+  if (!actions[key]) {
+    const { len, fn } = EMOTE_FN[clipName], A = firstFrame(from), B = firstFrame(to);
+    const a = mixer.clipAction(bake(key, len, 48, (t) => fn(t, A, B)));
+    a.setLoop(THREE.LoopOnce, 1);
+    a.clampWhenFinished = true;
+    actions[key] = a;
+  }
+  return key;
+}
+function startEmote(name) {
+  const spec = cyc.emotes[name], from = pose;
+  let to = spec.returnTo === 'same' ? from : spec.returnTo;
+  if (cyc.poses[to]?.oneShot) to = cyc.poses[to].then;   // never return into the middle of a stretch
+  waitingForSeam = false;
+  phase = 'emote'; emoteNow = name; emoteReturn = to; target = null;
+  play(emoteAction(spec.clip, from, to), cyc.emoteFade);
+  syncButtons();
+}
+
+mixer.addEventListener('finished', (e) => {
+  if (e.action !== playing) return;                 // overlays and stale clips
+  if (phase === 'moving') pose = target;
+  else if (phase === 'oneshot') pose = cyc.poses[pose].then;   // stretch ends seated
+  else if (phase === 'emote') { pose = emoteReturn; emoteNow = emoteReturn = null; }
+  else return;
+  land();
+});
+// Auto moves wait for the hold to come round to frame 0, which is exactly
+// where the transition clip starts, so nothing pops.
+mixer.addEventListener('loop', (e) => {
+  if (waitingForSeam && auto && phase === 'hold' && e.action === playing) moveTo(pickNext(pose), cyc.fade);
+});
+
+// ---------------------------------------------------------------------------
+// Butter. A quick drop-in pop, separate from the mixer.
+// ---------------------------------------------------------------------------
+let butterAnim = null;
+function setButter(on, action = 'butter') {
+  butter.visible = on;
+  butterAnim = on ? { t: 0 } : null;
+  if (on) trigger(action);
+  syncButtons();
+}
+
+// ---------------------------------------------------------------------------
+// Turntable: a sideways drag spins the model (not the camera) around the
+// vertical axis, so the lights stay put. Up-down swipes are left to the page
+// (touch-action: pan-y), which cancels the press when it takes them.
+// A press that barely moves is a tap; anything more is a drag with inertia.
+// ---------------------------------------------------------------------------
+let yaw = CONFIG.rotate.homeYaw;
+let faceYaw = null;                        // set by a scene (Butterman) to hold him at an angle
+const vel = { x: 0, y: 0 };                // radians per second (x = spin; y unused, kept for checks)
+let press = null;                          // { id, x, y, lastX, lastY, lastT, moved }
+let lastTouch = performance.now();
+
+function rotateBy(dYaw) {
+  yaw += dYaw;
+  spin.rotation.set(0, yaw, 0);
+}
+rotateBy(0);
+// Ease toward `target` by the shortest way round (he may have spun several turns).
+function easeYawTo(target, speed, dt) {
+  const d = THREE.MathUtils.euclideanModulo(target - yaw + Math.PI, Math.PI * 2) - Math.PI;
+  rotateBy(d * (1 - Math.exp(-speed * dt)));
+  return Math.abs(d);
+}
+// For scenes: hold him facing `angle` (radians), or null to hand control back.
+function faceTo(angle) { faceYaw = angle; vel.x = 0; }
+
+canvas.addEventListener('pointerdown', (e) => {
+  if (press) return;                       // one finger drives; ignore the rest
+  press = { id: e.pointerId, x: e.clientX, y: e.clientY, lastX: e.clientX, lastY: e.clientY, t0: e.timeStamp, lastT: e.timeStamp, moved: false };
+  vel.x = vel.y = 0;
+  try { canvas.setPointerCapture(e.pointerId); } catch { /* synthetic events have no capture target */ }
+});
+canvas.addEventListener('pointermove', (e) => {
+  if (!press || e.pointerId !== press.id) return;
+  const dx = e.clientX - press.lastX, dy = e.clientY - press.lastY;
+  if (!press.moved && Math.hypot(e.clientX - press.x, e.clientY - press.y) > CONFIG.rotate.tapSlop) {
+    press.moved = true;
+    canvas.classList.add('dragging');
+  }
+  if (press.moved) {
+    const k = CONFIG.rotate.radiansPerPixel;
+    if (faceYaw === null) rotateBy(dx * k);
+    const dt = Math.max((e.timeStamp - press.lastT) / 1000, 1 / 240);
+    vel.x = 0.6 * vel.x + 0.4 * (dx * k / dt);   // smoothed flick speed
+  }
+  press.lastX = e.clientX; press.lastY = e.clientY; press.lastT = e.timeStamp;
+  lastTouch = performance.now();
+});
+function endPress(e) {
+  if (!press || e.pointerId !== press.id) return;
+  // Taps fire on pointerup: that counts as a user gesture on phones, so the
+  // very first tap can unlock audio and play a sound at once.
+  if (!press.moved && e.type === 'pointerup' && e.timeStamp - press.t0 < CONFIG.rotate.tapMs) tap(e.clientX, e.clientY);
+  if (e.timeStamp - press.lastT > 100) vel.x = vel.y = 0;  // held still before letting go: no flick
+  canvas.classList.remove('dragging');
+  press = null;
+  lastTouch = performance.now();
+}
+canvas.addEventListener('pointerup', endPress);
+canvas.addEventListener('pointercancel', endPress);
+
+// ---------------------------------------------------------------------------
+// Tap: raycast against the hit area, then a random sound and a little squash.
+// ---------------------------------------------------------------------------
+const raycaster = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+let squash = null;
+let taps = 0;
+
+function tap(x, y) {
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
+  raycaster.setFromCamera(ndc, camera);
+  if (raycaster.intersectObject(hitArea, false).length === 0) return false;
+  taps++;
+  playRandomSound();
+  squash = { t: 0 };
+  trigger('tap');
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// Sound: Web Audio. Buffers are decoded once; each play is a cheap new source,
+// so taps can overlap with no lag. A shuffle bag avoids the same sound twice.
+// ---------------------------------------------------------------------------
+let audioCtx = null;
+let pool = [];
+let bag = [];
+let lastPlayed = -1;
+
+// iPhone silent switch (Aaron, decision e1107-37): tap sounds respect it. 'ambient' is what iOS
+// does by default for Web Audio; setting it says so on purpose. Butterman sets 'playback' for the
+// length of the gag (so it plays on silent) and puts this back afterwards. Safari-only API.
+function setAudioSession(type) {
+  try { if (navigator.audioSession) navigator.audioSession.type = type; } catch { /* not supported */ }
+}
+function unlockAudio() {
+  if (!audioCtx) setAudioSession('ambient');
+  if (!audioCtx) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    audioCtx = new Ctx();
+    pool = synthPlaceholders(audioCtx);
+    if (CONFIG.sounds.length) loadSounds(CONFIG.sounds);
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+async function loadSounds(urls) {
+  const decoded = await Promise.all(urls.map(async (u) => {
+    try { return await audioCtx.decodeAudioData(await (await fetch(u)).arrayBuffer()); }
+    catch { console.warn('sound failed to load:', u); return null; }
+  }));
+  const ok = decoded.filter(Boolean);
+  if (ok.length) { pool = ok; bag = []; }
+}
+function playRandomSound() {
+  const ctx = unlockAudio();
+  if (!ctx || !pool.length) return;
+  if (!bag.length) {
+    bag = pool.map((_, i) => i).sort(() => Math.random() - 0.5);
+    if (bag.length > 1 && bag[bag.length - 1] === lastPlayed) bag.unshift(bag.pop());
+  }
+  const i = bag.pop();
+  lastPlayed = i;
+  const src = ctx.createBufferSource();
+  src.buffer = pool[i];
+  src.playbackRate.value = 0.94 + Math.random() * 0.12;   // a little variety
+  const gain = ctx.createGain();
+  gain.gain.value = CONFIG.soundVolume;
+  src.connect(gain).connect(ctx.destination);
+  src.start();
+}
+// Placeholder blips computed straight into buffers: mrrp, boing, squeak, bloop.
+function synthPlaceholders(ctx) {
+  const make = (seconds, f) => {
+    const n = Math.floor(seconds * ctx.sampleRate), buf = ctx.createBuffer(1, n, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    let phase = 0;
+    for (let s = 0; s < n; s++) {
+      const t = s / ctx.sampleRate, [freq, amp] = f(t, t / seconds);
+      phase += TAU * freq / ctx.sampleRate;
+      d[s] = Math.sin(phase) * amp;
+    }
+    return buf;
+  };
+  const env = (u, a = 0.05) => Math.min(1, u / a) * (1 - u) ** 1.5;
+  return [
+    make(0.38, (t, u) => [520 + 380 * Math.sin(Math.PI * u) + 18 * Math.sin(t * 60), 0.6 * env(u)]),
+    make(0.6, (t, u) => [190 + 90 * Math.sin(t * 38) * (1 - u), 0.7 * env(u, 0.02)]),
+    make(0.16, (t, u) => [1200 + 1100 * u, 0.4 * env(u, 0.1)]),
+    make(0.3, (t, u) => [700 * (1 - u) + 160, 0.6 * env(u, 0.03)]),
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// UI wiring
+// ---------------------------------------------------------------------------
+const buttons = [...document.querySelectorAll('.controls button[data-pose]')];
+const butterBtn = document.getElementById('butter');
+const autoBtn = document.getElementById('auto');
+function syncButtons() {
+  const showing = landingPose();
+  for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.pose === showing));
+  butterBtn.setAttribute('aria-pressed', String(butter.visible));
+  autoBtn.setAttribute('aria-pressed', String(auto));
+}
+for (const b of buttons) b.addEventListener('click', () => request(b.dataset.pose));
+document.getElementById('hop').addEventListener('click', () => playEmote('hop', 'hop button'));
+butterBtn.addEventListener('click', () => setButter(!butter.visible));
+// Stand-in for the Butterman gag's end (prototypes/butterman/): butter lands and he flinches.
+document.getElementById('butterman').addEventListener('click', () => setButter(true, 'butterman'));
+autoBtn.addEventListener('click', () => { auto = !auto; syncButtons(); });
+
+// ---------------------------------------------------------------------------
+// Sizing: keep the whole cat in frame on wide screens and tall phones.
+// ---------------------------------------------------------------------------
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  const halfFov = THREE.MathUtils.degToRad(camera.fov / 2);
+  const dist = Math.max(6.4, 1.7 / (Math.tan(halfFov) * camera.aspect));
+  camera.position.set(0, 0.35, dist);
+  camera.lookAt(0, -0.05, 0);
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+resize();
+
+// ---------------------------------------------------------------------------
+// Loop
+// ---------------------------------------------------------------------------
+const timer = new THREE.Timer();
+timer.connect(document);              // pauses cleanly while the tab is hidden
+const debugEl = document.getElementById('debug');
+const showDebug = params.has('debug');
+debugEl.hidden = !showDebug;
+let frameMs = 16.7;
+const tmpV = new THREE.Vector3();
+const tmpSize = new THREE.Vector2();
+
+const freezeAt = params.has('t') ? Number(params.get('t')) : null;
+if (freezeAt !== null) auto = false;
+
+enter(cyc.poses[params.get('pose')] ? params.get('pose') : cyc.start, 0);
+syncButtons();
+if (params.get('butter') === '1') setButter(true);
+
+// ---------------------------------------------------------------------------
+// Performance: the ?perf=1 readout and the adaptive pixel ratio. Measures real
+// time between frames (not the clamped animation dt). Runs whether or not the
+// readout is shown, so phones get the fallback either way.
+// ---------------------------------------------------------------------------
+const P = CONFIG.perf;
+const perfEl = document.getElementById('perf');
+const showPerf = opt('perf') === '1';
+perfEl.hidden = !showPerf;
+const burnMs = Number(opt('burn')) || 0;
+const perf = { capped: false, device: (navigator.userAgent.match(/(iPhone|iPad|Android)[^;)]*[;)]?\s*[^;)]*/)?.[0] || navigator.platform || '').slice(0, 40), last: 0, start: 0, frames: 0, worst: 0, low: 0, high: 0, fps: 0, avg: 0, worstMs: 0, ceiling: P.maxDpr, lastDir: 0, events: [], gpu: '' };
+if (showPerf) {
+  const gl = renderer.getContext();
+  perf.gpu = String(gl.getParameter(gl.RENDERER));
+  if (/^WebKit WebGL$/.test(perf.gpu)) {                // Safari hides it; the debug extension may not
+    const ext = gl.getExtension('WEBGL_debug_renderer_info');
+    if (ext) perf.gpu = String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL));
+  }
+}
+function setDpr(v, why) {
+  dpr = Math.round(v * 100) / 100;
+  renderer.setPixelRatio(dpr);
+  perf.events.push(`${timer.getElapsed().toFixed(0)}s ${why} -> ${dpr}`);
+  if (perf.events.length > 3) perf.events.shift();
+}
+function perfFrame(now) {
+  const dt = now - perf.last;
+  perf.last = now;
+  if (dt <= 0 || dt > 1000 || now < P.warmupMs) { perf.start = now; perf.frames = 0; perf.worst = 0; return; }   // hidden tab or startup
+  perf.frames++;
+  perf.worst = Math.max(perf.worst, dt);
+  if (now - perf.start < P.sampleMs) return;
+  perf.fps = (perf.frames * 1000) / (now - perf.start);
+  perf.avg = (now - perf.start) / perf.frames;
+  perf.worstMs = perf.worst;
+  perf.start = now; perf.frames = 0; perf.worst = 0;
+  if (pinnedDpr) return;
+  // iPhone Low Power Mode (and some Android battery savers) cap the page at a steady 30 fps.
+  // That is a cap, not a struggling GPU: an even 33 ms with no spikes. Don't shed pixels for it.
+  perf.capped = Math.abs(perf.avg - 33.3) < 2 && perf.worstMs < 42;
+  if (perf.capped) { perf.low = perf.high = 0; return; }
+  if (perf.fps < P.lowFps) { perf.low++; perf.high = 0; }
+  else if (perf.fps >= P.highFps) { perf.high++; perf.low = 0; }
+  else { perf.low = perf.high = 0; }
+  if (perf.low >= P.lowWindows && dpr > P.minDpr) {
+    if (perf.lastDir > 0) perf.ceiling = Math.max(P.minDpr, dpr - P.step);   // the last step up was one too many
+    setDpr(Math.max(P.minDpr, dpr - P.step), `slow (${perf.fps.toFixed(0)} fps)`);
+    perf.low = 0; perf.lastDir = -1;
+  } else if (perf.high >= P.highWindows && dpr < Math.min(perf.ceiling, deviceDpr)) {
+    setDpr(Math.min(perf.ceiling, deviceDpr, dpr + P.step), `smooth (${perf.fps.toFixed(0)} fps)`);
+    perf.high = 0; perf.lastDir = 1;
+  }
+}
+document.addEventListener('visibilitychange', () => { perf.last = 0; });
+
+renderer.setAnimationLoop((now) => {
+  perfFrame(now);
+  if (burnMs) { const until = performance.now() + burnMs; while (performance.now() < until); }   // fake a slow phone
+  timer.update(now);
+  let dt = Math.min(timer.getDelta(), 0.1);     // a long stall never causes a big jump
+  let t = timer.getElapsed();
+  if (freezeAt !== null) { mixer.setTime(freezeAt); dt = 0; t = freezeAt; }
+  frameMs += (dt * 1000 - frameMs) * 0.05;
+
+  // A scene's angle wins; else flick inertia; else the optional drift back to face front.
+  const R = CONFIG.rotate;
+  if (faceYaw !== null) easeYawTo(faceYaw, 4, dt);
+  else if (!press) {
+    if (Math.abs(vel.x) > 1e-3) {
+      rotateBy(vel.x * dt);
+      vel.x *= Math.exp(-R.damping * dt);
+    } else if (R.returnHome && performance.now() - lastTouch > R.returnDelay * 1000) {
+      easeYawTo(R.homeYaw, R.returnSpeed, dt);
+    }
+  }
+
+  if (auto && phase === 'hold' && t > holdUntil) waitingForSeam = true;
+  mixer.update(dt);
+
+  // Float bob (smaller when the visitor prefers less motion).
+  const amp = CONFIG.float.height * (reducedMotion ? 0.3 : 1);
+  floater.position.y = Math.sin(t * CONFIG.float.speed) * amp;
+  floater.rotation.z = Math.sin(t * CONFIG.float.speed * 0.5) * 0.03;
+
+  // Tap squash: a quick springy wobble on a group above the mixer root.
+  if (squash) {
+    squash.t += dt;
+    const s = Math.exp(-squash.t * 7) * Math.sin(squash.t * 28) * 0.14;
+    react.scale.set(1 + s, 1 - s, 1 + s);
+    if (squash.t > 0.8) { react.scale.set(1, 1, 1); squash = null; }
+  }
+
+  // Butter drop-in: falls a little and overshoots its landing.
+  if (butterAnim && butterAnim.t < 0.5) {
+    butterAnim.t += freezeAt !== null ? 0.5 : dt;   // a frozen frame shows the butter landed
+    const u = Math.min(butterAnim.t / 0.5, 1);
+    const bounce = 1 + Math.sin(u * Math.PI) * 0.25 * (1 - u);
+    butter.position.y = 0.34 + (1 - u) ** 2 * 0.6;
+    butter.scale.set(bounce, 2 - bounce, bounce);
+  }
+
+  // Shadow follows his height: higher = smaller and fainter.
+  body.getWorldPosition(tmpV);
+  const lift = THREE.MathUtils.clamp(tmpV.y + 0.1, 0, 2);
+  shadow.scale.setScalar(1 - lift * 0.25);
+  shadow.material.opacity = 1 - lift * 0.35;
+
+  if (MODE === 'ray') updateRay();
+  if (rayRT) renderRayScaled();
+  else renderer.render(scene, camera);
+
+  if (showPerf) {
+    const info = renderer.info.render, size = renderer.getDrawingBufferSize(tmpSize);
+    perfEl.textContent =
+      `fps     ${perf.fps ? perf.fps.toFixed(1) : '…'}\n` +
+      `frame   ${perf.avg.toFixed(1)} ms avg, ${perf.worstMs.toFixed(1)} worst\n` +
+      `calls   ${info.calls}   tris ${(info.triangles / 1000).toFixed(1)}k\n` +
+      `dpr     ${dpr} of ${deviceDpr} ${pinnedDpr ? '(pinned)' : `(auto ${P.minDpr}-${Math.min(perf.ceiling, deviceDpr)})`}\n` +
+      `canvas  ${size.x}×${size.y}\n` +
+      `gpu     ${perf.gpu.slice(0, 40)}\n` +
+      `mode    ${MODE}${MODE === 'mesh' && sdfStats ? ` ${(sdfStats.tris / 1000).toFixed(1)}k tris, ${sdfStats.bones} bones, built in ${sdfStats.genMs} ms` : ''}${MODE === 'ray' ? ` ${NP} prims, scale ${RAY.scale}, cull ${RAY.cull ? 'on' : 'off'}` : ''}\n` +
+      `device  ${perf.device}${perf.capped ? '\nnote    steady 30 fps: Low Power Mode?' : ''}` +
+      (perf.events.length ? '\n' + perf.events.join('\n') : '');
+  }
+
+  if (showDebug) {
+    const q = spin.quaternion;
+    debugEl.textContent =
+      `pose    ${phase} ${phase === 'emote' ? emoteNow + ' -> ' + emoteReturn : pose}${target ? ' -> ' + target : ''}${route.length ? ' (then ' + route.join(', ') + ')' : ''}\n` +
+      `queue   ${queue.join(', ') || '-'}\n` +
+      `next in ${phase === 'hold' && auto ? Math.max(0, holdUntil - t).toFixed(1) + ' s' + (waitingForSeam ? ' (at seam)' : '') : '-'}\nbutter  ${butter.visible}\nauto    ${auto}\ntaps    ${taps}\n` +
+      `quat    ${q.x.toFixed(2)} ${q.y.toFixed(2)} ${q.z.toFixed(2)} ${q.w.toFixed(2)}\n` +
+      `frame   ${frameMs.toFixed(1)} ms\ncalls   ${renderer.info.render.calls}  tris ${renderer.info.render.triangles}`;
+  }
+});
+
+// A small handle for automated checks and console play.
+window.catViewer = {
+  request, emote, trigger, playEmote, setButter, rotateBy, faceTo, tap, config: CONFIG,
+  get yaw() { return +yaw.toFixed(3); },
+  get pose() { return pose; },
+  get phase() { return phase; },
+  get currentEmote() { return emoteNow; },
+  get queue() { return [...queue]; },
+  get emoteLog() { return [...emoteLog]; },
+  get perf() { return { fps: +perf.fps.toFixed(1), dpr, ceiling: perf.ceiling, events: [...perf.events], gpu: perf.gpu }; },
+  get butter() { return butter.visible; },
+  get quaternion() { return spin.quaternion.toArray().map((v) => +v.toFixed(3)); },
+  get taps() { return taps; },
+  get sounds() { return pool.length; },
+  set auto(v) { auto = v; syncButtons(); },
+  // SDF cat
+  mode: MODE,
+  get sdf() { return sdfStats; },
+  rayStats,
+  // World positions of the skinned mesh's vertices `ids` in the current pose (CPU skinning).
+  skinnedPositions(ids) {
+    if (!sdfMesh) return null;
+    spin.updateMatrixWorld(true);
+    sdfMesh.skeleton.update();
+    const v = new THREE.Vector3();
+    return ids.map((i) => sdfMesh.getVertexPosition(i, v).applyMatrix4(sdfMesh.matrixWorld).toArray());
+  },
+  // Bake the generated cat, its bones and every clip into one GLB (proof that the site could ship
+  // a file instead of the generator). Returns the byte size; download=true also saves it.
+  async exportGLB(download = false) {
+    if (!sdfMesh) return null;
+    const { GLTFExporter } = await import('three/addons/exporters/GLTFExporter.js');
+    // onlyVisible (the default) leaves out the hidden primitives, hit area and butter.
+    const glb = await new GLTFExporter().parseAsync(cat, { binary: true, animations: clips.filter((c) => !c.name.startsWith('add_')) });
+    if (download) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([glb], { type: 'model/gltf-binary' }));
+      a.download = 'sdf-cat.glb'; a.click();
+    }
+    return glb.byteLength;
+  },
+};
+</script>
+</body>
+</html>

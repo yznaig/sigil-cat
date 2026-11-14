@@ -1,0 +1,141 @@
+{
+  "name": "bulb",
+  "variant": null,
+  "bounds": {
+    "min": [
+      -0.05999999865889549,
+      -0.004999999888241291,
+      -0.05999999865889549
+    ],
+    "max": [
+      0.05999999865889549,
+      0.1899999976158142,
+      0.05999999865889549
+    ]
+  },
+  "triangles": 5872,
+  "meshes": 5,
+  "materials": 5,
+  "textures": [
+    [
+      256,
+      256
+    ]
+  ],
+  "geometryBytes": 563712,
+  "finite": true,
+  "parts": [
+    {
+      "name": "bulb",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "physics": {
+        "units": "cat-height units; play mass, not kg",
+        "mass": 0.06,
+        "colliders": [
+          {
+            "type": "sphere",
+            "radius": 0.061,
+            "position": [
+              0,
+              0.123,
+              0
+            ]
+          },
+          {
+            "type": "cylinder",
+            "radius": 0.024,
+            "height": 0.06,
+            "position": [
+              0,
+              0.03,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "anchors": {
+          "socket": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  ],
+  "physics": {
+    "units": "cat-height units; play mass, not kg",
+    "mass": 0.06,
+    "colliders": [
+      {
+        "type": "sphere",
+        "radius": 0.061,
+        "position": [
+          0,
+          0.123,
+          0
+        ]
+      },
+      {
+        "type": "cylinder",
+        "radius": 0.024,
+        "height": 0.06,
+        "position": [
+          0,
+          0.03,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "anchors": {
+      "socket": [
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "render": [
+    {
+      "frame": 35,
+      "calls": 12,
+      "triangles": 12770,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 36,
+      "calls": 12,
+      "triangles": 12770,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 37,
+      "calls": 12,
+      "triangles": 12770,
+      "points": 0,
+      "lines": 0
+    }
+  ],
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "errors": []
+}

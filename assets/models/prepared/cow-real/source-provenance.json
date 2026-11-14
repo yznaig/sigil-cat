@@ -1,0 +1,58 @@
+{
+  "title": "Farm Cow Animated Dairy cattle",
+  "author": "Rukh3D",
+  "authorURL": "https://sketchfab.com/rukh3d",
+  "sourceURL": "https://sketchfab.com/3d-models/farm-cow-animated-dairy-cattle-0e780cb5ab6d457198ded7d4e191a03e",
+  "license": "CC BY 4.0",
+  "licenseURL": "https://creativecommons.org/licenses/by/4.0/",
+  "verifiedOn": "2026-11-11",
+  "pageMetadataURL": "https://api.sketchfab.com/v3/models/0e780cb5ab6d457198ded7d4e191a03e",
+  "pageLicense": {
+    "uri": "https://api.sketchfab.com/v3/licenses/322a749bcfa841b29dff1e8a1bb74b0b",
+    "label": "CC Attribution",
+    "fullName": "Creative Commons Attribution",
+    "requirements": "Author must be credited. Commercial use is allowed.",
+    "url": "http://creativecommons.org/licenses/by/4.0/",
+    "slug": "by"
+  },
+  "redistributionRevision": "da7af50bca493e2208e1ba06c18d30e61d486a1c",
+  "sourceFiles": [
+    {
+      "path": "scene.gltf",
+      "url": "https://huggingface.co/datasets/fernandotonon/QtMeshEditor-motion-corpus/resolve/da7af50bca493e2208e1ba06c18d30e61d486a1c/raw/sketchfab/Farm_Cow_Animated_Dairy_cattle_0e780cb5/scene.gltf",
+      "bytes": 252981,
+      "sha256": "38f956ff734bf832c815ddb9f15ba1118fc0ba6e9c6f9b0fb27abca093d9b6dd"
+    },
+    {
+      "path": "scene.bin",
+      "url": "https://huggingface.co/datasets/fernandotonon/QtMeshEditor-motion-corpus/resolve/da7af50bca493e2208e1ba06c18d30e61d486a1c/raw/sketchfab/Farm_Cow_Animated_Dairy_cattle_0e780cb5/scene.bin",
+      "bytes": 780260,
+      "sha256": "6e5fe9f94f289df6342055f37cc07cfc075a4585f66def4f72ca57491e01522a"
+    },
+    {
+      "path": "textures/material_baseColor.jpeg",
+      "url": "https://huggingface.co/datasets/fernandotonon/QtMeshEditor-motion-corpus/resolve/da7af50bca493e2208e1ba06c18d30e61d486a1c/raw/sketchfab/Farm_Cow_Animated_Dairy_cattle_0e780cb5/textures/material_baseColor.jpeg",
+      "bytes": 71103,
+      "sha256": "95362f402b3a17031914301f5edc7064400a59a36de5f904fea4d724a0d4bb38"
+    },
+    {
+      "path": "textures/eyes_baseColor.jpeg",
+      "url": "https://huggingface.co/datasets/fernandotonon/QtMeshEditor-motion-corpus/resolve/da7af50bca493e2208e1ba06c18d30e61d486a1c/raw/sketchfab/Farm_Cow_Animated_Dairy_cattle_0e780cb5/textures/eyes_baseColor.jpeg",
+      "bytes": 5041,
+      "sha256": "c89247d9f3be538ee8012f0de8892f0869ea7f654eee63df3aea571cf73b9358"
+    },
+    {
+      "path": "license.txt",
+      "url": "https://huggingface.co/datasets/fernandotonon/QtMeshEditor-motion-corpus/resolve/da7af50bca493e2208e1ba06c18d30e61d486a1c/raw/sketchfab/Farm_Cow_Animated_Dairy_cattle_0e780cb5/license.txt",
+      "bytes": 732,
+      "sha256": "1cc6fda10c00efd3db668d3d07adcdd9b63aeeba023d09b506a13dee989e007d"
+    }
+  ],
+  "originalClips": [
+    "Armature|idle1",
+    "Armature|idle2",
+    "Armature|Attack1",
+    "Armature|Attack2",
+    "Armature|Death"
+  ]
+}

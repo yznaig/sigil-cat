@@ -1,0 +1,21 @@
+{
+  "phase": "single isolated desktop rerun after full-suite sound-silence failure; assertion unchanged",
+  "runtimeCommit": "b3e1a5b",
+  "status": "locked start load=4.97\nfinished 0\n",
+  "checks": [
+    "CHECK sounds all 69 replacement and impact voices decode:  PASS",
+    "CHECK sounds paradox loop completes its full hover and returns the cat: returned true; hover RMS 1.48e-2; paper true PASS",
+    "CHECK sounds 100 contact callbacks produce one principal voice per item: 1 first item; 1 independent item PASS",
+    "CHECK sounds same item can sound again after 80 ms:  PASS",
+    "CHECK sounds material bag exhausts variants and never repeats adjacent: impact-tin-small-03, impact-tin-small-01, impact-tin-small-02, impact-tin-small-03, impact-tin-small-01, impact-tin-small-02, impact-tin-small-03, impact-tin-small-01, impact-tin-small-02 PASS",
+    "CHECK sounds silence measurement: {\"before\":{\"clips\":17,\"loops\":2,\"tones\":0,\"impacts\":13,\"suppressedImpacts\":101,\"suppressedRestore\":0,\"restoring\":false},\"after\":{\"clips\":17,\"loops\":2,\"tones\":0,\"impacts\":13,\"suppressedImpacts\":106,\"suppressedRestore\":4,\"restoring\":false},\"allDenied\":true,\"rms\":0,\"bodies\":[{\"id\":\"paper\",\"sleeping\":false}]}",
+    "CHECK sounds sleeping and nested async restore schedule zero voices:  PASS",
+    "CHECK sounds crowded page and montage sum stays below -1 dBFS: -1.937 dBFS for 32 overlapping voices PASS",
+    "CHECK sounds oversampled safety handles 8x input overload: -2.081 dBFS PASS",
+    "CHECK sounds master mute silences a playing replacement: 3.04e-2 to 0.00e+0 RMS PASS",
+    "CHECK sounds mute and volume survive a real reload:  PASS",
+    "CHECK sounds saved keepsakes and sleeping body restore silently while unmuted: startup 0 voices; restore peak RMS 0.0e+0; sleeping true PASS"
+  ],
+  "initialLaunch": "The first queued diagnostic had no PW_FROM export and failed to find playwright-core before launching a browser. Retried with the run-all PW_FROM value.",
+  "interpretation": "All requested voices denied, counters unchanged, RMS 0. The earlier failure is not reproduced; exact cause remains unproved."
+}

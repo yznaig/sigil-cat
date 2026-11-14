@@ -1,0 +1,1821 @@
+{
+  "status": "locked start load=5.55\nfinished 0",
+  "checks": [
+    "CHECK board premise dense-sync: {\"run\":1,\"p95\":7.5,\"physicsP95\":4.5,\"renderP95\":1.8000000417232513,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":15,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[5.56,4.31,4.41],\"loadAfter\":[5.56,4.31,4.41]}",
+    "CHECK board premise dense-sync: {\"run\":2,\"p95\":6.9000000059604645,\"physicsP95\":4.299999997019768,\"renderP95\":1.9999999850988388,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":17,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[5.56,4.31,4.41],\"loadAfter\":[5.56,4.31,4.41]}",
+    "CHECK board premise dense-sync: {\"run\":3,\"p95\":7.199999988079071,\"physicsP95\":4.399999991059303,\"renderP95\":1.4999999701976776,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":17,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[5.56,4.31,4.41],\"loadAfter\":[5.56,4.31,4.41]}",
+    "CHECK board premise dense-sync: {\"run\":4,\"p95\":8,\"physicsP95\":4.700000002980232,\"renderP95\":2,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":16,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[5.56,4.31,4.41],\"loadAfter\":[5.56,4.31,4.41]}",
+    "CHECK board premise dense-sync: {\"run\":5,\"p95\":8,\"physicsP95\":4.700000002980232,\"renderP95\":1.7000000178813934,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":13,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.15,4.46,4.46],\"loadAfter\":[6.15,4.46,4.46]}",
+    "CHECK board premise dense-paced: {\"run\":1,\"p95\":8.200000002980232,\"physicsP95\":4.600000008940697,\"renderP95\":1.7999999970197678,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":15,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.15,4.46,4.46],\"loadAfter\":[6.15,4.46,4.46]}",
+    "CHECK board premise dense-paced: {\"run\":2,\"p95\":8.200000002980232,\"physicsP95\":4.899999991059303,\"renderP95\":1.8999999910593033,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":12,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.15,4.46,4.46],\"loadAfter\":[6.3,4.52,4.48]}",
+    "CHECK board premise dense-paced: {\"run\":3,\"p95\":8.5,\"physicsP95\":5,\"renderP95\":1.8999999910593033,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":17,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.3,4.52,4.48],\"loadAfter\":[7.08,4.71,4.54]}",
+    "CHECK board premise dense-paced: {\"run\":4,\"p95\":9.700000002980232,\"physicsP95\":5.399999991059303,\"renderP95\":2.2999999970197678,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":16,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[7.08,4.71,4.54],\"loadAfter\":[7.08,4.71,4.54]}",
+    "CHECK board premise dense-paced: {\"run\":5,\"p95\":7.799999997019768,\"physicsP95\":4.5999999940395355,\"renderP95\":1.8999999910593033,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":17,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[7.08,4.71,4.54],\"loadAfter\":[6.99,4.73,4.55]}",
+    "CHECK board premise separated-paced: {\"run\":1,\"p95\":4.100000008940697,\"physicsP95\":0.5,\"renderP95\":1.800000011920929,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":30,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.99,4.73,4.55],\"loadAfter\":[6.99,4.73,4.55]}",
+    "CHECK board premise separated-paced: {\"run\":2,\"p95\":5.200000002980232,\"physicsP95\":0.5,\"renderP95\":2.3999999910593033,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":30,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.99,4.73,4.55],\"loadAfter\":[6.83,4.73,4.55]}",
+    "CHECK board premise separated-paced: {\"run\":3,\"p95\":3.2999999970197678,\"physicsP95\":0.5,\"renderP95\":1.3999999910593033,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":30,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.83,4.73,4.55],\"loadAfter\":[6.61,4.72,4.55]}",
+    "CHECK board premise separated-paced: {\"run\":4,\"p95\":3.0999999940395355,\"physicsP95\":0.5,\"renderP95\":1.2000000327825546,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":30,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.61,4.72,4.55],\"loadAfter\":[6.61,4.72,4.55]}",
+    "CHECK board premise separated-paced: {\"run\":5,\"p95\":3.2000000029802322,\"physicsP95\":0.5,\"renderP95\":1.399999976158142,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":30,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.61,4.72,4.55],\"loadAfter\":[6.48,4.73,4.55]}",
+    "CHECK board shared-premise result: {\"renderer\":\"ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)\",\"viewport\":[1280,900],\"conditions\":[{\"condition\":\"dense-sync\",\"runs\":[{\"run\":1,\"p95\":7.5,\"physicsP95\":4.5,\"renderP95\":1.8000000417232513,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":15,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[5.56,4.31,4.41],\"loadAfter\":[5.56,4.31,4.41]},{\"run\":2,\"p95\":6.9000000059604645,\"physicsP95\":4.299999997019768,\"renderP95\":1.9999999850988388,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":17,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[5.56,4.31,4.41],\"loadAfter\":[5.56,4.31,4.41]},{\"run\":3,\"p95\":7.199999988079071,\"physicsP95\":4.399999991059303,\"renderP95\":1.4999999701976776,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":17,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[5.56,4.31,4.41],\"loadAfter\":[5.56,4.31,4.41]},{\"run\":4,\"p95\":8,\"physicsP95\":4.700000002980232,\"renderP95\":2,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":16,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[5.56,4.31,4.41],\"loadAfter\":[5.56,4.31,4.41]},{\"run\":5,\"p95\":8,\"physicsP95\":4.700000002980232,\"renderP95\":1.7000000178813934,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":13,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.15,4.46,4.46],\"loadAfter\":[6.15,4.46,4.46]}],\"medianP95\":7.5,\"medianPhysicsP95\":4.5,\"medianRenderP95\":1.8000000417232513},{\"condition\":\"dense-paced\",\"runs\":[{\"run\":1,\"p95\":8.200000002980232,\"physicsP95\":4.600000008940697,\"renderP95\":1.7999999970197678,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":15,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.15,4.46,4.46],\"loadAfter\":[6.15,4.46,4.46]},{\"run\":2,\"p95\":8.200000002980232,\"physicsP95\":4.899999991059303,\"renderP95\":1.8999999910593033,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":12,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.15,4.46,4.46],\"loadAfter\":[6.3,4.52,4.48]},{\"run\":3,\"p95\":8.5,\"physicsP95\":5,\"renderP95\":1.8999999910593033,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":17,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.3,4.52,4.48],\"loadAfter\":[7.08,4.71,4.54]},{\"run\":4,\"p95\":9.700000002980232,\"physicsP95\":5.399999991059303,\"renderP95\":2.2999999970197678,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":16,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[7.08,4.71,4.54],\"loadAfter\":[7.08,4.71,4.54]},{\"run\":5,\"p95\":7.799999997019768,\"physicsP95\":4.5999999940395355,\"renderP95\":1.8999999910593033,\"initialOverlappingColliderPairs\":15,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":17,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[7.08,4.71,4.54],\"loadAfter\":[6.99,4.73,4.55]}],\"medianP95\":8.200000002980232,\"medianPhysicsP95\":4.899999991059303,\"medianRenderP95\":1.8999999910593033},{\"condition\":\"separated-paced\",\"runs\":[{\"run\":1,\"p95\":4.100000008940697,\"physicsP95\":0.5,\"renderP95\":1.800000011920929,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":30,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.99,4.73,4.55],\"loadAfter\":[6.99,4.73,4.55]},{\"run\":2,\"p95\":5.200000002980232,\"physicsP95\":0.5,\"renderP95\":2.3999999910593033,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":30,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.99,4.73,4.55],\"loadAfter\":[6.83,4.73,4.55]},{\"run\":3,\"p95\":3.2999999970197678,\"physicsP95\":0.5,\"renderP95\":1.3999999910593033,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":30,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.83,4.73,4.55],\"loadAfter\":[6.61,4.72,4.55]},{\"run\":4,\"p95\":3.0999999940395355,\"physicsP95\":0.5,\"renderP95\":1.2000000327825546,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":30,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.61,4.72,4.55],\"loadAfter\":[6.61,4.72,4.55]},{\"run\":5,\"p95\":3.2000000029802322,\"physicsP95\":0.5,\"renderP95\":1.399999976158142,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":30,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.61,4.72,4.55],\"loadAfter\":[6.48,4.73,4.55]}],\"medianP95\":3.2999999970197678,\"medianPhysicsP95\":0.5,\"medianRenderP95\":1.3999999910593033}],\"ticket\":{\"edge\":[{\"seed\":14,\"dot\":0.19030833816363923,\"seconds\":2.933333333333333,\"sleeping\":true},{\"seed\":29,\"dot\":0.7593122041192806,\"seconds\":2.55,\"sleeping\":true},{\"seed\":33,\"dot\":0.12669841879689114,\"seconds\":2.65,\"sleeping\":true},{\"seed\":38,\"dot\":0.8581218409823521,\"seconds\":2.691666666666667,\"sleeping\":true},{\"seed\":40,\"dot\":0.14903190286103385,\"seconds\":2.35,\"sleeping\":true},{\"seed\":43,\"dot\":0.8157311760753947,\"seconds\":2.75,\"sleeping\":true},{\"seed\":45,\"dot\":0.7843303160320367,\"seconds\":2.425,\"sleeping\":true},{\"seed\":46,\"dot\":0.2839669387576703,\"seconds\":2.341666666666667,\"sleeping\":true},{\"seed\":48,\"dot\":0.5770986616597993,\"seconds\":2.8666666666666667,\"sleeping\":true},{\"seed\":51,\"dot\":0.6842326299241552,\"seconds\":2.5833333333333335,\"sleeping\":true},{\"seed\":52,\"dot\":0.19478782316777732,\"seconds\":2.691666666666667,\"sleeping\":true},{\"seed\":53,\"dot\":0.7843722691111026,\"seconds\":2.5833333333333335,\"sleeping\":true},{\"seed\":56,\"dot\":0.8742586438657902,\"seconds\":2.3333333333333335,\"sleeping\":true},{\"seed\":62,\"dot\":0.25696176598341225,\"seconds\":4,\"sleeping\":false},{\"seed\":73,\"dot\":0.42571454837204925,\"seconds\":2.591666666666667,\"sleeping\":true},{\"seed\":75,\"dot\":0.730391368459582,\"seconds\":2.325,\"sleeping\":true},{\"seed\":76,\"dot\":0.17130738073940677,\"seconds\":3.325,\"sleeping\":true},{\"seed\":85,\"dot\":0.09727592244001926,\"seconds\":3.066666666666667,\"sleeping\":true},{\"seed\":87,\"dot\":0.6648415105466299,\"seconds\":2.566666666666667,\"sleeping\":true},{\"seed\":97,\"dot\":0.10503480086291805,\"seconds\":2.3583333333333334,\"sleeping\":true},{\"seed\":98,\"dot\":0.49052646616949325,\"seconds\":2.5083333333333333,\"sleeping\":true}],\"worst\":{\"seed\":85,\"dot\":0.09727592244001926,\"seconds\":3.066666666666667,\"sleeping\":true},\"atRest\":{\"position\":{\"x\":-0.1048009991645813,\"y\":0.2699085772037506,\"z\":0.15701311826705933},\"quaternion\":{\"x\":0.6452510356903076,\"y\":-0.6126739978790283,\"z\":-0.2909338176250458,\"w\":0.35162368416786194},\"linvel\":{\"x\":0,\"y\":0,\"z\":0},\"angvel\":{\"x\":0,\"y\":0,\"z\":0},\"mass\":0.011999999172985554,\"manifolds\":[{\"collider\":1,\"normal\":{\"x\":0.0036477886606007814,\"y\":0.999993085861206,\"z\":0.0006888528005219996},\"contacts\":[{\"point\":{\"x\":-0.15522146224975586,\"y\":0.0004257597029209137,\"z\":0.26983770728111267},\"distance\":-0.0001488549169152975},{\"point\":{\"x\":-0.016840767115354538,\"y\":0.0004232935607433319,\"z\":0.07002574950456619},\"distance\":-0.00015304208500310779},{\"point\":{\"x\":-0.01522848755121231,\"y\":0.0005205683410167694,\"z\":0.07119256258010864},\"distance\":0.000041508814319968224},{\"point\":{\"x\":-0.15360915660858154,\"y\":0.0005230046808719635,\"z\":0.27100449800491333},\"distance\":0.000045636435970664024},{\"point\":{\"x\":-0.15412059426307678,\"y\":0.00047443807125091553,\"z\":0.2699982821941376},\"distance\":-0.00005148234777152538}]}]},\"afterWakeWithoutImpulse\":{\"position\":{\"x\":-0.09935473650693893,\"y\":0.2704080641269684,\"z\":0.16076874732971191},\"quaternion\":{\"x\":0.6415627002716064,\"y\":-0.617192804813385,\"z\":-0.2985696494579315,\"w\":0.3439861834049225},\"sleeping\":true,\"dot\":0.07282733060059243}}}",
+    "CHECK board premise dense-sync: {\"run\":1,\"p95\":6.899999991059303,\"physicsP95\":3.9000000059604645,\"renderP95\":2.0999999791383743,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":8,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.28,4.71,4.55],\"loadAfter\":[6.28,4.71,4.55]}",
+    "CHECK board premise dense-sync: {\"run\":2,\"p95\":6.5999999940395355,\"physicsP95\":3.7999999970197678,\"renderP95\":1.4999999701976776,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":55,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.28,4.71,4.55],\"loadAfter\":[6.26,4.73,4.56]}",
+    "CHECK board premise dense-sync: {\"run\":3,\"p95\":6.799999997019768,\"physicsP95\":4.4000000059604645,\"renderP95\":1.5000000149011612,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":64,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.26,4.73,4.56],\"loadAfter\":[6.26,4.73,4.56]}",
+    "CHECK board premise dense-sync: {\"run\":4,\"p95\":6.300000011920929,\"physicsP95\":3.8999999910593033,\"renderP95\":1.3999999910593033,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":49,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.26,4.73,4.56],\"loadAfter\":[6.26,4.73,4.56]}",
+    "CHECK board premise dense-sync: {\"run\":5,\"p95\":6.200000002980232,\"physicsP95\":4.0999999940395355,\"renderP95\":1.199999988079071,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":53,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.26,4.73,4.56],\"loadAfter\":[6.26,4.73,4.56]}",
+    "CHECK board premise dense-paced: {\"run\":1,\"p95\":6.399999991059303,\"physicsP95\":3.7999999970197678,\"renderP95\":1.4999999850988388,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":19,\"drawsPerItem\":[181,181,181,181,181,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.26,4.73,4.56],\"loadAfter\":[6.24,4.76,4.56]}",
+    "CHECK board premise dense-paced: {\"run\":2,\"p95\":6.299999997019768,\"physicsP95\":4,\"renderP95\":1.300000011920929,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":53,\"drawsPerItem\":[181,181,181,181,181,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.24,4.76,4.56],\"loadAfter\":[6.24,4.76,4.56]}",
+    "CHECK board premise dense-paced: {\"run\":3,\"p95\":7.399999991059303,\"physicsP95\":4.4000000059604645,\"renderP95\":1.699999988079071,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":57,\"drawsPerItem\":[181,181,181,181,181,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.24,4.76,4.56],\"loadAfter\":[6.38,4.81,4.58]}",
+    "CHECK board premise dense-paced: {\"run\":4,\"p95\":7,\"physicsP95\":4.200000002980232,\"renderP95\":1.5999999791383743,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":8,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.38,4.81,4.58],\"loadAfter\":[6.38,4.81,4.58]}",
+    "CHECK board premise dense-paced: {\"run\":5,\"p95\":8.099999994039536,\"physicsP95\":4.600000008940697,\"renderP95\":1.800000011920929,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":10,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.38,4.81,4.58],\"loadAfter\":[6.43,4.85,4.6]}",
+    "CHECK board premise separated-paced: {\"run\":1,\"p95\":5.799999997019768,\"physicsP95\":0.6000000089406967,\"renderP95\":2.499999985098839,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":32,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.43,4.85,4.6],\"loadAfter\":[6.55,4.9,4.61]}",
+    "CHECK board premise separated-paced: {\"run\":2,\"p95\":4.200000002980232,\"physicsP95\":0.5999999940395355,\"renderP95\":1.9000000208616257,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":32,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.55,4.9,4.61],\"loadAfter\":[6.55,4.9,4.61]}",
+    "CHECK board premise separated-paced: {\"run\":3,\"p95\":4.100000008940697,\"physicsP95\":0.6000000089406967,\"renderP95\":1.800000011920929,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":32,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.55,4.9,4.61],\"loadAfter\":[6.75,4.97,4.64]}",
+    "CHECK board premise separated-paced: {\"run\":4,\"p95\":4.199999988079071,\"physicsP95\":0.5999999940395355,\"renderP95\":1.899999976158142,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":32,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.75,4.97,4.64],\"loadAfter\":[6.75,4.97,4.64]}",
+    "CHECK board premise separated-paced: {\"run\":5,\"p95\":4.5999999940395355,\"physicsP95\":0.6000000089406967,\"renderP95\":1.9999999850988388,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":32,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.75,4.97,4.64],\"loadAfter\":[6.93,5.04,4.66]}",
+    "CHECK board shared-premise result: {\"renderer\":\"ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)\",\"viewport\":[390,844],\"conditions\":[{\"condition\":\"dense-sync\",\"runs\":[{\"run\":1,\"p95\":6.899999991059303,\"physicsP95\":3.9000000059604645,\"renderP95\":2.0999999791383743,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":8,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.28,4.71,4.55],\"loadAfter\":[6.28,4.71,4.55]},{\"run\":2,\"p95\":6.5999999940395355,\"physicsP95\":3.7999999970197678,\"renderP95\":1.4999999701976776,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":55,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.28,4.71,4.55],\"loadAfter\":[6.26,4.73,4.56]},{\"run\":3,\"p95\":6.799999997019768,\"physicsP95\":4.4000000059604645,\"renderP95\":1.5000000149011612,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":64,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.26,4.73,4.56],\"loadAfter\":[6.26,4.73,4.56]},{\"run\":4,\"p95\":6.300000011920929,\"physicsP95\":3.8999999910593033,\"renderP95\":1.3999999910593033,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":49,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.26,4.73,4.56],\"loadAfter\":[6.26,4.73,4.56]},{\"run\":5,\"p95\":6.200000002980232,\"physicsP95\":4.0999999940395355,\"renderP95\":1.199999988079071,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":53,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.26,4.73,4.56],\"loadAfter\":[6.26,4.73,4.56]}],\"medianP95\":6.5999999940395355,\"medianPhysicsP95\":3.9000000059604645,\"medianRenderP95\":1.4999999701976776},{\"condition\":\"dense-paced\",\"runs\":[{\"run\":1,\"p95\":6.399999991059303,\"physicsP95\":3.7999999970197678,\"renderP95\":1.4999999850988388,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":19,\"drawsPerItem\":[181,181,181,181,181,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.26,4.73,4.56],\"loadAfter\":[6.24,4.76,4.56]},{\"run\":2,\"p95\":6.299999997019768,\"physicsP95\":4,\"renderP95\":1.300000011920929,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":53,\"drawsPerItem\":[181,181,181,181,181,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.24,4.76,4.56],\"loadAfter\":[6.24,4.76,4.56]},{\"run\":3,\"p95\":7.399999991059303,\"physicsP95\":4.4000000059604645,\"renderP95\":1.699999988079071,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":57,\"drawsPerItem\":[181,181,181,181,181,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.24,4.76,4.56],\"loadAfter\":[6.38,4.81,4.58]},{\"run\":4,\"p95\":7,\"physicsP95\":4.200000002980232,\"renderP95\":1.5999999791383743,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":8,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.38,4.81,4.58],\"loadAfter\":[6.38,4.81,4.58]},{\"run\":5,\"p95\":8.099999994039536,\"physicsP95\":4.600000008940697,\"renderP95\":1.800000011920929,\"initialOverlappingColliderPairs\":14,\"initialWorstIntersection\":-0.12513984739780426,\"renderTargetGrowths\":10,\"drawsPerItem\":[180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180,180],\"loadBefore\":[6.38,4.81,4.58],\"loadAfter\":[6.43,4.85,4.6]}],\"medianP95\":7,\"medianPhysicsP95\":4.200000002980232,\"medianRenderP95\":1.5999999791383743},{\"condition\":\"separated-paced\",\"runs\":[{\"run\":1,\"p95\":5.799999997019768,\"physicsP95\":0.6000000089406967,\"renderP95\":2.499999985098839,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":32,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.43,4.85,4.6],\"loadAfter\":[6.55,4.9,4.61]},{\"run\":2,\"p95\":4.200000002980232,\"physicsP95\":0.5999999940395355,\"renderP95\":1.9000000208616257,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":32,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.55,4.9,4.61],\"loadAfter\":[6.55,4.9,4.61]},{\"run\":3,\"p95\":4.100000008940697,\"physicsP95\":0.6000000089406967,\"renderP95\":1.800000011920929,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":32,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.55,4.9,4.61],\"loadAfter\":[6.75,4.97,4.64]},{\"run\":4,\"p95\":4.199999988079071,\"physicsP95\":0.5999999940395355,\"renderP95\":1.899999976158142,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":32,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.75,4.97,4.64],\"loadAfter\":[6.75,4.97,4.64]},{\"run\":5,\"p95\":4.5999999940395355,\"physicsP95\":0.6000000089406967,\"renderP95\":1.9999999850988388,\"initialOverlappingColliderPairs\":0,\"initialWorstIntersection\":0,\"renderTargetGrowths\":32,\"drawsPerItem\":[179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179,179],\"loadBefore\":[6.75,4.97,4.64],\"loadAfter\":[6.93,5.04,4.66]}],\"medianP95\":4.200000002980232,\"medianPhysicsP95\":0.6000000089406967,\"medianRenderP95\":1.9000000208616257}],\"ticket\":{\"edge\":[{\"seed\":7,\"dot\":0.8907801068094612,\"seconds\":2.5083333333333333,\"sleeping\":true},{\"seed\":16,\"dot\":0.5625686159777565,\"seconds\":2.433333333333333,\"sleeping\":true},{\"seed\":21,\"dot\":0.8754095430013393,\"seconds\":2.466666666666667,\"sleeping\":true},{\"seed\":22,\"dot\":0.38367162699615914,\"seconds\":2.575,\"sleeping\":true},{\"seed\":40,\"dot\":0.19255265146887712,\"seconds\":2.341666666666667,\"sleeping\":true},{\"seed\":44,\"dot\":0.4501548918287597,\"seconds\":2.8583333333333334,\"sleeping\":true},{\"seed\":45,\"dot\":0.7826851626716373,\"seconds\":2.3833333333333333,\"sleeping\":true},{\"seed\":46,\"dot\":0.4130659908370119,\"seconds\":2.325,\"sleeping\":true},{\"seed\":52,\"dot\":0.6836094380470854,\"seconds\":2.941666666666667,\"sleeping\":true},{\"seed\":53,\"dot\":0.842569476072109,\"seconds\":2.566666666666667,\"sleeping\":true},{\"seed\":55,\"dot\":0.8592103364607624,\"seconds\":2.5166666666666666,\"sleeping\":true},{\"seed\":67,\"dot\":0.22147016866713898,\"seconds\":2.566666666666667,\"sleeping\":true},{\"seed\":73,\"dot\":0.8888067339762706,\"seconds\":2.6083333333333334,\"sleeping\":true},{\"seed\":74,\"dot\":0.8918171983182468,\"seconds\":2.5833333333333335,\"sleeping\":true},{\"seed\":75,\"dot\":0.7572763134901521,\"seconds\":2.3333333333333335,\"sleeping\":true},{\"seed\":87,\"dot\":0.866561806541327,\"seconds\":2.4583333333333335,\"sleeping\":true},{\"seed\":89,\"dot\":0.6010345455171127,\"seconds\":2.816666666666667,\"sleeping\":true},{\"seed\":97,\"dot\":0.13837842745478257,\"seconds\":2.3333333333333335,\"sleeping\":true}],\"worst\":{\"seed\":97,\"dot\":0.13837842745478257,\"seconds\":2.3333333333333335,\"sleeping\":true},\"atRest\":{\"position\":{\"x\":0.25410225987434387,\"y\":0.12135086208581924,\"z\":0.010299142450094223},\"quaternion\":{\"x\":-0.7423051595687866,\"y\":-0.04633062705397606,\"z\":-0.6664629578590393,\"w\":0.05161161348223686},\"linvel\":{\"x\":0,\"y\":0,\"z\":0},\"angvel\":{\"x\":0,\"y\":0,\"z\":0},\"mass\":0.011999999172985554,\"manifolds\":[{\"collider\":0,\"normal\":{\"x\":0.0005661456380039454,\"y\":0.9999893307685852,\"z\":-0.00459037022665143},\"contacts\":[{\"point\":{\"x\":0.27180224657058716,\"y\":0.0005790106952190399,\"z\":0.008389029651880264},\"distance\":0.000158033799380064},{\"point\":{\"x\":0.2698330283164978,\"y\":0.00044065341353416443,\"z\":0.008601047098636627},\"distance\":-0.00011868367437273264},{\"point\":{\"x\":0.24084551632404327,\"y\":0.00044219568371772766,\"z\":-0.25983843207359314},\"distance\":-0.000115599250420928},{\"point\":{\"x\":0.2428147792816162,\"y\":0.0005806013941764832,\"z\":-0.26005053520202637},\"distance\":0.0001612299820408225},{\"point\":{\"x\":0.25535744428634644,\"y\":0.00044143199920654297,\"z\":-0.12545034289360046},\"distance\":-0.00011715653818100691}]},{\"collider\":1,\"normal\":{\"x\":-0.0009173165308311582,\"y\":0.9999943375587463,\"z\":-0.0032674663234502077},\"contacts\":[{\"point\":{\"x\":0.3007906675338745,\"y\":0.0005774535238742828,\"z\":0.27682775259017944},\"distance\":0.0001549141015857458},{\"point\":{\"x\":0.2988211512565613,\"y\":0.00043909624218940735,\"z\":0.2770400047302246},\"distance\":-0.0001218023244291544},{\"point\":{\"x\":0.26983368396759033,\"y\":0.0004406459629535675,\"z\":0.008600462228059769},\"distance\":-0.00011870288290083408},{\"point\":{\"x\":0.2718031108379364,\"y\":0.0005790255963802338,\"z\":0.008388262242078781},\"distance\":0.000158058013767004},{\"point\":{\"x\":0.28430670499801636,\"y\":0.00043987855315208435,\"z\":0.14262878894805908},\"distance\":-0.00012026762124150991}]}]},\"afterWakeWithoutImpulse\":{\"position\":{\"x\":0.2538582384586334,\"y\":0.12131840735673904,\"z\":0.010322270914912224},\"quaternion\":{\"x\":-0.7422632575035095,\"y\":-0.047006815671920776,\"z\":-0.6664033532142639,\"w\":0.05236666649580002},\"sleeping\":true,\"dot\":0.14039070409093046}}}"
+  ],
+  "results": [
+    {
+      "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+      "viewport": [
+        1280,
+        900
+      ],
+      "conditions": [
+        {
+          "condition": "dense-sync",
+          "runs": [
+            {
+              "run": 1,
+              "p95": 7.5,
+              "physicsP95": 4.5,
+              "renderP95": 1.8000000417232513,
+              "initialOverlappingColliderPairs": 15,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 15,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                5.56,
+                4.31,
+                4.41
+              ],
+              "loadAfter": [
+                5.56,
+                4.31,
+                4.41
+              ]
+            },
+            {
+              "run": 2,
+              "p95": 6.9000000059604645,
+              "physicsP95": 4.299999997019768,
+              "renderP95": 1.9999999850988388,
+              "initialOverlappingColliderPairs": 15,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 17,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                5.56,
+                4.31,
+                4.41
+              ],
+              "loadAfter": [
+                5.56,
+                4.31,
+                4.41
+              ]
+            },
+            {
+              "run": 3,
+              "p95": 7.199999988079071,
+              "physicsP95": 4.399999991059303,
+              "renderP95": 1.4999999701976776,
+              "initialOverlappingColliderPairs": 15,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 17,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                5.56,
+                4.31,
+                4.41
+              ],
+              "loadAfter": [
+                5.56,
+                4.31,
+                4.41
+              ]
+            },
+            {
+              "run": 4,
+              "p95": 8,
+              "physicsP95": 4.700000002980232,
+              "renderP95": 2,
+              "initialOverlappingColliderPairs": 15,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 16,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                5.56,
+                4.31,
+                4.41
+              ],
+              "loadAfter": [
+                5.56,
+                4.31,
+                4.41
+              ]
+            },
+            {
+              "run": 5,
+              "p95": 8,
+              "physicsP95": 4.700000002980232,
+              "renderP95": 1.7000000178813934,
+              "initialOverlappingColliderPairs": 15,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 13,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                6.15,
+                4.46,
+                4.46
+              ],
+              "loadAfter": [
+                6.15,
+                4.46,
+                4.46
+              ]
+            }
+          ],
+          "medianP95": 7.5,
+          "medianPhysicsP95": 4.5,
+          "medianRenderP95": 1.8000000417232513
+        },
+        {
+          "condition": "dense-paced",
+          "runs": [
+            {
+              "run": 1,
+              "p95": 8.200000002980232,
+              "physicsP95": 4.600000008940697,
+              "renderP95": 1.7999999970197678,
+              "initialOverlappingColliderPairs": 15,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 15,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                6.15,
+                4.46,
+                4.46
+              ],
+              "loadAfter": [
+                6.15,
+                4.46,
+                4.46
+              ]
+            },
+            {
+              "run": 2,
+              "p95": 8.200000002980232,
+              "physicsP95": 4.899999991059303,
+              "renderP95": 1.8999999910593033,
+              "initialOverlappingColliderPairs": 15,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 12,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                6.15,
+                4.46,
+                4.46
+              ],
+              "loadAfter": [
+                6.3,
+                4.52,
+                4.48
+              ]
+            },
+            {
+              "run": 3,
+              "p95": 8.5,
+              "physicsP95": 5,
+              "renderP95": 1.8999999910593033,
+              "initialOverlappingColliderPairs": 15,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 17,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                6.3,
+                4.52,
+                4.48
+              ],
+              "loadAfter": [
+                7.08,
+                4.71,
+                4.54
+              ]
+            },
+            {
+              "run": 4,
+              "p95": 9.700000002980232,
+              "physicsP95": 5.399999991059303,
+              "renderP95": 2.2999999970197678,
+              "initialOverlappingColliderPairs": 15,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 16,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                7.08,
+                4.71,
+                4.54
+              ],
+              "loadAfter": [
+                7.08,
+                4.71,
+                4.54
+              ]
+            },
+            {
+              "run": 5,
+              "p95": 7.799999997019768,
+              "physicsP95": 4.5999999940395355,
+              "renderP95": 1.8999999910593033,
+              "initialOverlappingColliderPairs": 15,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 17,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                7.08,
+                4.71,
+                4.54
+              ],
+              "loadAfter": [
+                6.99,
+                4.73,
+                4.55
+              ]
+            }
+          ],
+          "medianP95": 8.200000002980232,
+          "medianPhysicsP95": 4.899999991059303,
+          "medianRenderP95": 1.8999999910593033
+        },
+        {
+          "condition": "separated-paced",
+          "runs": [
+            {
+              "run": 1,
+              "p95": 4.100000008940697,
+              "physicsP95": 0.5,
+              "renderP95": 1.800000011920929,
+              "initialOverlappingColliderPairs": 0,
+              "initialWorstIntersection": 0,
+              "renderTargetGrowths": 30,
+              "drawsPerItem": [
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179
+              ],
+              "loadBefore": [
+                6.99,
+                4.73,
+                4.55
+              ],
+              "loadAfter": [
+                6.99,
+                4.73,
+                4.55
+              ]
+            },
+            {
+              "run": 2,
+              "p95": 5.200000002980232,
+              "physicsP95": 0.5,
+              "renderP95": 2.3999999910593033,
+              "initialOverlappingColliderPairs": 0,
+              "initialWorstIntersection": 0,
+              "renderTargetGrowths": 30,
+              "drawsPerItem": [
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179
+              ],
+              "loadBefore": [
+                6.99,
+                4.73,
+                4.55
+              ],
+              "loadAfter": [
+                6.83,
+                4.73,
+                4.55
+              ]
+            },
+            {
+              "run": 3,
+              "p95": 3.2999999970197678,
+              "physicsP95": 0.5,
+              "renderP95": 1.3999999910593033,
+              "initialOverlappingColliderPairs": 0,
+              "initialWorstIntersection": 0,
+              "renderTargetGrowths": 30,
+              "drawsPerItem": [
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179
+              ],
+              "loadBefore": [
+                6.83,
+                4.73,
+                4.55
+              ],
+              "loadAfter": [
+                6.61,
+                4.72,
+                4.55
+              ]
+            },
+            {
+              "run": 4,
+              "p95": 3.0999999940395355,
+              "physicsP95": 0.5,
+              "renderP95": 1.2000000327825546,
+              "initialOverlappingColliderPairs": 0,
+              "initialWorstIntersection": 0,
+              "renderTargetGrowths": 30,
+              "drawsPerItem": [
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179
+              ],
+              "loadBefore": [
+                6.61,
+                4.72,
+                4.55
+              ],
+              "loadAfter": [
+                6.61,
+                4.72,
+                4.55
+              ]
+            },
+            {
+              "run": 5,
+              "p95": 3.2000000029802322,
+              "physicsP95": 0.5,
+              "renderP95": 1.399999976158142,
+              "initialOverlappingColliderPairs": 0,
+              "initialWorstIntersection": 0,
+              "renderTargetGrowths": 30,
+              "drawsPerItem": [
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179
+              ],
+              "loadBefore": [
+                6.61,
+                4.72,
+                4.55
+              ],
+              "loadAfter": [
+                6.48,
+                4.73,
+                4.55
+              ]
+            }
+          ],
+          "medianP95": 3.2999999970197678,
+          "medianPhysicsP95": 0.5,
+          "medianRenderP95": 1.3999999910593033
+        }
+      ],
+      "ticket": {
+        "edge": [
+          {
+            "seed": 14,
+            "dot": 0.19030833816363923,
+            "seconds": 2.933333333333333,
+            "sleeping": true
+          },
+          {
+            "seed": 29,
+            "dot": 0.7593122041192806,
+            "seconds": 2.55,
+            "sleeping": true
+          },
+          {
+            "seed": 33,
+            "dot": 0.12669841879689114,
+            "seconds": 2.65,
+            "sleeping": true
+          },
+          {
+            "seed": 38,
+            "dot": 0.8581218409823521,
+            "seconds": 2.691666666666667,
+            "sleeping": true
+          },
+          {
+            "seed": 40,
+            "dot": 0.14903190286103385,
+            "seconds": 2.35,
+            "sleeping": true
+          },
+          {
+            "seed": 43,
+            "dot": 0.8157311760753947,
+            "seconds": 2.75,
+            "sleeping": true
+          },
+          {
+            "seed": 45,
+            "dot": 0.7843303160320367,
+            "seconds": 2.425,
+            "sleeping": true
+          },
+          {
+            "seed": 46,
+            "dot": 0.2839669387576703,
+            "seconds": 2.341666666666667,
+            "sleeping": true
+          },
+          {
+            "seed": 48,
+            "dot": 0.5770986616597993,
+            "seconds": 2.8666666666666667,
+            "sleeping": true
+          },
+          {
+            "seed": 51,
+            "dot": 0.6842326299241552,
+            "seconds": 2.5833333333333335,
+            "sleeping": true
+          },
+          {
+            "seed": 52,
+            "dot": 0.19478782316777732,
+            "seconds": 2.691666666666667,
+            "sleeping": true
+          },
+          {
+            "seed": 53,
+            "dot": 0.7843722691111026,
+            "seconds": 2.5833333333333335,
+            "sleeping": true
+          },
+          {
+            "seed": 56,
+            "dot": 0.8742586438657902,
+            "seconds": 2.3333333333333335,
+            "sleeping": true
+          },
+          {
+            "seed": 62,
+            "dot": 0.25696176598341225,
+            "seconds": 4,
+            "sleeping": false
+          },
+          {
+            "seed": 73,
+            "dot": 0.42571454837204925,
+            "seconds": 2.591666666666667,
+            "sleeping": true
+          },
+          {
+            "seed": 75,
+            "dot": 0.730391368459582,
+            "seconds": 2.325,
+            "sleeping": true
+          },
+          {
+            "seed": 76,
+            "dot": 0.17130738073940677,
+            "seconds": 3.325,
+            "sleeping": true
+          },
+          {
+            "seed": 85,
+            "dot": 0.09727592244001926,
+            "seconds": 3.066666666666667,
+            "sleeping": true
+          },
+          {
+            "seed": 87,
+            "dot": 0.6648415105466299,
+            "seconds": 2.566666666666667,
+            "sleeping": true
+          },
+          {
+            "seed": 97,
+            "dot": 0.10503480086291805,
+            "seconds": 2.3583333333333334,
+            "sleeping": true
+          },
+          {
+            "seed": 98,
+            "dot": 0.49052646616949325,
+            "seconds": 2.5083333333333333,
+            "sleeping": true
+          }
+        ],
+        "worst": {
+          "seed": 85,
+          "dot": 0.09727592244001926,
+          "seconds": 3.066666666666667,
+          "sleeping": true
+        },
+        "atRest": {
+          "position": {
+            "x": -0.1048009991645813,
+            "y": 0.2699085772037506,
+            "z": 0.15701311826705933
+          },
+          "quaternion": {
+            "x": 0.6452510356903076,
+            "y": -0.6126739978790283,
+            "z": -0.2909338176250458,
+            "w": 0.35162368416786194
+          },
+          "linvel": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "angvel": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "mass": 0.011999999172985554,
+          "manifolds": [
+            {
+              "collider": 1,
+              "normal": {
+                "x": 0.0036477886606007814,
+                "y": 0.999993085861206,
+                "z": 0.0006888528005219996
+              },
+              "contacts": [
+                {
+                  "point": {
+                    "x": -0.15522146224975586,
+                    "y": 0.0004257597029209137,
+                    "z": 0.26983770728111267
+                  },
+                  "distance": -0.0001488549169152975
+                },
+                {
+                  "point": {
+                    "x": -0.016840767115354538,
+                    "y": 0.0004232935607433319,
+                    "z": 0.07002574950456619
+                  },
+                  "distance": -0.00015304208500310779
+                },
+                {
+                  "point": {
+                    "x": -0.01522848755121231,
+                    "y": 0.0005205683410167694,
+                    "z": 0.07119256258010864
+                  },
+                  "distance": 4.1508814319968224e-05
+                },
+                {
+                  "point": {
+                    "x": -0.15360915660858154,
+                    "y": 0.0005230046808719635,
+                    "z": 0.27100449800491333
+                  },
+                  "distance": 4.5636435970664024e-05
+                },
+                {
+                  "point": {
+                    "x": -0.15412059426307678,
+                    "y": 0.00047443807125091553,
+                    "z": 0.2699982821941376
+                  },
+                  "distance": -5.148234777152538e-05
+                }
+              ]
+            }
+          ]
+        },
+        "afterWakeWithoutImpulse": {
+          "position": {
+            "x": -0.09935473650693893,
+            "y": 0.2704080641269684,
+            "z": 0.16076874732971191
+          },
+          "quaternion": {
+            "x": 0.6415627002716064,
+            "y": -0.617192804813385,
+            "z": -0.2985696494579315,
+            "w": 0.3439861834049225
+          },
+          "sleeping": true,
+          "dot": 0.07282733060059243
+        }
+      }
+    },
+    {
+      "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+      "viewport": [
+        390,
+        844
+      ],
+      "conditions": [
+        {
+          "condition": "dense-sync",
+          "runs": [
+            {
+              "run": 1,
+              "p95": 6.899999991059303,
+              "physicsP95": 3.9000000059604645,
+              "renderP95": 2.0999999791383743,
+              "initialOverlappingColliderPairs": 14,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 8,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                6.28,
+                4.71,
+                4.55
+              ],
+              "loadAfter": [
+                6.28,
+                4.71,
+                4.55
+              ]
+            },
+            {
+              "run": 2,
+              "p95": 6.5999999940395355,
+              "physicsP95": 3.7999999970197678,
+              "renderP95": 1.4999999701976776,
+              "initialOverlappingColliderPairs": 14,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 55,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                6.28,
+                4.71,
+                4.55
+              ],
+              "loadAfter": [
+                6.26,
+                4.73,
+                4.56
+              ]
+            },
+            {
+              "run": 3,
+              "p95": 6.799999997019768,
+              "physicsP95": 4.4000000059604645,
+              "renderP95": 1.5000000149011612,
+              "initialOverlappingColliderPairs": 14,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 64,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                6.26,
+                4.73,
+                4.56
+              ],
+              "loadAfter": [
+                6.26,
+                4.73,
+                4.56
+              ]
+            },
+            {
+              "run": 4,
+              "p95": 6.300000011920929,
+              "physicsP95": 3.8999999910593033,
+              "renderP95": 1.3999999910593033,
+              "initialOverlappingColliderPairs": 14,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 49,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                6.26,
+                4.73,
+                4.56
+              ],
+              "loadAfter": [
+                6.26,
+                4.73,
+                4.56
+              ]
+            },
+            {
+              "run": 5,
+              "p95": 6.200000002980232,
+              "physicsP95": 4.0999999940395355,
+              "renderP95": 1.199999988079071,
+              "initialOverlappingColliderPairs": 14,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 53,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                6.26,
+                4.73,
+                4.56
+              ],
+              "loadAfter": [
+                6.26,
+                4.73,
+                4.56
+              ]
+            }
+          ],
+          "medianP95": 6.5999999940395355,
+          "medianPhysicsP95": 3.9000000059604645,
+          "medianRenderP95": 1.4999999701976776
+        },
+        {
+          "condition": "dense-paced",
+          "runs": [
+            {
+              "run": 1,
+              "p95": 6.399999991059303,
+              "physicsP95": 3.7999999970197678,
+              "renderP95": 1.4999999850988388,
+              "initialOverlappingColliderPairs": 14,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 19,
+              "drawsPerItem": [
+                181,
+                181,
+                181,
+                181,
+                181,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                6.26,
+                4.73,
+                4.56
+              ],
+              "loadAfter": [
+                6.24,
+                4.76,
+                4.56
+              ]
+            },
+            {
+              "run": 2,
+              "p95": 6.299999997019768,
+              "physicsP95": 4,
+              "renderP95": 1.300000011920929,
+              "initialOverlappingColliderPairs": 14,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 53,
+              "drawsPerItem": [
+                181,
+                181,
+                181,
+                181,
+                181,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                6.24,
+                4.76,
+                4.56
+              ],
+              "loadAfter": [
+                6.24,
+                4.76,
+                4.56
+              ]
+            },
+            {
+              "run": 3,
+              "p95": 7.399999991059303,
+              "physicsP95": 4.4000000059604645,
+              "renderP95": 1.699999988079071,
+              "initialOverlappingColliderPairs": 14,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 57,
+              "drawsPerItem": [
+                181,
+                181,
+                181,
+                181,
+                181,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                6.24,
+                4.76,
+                4.56
+              ],
+              "loadAfter": [
+                6.38,
+                4.81,
+                4.58
+              ]
+            },
+            {
+              "run": 4,
+              "p95": 7,
+              "physicsP95": 4.200000002980232,
+              "renderP95": 1.5999999791383743,
+              "initialOverlappingColliderPairs": 14,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 8,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                6.38,
+                4.81,
+                4.58
+              ],
+              "loadAfter": [
+                6.38,
+                4.81,
+                4.58
+              ]
+            },
+            {
+              "run": 5,
+              "p95": 8.099999994039536,
+              "physicsP95": 4.600000008940697,
+              "renderP95": 1.800000011920929,
+              "initialOverlappingColliderPairs": 14,
+              "initialWorstIntersection": -0.12513984739780426,
+              "renderTargetGrowths": 10,
+              "drawsPerItem": [
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180,
+                180
+              ],
+              "loadBefore": [
+                6.38,
+                4.81,
+                4.58
+              ],
+              "loadAfter": [
+                6.43,
+                4.85,
+                4.6
+              ]
+            }
+          ],
+          "medianP95": 7,
+          "medianPhysicsP95": 4.200000002980232,
+          "medianRenderP95": 1.5999999791383743
+        },
+        {
+          "condition": "separated-paced",
+          "runs": [
+            {
+              "run": 1,
+              "p95": 5.799999997019768,
+              "physicsP95": 0.6000000089406967,
+              "renderP95": 2.499999985098839,
+              "initialOverlappingColliderPairs": 0,
+              "initialWorstIntersection": 0,
+              "renderTargetGrowths": 32,
+              "drawsPerItem": [
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179
+              ],
+              "loadBefore": [
+                6.43,
+                4.85,
+                4.6
+              ],
+              "loadAfter": [
+                6.55,
+                4.9,
+                4.61
+              ]
+            },
+            {
+              "run": 2,
+              "p95": 4.200000002980232,
+              "physicsP95": 0.5999999940395355,
+              "renderP95": 1.9000000208616257,
+              "initialOverlappingColliderPairs": 0,
+              "initialWorstIntersection": 0,
+              "renderTargetGrowths": 32,
+              "drawsPerItem": [
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179
+              ],
+              "loadBefore": [
+                6.55,
+                4.9,
+                4.61
+              ],
+              "loadAfter": [
+                6.55,
+                4.9,
+                4.61
+              ]
+            },
+            {
+              "run": 3,
+              "p95": 4.100000008940697,
+              "physicsP95": 0.6000000089406967,
+              "renderP95": 1.800000011920929,
+              "initialOverlappingColliderPairs": 0,
+              "initialWorstIntersection": 0,
+              "renderTargetGrowths": 32,
+              "drawsPerItem": [
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179
+              ],
+              "loadBefore": [
+                6.55,
+                4.9,
+                4.61
+              ],
+              "loadAfter": [
+                6.75,
+                4.97,
+                4.64
+              ]
+            },
+            {
+              "run": 4,
+              "p95": 4.199999988079071,
+              "physicsP95": 0.5999999940395355,
+              "renderP95": 1.899999976158142,
+              "initialOverlappingColliderPairs": 0,
+              "initialWorstIntersection": 0,
+              "renderTargetGrowths": 32,
+              "drawsPerItem": [
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179
+              ],
+              "loadBefore": [
+                6.75,
+                4.97,
+                4.64
+              ],
+              "loadAfter": [
+                6.75,
+                4.97,
+                4.64
+              ]
+            },
+            {
+              "run": 5,
+              "p95": 4.5999999940395355,
+              "physicsP95": 0.6000000089406967,
+              "renderP95": 1.9999999850988388,
+              "initialOverlappingColliderPairs": 0,
+              "initialWorstIntersection": 0,
+              "renderTargetGrowths": 32,
+              "drawsPerItem": [
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179,
+                179
+              ],
+              "loadBefore": [
+                6.75,
+                4.97,
+                4.64
+              ],
+              "loadAfter": [
+                6.93,
+                5.04,
+                4.66
+              ]
+            }
+          ],
+          "medianP95": 4.200000002980232,
+          "medianPhysicsP95": 0.6000000089406967,
+          "medianRenderP95": 1.9000000208616257
+        }
+      ],
+      "ticket": {
+        "edge": [
+          {
+            "seed": 7,
+            "dot": 0.8907801068094612,
+            "seconds": 2.5083333333333333,
+            "sleeping": true
+          },
+          {
+            "seed": 16,
+            "dot": 0.5625686159777565,
+            "seconds": 2.433333333333333,
+            "sleeping": true
+          },
+          {
+            "seed": 21,
+            "dot": 0.8754095430013393,
+            "seconds": 2.466666666666667,
+            "sleeping": true
+          },
+          {
+            "seed": 22,
+            "dot": 0.38367162699615914,
+            "seconds": 2.575,
+            "sleeping": true
+          },
+          {
+            "seed": 40,
+            "dot": 0.19255265146887712,
+            "seconds": 2.341666666666667,
+            "sleeping": true
+          },
+          {
+            "seed": 44,
+            "dot": 0.4501548918287597,
+            "seconds": 2.8583333333333334,
+            "sleeping": true
+          },
+          {
+            "seed": 45,
+            "dot": 0.7826851626716373,
+            "seconds": 2.3833333333333333,
+            "sleeping": true
+          },
+          {
+            "seed": 46,
+            "dot": 0.4130659908370119,
+            "seconds": 2.325,
+            "sleeping": true
+          },
+          {
+            "seed": 52,
+            "dot": 0.6836094380470854,
+            "seconds": 2.941666666666667,
+            "sleeping": true
+          },
+          {
+            "seed": 53,
+            "dot": 0.842569476072109,
+            "seconds": 2.566666666666667,
+            "sleeping": true
+          },
+          {
+            "seed": 55,
+            "dot": 0.8592103364607624,
+            "seconds": 2.5166666666666666,
+            "sleeping": true
+          },
+          {
+            "seed": 67,
+            "dot": 0.22147016866713898,
+            "seconds": 2.566666666666667,
+            "sleeping": true
+          },
+          {
+            "seed": 73,
+            "dot": 0.8888067339762706,
+            "seconds": 2.6083333333333334,
+            "sleeping": true
+          },
+          {
+            "seed": 74,
+            "dot": 0.8918171983182468,
+            "seconds": 2.5833333333333335,
+            "sleeping": true
+          },
+          {
+            "seed": 75,
+            "dot": 0.7572763134901521,
+            "seconds": 2.3333333333333335,
+            "sleeping": true
+          },
+          {
+            "seed": 87,
+            "dot": 0.866561806541327,
+            "seconds": 2.4583333333333335,
+            "sleeping": true
+          },
+          {
+            "seed": 89,
+            "dot": 0.6010345455171127,
+            "seconds": 2.816666666666667,
+            "sleeping": true
+          },
+          {
+            "seed": 97,
+            "dot": 0.13837842745478257,
+            "seconds": 2.3333333333333335,
+            "sleeping": true
+          }
+        ],
+        "worst": {
+          "seed": 97,
+          "dot": 0.13837842745478257,
+          "seconds": 2.3333333333333335,
+          "sleeping": true
+        },
+        "atRest": {
+          "position": {
+            "x": 0.25410225987434387,
+            "y": 0.12135086208581924,
+            "z": 0.010299142450094223
+          },
+          "quaternion": {
+            "x": -0.7423051595687866,
+            "y": -0.04633062705397606,
+            "z": -0.6664629578590393,
+            "w": 0.05161161348223686
+          },
+          "linvel": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "angvel": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "mass": 0.011999999172985554,
+          "manifolds": [
+            {
+              "collider": 0,
+              "normal": {
+                "x": 0.0005661456380039454,
+                "y": 0.9999893307685852,
+                "z": -0.00459037022665143
+              },
+              "contacts": [
+                {
+                  "point": {
+                    "x": 0.27180224657058716,
+                    "y": 0.0005790106952190399,
+                    "z": 0.008389029651880264
+                  },
+                  "distance": 0.000158033799380064
+                },
+                {
+                  "point": {
+                    "x": 0.2698330283164978,
+                    "y": 0.00044065341353416443,
+                    "z": 0.008601047098636627
+                  },
+                  "distance": -0.00011868367437273264
+                },
+                {
+                  "point": {
+                    "x": 0.24084551632404327,
+                    "y": 0.00044219568371772766,
+                    "z": -0.25983843207359314
+                  },
+                  "distance": -0.000115599250420928
+                },
+                {
+                  "point": {
+                    "x": 0.2428147792816162,
+                    "y": 0.0005806013941764832,
+                    "z": -0.26005053520202637
+                  },
+                  "distance": 0.0001612299820408225
+                },
+                {
+                  "point": {
+                    "x": 0.25535744428634644,
+                    "y": 0.00044143199920654297,
+                    "z": -0.12545034289360046
+                  },
+                  "distance": -0.00011715653818100691
+                }
+              ]
+            },
+            {
+              "collider": 1,
+              "normal": {
+                "x": -0.0009173165308311582,
+                "y": 0.9999943375587463,
+                "z": -0.0032674663234502077
+              },
+              "contacts": [
+                {
+                  "point": {
+                    "x": 0.3007906675338745,
+                    "y": 0.0005774535238742828,
+                    "z": 0.27682775259017944
+                  },
+                  "distance": 0.0001549141015857458
+                },
+                {
+                  "point": {
+                    "x": 0.2988211512565613,
+                    "y": 0.00043909624218940735,
+                    "z": 0.2770400047302246
+                  },
+                  "distance": -0.0001218023244291544
+                },
+                {
+                  "point": {
+                    "x": 0.26983368396759033,
+                    "y": 0.0004406459629535675,
+                    "z": 0.008600462228059769
+                  },
+                  "distance": -0.00011870288290083408
+                },
+                {
+                  "point": {
+                    "x": 0.2718031108379364,
+                    "y": 0.0005790255963802338,
+                    "z": 0.008388262242078781
+                  },
+                  "distance": 0.000158058013767004
+                },
+                {
+                  "point": {
+                    "x": 0.28430670499801636,
+                    "y": 0.00043987855315208435,
+                    "z": 0.14262878894805908
+                  },
+                  "distance": -0.00012026762124150991
+                }
+              ]
+            }
+          ]
+        },
+        "afterWakeWithoutImpulse": {
+          "position": {
+            "x": 0.2538582384586334,
+            "y": 0.12131840735673904,
+            "z": 0.010322270914912224
+          },
+          "quaternion": {
+            "x": -0.7422632575035095,
+            "y": -0.047006815671920776,
+            "z": -0.6664033532142639,
+            "w": 0.05236666649580002
+          },
+          "sleeping": true,
+          "dot": 0.14039070409093046
+        }
+      }
+    }
+  ]
+}

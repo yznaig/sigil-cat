@@ -1,0 +1,213 @@
+{
+  "decision": "e1110-12",
+  "softCcdPrediction": 0.08,
+  "barrelHalfExtents": [
+    0.14,
+    0.014,
+    0.014
+  ],
+  "visibleBarrelHalfExtents": [
+    0.14,
+    0.012,
+    0.012
+  ],
+  "floorTolerance": 0.01,
+  "cpuBudgetMs": 2,
+  "sizes": {
+    "desktop": {
+      "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+      "runs": [
+        {
+          "p95": 2,
+          "loadBefore": [
+            7.68,
+            5.15,
+            6.27
+          ],
+          "loadAfter": [
+            7.68,
+            5.15,
+            6.27
+          ]
+        },
+        {
+          "p95": 1.7000000029802322,
+          "loadBefore": [
+            7.68,
+            5.15,
+            6.27
+          ],
+          "loadAfter": [
+            7.68,
+            5.15,
+            6.27
+          ]
+        },
+        {
+          "p95": 1.2999999970197678,
+          "loadBefore": [
+            7.68,
+            5.15,
+            6.27
+          ],
+          "loadAfter": [
+            7.68,
+            5.15,
+            6.27
+          ]
+        },
+        {
+          "p95": 1.8999999985098839,
+          "loadBefore": [
+            7.68,
+            5.15,
+            6.27
+          ],
+          "loadAfter": [
+            7.46,
+            5.15,
+            6.26
+          ]
+        },
+        {
+          "p95": 1.2000000029802322,
+          "loadBefore": [
+            7.46,
+            5.15,
+            6.26
+          ],
+          "loadAfter": [
+            7.46,
+            5.15,
+            6.26
+          ]
+        }
+      ],
+      "medianP95": 1.7000000029802322,
+      "checks": [
+        "CHECK world no eager engine before first solid:  PASS",
+        "CHECK world lazy engine loads after cat:  PASS",
+        "CHECK world renderer: ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "CHECK world 100 bounded drops floor penetration: min=-0.03294 violations=13 FAIL",
+        "CHECK world check-rifle off-centre grip: error=0.001px angle=2.893 PASS",
+        "CHECK world cancellation removes joint:  PASS",
+        "CHECK world check-top off-centre grip: error=0.009px angle=2.562 PASS",
+        "CHECK world cancellation removes joint:  PASS",
+        "CHECK world blur releases input:  PASS",
+        "CHECK world sleeping unregisters callback: steps=0 syncs=0 PASS",
+        "CHECK world thicker barrel resting art gap: gap=0.793px height=0.00184 PASS",
+        "CHECK world respawn waits five seconds:  PASS",
+        "CHECK world respawn falls once from above: delay=5021ms PASS",
+        "CHECK world budget run 1: {\"p95\":2,\"loadBefore\":[7.68,5.15,6.27],\"loadAfter\":[7.68,5.15,6.27]}",
+        "CHECK world budget run 2: {\"p95\":1.7000000029802322,\"loadBefore\":[7.68,5.15,6.27],\"loadAfter\":[7.68,5.15,6.27]}",
+        "CHECK world budget run 3: {\"p95\":1.2999999970197678,\"loadBefore\":[7.68,5.15,6.27],\"loadAfter\":[7.68,5.15,6.27]}",
+        "CHECK world budget run 4: {\"p95\":1.8999999985098839,\"loadBefore\":[7.68,5.15,6.27],\"loadAfter\":[7.46,5.15,6.26]}",
+        "CHECK world budget run 5: {\"p95\":1.2000000029802322,\"loadBefore\":[7.46,5.15,6.26],\"loadAfter\":[7.46,5.15,6.26]}",
+        "CHECK world 20 bodies desktop CPU budget: median p95=1.700ms/60Hz frame; runs=2.000,1.700,1.300,1.900,1.200; phone viewport is not iPhone hardware PASS",
+        "CHECK world cleanup zero bodies and joints:  PASS"
+      ]
+    },
+    "phone": {
+      "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+      "runs": [
+        {
+          "p95": 1.6000000014901161,
+          "loadBefore": [
+            3.82,
+            4.47,
+            5.71
+          ],
+          "loadAfter": [
+            3.82,
+            4.47,
+            5.71
+          ]
+        },
+        {
+          "p95": 1.8999999985098839,
+          "loadBefore": [
+            3.82,
+            4.47,
+            5.71
+          ],
+          "loadAfter": [
+            3.82,
+            4.47,
+            5.71
+          ]
+        },
+        {
+          "p95": 1.7000000029802322,
+          "loadBefore": [
+            3.82,
+            4.47,
+            5.71
+          ],
+          "loadAfter": [
+            3.82,
+            4.47,
+            5.71
+          ]
+        },
+        {
+          "p95": 2.100000001490116,
+          "loadBefore": [
+            3.82,
+            4.47,
+            5.71
+          ],
+          "loadAfter": [
+            3.82,
+            4.47,
+            5.71
+          ]
+        },
+        {
+          "p95": 1.8999999985098839,
+          "loadBefore": [
+            3.82,
+            4.47,
+            5.71
+          ],
+          "loadAfter": [
+            3.82,
+            4.47,
+            5.71
+          ]
+        }
+      ],
+      "medianP95": 1.8999999985098839,
+      "checks": [
+        "CHECK world no eager engine before first solid:  PASS",
+        "CHECK world lazy engine loads after cat:  PASS",
+        "CHECK world renderer: ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+        "CHECK world 100 bounded drops floor penetration: min=-0.03294 violations=13 FAIL",
+        "CHECK world check-rifle off-centre grip: error=0.002px angle=2.914 PASS",
+        "CHECK world cancellation removes joint:  PASS",
+        "CHECK world check-top off-centre grip: error=0.006px angle=2.093 PASS",
+        "CHECK world cancellation removes joint:  PASS",
+        "CHECK world blur releases input:  PASS",
+        "CHECK world sleeping unregisters callback: steps=0 syncs=0 PASS",
+        "CHECK world thicker barrel resting art gap: gap=0.389px height=0.00182 PASS",
+        "CHECK world respawn waits five seconds:  PASS",
+        "CHECK world respawn falls once from above: delay=5022ms PASS",
+        "CHECK world budget run 1: {\"p95\":1.6000000014901161,\"loadBefore\":[3.82,4.47,5.71],\"loadAfter\":[3.82,4.47,5.71]}",
+        "CHECK world budget run 2: {\"p95\":1.8999999985098839,\"loadBefore\":[3.82,4.47,5.71],\"loadAfter\":[3.82,4.47,5.71]}",
+        "CHECK world budget run 3: {\"p95\":1.7000000029802322,\"loadBefore\":[3.82,4.47,5.71],\"loadAfter\":[3.82,4.47,5.71]}",
+        "CHECK world budget run 4: {\"p95\":2.100000001490116,\"loadBefore\":[3.82,4.47,5.71],\"loadAfter\":[3.82,4.47,5.71]}",
+        "CHECK world budget run 5: {\"p95\":1.8999999985098839,\"loadBefore\":[3.82,4.47,5.71],\"loadAfter\":[3.82,4.47,5.71]}",
+        "CHECK world 20 bodies desktop CPU budget: median p95=1.900ms/60Hz frame; runs=1.600,1.900,1.700,2.100,1.900; phone viewport is not iPhone hardware PASS",
+        "CHECK world cleanup zero bodies and joints:  PASS"
+      ]
+    }
+  },
+  "suiteEnd": [
+    "FAILED: world-core-desktop world-core-phone",
+    "(full output: /tmp/tmp.pp9to3jBb2)"
+  ],
+  "failures": [
+    "CHECK world 100 bounded drops floor penetration: min=-0.03294 violations=13 FAIL",
+    "CHECK world 100 bounded drops floor penetration: min=-0.03294 violations=13 FAIL",
+    "FAILED: world-core-desktop world-core-phone"
+  ]
+}

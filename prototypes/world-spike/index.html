@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Sigil Cat · world physics study</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#f3f0e9;color:#39382e;font:14px Georgia,serif}canvas{display:block;width:100%;height:100%;touch-action:none}header{position:absolute;top:28px;left:28px;pointer-events:none}h1{font-size:22px;font-weight:normal;margin:0 0 8px}p{margin:6px 0;max-width:330px;line-height:1.5}footer{position:absolute;bottom:24px;left:24px;right:24px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}button{border:1px solid #b9b5a8;background:#faf8f1;color:inherit;border-radius:20px;padding:9px 16px;cursor:pointer}output{font:12px monospace}#error{color:#922}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/","cannon-es":"https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"}}</script>
+<header><h1>A little weight in the world</h1><p>Grab the brass top or rifle anywhere. Lift, let it swing, then let go.</p><p>Scroll while holding to move into the page.</p><p id="error"></p></header>
+<canvas aria-label="Physics study: draggable rifle and spinning top"></canvas>
+<footer><button id="drop">Drop again</button><button id="many">20 objects</button><output id="status">Loading…</output></footer>
+<script type="module">import('./spike.js').catch(e=>{document.querySelector('#error').textContent=e.message; console.error(e);});</script>
+</html>

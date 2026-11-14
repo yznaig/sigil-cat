@@ -1,0 +1,68 @@
+{
+  "source": "cat-bird-source.png",
+  "sourceSize": [
+    2172,
+    724
+  ],
+  "sourceSha256": "8428f3135491cce41b5cdb0eeeec95eb80580c3895fe414622fdddff6a47b677",
+  "frameWidth": 28,
+  "frameHeight": 28,
+  "columns": 3,
+  "rows": 1,
+  "frames": [
+    "wings up",
+    "wings level",
+    "wings down"
+  ],
+  "order": [
+    0,
+    1,
+    2,
+    1
+  ],
+  "sourceTranslations": [
+    [
+      0,
+      0
+    ],
+    [
+      35,
+      0
+    ],
+    [
+      70,
+      0
+    ]
+  ],
+  "measuredGridPitch": 18.1,
+  "sampleGridPitch": 18.2,
+  "sampleOrigin": [
+    140,
+    145
+  ],
+  "stationaryRegion": {
+    "x": 15,
+    "y": 0,
+    "width": 13,
+    "height": 28,
+    "referenceFrame": 1
+  },
+  "body": {
+    "x": 5,
+    "y": 7,
+    "width": 22,
+    "height": 15,
+    "shape": "ellipse"
+  },
+  "pivot": [
+    16,
+    14.5
+  ],
+  "fitBodyTo": [
+    34,
+    24
+  ],
+  "key": "min(red, blue) - green > 8 => transparent; binary alpha; transparent RGB zeroed",
+  "sampling": "nearest cell-centre samples only; no blur, quantization, drawing, eye or butter added",
+  "outputSha256": "842a4f95e37126529ba1412e44cd7ad1449510cd4fe7c93445224f03391c295b"
+}

@@ -1,0 +1,163 @@
+{
+  "name": "hats",
+  "variant": "wizard",
+  "bounds": {
+    "min": [
+      -0.23999999463558197,
+      0,
+      -0.23999999463558197
+    ],
+    "max": [
+      0.23999999463558197,
+      0.38999998569488525,
+      0.23999999463558197
+    ]
+  },
+  "triangles": 832,
+  "meshes": 3,
+  "materials": 3,
+  "textures": [
+    [
+      32,
+      32
+    ]
+  ],
+  "geometryBytes": 79872,
+  "finite": true,
+  "parts": [
+    {
+      "name": "rack/wizard",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "physics": {
+        "units": "cat-height units; play mass, not kg",
+        "mass": 0.06,
+        "colliders": [
+          {
+            "type": "cone",
+            "radius": 0.137,
+            "height": 0.36,
+            "position": [
+              0,
+              0.2,
+              0
+            ]
+          },
+          {
+            "type": "cylinder",
+            "radius": 0.235,
+            "height": 0.022,
+            "position": [
+              0,
+              0.012,
+              0
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "anchors": {
+          "headSeat": [
+            0,
+            0,
+            0
+          ],
+          "butter": [
+            0,
+            0.39,
+            0
+          ],
+          "peg": [
+            0,
+            0.025,
+            0
+          ]
+        }
+      }
+    }
+  ],
+  "physics": {
+    "units": "cat-height units; play mass, not kg",
+    "mass": 0.06,
+    "colliders": [
+      {
+        "type": "cone",
+        "radius": 0.137,
+        "height": 0.36,
+        "position": [
+          0,
+          0.2,
+          0
+        ]
+      },
+      {
+        "type": "cylinder",
+        "radius": 0.235,
+        "height": 0.022,
+        "position": [
+          0,
+          0.012,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "anchors": {
+      "headSeat": [
+        0,
+        0,
+        0
+      ],
+      "butter": [
+        0,
+        0.39,
+        0
+      ],
+      "peg": [
+        0,
+        0.025,
+        0
+      ]
+    }
+  },
+  "render": [
+    {
+      "frame": 35,
+      "calls": 7,
+      "triangles": 1666,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 36,
+      "calls": 7,
+      "triangles": 1666,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 37,
+      "calls": 6,
+      "triangles": 1664,
+      "points": 0,
+      "lines": 0
+    }
+  ],
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "errors": []
+}

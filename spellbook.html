@@ -1,0 +1,17 @@
+<!doctype html>
+<!--
+  The grimoire used to be a page of its own; it is now a pop-up over the cat (src/ui/books.js), so returning to him no
+  longer loads everything again (playtest-2). This address still works: it opens the page with the grimoire up.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sigil Cat · the grimoire</title>
+<meta name="theme-color" content="#fdf0e6">
+<meta http-equiv="refresh" content="0; url=./?book=grimoire">
+<link rel="canonical" href="./?book=grimoire">
+<script>location.replace('./?book=grimoire' + location.hash);</script>
+</head>
+<body style="background:#fdf0e6"><p><a href="./?book=grimoire">Open the grimoire</a></p></body>
+</html>

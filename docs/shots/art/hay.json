@@ -1,0 +1,174 @@
+{
+  "name": "hay",
+  "variant": null,
+  "bounds": {
+    "min": [
+      -0.2979307174682617,
+      -0.012799999676644802,
+      -0.20991986989974976
+    ],
+    "max": [
+      0.27306312322616577,
+      0.13061286509037018,
+      0.21426820755004883
+    ]
+  },
+  "triangles": 9908,
+  "meshes": 4,
+  "materials": 4,
+  "textures": [],
+  "geometryBytes": 951168,
+  "finite": true,
+  "parts": [
+    {
+      "name": "hay",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "physics": {
+        "units": "cat-height units; play mass, not kg",
+        "mass": 0.12,
+        "colliders": [
+          {
+            "type": "convex",
+            "vertices": [
+              [
+                -0.22,
+                0,
+                -0.14
+              ],
+              [
+                0.22,
+                0,
+                -0.14
+              ],
+              [
+                0.23,
+                0,
+                0.14
+              ],
+              [
+                -0.22,
+                0,
+                0.14
+              ],
+              [
+                -0.13,
+                0.12,
+                -0.06
+              ],
+              [
+                0.12,
+                0.13,
+                -0.06
+              ],
+              [
+                0.12,
+                0.12,
+                0.07
+              ],
+              [
+                -0.1,
+                0.15,
+                0.05
+              ]
+            ]
+          }
+        ],
+        "anchors": {
+          "landed": {
+            "mass": 0
+          }
+        }
+      }
+    }
+  ],
+  "physics": {
+    "units": "cat-height units; play mass, not kg",
+    "mass": 0.12,
+    "colliders": [
+      {
+        "type": "convex",
+        "vertices": [
+          [
+            -0.22,
+            0,
+            -0.14
+          ],
+          [
+            0.22,
+            0,
+            -0.14
+          ],
+          [
+            0.23,
+            0,
+            0.14
+          ],
+          [
+            -0.22,
+            0,
+            0.14
+          ],
+          [
+            -0.13,
+            0.12,
+            -0.06
+          ],
+          [
+            0.12,
+            0.13,
+            -0.06
+          ],
+          [
+            0.12,
+            0.12,
+            0.07
+          ],
+          [
+            -0.1,
+            0.15,
+            0.05
+          ]
+        ]
+      }
+    ],
+    "anchors": {
+      "landed": {
+        "mass": 0
+      }
+    }
+  },
+  "render": [
+    {
+      "frame": 35,
+      "calls": 9,
+      "triangles": 19818,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 36,
+      "calls": 9,
+      "triangles": 19818,
+      "points": 0,
+      "lines": 0
+    },
+    {
+      "frame": 37,
+      "calls": 9,
+      "triangles": 19818,
+      "points": 0,
+      "lines": 0
+    }
+  ],
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "errors": []
+}

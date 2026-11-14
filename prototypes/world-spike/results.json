@@ -1,0 +1,322 @@
+[
+  {
+    "size": "desktop",
+    "width": 1280,
+    "height": 900,
+    "dpr": 1,
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "errors": [],
+    "initMs": 1154.8000000044703,
+    "moving": [
+      {
+        "count": 3,
+        "stepMs": {
+          "n": 240,
+          "mean": 0.11375000001862645,
+          "p95": 0.29999999701976776,
+          "max": 6.5
+        },
+        "frameCpuMs": {
+          "n": 87,
+          "mean": 0.8218390806310478,
+          "p95": 1.3999999985098839,
+          "max": 1.7000000029802322
+        },
+        "rafGapMs": {
+          "n": 86,
+          "mean": 28.680232558139537,
+          "p95": 33.400000000000546,
+          "max": 50.100000000000364
+        },
+        "contacts": 65
+      },
+      {
+        "count": 20,
+        "stepMs": {
+          "n": 240,
+          "mean": 3.406250000031044,
+          "p95": 7,
+          "max": 9.900000005960464
+        },
+        "frameCpuMs": {
+          "n": 34,
+          "mean": 15.911764705444083,
+          "p95": 37.600000001490116,
+          "max": 47.899999998509884
+        },
+        "rafGapMs": {
+          "n": 33,
+          "mean": 73.73636363636362,
+          "p95": 100.09999999999854,
+          "max": 116.60000000000036
+        },
+        "contacts": 300
+      }
+    ],
+    "idle": {
+      "steps": 0,
+      "frames": 0,
+      "pending": 0
+    },
+    "grabs": [
+      {
+        "n": 0,
+        "picked": "rifle",
+        "error": 0.00004022185238453366
+      },
+      {
+        "n": 1,
+        "picked": "top-0",
+        "error": 0.00015610276120736247
+      }
+    ],
+    "network": [
+      {
+        "url": "http://localhost:8743/prototypes/world-spike/",
+        "requestBodySize": 0,
+        "requestHeadersSize": 655,
+        "responseBodySize": 1657,
+        "responseHeadersSize": 212
+      },
+      {
+        "url": "http://localhost:8743/prototypes/world-spike/spike.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 569,
+        "responseBodySize": 12241,
+        "responseHeadersSize": 219
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/environments/RoomEnvironment.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 677,
+        "responseBodySize": 1741,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/geometries/ConvexGeometry.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 671,
+        "responseBodySize": 784,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 631,
+        "responseBodySize": 104976,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/loaders/GLTFLoader.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 657,
+        "responseBodySize": 21666,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/math/ConvexHull.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 713,
+        "responseBodySize": 6820,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 629,
+        "responseBodySize": 77073,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/utils/BufferGeometryUtils.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 726,
+        "responseBodySize": 7573,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/utils/SkeletonUtils.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 714,
+        "responseBodySize": 2894,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.core.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 669,
+        "responseBodySize": 209510,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "http://localhost:8743/assets/models/awp.glb",
+        "requestBodySize": 0,
+        "requestHeadersSize": 527,
+        "responseBodySize": 86816,
+        "responseHeadersSize": 221
+      }
+    ],
+    "downloadBodyBytes": 533751,
+    "pass": true
+  },
+  {
+    "size": "phone",
+    "width": 390,
+    "height": 844,
+    "dpr": 2,
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "errors": [],
+    "initMs": 969,
+    "moving": [
+      {
+        "count": 3,
+        "stepMs": {
+          "n": 240,
+          "mean": 0.05666666667287548,
+          "p95": 0.19999999552965164,
+          "max": 1.8999999985098839
+        },
+        "frameCpuMs": {
+          "n": 110,
+          "mean": 0.6736363637176427,
+          "p95": 1.1000000014901161,
+          "max": 1.5
+        },
+        "rafGapMs": {
+          "n": 109,
+          "mean": 22.628440366972477,
+          "p95": 33.40000000000009,
+          "max": 50
+        },
+        "contacts": 65
+      },
+      {
+        "count": 20,
+        "stepMs": {
+          "n": 240,
+          "mean": 3.196250000006209,
+          "p95": 6.0999999940395355,
+          "max": 9.199999995529652
+        },
+        "frameCpuMs": {
+          "n": 38,
+          "mean": 17.44736842203297,
+          "p95": 38.899999998509884,
+          "max": 39
+        },
+        "rafGapMs": {
+          "n": 37,
+          "mean": 66.66216216216216,
+          "p95": 99.89999999999964,
+          "max": 100
+        },
+        "contacts": 300
+      }
+    ],
+    "idle": {
+      "steps": 0,
+      "frames": 0,
+      "pending": 0
+    },
+    "grabs": [
+      {
+        "n": 0,
+        "picked": "rifle",
+        "error": 0.00027591106392821726
+      },
+      {
+        "n": 1,
+        "picked": "top-0",
+        "error": 0.00003970812708805932
+      }
+    ],
+    "network": [
+      {
+        "url": "http://localhost:8743/prototypes/world-spike/",
+        "requestBodySize": 0,
+        "requestHeadersSize": 655,
+        "responseBodySize": 1657,
+        "responseHeadersSize": 212
+      },
+      {
+        "url": "http://localhost:8743/prototypes/world-spike/spike.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 569,
+        "responseBodySize": 12241,
+        "responseHeadersSize": 219
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/environments/RoomEnvironment.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 677,
+        "responseBodySize": 1741,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/geometries/ConvexGeometry.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 671,
+        "responseBodySize": 784,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/loaders/GLTFLoader.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 657,
+        "responseBodySize": 21657,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 629,
+        "responseBodySize": 77073,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/math/ConvexHull.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 713,
+        "responseBodySize": 6820,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/utils/BufferGeometryUtils.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 726,
+        "responseBodySize": 7911,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 631,
+        "responseBodySize": 133048,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/utils/SkeletonUtils.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 714,
+        "responseBodySize": 2894,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.core.js",
+        "requestBodySize": 0,
+        "requestHeadersSize": 669,
+        "responseBodySize": 209195,
+        "responseHeadersSize": 0
+      },
+      {
+        "url": "http://localhost:8743/assets/models/awp.glb",
+        "requestBodySize": 0,
+        "requestHeadersSize": 527,
+        "responseBodySize": 86816,
+        "responseHeadersSize": 221
+      }
+    ],
+    "downloadBodyBytes": 561837,
+    "pass": true
+  }
+]

@@ -1,0 +1,26 @@
+<!doctype html><meta charset="utf-8"><title>Sigil Cat · prepared art</title>
+<style>body{margin:0;background:#e6e1d8;color:#302b26;font:14px system-ui}header{height:76px;padding:24px 30px 0;box-sizing:border-box}h1{font-size:20px;margin:0 0 5px;font-weight:600}p{margin:0;color:#746b61;font-size:12px}canvas{display:block}footer{display:flex;justify-content:space-around;padding:14px;font-size:12px;letter-spacing:2px;text-transform:uppercase}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}</script>
+<header><h1 id="title"></h1><p>ORIGINAL PROCEDURAL ART · THREE VIEWS · PHYSICAL MATERIALS · 1 UNIT = CAT HEIGHT</p></header>
+<canvas id="view"></canvas><footer><span>Front / three quarter</span><span>Rear / construction</span><span id="third">Detail / underside</span></footer>
+<script type="module">
+import * as T from 'three';import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+const query=new URLSearchParams(location.search),name=query.get('asset')||'rack',variant=query.get('variant');
+const mod=await import(`/assets/models/prepared/${name}.js`),item=mod.create({variant,lit:query.has('lit')});
+document.querySelector('#title').textContent=`SIGIL CAT / ${name.toUpperCase()}${variant?' / '+variant.toUpperCase():''}`;
+const renderer=new T.WebGLRenderer({canvas:document.querySelector('#view'),antialias:true,preserveDrawingBuffer:true});renderer.setSize(1440,620);renderer.setPixelRatio(1);renderer.setClearColor('#e6e1d8');renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.0;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFShadowMap;
+const scene=new T.Scene(),pmrem=new T.PMREMGenerator(renderer),env=new RoomEnvironment();scene.environment=pmrem.fromScene(env,.04).texture;scene.environmentIntensity=.7;env.dispose();pmrem.dispose();scene.add(item);
+const light=new T.DirectionalLight('#fff0da',2.8);light.position.set(3,5,4);light.castShadow=true;light.shadow.mapSize.set(1024,1024);light.shadow.bias=-.00015;scene.add(light);scene.add(new T.HemisphereLight('#e8efff','#827056',.7));
+const fill=new T.DirectionalLight('#dceaff',.8);fill.position.set(-3,2,-4);scene.add(fill);
+const bounds=new T.Box3().setFromObject(item),center=bounds.getCenter(new T.Vector3()),size=bounds.getSize(new T.Vector3()),span=Math.max(size.y*1.25,Math.hypot(size.x,size.z)*1.25);
+const plane=new T.Mesh(new T.PlaneGeometry(200,200),new T.MeshStandardMaterial({color:'#e6e1d8',roughness:1}));plane.rotation.x=-Math.PI/2;plane.position.y=bounds.min.y-.002;plane.receiveShadow=true;scene.add(plane);
+Object.assign(light.shadow.camera,{left:-span,right:span,top:span,bottom:-span,near:.1,far:15});light.target.position.copy(center);scene.add(light.target);
+const camera=new T.OrthographicCamera(-span*.39,span*.39,span*.5,-span*.5,.001,100);
+const angles=[[.85,.45,1.5],[-1.15,.5,-1.3],[.55,1.7,1]];if(query.has('under'))angles[2]=[.7,-1.1,1.3];
+renderer.setScissorTest(true);const stats=[];
+for(let i=0;i<3;i++){plane.visible=!(i===2&&query.has('under'));camera.position.copy(center).add(new T.Vector3(...angles[i]).normalize().multiplyScalar(span*4));camera.lookAt(center);camera.updateProjectionMatrix();renderer.setViewport(i*480,0,480,620);renderer.setScissor(i*480,0,480,620);renderer.render(scene,camera);stats.push({...renderer.info.render});}
+let triangles=0,meshes=0;const materials=new Set(),textures=new Set();item.traverse(o=>{if(!o.isMesh)return;meshes++;triangles+=(o.geometry.index?.count||o.geometry.attributes.position.count)/3;materials.add(o.material);for(const k of ['map','bumpMap','roughnessMap'])if(o.material[k])textures.add(o.material[k]);});
+let geometryBytes=0,finite=true;const parts=[];item.traverse(o=>{if(o.userData.physics)parts.push({name:o.name,position:o.position.toArray(),rotation:o.rotation.toArray().slice(0,3),physics:o.userData.physics});if(o.isMesh){for(const a of Object.values(o.geometry.attributes)){geometryBytes+=a.array.byteLength;for(const v of a.array)if(!Number.isFinite(v))finite=false;}geometryBytes+=o.geometry.index?.array.byteLength||0;}});if(!finite)throw Error('Non-finite geometry');
+window.artReport={name,variant,bounds:{min:bounds.min.toArray(),max:bounds.max.toArray()},triangles,meshes,materials:materials.size,textures:[...textures].map(t=>[t.image.width,t.image.height]),geometryBytes,finite,parts,physics:item.userData.physics,render:stats,renderer:renderer.getContext().getParameter(renderer.getContext().getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL)};
+window.artReady=true;
+</script>

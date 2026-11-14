@@ -1,0 +1,247 @@
+{
+ "sit": {
+  "frames_checked": 61,
+  "sheet_frames": [
+   0,
+   24,
+   48,
+   72,
+   96,
+   120
+  ],
+  "worst": {
+   "self": 0,
+   "whisk": 0,
+   "floor": -0.0017958821263164282,
+   "vol_min_ratio": 1.0,
+   "max_move": 0.0009
+  },
+  "bad": [],
+  "ok": true
+ },
+ "lie": {
+  "frames_checked": 61,
+  "sheet_frames": [
+   0,
+   24,
+   48,
+   72,
+   96,
+   120
+  ],
+  "worst": {
+   "self": 0,
+   "whisk": 0,
+   "floor": 0.0008065029978752136,
+   "vol_min_ratio": 1.0,
+   "max_move": 0.0002
+  },
+  "bad": [],
+  "ok": true
+ },
+ "sleep": {
+  "frames_checked": 91,
+  "sheet_frames": [
+   0,
+   36,
+   72,
+   108,
+   144,
+   180
+  ],
+  "worst": {
+   "self": 0,
+   "whisk": 0,
+   "floor": 0.0013566389679908752,
+   "vol_min_ratio": 1.0,
+   "max_move": 0.0001
+  },
+  "bad": [],
+  "ok": true
+ },
+ "sit_to_lie": {
+  "frames_checked": 22,
+  "sheet_frames": [
+   0,
+   8,
+   17,
+   25,
+   34,
+   42
+  ],
+  "worst": {
+   "self": 0,
+   "whisk": 0,
+   "floor": 0.0022715404629707336,
+   "vol_min_ratio": 0.999,
+   "max_move": 0.1544
+  },
+  "bad": [],
+  "ok": true
+ },
+ "lie_to_sit": {
+  "frames_checked": 20,
+  "sheet_frames": [
+   0,
+   8,
+   15,
+   23,
+   30,
+   38
+  ],
+  "worst": {
+   "self": 0,
+   "whisk": 0,
+   "floor": 0.0020850887522101402,
+   "vol_min_ratio": 0.971,
+   "max_move": 0.3462
+  },
+  "bad": [],
+  "ok": true
+ },
+ "lie_to_sleep": {
+  "frames_checked": 30,
+  "sheet_frames": [
+   0,
+   12,
+   23,
+   35,
+   46,
+   58
+  ],
+  "worst": {
+   "self": 0,
+   "whisk": 0,
+   "floor": 0.0020805029198527336,
+   "vol_min_ratio": 1.0,
+   "max_move": 0.0369
+  },
+  "bad": [],
+  "ok": true
+ },
+ "sleep_to_lie": {
+  "frames_checked": 21,
+  "sheet_frames": [
+   0,
+   8,
+   16,
+   24,
+   32,
+   40
+  ],
+  "worst": {
+   "self": 0,
+   "whisk": 0,
+   "floor": 0.0025531798601150513,
+   "vol_min_ratio": 0.983,
+   "max_move": 0.1703
+  },
+  "bad": [],
+  "ok": true
+ },
+ "sit_to_stretch": {
+  "frames_checked": 18,
+  "sheet_frames": [
+   0,
+   7,
+   13,
+   20,
+   26,
+   33
+  ],
+  "worst": {
+   "self": 0,
+   "whisk": 0,
+   "floor": 0.003232410177588463,
+   "vol_min_ratio": 1.0,
+   "max_move": 0.1666
+  },
+  "bad": [],
+  "ok": true
+ },
+ "lie_to_stretch": {
+  "frames_checked": 19,
+  "sheet_frames": [
+   0,
+   7,
+   14,
+   21,
+   28,
+   35
+  ],
+  "worst": {
+   "self": 0,
+   "whisk": 0,
+   "floor": 0.0020850887522101402,
+   "vol_min_ratio": 0.964,
+   "max_move": 0.4689
+  },
+  "bad": [],
+  "ok": true
+ },
+ "stretch": {
+  "frames_checked": 57,
+  "sheet_frames": [
+   0,
+   22,
+   45,
+   67,
+   90,
+   112
+  ],
+  "worst": {
+   "self": 0,
+   "whisk": 0,
+   "floor": 0.002536456799134612,
+   "vol_min_ratio": 0.996,
+   "max_move": 0.0828
+  },
+  "bad": [],
+  "ok": true
+ },
+ "add_hop": {
+  "frames_checked": 14,
+  "sheet_frames": [
+   0,
+   5,
+   10,
+   16,
+   21,
+   26
+  ],
+  "worst": {
+   "self": 0,
+   "whisk": 0,
+   "floor": -0.001998246880248189,
+   "vol_min_ratio": 0.996,
+   "max_move": 0.1011
+  },
+  "bad": [],
+  "ok": true
+ },
+ "add_startle": {
+  "frames_checked": 12,
+  "sheet_frames": [
+   0,
+   4,
+   8,
+   13,
+   17,
+   21
+  ],
+  "worst": {
+   "self": 0,
+   "whisk": 0,
+   "floor": -0.005705523770302534,
+   "vol_min_ratio": 0.995,
+   "max_move": 0.0654
+  },
+  "bad": [],
+  "ok": true
+ },
+ "_rest": {
+  "self": 0,
+  "whisk": 0,
+  "floor": 0.0
+ }
+}

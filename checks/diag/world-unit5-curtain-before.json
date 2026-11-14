@@ -1,0 +1,10 @@
+{
+  "phase": "software curtain visibility diagnostic before fix",
+  "renderer": "SwiftShader; not a performance or acceptance run",
+  "firstAttempt": "30s load-event navigation timeout",
+  "checks": [
+    "CHECK board curtain renderer: ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "CHECK board curtain before: [{\"id\":\"paper\",\"stored\":true,\"root\":false,\"art\":false,\"picture\":false,\"domHidden\":true,\"domDisplay\":\"none\",\"shadow\":false,\"shadowParent\":\"3022f408-49d5-4313-a778-5aa2731d6e73\",\"artParent\":\"3022f408-49d5-4313-a778-5aa2731d6e73\",\"stage\":\"834c63ac-9a07-4381-8ff1-6c98e9360cf9\"},{\"id\":\"postcard\",\"stored\":false,\"root\":true,\"art\":true,\"picture\":false,\"domHidden\":false,\"domDisplay\":\"block\",\"shadow\":true,\"shadowParent\":\"3022f408-49d5-4313-a778-5aa2731d6e73\",\"artParent\":\"3022f408-49d5-4313-a778-5aa2731d6e73\",\"stage\":\"834c63ac-9a07-4381-8ff1-6c98e9360cf9\"},{\"id\":\"ticket\",\"domDisplay\":null,\"artParent\":\"3022f408-49d5-4313-a778-5aa2731d6e73\",\"stage\":\"834c63ac-9a07-4381-8ff1-6c98e9360cf9\"}]",
+    "CHECK board curtain after new ticket: [{\"id\":\"paper\",\"stored\":true,\"root\":false,\"art\":false,\"picture\":false,\"domHidden\":true,\"domDisplay\":\"none\",\"shadow\":false,\"shadowParent\":\"24d73c56-f26c-409a-8446-00d90f8eb7f4\",\"artParent\":\"24d73c56-f26c-409a-8446-00d90f8eb7f4\",\"stage\":\"834c63ac-9a07-4381-8ff1-6c98e9360cf9\"},{\"id\":\"postcard\",\"stored\":true,\"root\":true,\"art\":false,\"picture\":false,\"domHidden\":true,\"domDisplay\":\"none\",\"shadow\":true,\"shadowParent\":\"24d73c56-f26c-409a-8446-00d90f8eb7f4\",\"artParent\":\"24d73c56-f26c-409a-8446-00d90f8eb7f4\",\"stage\":\"834c63ac-9a07-4381-8ff1-6c98e9360cf9\"},{\"id\":\"ticket\",\"stored\":false,\"root\":true,\"art\":true,\"picture\":false,\"domHidden\":false,\"domDisplay\":\"block\",\"shadow\":true,\"shadowParent\":\"24d73c56-f26c-409a-8446-00d90f8eb7f4\",\"artParent\":\"24d73c56-f26c-409a-8446-00d90f8eb7f4\",\"stage\":\"834c63ac-9a07-4381-8ff1-6c98e9360cf9\"}]"
+  ]
+}

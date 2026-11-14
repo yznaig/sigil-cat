@@ -1,0 +1,508 @@
+{
+  "idle": {
+    "before": {
+      "steps": 300,
+      "syncs": 304,
+      "shadows": 165,
+      "atlas": 9,
+      "shelf": 5,
+      "board": 1,
+      "supports": 0,
+      "callbacks": 12
+    },
+    "after": {
+      "steps": 300,
+      "syncs": 304,
+      "shadows": 165,
+      "atlas": 9,
+      "shelf": 5,
+      "board": 1,
+      "supports": 0,
+      "callbacks": 12
+    },
+    "zero": true
+  },
+  "submission": {
+    "renderer": "ANGLE (Microsoft Corporation, D3D12 (NVIDIA GeForce RTX 5070 Ti), OpenGL ES 3.1)",
+    "load": [
+      12.53,
+      13.72,
+      11.41
+    ],
+    "method": "five alternating rounds; five batches of 50 identical main renders per mode; gl.finish outside the CPU timer prevents backlog carry; hiding is diagnostic only",
+    "out": [
+      {
+        "round": 0,
+        "name": "all",
+        "samples": [
+          0.07,
+          0.06599999994039535,
+          0.10200000017881393,
+          0.09599999994039536,
+          0.08
+        ],
+        "info": {
+          "frame": 1426,
+          "calls": 16,
+          "triangles": 3036,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 0,
+        "name": "no-shelf",
+        "samples": [
+          0.09800000011920929,
+          0.10400000005960465,
+          0.08200000017881394,
+          0.07400000005960465,
+          0.12199999988079072
+        ],
+        "info": {
+          "frame": 1677,
+          "calls": 15,
+          "triangles": 3034,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 0,
+        "name": "no-new-shadows",
+        "samples": [
+          0.06,
+          0.05199999988079071,
+          0.06599999994039535,
+          0.06800000011920929,
+          0.052000000178813933
+        ],
+        "info": {
+          "frame": 1928,
+          "calls": 14,
+          "triangles": 336,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 0,
+        "name": "no-unit6-pictures",
+        "samples": [
+          0.044000000059604645,
+          0.05,
+          0.06599999994039535,
+          0.06199999988079071,
+          0.06
+        ],
+        "info": {
+          "frame": 2179,
+          "calls": 13,
+          "triangles": 3030,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 0,
+        "name": "no-floor-shadows",
+        "samples": [
+          0.047999999821186065,
+          0.15400000005960465,
+          0.14799999982118606,
+          0.1780000001192093,
+          0.14400000005960464
+        ],
+        "info": {
+          "frame": 2430,
+          "calls": 10,
+          "triangles": 20,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 1,
+        "name": "no-floor-shadows",
+        "samples": [
+          0.1780000001192093,
+          0.15599999994039535,
+          0.23599999994039536,
+          0.11800000011920929,
+          0.1980000001192093
+        ],
+        "info": {
+          "frame": 2681,
+          "calls": 10,
+          "triangles": 20,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 1,
+        "name": "no-unit6-pictures",
+        "samples": [
+          0.21799999982118606,
+          0.21800000011920928,
+          0.12800000011920928,
+          0.24,
+          0.2819999998807907
+        ],
+        "info": {
+          "frame": 2932,
+          "calls": 13,
+          "triangles": 3030,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 1,
+        "name": "no-new-shadows",
+        "samples": [
+          0.34799999982118607,
+          0.3180000001192093,
+          0.53,
+          0.15400000005960465,
+          0.29599999994039533
+        ],
+        "info": {
+          "frame": 3183,
+          "calls": 14,
+          "triangles": 336,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 1,
+        "name": "no-shelf",
+        "samples": [
+          0.45400000005960467,
+          0.31,
+          0.2419999998807907,
+          0.25,
+          0.3079999998211861
+        ],
+        "info": {
+          "frame": 3434,
+          "calls": 15,
+          "triangles": 3034,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 1,
+        "name": "all",
+        "samples": [
+          0.3459999999403954,
+          0.30399999976158143,
+          0.4060000002384186,
+          0.24799999982118606,
+          0.24399999976158143
+        ],
+        "info": {
+          "frame": 3685,
+          "calls": 16,
+          "triangles": 3036,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 2,
+        "name": "all",
+        "samples": [
+          0.33599999994039537,
+          0.24800000011920928,
+          0.3120000001788139,
+          0.24799999982118606,
+          0.26800000011920927
+        ],
+        "info": {
+          "frame": 3936,
+          "calls": 16,
+          "triangles": 3036,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 2,
+        "name": "no-shelf",
+        "samples": [
+          0.2519999998807907,
+          0.24399999976158143,
+          0.28400000005960463,
+          0.22,
+          0.25
+        ],
+        "info": {
+          "frame": 4187,
+          "calls": 15,
+          "triangles": 3034,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 2,
+        "name": "no-new-shadows",
+        "samples": [
+          0.17600000023841858,
+          0.23599999994039536,
+          0.22799999982118607,
+          0.25599999994039535,
+          0.20599999994039536
+        ],
+        "info": {
+          "frame": 4438,
+          "calls": 14,
+          "triangles": 336,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 2,
+        "name": "no-unit6-pictures",
+        "samples": [
+          0.19199999988079072,
+          0.19400000005960463,
+          0.19,
+          0.20200000017881392,
+          0.21599999994039534
+        ],
+        "info": {
+          "frame": 4689,
+          "calls": 13,
+          "triangles": 3030,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 2,
+        "name": "no-floor-shadows",
+        "samples": [
+          0.20799999982118605,
+          0.1780000001192093,
+          0.14400000005960464,
+          0.1780000001192093,
+          0.19199999988079072
+        ],
+        "info": {
+          "frame": 4940,
+          "calls": 10,
+          "triangles": 20,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 3,
+        "name": "no-floor-shadows",
+        "samples": [
+          0.18599999994039534,
+          0.1980000001192093,
+          0.25,
+          0.1719999998807907,
+          0.16799999982118607
+        ],
+        "info": {
+          "frame": 5191,
+          "calls": 10,
+          "triangles": 20,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 3,
+        "name": "no-unit6-pictures",
+        "samples": [
+          0.22199999988079072,
+          0.16599999994039535,
+          0.2419999998807907,
+          0.25400000005960466,
+          0.26599999994039536
+        ],
+        "info": {
+          "frame": 5442,
+          "calls": 13,
+          "triangles": 3030,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 3,
+        "name": "no-new-shadows",
+        "samples": [
+          0.20799999982118605,
+          0.3219999998807907,
+          0.2619999998807907,
+          0.3,
+          0.2740000000596046
+        ],
+        "info": {
+          "frame": 5693,
+          "calls": 14,
+          "triangles": 336,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 3,
+        "name": "no-shelf",
+        "samples": [
+          0.41,
+          0.35200000017881394,
+          0.38399999976158145,
+          0.34,
+          0.31
+        ],
+        "info": {
+          "frame": 5944,
+          "calls": 15,
+          "triangles": 3034,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 3,
+        "name": "all",
+        "samples": [
+          0.31,
+          0.3440000000596046,
+          0.38,
+          0.32400000005960466,
+          0.3120000001788139
+        ],
+        "info": {
+          "frame": 6195,
+          "calls": 16,
+          "triangles": 3036,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 4,
+        "name": "all",
+        "samples": [
+          0.29400000005960464,
+          0.30400000005960465,
+          0.3,
+          0.2739999997615814,
+          0.24599999994039534
+        ],
+        "info": {
+          "frame": 6446,
+          "calls": 16,
+          "triangles": 3036,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 4,
+        "name": "no-shelf",
+        "samples": [
+          0.26400000005960467,
+          0.24,
+          0.31599999994039535,
+          0.22599999994039535,
+          0.2580000001192093
+        ],
+        "info": {
+          "frame": 6697,
+          "calls": 15,
+          "triangles": 3034,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 4,
+        "name": "no-new-shadows",
+        "samples": [
+          0.21400000005960465,
+          0.20599999994039536,
+          0.24,
+          0.24599999994039534,
+          0.2280000001192093
+        ],
+        "info": {
+          "frame": 6948,
+          "calls": 14,
+          "triangles": 336,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 4,
+        "name": "no-unit6-pictures",
+        "samples": [
+          0.23799999982118605,
+          0.2080000001192093,
+          0.19,
+          0.23599999994039536,
+          0.17400000005960464
+        ],
+        "info": {
+          "frame": 7199,
+          "calls": 13,
+          "triangles": 3030,
+          "points": 0,
+          "lines": 0
+        }
+      },
+      {
+        "round": 4,
+        "name": "no-floor-shadows",
+        "samples": [
+          0.2619999998807907,
+          0.1819999998807907,
+          0.16,
+          0.18,
+          0.19400000005960463
+        ],
+        "info": {
+          "frame": 7450,
+          "calls": 10,
+          "triangles": 20,
+          "points": 0,
+          "lines": 0
+        }
+      }
+    ]
+  },
+  "summary": {
+    "all": {
+      "medianMs": 0.29400000005960464,
+      "calls": 16
+    },
+    "no-shelf": {
+      "medianMs": 0.2519999998807907,
+      "calls": 15
+    },
+    "no-new-shadows": {
+      "medianMs": 0.2280000001192093,
+      "calls": 14
+    },
+    "no-unit6-pictures": {
+      "medianMs": 0.20200000017881392,
+      "calls": 13
+    },
+    "no-floor-shadows": {
+      "medianMs": 0.1780000001192093,
+      "calls": 10
+    }
+  }
+}

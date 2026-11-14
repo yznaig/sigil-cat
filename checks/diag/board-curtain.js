@@ -1,0 +1,14 @@
+cat.auto=false;
+const gl=stage.renderer.getContext();note('board curtain renderer',gl.getParameter(gl.getExtension('WEBGL_debug_renderer_info').UNMASKED_RENDERER_WEBGL));
+const ids=['paper','postcard'];await Promise.all(ids.map(id=>keepsakes.give(id).worldTask));await sleep(2000);
+site.pinboard.select('paper');await sleep(100);
+const state=()=>['paper','postcard','ticket'].map(id=>{const i=keepsakes.get(id),s=site.worldLayout.shadows.get(id);return {id,stored:i?.stored,root:i?.object?.visible,art:i?.cardArt?.visible,picture:i?.picture?.card.visible,domHidden:i?.el.hidden,domDisplay:i&&getComputedStyle(i.el).display,shadow:s?.group.visible,shadowParent:s?.group.parent?.uuid,artParent:site.pinboard.art?.group.uuid,stage:stage.scene.uuid};});
+note('board curtain before',JSON.stringify(state()));
+await E.butterman.clipsReady;E.butterman.seek(9,'rise');await sleep(250);
+await keepsakes.give('ticket').worldTask;await sleep(2000);E.butterman.stop();await sleep(400);
+note('board curtain after new ticket',JSON.stringify(state()));await __shot('world-unit5-curtain-unlock');
+const cards=['paper','postcard','ticket'].map(id=>keepsakes.get(id));
+for(const i of cards)i.picture.card.visible=false;
+await sleep(100);await __shot('world-unit5-curtain-no-independent-pictures');
+for(const i of cards)site.worldLayout.shadows.get(i.id).group.visible=false;
+site.pinboard.invalidate();await sleep(100);await __shot('world-unit5-curtain-no-card-shadows');

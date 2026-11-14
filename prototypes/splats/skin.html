@@ -1,0 +1,183 @@
+<!doctype html>
+<!--
+  Skinning test: can a splat cat move with our rig? (docs/research/splats.md, question 2.)
+  The cheapest binding: every Gaussian copies the bone weights of its nearest mesh vertices (in the sit pose),
+  then Spark's SplatSkinning moves it with the GLB's bones each frame, while the mesh cat plays the same clip beside it.
+  The splat is the stand-in baked from the mesh's sit pose (bake.js) or, with #src=idol, splats/sit.spz (Idol output,
+  aligned to the mesh). The bones carry only the skeleton: the GLB's pose blend shapes (loaf, sleep) do not reach
+  the splat, which is part of what this page shows.
+  Hash: #clip=sit_to_lie (any GLB clip)  #t=1.2 freeze that moment  #mode=lbs (Spark's linear blend; draws nothing with baked splats)  #naive=1 (Spark's DQ rest/bone API as documented: drifts)
+        #n=65536  #ui=0  #side=0 (splat only)  #src=idol
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Splat Skinning</title>
+<style>
+  :root { --bone: #f7ede3; --ink: #121212; --ink-soft: #6b6359; --pill: rgba(255,255,255,.7); }
+  html, body { margin: 0; height: 100%; background: var(--bone); color: var(--ink); overflow: hidden;
+    font: 15px/1.4 ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  .tag { position: fixed; top: 14px; left: 16px; margin: 0; font-size: 13px; color: var(--ink-soft); max-width: calc(100vw - 32px); }
+  .controls { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); display: flex; gap: 6px; flex-wrap: wrap;
+    justify-content: center; width: max-content; max-width: calc(100vw - 32px); }
+  .controls button { font: inherit; font-size: 13px; border: 0; border-radius: 999px; padding: 7px 12px; background: var(--pill); cursor: pointer; }
+  .controls button[aria-pressed="true"] { background: var(--ink); color: var(--bone); }
+  #status { position: fixed; left: 50%; top: 45%; transform: translate(-50%,-50%); color: var(--ink-soft); font-size: 14px; }
+  body.clean .tag, body.clean .controls { display: none; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/",
+    "@sparkjsdev/spark": "https://cdn.jsdelivr.net/npm/@sparkjsdev/spark@2.4.0/dist/spark.module.min.js"
+  }
+}
+</script>
+</head>
+<body>
+<p class="tag">Skinning test · left: mesh cat · right: splat bound to the same bones (nearest-vertex weights)</p>
+<div class="controls" id="clips"></div>
+<div id="status">binding…</div>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { SparkRenderer, SplatMesh, SplatSkinning, SplatSkinningMode } from '@sparkjsdev/spark';
+import { loadFibre, bakeSplats } from './bake.js';
+
+const params = new URLSearchParams(location.hash.slice(1));
+if (params.get('ui') === '0') document.body.classList.add('clean');
+const count = Number(params.get('n')) || 65536;
+const side = params.get('side') !== '0';
+const lbs = params.get('mode') === 'lbs';   // Spark's linear-blend mode needs ext/cov splats, which refuse hand-built splats
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setClearColor(0xf7ede3);
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 40);
+scene.add(new SparkRenderer({ renderer }));
+scene.add(new THREE.HemisphereLight(0xfffaf2, 0x6b5f52, 1.6));
+const key = new THREE.DirectionalLight(0xfff4e6, 1.6); key.position.set(-0.3, 3, 3.5); scene.add(key);
+const OFFSET = side ? 0.75 : 0;
+function frame() {
+  renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight;
+  const needW = side ? 3.1 : 1.7, half = THREE.MathUtils.degToRad(15);
+  const dist = Math.max(1.9 / 2 / Math.tan(half), needW / 2 / (Math.tan(half) * camera.aspect));
+  const yaw = THREE.MathUtils.degToRad(Number(params.get('yaw') ?? 35));
+  camera.position.set(Math.sin(yaw) * dist, 0.62 + dist * 0.12, Math.cos(yaw) * dist);
+  camera.lookAt(0, 0.5, 0); camera.updateProjectionMatrix();
+}
+addEventListener('resize', frame); frame();
+
+const [gltf, fibre] = await Promise.all([
+  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync('../sigil-cat/models/sigil-cat.glb'),
+  loadFibre('../sigil-cat/textures/fiber-tile.png'),
+]);
+const cat = gltf.scene; scene.add(cat);
+let body, whiskers;
+cat.traverse((o) => { if (o.isSkinnedMesh) { o.frustumCulled = false; if (o.name.includes('whisker')) whiskers = o; else body = o; } });
+body.material = new THREE.MeshStandardMaterial({ color: 0x2a2725, roughness: 0.95 });
+whiskers.material = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.5 });
+const bones = body.skeleton.bones;
+const mixer = new THREE.AnimationMixer(cat);
+const play = (name) => { mixer.stopAllAction(); const a = mixer.clipAction(gltf.animations.find((c) => c.name === name)); a.reset().play(); return a; };
+
+// 1. Rest = the sit pose. Both the splat and the bone rest transforms are taken here.
+play('sit'); mixer.setTime(0); cat.position.x = 0; cat.updateMatrixWorld(true);
+let splat;
+if (params.get('src') === 'idol') splat = new SplatMesh({ url: 'splats/sit.spz', covSplats: lbs, extSplats: lbs });
+else splat = new SplatMesh({ covSplats: lbs, extSplats: lbs, maxSplats: count, constructSplats: bakeSplats({ body, whiskers, fibre, count, seed: 7 }) });
+await splat.initialized;
+scene.add(splat);
+
+// 2. Nearest-vertex weights. Posed vertices of body + whiskers into a uniform grid; each Gaussian blends the
+//    skin weights of its 4 nearest vertices (inverse distance), keeps the 4 strongest bones.
+const verts = [];   // {p, idx[4], w[4]}
+const v = new THREE.Vector3();
+for (const m of [body, whiskers]) {
+  const si = m.geometry.attributes.skinIndex, sw = m.geometry.attributes.skinWeight;
+  const boneMap = m.skeleton.bones.map((b) => bones.indexOf(b));
+  for (let i = 0; i < m.geometry.attributes.position.count; i++) {
+    m.getVertexPosition(i, v); v.applyMatrix4(m.matrixWorld);
+    verts.push({ p: v.clone(), idx: [0, 1, 2, 3].map((k) => boneMap[si.getComponent(i, k)]), w: [0, 1, 2, 3].map((k) => sw.getComponent(i, k)) });
+  }
+}
+const cell = 0.04, grid = new Map(), key3 = (x, y, z) => `${x},${y},${z}`;
+for (const vt of verts) { const k = key3(...vt.p.toArray().map((c) => Math.floor(c / cell))); (grid.get(k) || grid.set(k, []).get(k)).push(vt); }
+function nearest(p, k = 4) {
+  const c = p.toArray().map((x) => Math.floor(x / cell));
+  for (let r = 1; r < 12; r++) {
+    const found = [];
+    for (let dx = -r; dx <= r; dx++) for (let dy = -r; dy <= r; dy++) for (let dz = -r; dz <= r; dz++) {
+      const g = grid.get(key3(c[0] + dx, c[1] + dy, c[2] + dz)); if (g) found.push(...g);
+    }
+    if (found.length >= k) return found.map((f) => [f, f.p.distanceToSquared(p)]).sort((a, b) => a[1] - b[1]).slice(0, k);
+  }
+  return [];
+}
+const skinning = new SplatSkinning({ mesh: splat, numBones: bones.length, mode: lbs ? SplatSkinningMode.LINEAR_BLEND : SplatSkinningMode.DUAL_QUATERNION });
+const bi = new THREE.Vector4(), bw = new THREE.Vector4();
+splat.forEachSplat((i, center) => {
+  const acc = new Map();
+  for (const [vt, d2] of nearest(center)) {
+    const f = 1 / (Math.sqrt(d2) + 1e-3);
+    vt.idx.forEach((b, k) => { if (vt.w[k] > 0) acc.set(b, (acc.get(b) || 0) + vt.w[k] * f); });
+  }
+  const top = [...acc].sort((a, b) => b[1] - a[1]).slice(0, 4), sum = top.reduce((s, [, w]) => s + w, 0) || 1;
+  while (top.length < 4) top.push([0, 0]);
+  bi.set(...top.map(([b]) => b)); bw.set(...top.map(([, w]) => w / sum));
+  skinning.setSplatBones(i, bi, bw);
+});
+const q = new THREE.Quaternion(), p = new THREE.Vector3(), s = new THREE.Vector3();
+// Spark's rest/bone API composes rest and current in an order that turns about the world origin, not the bone
+// (relQuat = rest^-1 * now, relPos = now - rest), so parts drift. Fix: keep Spark's rest at identity and hand it
+// the standard skin transform ourselves: now * rest^-1, decomposed into a rotation and a translation.
+const naive = params.get('naive') === '1';
+const restInv = bones.map((b) => b.matrixWorld.clone().invert());
+bones.forEach((b, i) => {
+  b.matrixWorld.decompose(p, q, s);
+  if (lbs) skinning.setRestMatrix(i, new THREE.Matrix4());
+  else if (naive) skinning.setRestQuatPos(i, q, p);
+  else skinning.setRestQuatPos(i, new THREE.Quaternion(), new THREE.Vector3());
+});
+skinning.updateBones();
+splat.skinning = skinning; splat.updateGenerator();
+cat.position.x = -OFFSET; splat.position.x = OFFSET;
+
+// 3. Each frame: bones' world transforms, minus the mesh cat's sideways offset, into the skinning.
+const shift = new THREE.Matrix4().makeTranslation(OFFSET, 0, 0), m4 = new THREE.Matrix4();
+function syncBones() {
+  cat.updateMatrixWorld(true);
+  bones.forEach((b, i) => {
+    m4.makeTranslation(OFFSET, 0, 0).multiply(b.matrixWorld);           // undo cat.x = -OFFSET
+    if (lbs) skinning.setBoneMatrix(i, m4.multiply(restInv[i]));
+    else { if (!naive) m4.multiply(restInv[i]); m4.decompose(p, q, s); skinning.setBoneQuatPos(i, q, p); }
+  });
+  skinning.updateBones(); splat.needsUpdate = true;
+}
+
+const clips = ['sit_to_lie', 'lie_to_sleep', 'sit_to_stretch', 'stretch', 'add_hop'];
+let clipName = clips.includes(params.get('clip')) ? params.get('clip') : 'sit_to_stretch';
+let action = play(clipName);
+const btns = {};
+for (const c of clips) { const b = document.createElement('button'); b.textContent = c; b.onclick = () => { clipName = c; action = play(c); sync(); }; document.getElementById('clips').appendChild(b); btns[c] = b; }
+const sync = () => { for (const [c, b] of Object.entries(btns)) b.setAttribute('aria-pressed', String(c === clipName)); };
+sync();
+document.getElementById('status').hidden = true;
+const freezeT = params.has('t') ? Number(params.get('t')) : null;
+let last = performance.now();
+renderer.setAnimationLoop(() => {
+  const now = performance.now(), dt = (now - last) / 1000; last = now;
+  if (freezeT !== null) mixer.setTime(freezeT); else mixer.update(dt);
+  syncBones();
+  renderer.render(scene, camera);
+});
+requestAnimationFrame(() => requestAnimationFrame(() => { document.body.dataset.ready = '1'; }));
+window.splatSkin = { skinning, splat, mixer };
+</script>
+</body>
+</html>
