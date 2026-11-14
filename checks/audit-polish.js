@@ -2,7 +2,7 @@ cat.auto=false;
 const centre=el=>{const b=el.getBoundingClientRect();return {x:b.x+b.width/2,y:b.y+b.height/2};};
 const owns=(el,p)=>{const at=document.elementFromPoint(p.x,p.y);return at===el||el.contains(at);};
 registry.find('whisper',{quiet:true});registry.find('blastoff',{quiet:true});await sleep(600);
-const controls=['sound','ask','volume','grimoire'].map(id=>document.getElementById(id));
+const controls=['sound','volume','grimoire'].map(id=>document.getElementById(id));
 const targets=controls.map(el=>{const p=centre(el);return {id:el.id,points:[[-21.5,-21.5],[21.5,-21.5],[-21.5,21.5],[21.5,21.5],[0,0]].every(([x,y])=>owns(el,{x:p.x+x,y:p.y+y}))};});
 check('audit footer utilities have 44px hit areas',targets.every(t=>t.points),JSON.stringify(targets));
 // Native presses must get through the lock, without releasing it or triggering a skip.

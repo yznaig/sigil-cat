@@ -1,5 +1,5 @@
 // The page's chrome in the "Hush" look: the name at the top, the numbers top right, the row of marks, the message
-// line, the sound control, "ask the butter" and the grimoire link. Messages arrive in his script (a made-up
+// line, the sound control and the grimoire link. Messages arrive in his script (a made-up
 // alphabet of small signs) and settle into words, letter by letter.
 //   ui.say('new: the bolt')        a message (ms: how long it stays; plain: no script)
 //   ui.caption(text | null)        a line held as long as the caller wants it (Butterman's lyrics)
@@ -154,9 +154,9 @@ export function createUI(site) {
   vol.addEventListener('input', () => { audio.context(); audio.setVolume(Number(vol.value) / 100); });
   vol.addEventListener('change', () => audio.play('click', { gain: 0.4 }));
 
-  // ---- ask the butter: it never does the trick for you ----
-  let hintIx = store.get('askIx', 0);
-  $('ask').addEventListener('click', () => { say(config.ui.hints[hintIx++ % config.ui.hints.length], { ms: 4200 }); store.set('askIx', hintIx); });
+  // "ask the butter" (a button of hints) is gone (polish lane, 2026-11-13, Aaron: "I think we should just remove 'ask
+  // the butter'"); an older save's place in its list is dropped. The Ask the Butter achievement is the butter's whisper.
+  if (store.get('askIx') != null) store.del('askIx');
 
   // ---- the cat speaks: a line above his head, in his script, settling into words (playtest-2, item 1) ----
   // One sentence at a time. At the start of each he hops as if pressed and the bonk plays once. The line is placed
@@ -206,7 +206,7 @@ export function createUI(site) {
     const box = (el) => { const r = el?.getBoundingClientRect(); return r && r.width && r.height ? r : null; };
     // the words at the top: one beside his x narrows the line; one over it (the name; the numbers on a narrow
     // portrait page) is a ceiling
-    const name = box($('name')), tops = [box(document.querySelector('.top .tl')), box($('tally'))].filter(Boolean);
+    const name = box($('name')), tops = [box(document.querySelector('.top .tl')), box($('fs-toggle')), box($('tally'))].filter(Boolean);   // fs-toggle: the full-screen button (fullscreen lane, playtest-3)
     const above = tops.filter((r) => r.left <= x && r.right >= x), sides = tops.filter((r) => !above.includes(r));
     let room = W - edge * 2;
     for (const r of sides) room = Math.min(room, 2 * (r.left > x ? r.left - x : x - r.right) - 16);

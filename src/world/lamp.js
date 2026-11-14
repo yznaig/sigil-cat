@@ -127,14 +127,20 @@ export function createLamp(site, rack) {
   // A floor decal down and to the right of the lamp: a soft violet pool where the UV light falls, and in it a wobbly,
   // badly drawn smiley that glows only there. Built the first time the lamp is lit; hidden (not drawn) while it is off.
   let ink = null, inkFade = null, inkOn = false;
-  const SMILEY = {w: 1.25, d: .8, offset: [.42, .3], fade: .6};
+  // offset [x, z] from the lamp's socket; it was [.42, .3]. Polish lane (playtest 3, Aaron: "The glow-in-the-dark smiley
+  // face should also be moved closer to the front, just a little bit, because currently it's slightly covered by the
+  // controller stand"): .12 nearer the front, which clears the stand at 1366x768 to 1920x1080 with its glow. On a short
+  // screen (`short` px tall or less: a phone on its side) the floor in front of the stand is where the sound button sits,
+  // so there it slides right instead (offsetShort), clear of both.
+  const SMILEY = {w: 1.25, d: .8, offset: [.42, .42], offsetShort: [.74, .28], short: 500, fade: .6};
   function placeSmiley() {
     if (!ink || !rack.root) return;
     rack.root.updateMatrixWorld(true);
     const socket = supports.registry.get('rack-lamp')?.slots[0].position; if (!socket) return;
     const lamp = rack.root.localToWorld(new T.Vector3(...socket));
     // the decal's left edge starts under the lamp; the smiley sits in its right half
-    ink.position.set(lamp.x + SMILEY.offset[0], .004, lamp.z + SMILEY.offset[1]);
+    const [ox, oz] = stage.height <= SMILEY.short ? SMILEY.offsetShort : SMILEY.offset;
+    ink.position.set(lamp.x + ox, .004, lamp.z + oz);
   }
   function smiley(on) {
     if (!on && !ink) return;

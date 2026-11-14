@@ -68,14 +68,17 @@ function createEggCup(site){
  async function ensure({arrive=false}={}){
   if(task)return task;
   task=(async()=>{
-   const [,,egg]=await Promise.all([world.ensure(),stage.ensureEnv(),import('../../assets/models/prepared/kitchen/egg.js')]);
+   const [,,egg,{mat}]=await Promise.all([world.ensure(),stage.ensureEnv(),import('../../assets/models/prepared/kitchen/egg.js'),import('../../assets/models/prepared/core.js')]);
    const s=eggScale();slots[0].position=[0,seatHeight(egg.radiusAt,egg.EGG.length,s),0];
    // the egg's shape for its share of the shadow (its collider hull, a lathe like the art)
    {const pts=egg.outline(20).map(v=>new T.Vector2(v.x*s,v.y*s));eggArt=new T.LatheGeometry(pts,16);}
    root=new T.Group();root.name='egg-cup';visual=new T.Group();
    const lathe=new T.LatheGeometry(C.profile.map(([r,y])=>new T.Vector2(r*k,y*k)),48);
-   const porcelain=forPicture(new T.MeshStandardMaterial({color:'#f3ede3',roughness:.22,metalness:0}));
-   visual.add(new T.Mesh(lathe,porcelain));
+   // Turned wood (polish lane, playtest 3, Aaron: "It's a bit too hard to see the egg cup ... we can make the egg cup
+   // wooden"): the controller stand's maple (src/flappy/stand-art.js), its grain running up the turned cup, a little
+   // more polish than the stand; it was white porcelain, close to the cream wall.
+   const wood=forPicture(mat('#9a6b45',.36,0,'wood'));
+   visual.add(new T.Mesh(lathe,wood));
    // Invisible floor-shadow proxy: the cup's own lathe.
    const proxy=new T.Mesh(lathe,new T.MeshBasicMaterial({visible:false}));proxy.name='egg-cup-shadow';root.add(proxy);
    stage.scene.add(root);

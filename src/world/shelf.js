@@ -24,7 +24,9 @@ export const SHELF_VIEW={square:true,yawDeg:30,tilt:.1,width:.34,maxWidth:450,of
 export const HOOKS={x:[-.21,.2],y:-.058,z:.05,takes:['bucket','flour']};
 // The resting top (e1111-42) leans this way in shelf space (radians from +x toward the front): forward and to the
 // left, its crown toward you and its stem away from the rifle.
-const TOP_LEAN=Math.PI-.55,HOLE={x:-.38,z:.06,r:.073,floor:.014,top:.05};
+// The recess sits at the art's TOP_X (assets/models/prepared/shelf.js; polish lane, playtest 3: moved left from -.38
+// so the top no longer hides the rifle's stock).
+const TOP_LEAN=Math.PI-.55,HOLE={x:-.53,z:.06,r:.073,floor:.014,top:.05};
 export function shelfService(site){return site.shelf??=createShelf(site);}
 function createShelf(site){
  const {THREE:T,world,stage,supports,keepsakes,store}=site;
@@ -32,7 +34,7 @@ function createShelf(site){
  let task=null,root,picture,entry,art,preview,dirty=false,last='',stopKey='',home=null,homeRect=null,arrival=null,wall=null;
  const arrivals=furnitureArrivals(site);
  const vertices=boxVertices(T,[.71,.27,.20],[0,.07,0]);
- const slots=IDS.map(id=>({id,accepts:[id],position:({rifle:[0,.14,-.09],top:[-.38,.016,.06],pat:[.035,.064,.07],tin:[.46,.05,.035]})[id],quaternion:[0,0,0,1]}));
+ const slots=IDS.map(id=>({id,accepts:[id],position:({rifle:[0,.14,-.09],top:[HOLE.x,.016,.06],pat:[.035,.064,.07],tin:[.46,.05,.035]})[id],quaternion:[0,0,0,1]}));
  const receiver=new T.Group();receiver.position.y=.05;receiver.rotation.x=-Math.PI/2;
  // The point an item hangs from, in its own frame: the middle of its topmost points (the pail's grip, the sack's
  // folded top). Its slot puts that point on the hook; the swing pivots about it.

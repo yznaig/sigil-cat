@@ -9,7 +9,9 @@
 // Nothing runs at rest: the world's own step calls this only while the top is awake.
 export const TOP_SPIN = {
   seconds: 4.4,            // spinning upright (was ~0.7 s of free spin before it toppled; +4 s per e1111-58)
-  omega: [30, 9],          // spin speed at the start and end of it, rad/s
+  // spin speed at the start and end of it, rad/s (polish lane, playtest 3, Aaron: "needs to spin even faster"; was
+  // [30, 9]; 54 rad/s is ~52 degrees a frame at 60 fps, well short of the 180 where a spin starts to read backwards)
+  omega: [54, 15],
   lean: [.035, .2],        // lean from upright as it starts and just before it falls, radians
   precess: [2.2, 5.5],     // how fast the lean wanders round, rad/s
   rise: [.42, .7],         // seconds to right itself from a slight tilt / from lying flat

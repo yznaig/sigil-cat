@@ -1,11 +1,13 @@
 // The reward uses a fixed support and a visual rotor, never an unstable perpetual contact.
+// The charged rotor's speed, rad/s (polish lane, playtest 3, "the spinning top needs to spin even faster": was 12).
+const ROTOR=20;
 export function createChargedTop(site){
  const {world,stage,THREE:T}=site;
  let inst=null,angle=0,listening=false;
  const stats={frames:0};
  function unlisten(){const n=stage.onFrame.indexOf(frame);if(n>=0)stage.onFrame.splice(n,1);listening=false;}
  function listen(){if(inst&&!document.hidden&&!stage.reducedMotion&&!inst.worldEntry.support&&!listening){stage.onFrame.push(frame);listening=true;}}
- function frame(dt){if(!inst)return;angle=(angle+dt*12)%(Math.PI*2);const e=inst.worldEntry;
+ function frame(dt){if(!inst)return;angle=(angle+dt*ROTOR)%(Math.PI*2);const e=inst.worldEntry;
   e.object.quaternion.setFromAxisAngle(new T.Vector3(0,1,0),angle);e.object.updateMatrixWorld(true);e.sync(e);stats.frames++;
  }
  function stop(){if(!inst)return;const i=inst,e=i.worldEntry;inst=null;unlisten();i.setState({charged:false});i.key.querySelector('button').textContent=i.def.label;

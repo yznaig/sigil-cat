@@ -91,8 +91,9 @@ export default function createFling(site) {
       const end = stage.toScreen(resting.flightLanding);
       const e = k * k * (3 - 2 * k), y = hit.y + (end.y - hit.y) * e;
       place(hit.x + (end.x-hit.x)*e + Math.sin(k * 9) * 3 * (1-e), y, F.impactScale + (1-F.impactScale) * e, 14 * side * (1 - e),1,e);
-      streak.grow = e; streak.redraw?.();
+      streak.grow = e; streak.endPx = (resting.picture?.rect?.y ?? y - resting.h * (F.impactScale + (1-F.impactScale) * e) / 2) - streak.box.y; streak.redraw?.();
     });
+    streak.endPx = null; streak.redraw?.();
     try { squeak?.stop(); } catch { /* done */ }
     pat.remove();
     butter.endFlight(resting);
@@ -115,9 +116,15 @@ export default function createFling(site) {
         if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
         g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, W, H);
         const filmW = W * F.width / filmSize, dx = W * (inst.state.offsetX || 0) / filmSize;
-        const len = Math.max(0,(H-filmW*.35)*(inst.grow ?? 1));
+        // While the pat slides it is drawn larger than at rest, and the film (a page layer, over the GL pat) would run
+        // into it: during the slide it stops at the top of the pat's drawn picture (inst.endPx, set by the slide; polish lane, playtest 3,
+        // when the film became dense enough to show there).
+        const len = Math.max(0,Math.min((H-filmW*.35)*(inst.grow ?? 1), inst.endPx ?? Infinity));
         // Thin butter transmits the page colour. Feather the edges and leave narrow wet ridges,
         // rather than giving the smear the opaque silhouette of a second pat.
+        // Polish lane (playtest 3, Aaron: "The butter streak from flinging the butter needs to be less see-through, so
+        // it's a bit more blaring on the screen"): the film about three times as dense (its peak .25 -> .72) and a
+        // deeper butter yellow, the ridges brighter; the edges still feather out to nothing.
         let seed=inst.state.seed||7; const rnd=()=>((seed=seed*16807%2147483647)/2147483647);
         for(let y=0;y<len;y++) {
           const cap=Math.min(1,Math.sqrt(y/Math.max(1,filmW*.22)));
@@ -125,10 +132,10 @@ export default function createFling(site) {
           const centre=W/2+dx*(.5-y/H);
           const left=centre-width/2+Math.sin(y*.025)*filmW*.025;
           const gr=g.createLinearGradient(left,0,left+width,0);
-          gr.addColorStop(0,'rgba(243,211,107,0)');gr.addColorStop(.12,'rgba(243,211,107,.12)');
-          gr.addColorStop(.38,'rgba(250,228,150,.25)');gr.addColorStop(.78,'rgba(243,211,107,.17)');gr.addColorStop(1,'rgba(243,211,107,0)');
+          gr.addColorStop(0,'rgba(238,196,82,0)');gr.addColorStop(.12,'rgba(238,196,82,.42)');
+          gr.addColorStop(.38,'rgba(248,220,128,.72)');gr.addColorStop(.78,'rgba(238,196,82,.55)');gr.addColorStop(1,'rgba(238,196,82,0)');
           g.fillStyle=gr;g.fillRect(left,y,width,1);
-          for(let j=0;j<4;j++) {const x=centre+filmW*(-.23+j*.14)+Math.sin(y*.018+j)*1.2;g.fillStyle=`rgba(255,248,215,${(.05+rnd()*.08)*(1-y/H*.5)})`;g.fillRect(x,y,.7,1);}
+          for(let j=0;j<4;j++) {const x=centre+filmW*(-.23+j*.14)+Math.sin(y*.018+j)*1.2;g.fillStyle=`rgba(255,248,215,${(.14+rnd()*.14)*(1-y/H*.5)})`;g.fillRect(x,y,.7,1);}
         }
         g.globalCompositeOperation = 'destination-out';
         for (const e of inst.erased) { g.beginPath(); g.arc(e[0] * W, e[1] * H, F.wipe, 0, 7); g.fill(); }

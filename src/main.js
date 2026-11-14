@@ -26,6 +26,7 @@ import { createAchievements } from './ui/achievements.js';
 import { createFreeze } from './core/freeze.js';
 import { createShell } from './ui/shell.js';
 import { createBooks } from './ui/books.js';
+import { createFullscreen } from './ui/fullscreen.js';
 
 installPageScheduler();
 const stage = createStage(document.getElementById('c'));
@@ -58,6 +59,7 @@ const { cat, ui, registry, input } = site;
 // The loading screen's doors and the phone held upright (src/ui/shell.js); the two books as pop-ups (src/ui/books.js).
 site.shell = createShell(site);
 site.books = createBooks(site);
+site.fullscreen = createFullscreen(site);   // fullscreen lane (playtest-3): the step after "flip sideways" and the button
 // (the loading screen's doors count as busy: no shader warm-up hitches the pop or the slide)
 stage.setBusyCheck(() => cat.pressing || Math.abs(cat.vel) > 0.5 || cat.popping || (site.shell && !site.shell.revealed));
 
@@ -167,8 +169,10 @@ if (stage.params.has('debug')) {
     for (const s of site.eggs.butterman?.scenes ?? []) add('bm ' + s, () => site.eggs.butterman.play({ scene: s }));
     // fx lane, playtest 3: a cake, and the bonk count (achievements react to it as to real bonks; none is taken back)
     for (const n of ['cake', 'bonks 0', 'bonks +1000', 'bonks +1000000']) add(n, () => site.fire(n));
-    add('ach all', () => site.achievements.grantAll({ except: ['platinum'] }));
-    add('platinum', () => site.achievements.grantAll());
+    // polish lane (2026-11-13): 'ach all' is earning them all: the last one made Platinum Cat anyway (quietly, with no
+    // reveal), so it now plays Platinum's reveal and drops the badge like the real path; the 'platinum' button that did
+    // the same is gone
+    add('ach all', () => site.achievements.grantAll());
     add('ach forget', () => { site.achievements.forget(); location.reload(); });
     add('forget all', () => { store.reset(); location.reload(); });
   });

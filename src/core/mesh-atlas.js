@@ -14,7 +14,7 @@ function createAtlas(site){
  const limit=128,groups=new Map(),pictures=new Set(),dirty=new Set(),free=[],quadGeometry=new T.PlaneGeometry(1,1);
  // Its depth is kept as a texture: the main pass composites the pictures by it (world-presentation.js, playtest-2).
  const rt=new T.WebGLRenderTarget(64,64,{depthBuffer:true,depthTexture:new T.DepthTexture(64,64)}),stats={passes:0,draws:0,growths:0,texturePixels:4096,tile:64,prepMs:0,renderMs:0,fallbackMs:0,fallbacks:0,calls:0};
- let nextSlot=0,width=64,height=64,flushing=false,relaying=0;
+ let nextSlot=0,width=64,height=64,flushing=false,relaying=0,trace=null;
  const clearGeometry=quadGeometry.clone(),clearRegions=new T.InstancedBufferAttribute(new Float32Array(limit*4),4);
  clearGeometry.setAttribute('region',clearRegions);
  const clearMaterial=new T.ShaderMaterial({depthTest:true,depthWrite:true,depthFunc:T.AlwaysDepth,blending:T.NoBlending,
@@ -24,12 +24,17 @@ function createAtlas(site){
  function groupFor(visual){
   const materials=Array.isArray(visual.material)?visual.material:[visual.material],key=visual.geometry.uuid+materials.map(m=>m.uuid).join('/');
   if(groups.has(key))return groups.get(key);
-  const geometry=visual.geometry.clone(),regions=new T.InstancedBufferAttribute(new Float32Array(limit*4),4);geometry.setAttribute('region',regions);
+  const geometry=visual.geometry.clone(),regions=new T.InstancedBufferAttribute(new Float32Array(limit*4),4),tiles=new T.InstancedBufferAttribute(new Float32Array(limit*4),4);geometry.setAttribute('region',regions);geometry.setAttribute('tile',tiles);tiles.setUsage(T.DynamicDrawUsage);
   const clones=materials.map(source=>{const m=source.clone(),prior=source.onBeforeCompile,key=source.customProgramCacheKey.bind(source);
-   m.onBeforeCompile=(s,r)=>{prior.call(source,s,r);s.vertexShader='attribute vec4 region;\n'+s.vertexShader;s.vertexShader=s.vertexShader.replace('#include <project_vertex>','#include <project_vertex>\ngl_Position.xy=gl_Position.xy*region.xy+gl_Position.w*region.zw;');};
+   m.onBeforeCompile=(s,r)=>{prior.call(source,s,r);s.vertexShader='attribute vec4 region;\n'+s.vertexShader;s.vertexShader=s.vertexShader.replace('#include <project_vertex>','#include <project_vertex>\ngl_Position.xy=gl_Position.xy*region.xy+gl_Position.w*region.zw;vAtlasTile=tile;');
+    // Each instance paints only inside its own tile (box-open stray pictures fix, 2026-11-13): art that reaches past its
+    // picture's screen box (a lid swung open, a part a body grew) is cut at its own picture's edge, never drawn into a
+    // neighbour's cached picture, which would keep it until that neighbour next moved. tile = its tile in atlas pixels.
+    s.vertexShader='attribute vec4 tile;\nvarying vec4 vAtlasTile;\n'+s.vertexShader;
+    s.fragmentShader='varying vec4 vAtlasTile;\n'+s.fragmentShader.replace(/void main\(\)\s*\{/,m=>m+'\nif(any(lessThan(gl_FragCoord.xy,vAtlasTile.xy))||any(greaterThanEqual(gl_FragCoord.xy,vAtlasTile.zw)))discard;');};
    m.customProgramCacheKey=()=>key()+':world-atlas';return m;});
   const mesh=new T.InstancedMesh(geometry,Array.isArray(visual.material)?clones:clones[0],limit);mesh.frustumCulled=false;mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);regions.setUsage(T.DynamicDrawUsage);mesh.count=0;scene.add(mesh);
-  const g={mesh,regions,clones,users:0};groups.set(key,g);g.key=key;return g;
+  const g={mesh,regions,tiles,clones,users:0};groups.set(key,g);g.key=key;return g;
  }
  // Pack each picture at its own full-resolution capacity. A large box must
  // not allocate a box-sized tile for every button-sized hat or ingredient.
@@ -70,7 +75,7 @@ function createAtlas(site){
   for(const p of dirty){
    if(p.attached||!p.card.visible)continue;
    const region=p.region,x=region.x/width,y=region.y/height,w=p.renderWidth/width,h=p.renderHeight/height,rect=p.rect;
-   clearRegions.setXYZW(clear.count++,2*w,2*h,2*x+w-1,2*y+h-1);
+   clearRegions.setXYZW(clear.count++,2*w,2*h,2*x+w-1,2*y+h-1);trace?.push([region.x,region.y,region.x+p.renderWidth,region.y+p.renderHeight]);
    p.model.matrixAutoUpdate=false;p.model.matrix.copy(p.root.matrixWorld);p.model.updateMatrixWorld(true);
    const parts=[];let custom=false;
    p.visual.traverseVisible(o=>{if(o.isMesh){parts.push(o);const ms=Array.isArray(o.material)?o.material:[o.material];if(o.geometry.isInstancedBufferGeometry||ms.some(m=>m.isShaderMaterial))custom=true;}else if(o.isSprite||o.isLight)custom=true;});
@@ -83,6 +88,7 @@ function createAtlas(site){
     g.regions.setXYZW(n,stage.width/rect.w*w,stage.height/rect.h*h,
      (stage.width-2*rect.x)/rect.w*w+2*x-1,
      (2*(rect.y+rect.h)-stage.height)/rect.h*h+2*y-1);
+    g.tiles.setXYZW(n,region.x,region.y,region.x+p.renderWidth,region.y+p.renderHeight);
     g.mesh.setMatrixAt(n,part.matrixWorld);
    }
    p.stats.draws++;stats.draws++;
@@ -90,7 +96,7 @@ function createAtlas(site){
   clearRegions.clearUpdateRanges();clearRegions.addUpdateRange(0,clear.count*4);clearRegions.needsUpdate=true;
   // A group with nothing to draw this pass is skipped outright (three still binds its program for count 0).
   // Upload only the instances written this pass (three otherwise sends all 128 slots of every group each frame).
-  for(const g of groups.values()){g.mesh.visible=g.mesh.count>0;if(g.mesh.count){const n=g.mesh.count;g.regions.clearUpdateRanges();g.regions.addUpdateRange(0,n*4);g.regions.needsUpdate=true;g.mesh.instanceMatrix.clearUpdateRanges();g.mesh.instanceMatrix.addUpdateRange(0,n*16);g.mesh.instanceMatrix.needsUpdate=true;}}
+  for(const g of groups.values()){g.mesh.visible=g.mesh.count>0;if(g.mesh.count){const n=g.mesh.count;g.regions.clearUpdateRanges();g.regions.addUpdateRange(0,n*4);g.regions.needsUpdate=true;g.tiles.clearUpdateRanges();g.tiles.addUpdateRange(0,n*4);g.tiles.needsUpdate=true;g.mesh.instanceMatrix.clearUpdateRanges();g.mesh.instanceMatrix.addUpdateRange(0,n*16);g.mesh.instanceMatrix.needsUpdate=true;}}
   const t1=performance.now();const old=R.getRenderTarget(),auto=R.autoClear;R.autoClear=false;R.setRenderTarget(rt);const c0=R.info.render.calls;R.render(scene,camera);stats.calls+=R.info.render.calls-c0;const t2=performance.now();
   for(const p of fallback){
    if(!p.fallback){p.fallback=new T.Scene();for(const o of stage.scene.children)if(o.isLight)p.fallback.add(o.clone());p.fallback.add(p.model);}
@@ -114,7 +120,7 @@ function createAtlas(site){
   // A foot/hinge origin is not the centre of the geometry. Using distance from
   // that origin doubled long props' reserve and inflated every atlas tile.
   const boundsCentre=new T.Box3().setFromPoints(vertices).getCenter(new T.Vector3());
-  let flat=Float64Array.from(vertices.flatMap(v=>[v.x,v.y,v.z]));const mvp=new T.Matrix4();
+  const mvp=new T.Matrix4();
   const radius=Math.sqrt(Math.max(...vertices.map(v=>v.distanceToSquared(boundsCentre))));let attachment=null,invalid=true,lastWidth=0,lastHeight=0,lastDpr=0,lastVisible,precise=true,reduced=false,stillSince=null;
   function draw(force=false){
    root.updateWorldMatrix(true,false);
@@ -127,10 +133,13 @@ function createAtlas(site){
    // Visibility skips rendering below, not the physical-to-screen pose sync.
    let x=Infinity,y=Infinity,right=-Infinity,bottom=-Infinity;
    // stage.toScreen per vertex, folded into one clip matrix (same projection).
-   if(flat.length!==vertices.length*3)flat=Float64Array.from(vertices.flatMap(v=>[v.x,v.y,v.z]));
+   // The points are read live on every draw (box-open stray pictures fix, 2026-11-13). They were copied once and copied
+   // again only when their number changed, but the box swaps its lid's points in place as the lid swings
+   // (gags/box.js setLidCollider: same array, same count): its screen box stayed the shut box's, the open lid fell
+   // outside its own tile and was painted over its neighbours' tiles (Aaron's img10: cardboard under the flour).
    const camera=stage.camera,e=mvp.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse).multiply(root.matrixWorld).elements,W=stage.width/2,H=stage.height/2;
-   for(let n=0;n<flat.length;n+=3){
-    const vx=flat[n],vy=flat[n+1],vz=flat[n+2],w=e[3]*vx+e[7]*vy+e[11]*vz+e[15];
+   for(let n=0;n<vertices.length;n++){
+    const v=vertices[n],vx=v.x,vy=v.y,vz=v.z,w=e[3]*vx+e[7]*vy+e[11]*vz+e[15];
     const sx=((e[0]*vx+e[4]*vy+e[8]*vz+e[12])/w+1)*W,sy=(1-(e[1]*vx+e[5]*vy+e[9]*vz+e[13])/w)*H;
     if(sx<x)x=sx;if(sy<y)y=sy;if(sx>right)right=sx;if(sy>bottom)bottom=sy;
    }
@@ -179,5 +188,9 @@ function createAtlas(site){
    const old=R.getRenderTarget(),auto=R.autoClear;R.autoClear=false;R.setRenderTarget(rt);R.render(scene,camera);R.setRenderTarget(old);R.autoClear=auto;
   }finally{for(const g of mine){g.mesh.count=0;g.mesh.visible=false;}clear.count=0;}
  }
- return {add,flush,stats,warm,get pending(){return dirty.size;}};
+ return {add,flush,stats,warm,get pending(){return dirty.size;},
+  // Read-only, for checks (box-open stray pictures fix, 2026-11-13: checks/box-open-tiles.js reads the atlas back).
+  get target(){return rt;},get list(){return [...pictures];},
+  // trace: an array set by a check; every tile a pass draws into is pushed to it as [x0,y0,x1,y1] in atlas pixels
+  get trace(){return trace;},set trace(v){trace=v;}};
 }

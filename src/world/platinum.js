@@ -256,7 +256,9 @@ function createBadge(site) {
   }
   // fx lane, playtest 3 (Aaron: the small bell "should also sound when you tap on the platinum cat award"); the impact
   // layer it used is silent while collisions are off (e1111-58)
-  function ting() { audio.play('bell', { gain: 0.8, rate: 0.9 }); audio.impact?.('platinum', { material: 'metal', size: 'small', strength: 0.5 }); inst?.wiggle?.(); }
+  // The bell is the stickers' pitch exactly (playtest 3). Polish lane (2026-11-13): this comment once sat mid-line and
+  // swallowed the closing brace, so the module failed to parse and no Platinum Cat badge could ever load.
+  function ting() { audio.play('bell', { gain: 0.8, rate: 1 }); audio.impact?.('platinum', { material: 'metal', size: 'small', strength: 0.5 }); inst?.wiggle?.(); }
 
   // ---- the cover: one more support on the board's root ----
   async function cover() {

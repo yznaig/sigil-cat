@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Sigil Cat's home-screen icon (fullscreen lane, playtest-3): the favicon's cat head, ink on the page's paper.
+       The head keeps inside the middle 60% so a round or squircle mask never cuts it. -->
+  <defs><radialGradient id="w" cx="50%" cy="105%" r="75%"><stop offset="0" stop-color="#f0d6be" stop-opacity=".7"/><stop offset="1" stop-color="#f0d6be" stop-opacity="0"/></radialGradient></defs>
+  <rect width="512" height="512" fill="#fdf0e6"/>
+  <rect width="512" height="512" fill="url(#w)"/>
+  <g transform="translate(256 262) scale(9.6) translate(-16 -16)"><path fill="#121212" d="M6 4l6 6h8l6-6v13a10 10 0 01-20 0z"/></g>
+</svg>

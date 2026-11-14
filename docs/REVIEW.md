@@ -5096,3 +5096,186 @@ of the eight failed a different line, "everything taken out of the chest ... nev
 picture 46% over the box's): seen once, for the physics owner. world-layout desktop, phone and 1536x864; bird and
 egg-cup at 1280x900, 1440x900 and 1536x864; furniture-p2, world-occluders, box-home, gags-box, kitchen-recycle,
 cards-tap, world-board, kitchen-card and world-arrivals at desktop and phone: all pass.
+
+## Small tweaks after playtest 3 (2026-11-13, Aaron, no check run by his word)
+- The bell: stickers and the Platinum Cat play it at one pitch (rate 1, no per-tap wobble); only loudness differs.
+- The bird: later visits after 4-10 min (was 1.5-5), limiter 10 min (was 5); first visit still 90 s so a new player meets it.
+  It is drawn at SIZE 70 (was 40), about the egg's size as it drops, and flies in from past the right edge over 2.4 s
+  before circling; the egg goes 0.4 s after it arrives, from where it is drawn. Bird checks' timings updated, not run.
+
+## Box-open stray pictures fix (2026-11-13)
+Aaron (img10, 2476x1312): "I'm opening the cardboard box. It's opening up into where the pin board is, and it's putting
+these textures around the bucket and the flour."
+- **Cause.** The mesh atlas (`src/core/mesh-atlas.js`) worked out each picture's screen box from a copy of its points
+  made once, and copied again only when their number changed (ff68ffb, 2026-11-11, so p2-final and main have it too).
+  The box swaps its lid's points in place as the lid swings (`gags/box.js` setLidCollider: same array, same count), so
+  its screen box stayed the shut box's. The swinging lid (upright it reaches toward the pinboard, which is what Aaron
+  saw) and the open lid fell up to 133 px outside the box's picture. The atlas draws every picture in one pass with
+  no clipping to its tile, so that part of the lid was painted into whatever tile lay past the box's. When that was
+  another item's tile, the item showed a hard-edged scrap of cardboard until it next moved (under the flour and the
+  recipe card in `docs/shots/boxfix/lid-swinging-before.jpg`). The faint copy of the pail is most likely the same
+  overdraw in the depth texture the pictures are composited by. Not confirmed: it needs his layout.
+  The open box also showed without its lid.
+- **Fix, two parts.** (1) The bounds read the points live on every draw (no copy; the same one multiply per point,
+  so no new cost). The open and swinging lid now show, inside the box's picture. (2) Every atlas instance paints
+  only inside its own tile: a `tile` instance attribute, and a discard in the cloned materials' fragment shader
+  outside it. The cut that already held for the fallback path (viewport + scissor) now holds for the batched path
+  too. Whatever reaches past a picture's screen box (the ears added in the box drop, a future part) is cut at its
+  own edge and never lands in a neighbour's cached picture. Atlas passes are event-driven, so idle cost is unchanged.
+- The grey wedge at the box's left in his shot is the box's own floor shadow (present before any opening, same as
+  the flour's and pail's).
+- Read-only accessors for checks: `site.meshPictures.target` (the atlas target), `.list`, and `.trace` (set it to an
+  array and each pass pushes every tile it draws into).
+- **Check** `checks/box-open-tiles.js` (run-all, desktop + phone): a room like his. The box is opened and shut by
+  tapping and Escape, twice. At every frame of each swing (a) the box's art (every mesh point) lies inside its
+  picture's screen box, and (b) the atlas, read back each frame, changed only inside the tiles drawn since the last
+  read. Before the fix: art up to 133 px outside, and 300-16,000 stray atlas pixels per swing (all 8 lines FAIL).
+  After: 0 px and 0 pixels (PASS).
+- Shots (2476x1312, lid mid-swing, slowed): `docs/shots/boxfix/lid-swinging-{before,after}.jpg`, and the atlas at
+  that moment, `atlas-lid-swinging-{before,after}.jpg`. Before: the lid is missing from the box, and a scrap of
+  cardboard sits under the flour and under the recipe card. After: the lid shows and nothing else changes.
+- **Checks run** (load 10-12, under the parallel full suite): box-open-tiles at desktop (1280x900, dpr 1), at phone
+  (844x390, dpr 2) and at 2476x1312 (dpr 1): all pass. Also world-atlas (tile pixels against the original 3D),
+  gags-box, box-home, kitchen-chest (+ reload), visual-hairlines and world-final-cost, desktop + phone: all pass.
+  Speed gate, median p95: twenty 3.2 / maximum 3.3 ms desktop, 3.0 / 2.7 ms phone (gate 4.0).
+  world-presentation fails at both sizes, and fails the same way without this change: the unmodified atlas on this
+  branch (6f2eaa3) gives the same "matches independent quads/shadows" lines, about 2.5 % of pixels at desktop. It is
+  left for the presentation's owner.
+
+## World-presentation check fix (2026-11-13)
+The final suite on sc/p3-final (986e9ad) failed world-presentation at both sizes: "one picture batch per side of the
+cat" (3 batches for 2 sides) and every "matches independent quads/shadows" line (about 2.5 % of pixels, max delta 46).
+- **Where it broke.** Bisected over `git log --first-parent`: passes at 904695f, 785519e (visual: the half-texel
+  clamp), fb79f65 (butterman) and f067d02 (physics); fails from 12eceaa (merge sc/p3-layout) on. The layout lane gave
+  the shelf a soft wall shadow (`softWallShadow` in `src/core/soft-floor-shadow.js`, Aaron's e1113-30): one more
+  batched picture, depth `'none'`, owned by neither a keepsake nor a world body.
+- **Stale check, not a visual bug.** (1) The parity lines draw the reference from the cards of keepsakes and world
+  bodies only, so the reference had no wall shadow and the batched frame did: the diff
+  (`docs/shots/presfix/diff-old-reference-x4-desktop.jpg`) is exactly the shelf's shadow silhouette, and its max delta
+  46 is the shadow's opacity (.18 x 255). With every batched picture in the reference
+  (`diff-every-picture-x4-desktop.jpg`): 0.09 % of pixels, max delta 5 (8-bit rounding inside the soft shadow), at
+  every stage the check samples. The composite draws the wall shadow the same as the shadow drawn on its own.
+  (2) A picture without depth draws in a chunk of its own (`buildPictures` splits on depth kind since the physics lane's
+  per-pixel depth, playtest-2); the wall shadow sits behind the cat, so that side now holds both kinds: behind
+  {no depth, depth} + in front {depth} = 3. That is the minimum for this room, not a broken batch.
+  The final suite's one 232 max delta (stored art) did not recur in 4 runs here; with the full reference no stage
+  shows over 5.
+- **Change (check only, no runtime code).** `checks/world-presentation.js`: the reference draws every picture the
+  presentation lists (`site.worldPresentation.list`); the batch line expects one batch per side of the cat and depth
+  kind, the sides worked out in the check from the camera (not read from the presentation's sort). Thresholds unchanged.
+  Diagnostic kept: `checks/diag/presentation-parity.js` (batched, old reference, both diffs; not in run-all).
+- **Cost.** No source change, so frame cost is unchanged (the extra draw for the wall shadow's chunk is the layout
+  lane's, already in the suite's speed numbers).
+- **Checks run** (load 7-11, port 18871): world-presentation, world-presentation-rotor, world-atlas, box-open-tiles,
+  visual-hairlines (`&motion=0.6`), desktop 1280x900 dpr 1 and phone 844x390 dpr 2: all PASS.
+
+## Polish lane: platinum and ask-the-butter (2026-11-13)
+Aaron's polish list (inputs/playtest-3.md, "Polish"), items 2 and 4. Branch `sc/p3-polish-ui` from `sc/p3-presfix` a8c40ac.
+
+### Platinum Cat: not only the debug button; the real path was broken too
+- **Cause.** Commit 6f2eaa3 ("one bell pitch") left a `//` comment mid-line in `src/world/platinum.js` `ting()`. The
+  comment swallowed the call after it and the function's closing brace, so the module failed to parse
+  (`SyntaxError: Unexpected end of input`). Platinum Cat was still *earned*, but the badge module could never load, so no
+  badge ever came, whichever way it was earned. A returning player's saved badge could not come back either (its save
+  was kept, so the fix brings it back). Seen first with the real `ach all` button in a fresh room: 46 of 46 earned, a
+  PAGEERROR, no keepsake. All other `src` modules parse (checked each with `node --input-type=module --check`).
+- **Fix.** The comment goes on its own line above `ting()`; the code is as the fx lane wrote it.
+- **A badge already lost comes back.** `src/ui/achievements.js`, at boot: Platinum Cat earned but no badge saved
+  means the badge was lost (it is never chestable or binnable, `NOT_ITEMS` in `src/world/recipes.js`, and nothing
+  takes it), so it is given again and falls in. Having Platinum Cat always means having its badge (e1112-37).
+- **The debug button.** `ach all` passed `except: ['platinum']`, but the last unlock's meta check made Platinum anyway,
+  *quietly*: no Platinum reveal, the badge with no delay. The `platinum` button (plain `grantAll()`) did the same,
+  because every grant in its loop was quiet and meta made Platinum before its own loud unlock. `grantAll()` now grants
+  as though earned: the rest quietly, the last one out loud, and Platinum follows it through meta with its reveal and
+  the badge after its delay. `ach all` calls it; the `platinum` button is gone (one button, one meaning). The checks
+  that call `grantAll()` (achievements-badge, furniture-p2, physics-p3) wait for the badge, so the 1.4 s delay suits them.
+- **Checks.** New `checks/platinum-earn.js` + `-reload.js`, three saves built from the live list in run-all.sh:
+  every achievement but Full Circle (and Fluent): the circle drawn as a real sigil; every achievement but Flappy (a
+  playtest-2 one, counted toward Platinum per e1112-37): the bird game's first point; Platinum earned with no badge
+  saved. Each time Platinum's reveal plays (not for the lost badge), one physical badge lands inside the page, it is
+  saved, and after a reload it is still earned and the badge is back once. Red before the fix (circle and lost saves
+  both FAIL "the badge comes into the room", with the parse error), green after. `checks/debug-panel.js` adds: one
+  `ach all` button, no `platinum` button; clicked, Platinum's reveal plays and the badge falls in.
+
+### "Ask the butter" removed
+- Aaron: "I think we should just remove 'ask the butter'." Gone: the button (index.html), its click and the saved
+  place in its list (`askIx`, dropped from an older save at boot), the list of hints (`config.ui.hints`), every CSS
+  rule naming `#ask`, the `.dot` it alone used, and the 701-1240 px rule that stacked SOUND above it (one control now).
+  This retires the "ask-the-butter hints" on the message line that e1112-32 kept; Aaron's newer word wins.
+- Kept: the achievement "Ask the Butter" (id `whisper`), earned by the butter's whisper in `src/eggs/butterman.js`,
+  not by the button; the first-visit hint line (`config.ui.hint`, "turn him · tap him · draw on the air").
+- SOUND stays where it was, bottom left on the footer's baseline: `docs/shots/polish-ui/bottom-left-desktop.png`
+  (1280x900) and `bottom-left-phone.png` (844x390).
+- Checks updated: `checks/text.js` item 3 no longer looks for the button; item 8 is now "ask the butter is gone: no
+  button, no hint list, no copy on the page". `checks/audit-polish.js` measures the 44 px targets of sound, volume and
+  grimoire (ask removed). The old `checks/diag/*.json` logs that mention `ask` are history and stay.
+
+## Polish lane: art and placement (2026-11-13)
+Aaron's "Polish" list (playtest-3.md, end), the art and placement items. Before/after crops: `docs/shots/polish-art/`
+(`*-before.jpg` / `*-after.jpg`).
+- **The top moved left on the shelf** ("so it can show the whole sniper"). The bored recess moved from x -.38 to
+  `TOP_X` -.53 in the shelf art (`assets/models/prepared/shelf.js`: the hole, its floor disc, the recess colliders and
+  the plank pieces either side follow `TOP_X`); `src/world/shelf.js` `HOLE.x` matches it, and the resting pose is
+  still solved from the real collider points (`topRest`). The hole's edge keeps .07 of wood to the plank's left end.
+  The whole rifle shows at 1280x900, 1536x864 and 844x390 (`shelf-top-*`). `checks/world-arrivals.js`'s recess test
+  follows the new x.
+- **The top spins faster.** `TOP_SPIN.omega` [30, 9] -> [54, 15] rad/s (`src/core/top-spin.js`): ~52 degrees a frame
+  at 60 fps, well short of the 180 where a spin starts to read backwards. The charged top's rotor 12 -> 20 rad/s
+  (`src/core/charged-top.js`), so both spins read faster. Reduced motion unchanged (neither runs calm).
+- **Chocolate cake.** `assets/models/prepared/cake.js`: dark sponge, darker base, glossy ganache top, a milk-chocolate
+  buttercream filling and beads; the raspberry jam stays as the one bright line. Every cake (the later bakes, the
+  sliced-down ones) uses this model. The chest's icons are renders of the model cached in localStorage, so the cache
+  key went v1 -> v2 (`src/ui/item-icons.js`, the v1 entry removed) and a returning player's cake icon redraws. The
+  achievement icons are line drawings with no cake colour, so nothing to change there.
+- **Wooden egg cup.** `src/world/egg-cup.js`: the controller stand's maple (`#9a6b45`, the stand's wood texture, grain
+  up the turned cup), a little glossier than the stand; it was white porcelain on the cream wall.
+- **The smiley clear of the stand.** It was covered at 1536x864 (8 of 48 points on the face's ring behind the stand),
+  on a phone (7) and at 1920x1080 (4); fine at 1280x900. `SMILEY.offset` [.42, .3] -> [.42, .42] from the lamp
+  (`src/world/lamp.js`): .12 nearer the front clears it with its glow from 1366x768 to 1920x1080. On a phone there is
+  no room in front of the stand (the sound button sits there), so on screens 500 px tall or less it slides right
+  instead (`offsetShort` [.74, .28]): clear of the stand and the button. New gate in `checks/gags-lamp.js`: with the
+  stand and the egg cup in the row, no point of the ring (15 % wide, for the stroke and glow) is behind furniture and
+  none is under a footer button.
+- **A denser butter streak** ("less see-through ... more blaring"). `src/gags/fling.js`: the film's peak alpha .25 ->
+  .72 (edges .12 -> .42, back .17 -> .55), a deeper butter yellow, the wet ridges brighter; the edges still feather to
+  nothing. Dense, it showed where it overlapped the pat while sliding (the streak is a page layer over the GL pat, and
+  its growth ran ahead of the large sliding pat): during the slide it now stops at the top of the pat's drawn picture,
+  and reaches its full length when the pat lands (as before).
+- **Cost.** No new per-frame work: art colours and positions, two constants, and one canvas value the slide already
+  redraws each frame.
+- **Checks run** (port 18881, load 7-18; desktop 1280x900 dpr 1 and phone 844x390 dpr 2): world-shelf, world-shelf-solids,
+  world-shelf-play, world-arrivals, polish-top (and calm), world-presentation-rotor, egg-cup (and calm), gags-lamp (and
+  calm, plus 1536x864), look-use, look-pat-return, world-cake, world-water: all PASS (world-cake desktop's reload-pose
+  line failed once at load 18 and passed on its rerun). furniture-p2 fails at both sizes, not from this lane:
+  `src/world/platinum.js` on the base (a8c40ac) does not parse (`node --check`: "Unexpected end of input"), so
+  `grantAll` never brings the badge. That is the polish-ui lane's file (and likely Aaron's "achievement all ... did not
+  get the platinum cat item").
+
+## Fullscreen lane (2026-11-13)
+Aaron: "Mobile, along with its 'flip screen' step, I think needs a full screen step + button people can full screen
+and un-fullscreen the page, the top bar takes up way too much space otherwise". New: `src/ui/fullscreen.js`,
+`site.webmanifest`, `assets/icons/` (icon.svg, 192/512 PNGs, apple-touch-icon), `checks/fullscreen.js` + `-reload.js`.
+
+| Part | What is built | Choices for Aaron's veto |
+|---|---|---|
+| The step | On a phone (the shell's rule: coarse pointer, short side at most 600 px), once it is on its side, a card over the closed loading doors before he pops in: "full screen" (the ink pill) and a quiet "not now". Choosing it goes full screen inside that tap (`requestFullscreen({navigationUI:'hide'})`, webkit fallback) and tries `screen.orientation.lock('landscape')` (a refusal is ignored); then he pops in and the doors open on the room laid out for the bigger screen. Loaded upright: "flip sideways" first, the step after the turn. Escape or a click outside is "not now" (e1112-41). | Placed before the pop, so the doors open on the full-screen room rather than the room jumping in size after. Asked once per visit (sessionStorage): either answer ends it, and a reload in the same visit (which leaves full screen in every browser) does not ask again; the button is there. A new visit asks again. The wording is mine. |
+| The button | A 30 px felt patch with a corners icon just after "Sigil Cat" at the top left, a 44 px finger target, `aria-label` "full screen" / "leave full screen" and `aria-pressed`. It follows the real state on `fullscreenchange`, so the system back gesture shows on it too. Clear of the numbers, SOUND, the books, the sigil row, the name and the shelf (checked by rectangles). | Shown on every touch screen whose browser can do it, tablets included (the step is phones only, as the brief's "phones/touch only" split it). Desktop: never (a mouse has F11). The speech line now keeps clear of it like the label (`src/ui/hush.js` placeSpeech, one line). |
+| Re-layout | Browsers send a resize as they go in or out; some send it before the new size settles. After every `fullscreenchange` one more resize is sent two frames later, so `stage.frame()` always measures the settled size (a frozen page keeps it for the release, as before). | |
+| No element full screen (iPhone Safari) | Feature-detected at the step: the card says "This browser can't hide its bars for a page. To play with the whole screen, tap Share, then Add to Home Screen, and open Sigil Cat from there." with one "ok"; no button. Other browsers without the API get "add it to your home screen from the browser's menu". | |
+| Home screen | `site.webmanifest` (display fullscreen with a standalone fallback, orientation landscape, the page's colours, icons drawn from the favicon's cat head, maskable-safe), `apple-mobile-web-app-capable`, `mobile-web-app-capable`, status bar `black-translucent` (the page already respects the safe areas), `apple-touch-icon`. Opened from the home screen (`display-mode` standalone/fullscreen, `navigator.standalone`): no step, no button. | The icon is new (the favicon's head, ink on the page's paper); swap `assets/icons/` for a better one any time. |
+
+Off switches: `?fs=0`. Under automation the step is off unless `?fs=1` (like `?doors=1`), so the other phone checks
+are unchanged; the button stays in the chrome there. No sound (e1112-40); reduced motion: no fades.
+Shared files touched (small, commented): `src/ui/shell.js` (the step awaited after `landscape()` in `reveal()`, and
+after the turn in the instant path; a `phone` getter), `src/main.js` (one line), `src/ui/hush.js` (speech clears the
+button), `src/ui/hush.css` (a block at the end), `index.html` (manifest and meta), `checks/run-all.sh` (six runs).
+
+Checks (headless, 844x390 dpr 2 unless noted), all pass: `fullscreen.js` case api 11/11 (step before the pop, the
+tap enters, `document.fullscreenElement` is the page, the stage re-laid out and matches the window, the button leaves,
+enters again and follows a system exit; reload: no second step), later --reduced 7/7 (Escape is not now, no fades,
+not asked again), noapi 4/4 (the iPhone hint, one ok, a click outside closes, no button), standalone 2/2, portrait at
+390x844 4/4 (flip first, then the step), desktop 1/1 (neither). Touched checks rerun: shell-boot desktop, phone and
+calm phone, shell-turn phone-portrait 7/7, shell-books phone, text phone: all pass. Not run: the full suite.
+Shots: `docs/shots/fullscreen/fullscreen-step-phone.jpg`, `fullscreen-button-phone.jpg`, `fullscreen-hint-phone.jpg`.
+Not testable here: a real phone. Android Chrome should behave as headless Chromium did; iPhone Safari's home-screen
+launch and the orientation lock need a device.

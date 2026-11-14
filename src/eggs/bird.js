@@ -8,9 +8,14 @@
 import {css} from '../core/util.js';
 import {birdSVG,flightArt,playerFrame} from '../flappy/art.js';
 import {PLAYER} from '../flappy/config.js';
-// Distant bird size in px (was 27; Aaron: "a bit bigger").
-const SIZE=40;
-export const VISITS={first:90000,gap:[90000,300000],cap:300000,stay:150000,settle:15000,leave:2.4};
+// Distant bird size in px (was 27, then 40; playtest 3, Aaron: "a little bit bigger so it kind of matches the size of the
+// egg when it initially drops": the egg lands about 60 px across at desktop size, the bird draws .66-.9 of SIZE).
+const SIZE=70;
+// Playtest 3 (Aaron: "make the Flappy Bird quite a bit rarer, and let's actually change that guarantee to 10 minutes"):
+// later visits come after 4 to 10 minutes without it (was 1.5 to 5), never longer than 10. The first visit stays at
+// 90 s so a new player still meets it. arrive: it flies in from the right edge (Aaron: "come from the side of the
+// screen, not just spawn in the middle"), then lets its egg go.
+export const VISITS={first:90000,gap:[240000,600000],cap:600000,stay:150000,settle:15000,leave:2.4,arrive:2.4,eggAfter:.4};
 css('distant-bird',`
 .distant-bird{position:absolute;width:${SIZE}px;height:${Math.round(SIZE*24/27)}px;left:0;top:0;opacity:.64;will-change:transform;pointer-events:none}
 .distant-bird svg{width:100%;height:100%;overflow:visible}.distant-bird .wing{transform-origin:0 0}
@@ -26,7 +31,8 @@ export default function createBird(site) {
   // away: visible play time since the bird was last here. gap: how long this absence lasts (drawn when it leaves).
   // The page's open time before this module armed counts too, so the first visit still means 90 s after opening.
   let away=num(store.get('bird.away'))+performance.now(),gap=Math.min(VISITS.cap,num(store.get('bird.gap'),store.get('bird.seen')?draw():VISITS.first));
-  let state='waiting',timer=null,armedAt=0,forced=null,stayLeft=VISITS.stay,flightTime=0,leaving=null,eggOwed=false;
+  let state='waiting',timer=null,armedAt=0,forced=null,stayLeft=VISITS.stay,flightTime=0,leaving=null,arriving=null,eggOwed=false,eggWait=0;
+  const drawn={x:0,y:0};
   let bird=null,key=null,focusRing=null,listening=false,screen=null,resources=null;
   const stats={frames:0,appearedAt:null,arrivals:0,departures:0,eggCalls:0,gameStarts:0,returns:0,payoffs:0,beats:[],loads:0,replays:0};
   const circle={x:0,y:0,rx:0,ry:0};
@@ -35,23 +41,31 @@ export default function createBird(site) {
     circle.rx=Math.min(80,stage.width*.15);circle.ry=27;
     if(focusRing)Object.assign(focusRing.style,{left:(circle.x-circle.rx-18)+'px',top:(circle.y-circle.ry-18)+'px',width:(circle.rx*2+36)+'px',height:(circle.ry*2+36)+'px'});
   }
-  function hit(x,y){return state==='flying'&&!input.locked&&!cat.hidden&&((x-circle.x)/(circle.rx+24))**2+((y-circle.y)/(circle.ry+24))**2<=1;}
+  function hit(x,y){return state==='flying'&&!arriving&&!input.locked&&!cat.hidden&&((x-circle.x)/(circle.rx+24))**2+((y-circle.y)/(circle.ry+24))**2<=1;}
   function unlisten(){const i=stage.onFrame.indexOf(tick);if(i>=0)stage.onFrame.splice(i,1);listening=false;}
   function listen(){if(!listening&&(state==='flying'||state==='leaving')&&!document.hidden){stage.onFrame.push(tick);listening=true;}}
   function position(){const a=flightTime*(stage.reducedMotion?.24:.36);return {x:circle.x+Math.cos(a)*circle.rx,y:circle.y+Math.sin(a)*circle.ry};}
   function tick(dt){
     stats.frames++;if(!bird)return;
     bird.hidden=input.locked||cat.hidden;if(key)key.disabled=bird.hidden||state!=='flying';if(bird.hidden)return;
-    // An arrival during a cutscene owes its egg until the bird can be seen letting it go.
-    if(eggOwed&&state==='flying'){eggOwed=false;dropEgg();}
     flightTime+=dt;const a=flightTime*(stage.reducedMotion?.24:.36);let {x,y}=position(),opacity=.64;
     let facing=-Math.sin(a)>=0?1:-1;
+    if(arriving){
+      // In it comes from past the right edge, a little high, easing onto its circle. Reduced motion: a fade in place.
+      arriving.t+=dt;const u=Math.min(1,arriving.t/(stage.reducedMotion?1:VISITS.arrive)),k=1-(1-u)**2;
+      if(!stage.reducedMotion){const sx=stage.width+SIZE,sy=circle.y-90;x=sx+(x-sx)*k;y=sy+(y-sy)*k;facing=u<.85?-1:facing;}
+      else opacity=.64*u;
+      if(u>=1)arriving=null;
+    }
+    // Its egg goes a moment after it has arrived; an arrival during a cutscene owes it until the bird can be seen.
+    if(eggOwed&&state==='flying'&&!arriving&&(eggWait+=dt)>=VISITS.eggAfter){eggOwed=false;dropEgg();}
     if(leaving){
       // Off it goes: out along the right and up, fading over the last stretch. Reduced motion: a fade where it is.
       leaving.t+=dt;const u=Math.min(1,leaving.t/(stage.reducedMotion?1:VISITS.leave));
       if(!stage.reducedMotion){x=leaving.x+(stage.width+60-leaving.x)*u*u;y=leaving.y-u*90;facing=1;}else{x=leaving.x;y=leaving.y;}
       opacity=.64*Math.min(1,(1-u)*2.5);if(u>=1){gone();return;}
     }
+    drawn.x=x;drawn.y=y;
     const sprite=flightArt().player,ratio=SIZE/PLAYER.frameWidth;
     const anchor=sprite?PLAYER.pivot.map(v=>v*ratio):[SIZE/2,SIZE*12/27];
     bird.style.transform=`translate3d(${x-anchor[0]}px,${y-anchor[1]}px,0) scale(${facing*(.78+.12*Math.sin(a))},${.78+.12*Math.sin(a)})`;
@@ -93,23 +107,22 @@ export default function createBird(site) {
   }
   function appear(){
     if(state!=='waiting'||document.hidden){arm();return;}
-    state='flying';stats.appearedAt=performance.now();stats.arrivals++;stayLeft=VISITS.stay;flightTime=0;leaving=null;
+    state='flying';stats.appearedAt=performance.now();stats.arrivals++;stayLeft=VISITS.stay;flightTime=0;leaving=null;arriving={t:0};eggOwed=true;eggWait=0;
     away=0;gap=draw();store.set('bird.seen',true);save();showBird();
     // Media and game code start only once the secret itself exists.
     prepare();
-    // As it flies on, it lets an egg go when the player has none anywhere (e1111-58; playtest-2: every visit).
-    setTimeout(()=>{if(state!=='flying')return;if(bird&&!bird.hidden)dropEgg();else eggOwed=true;},stage.reducedMotion?200:1400);
+    // Once it has flown in, it lets an egg go when the player has none anywhere (e1111-58; playtest-2: every visit; tick).
     arm();
   }
-  function dropEgg(){stats.eggCalls++;dispatchEvent(new CustomEvent('sigilcat:bird-egg',{detail:position()}));}
+  function dropEgg(){stats.eggCalls++;dispatchEvent(new CustomEvent('sigilcat:bird-egg',{detail:{x:drawn.x,y:drawn.y}}));}
   function leave(){
     if(state!=='flying')return;
     if(timer!==null){clearTimeout(timer);timer=null;}
     if(!bird||document.hidden||bird.hidden){gone();return;}
-    state='leaving';eggOwed=false;const p=position();leaving={t:0,x:p.x,y:p.y};if(key)key.disabled=true;listen();
+    state='leaving';eggOwed=false;const p=arriving?drawn:position();arriving=null;leaving={t:0,x:p.x,y:p.y};if(key)key.disabled=true;listen();
   }
   function gone(){
-    clearBird();leaving=null;eggOwed=false;state='waiting';stats.departures++;away=0;gap=draw();save();arm();
+    clearBird();leaving=null;arriving=null;eggOwed=false;state='waiting';stats.departures++;away=0;gap=draw();save();arm();
   }
   function showBird(){
     bird=document.createElement('div');bird.className='distant-bird';bird.innerHTML=birdSVG;document.getElementById('back').append(bird);

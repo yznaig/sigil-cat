@@ -3,13 +3,20 @@
 cat.auto=false;const W=site.world,S=site.supports,T=site.THREE;
 const items=['rifle','top','paper','postcard','ticket','tin','pat'].map(id=>keepsakes.give(id));await Promise.all(items.map(i=>i.worldTask));await site.shelf.task;await sleep(2000);await until(()=>!W.stats.listening&&!S.listening,12000);
 const B=site.worldPresentation;B.flush();
-// One batch per side of the cat (e1111-58: pictures deeper than him draw before him).
-const sides=(B.stats.behindCat>0)+(B.stats.behindCat<B.stats.pictureQuads);
-check('presentation one picture batch per side of the cat and stationary shadow layer',B.stats.pictureBatches===sides&&B.stationaryShadows>=4&&B.stats.shadowVertices>0,JSON.stringify(B.stats));
+// One batch per side of the cat (e1111-58: pictures deeper than him draw before him) and per depth kind: a picture
+// that takes no part in the depth between pictures (a soft floor shadow, the shelf's wall shadow: depth 'none', physics
+// and layout lanes) draws in a chunk of its own, so a side holding both kinds has two (presentation check fix,
+// 2026-11-13). The side is worked out here from the camera, apart from the presentation's own sort.
+const groups=()=>{const f=new T.Vector3(),r=new T.Vector3();stage.camera.getWorldDirection(f);const limit=r.copy(site.cat.card.position).sub(stage.camera.position).dot(f),g=new Set();
+ for(const p of B.list)if(p.card.visible&&p.quad.material.visible)g.add((r.copy(p.card.position).sub(stage.camera.position).dot(f)>limit)+':'+(p.depthMode==='none'));return g;};
+const kinds=groups();
+check('presentation one picture batch per side of the cat and depth kind, and stationary shadow layer',B.stats.pictureBatches===kinds.size&&B.stationaryShadows>=4&&B.stats.shadowVertices>0,JSON.stringify({...B.stats,groups:[...kinds]}));
 async function parity(label){
  B.flush();const R=stage.renderer,w=stage.width,h=stage.height,rt=new T.WebGLRenderTarget(w,h),a=new Uint8Array(w*h*4),b=new Uint8Array(w*h*4),old=R.getRenderTarget();
  R.setRenderTarget(rt);R.clear();R.render(stage.scene,stage.camera);R.readRenderTargetPixels(rt,0,0,w,h,a);
- const cards=[...new Set([...keepsakes.live.values()].map(i=>i.picture?.card).concat([...W.entries.values()].map(e=>e.presentation?.card)).filter(Boolean))];
+ // Every picture the presentation batches, drawn on its own: keepsakes, world bodies and pictures owned by neither
+ // (the shelf's wall shadow, layout lane playtest-3, was left out of a list built from keepsakes and world bodies).
+ const cards=[...new Set(B.list.map(p=>p.card))];
  B.root.visible=false;for(const card of cards)stage.scene.add(card);
  const layers=[];for(const e of site.worldLayout.shadows.values())for(const m of e.group.children){layers.push([m,m.layers.mask]);m.layers.enable(0);}
  R.clear();R.render(stage.scene,stage.camera);R.readRenderTargetPixels(rt,0,0,w,h,b);

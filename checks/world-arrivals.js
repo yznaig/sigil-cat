@@ -41,7 +41,7 @@ await __shot('arrivals-shelf-landed');
 const top=keepsakes.give('top');await top.worldTask;shelf.store('rifle',false);check('arrivals top stores on the shelf',shelf.store('top',false)&&top.worldEntry.support?.id==='shelf');
 {const q=new T.Quaternion(...shelf.slots.find(s=>s.id==='top').quaternion),axis=new T.Vector3(0,1,0).applyQuaternion(q),tilt=Math.acos(axis.y)*180/Math.PI;
  const p=new T.Vector3(...shelf.slots.find(s=>s.id==='top').position);let gap=Infinity,below=0;
- for(const v of top.colliderVertices){const w=v.clone().applyQuaternion(q).add(p),floor=Math.hypot(w.x+.38,w.z-.06)<.073?.014:.05;gap=Math.min(gap,w.y-floor);if(w.y<floor-.0005)below++;}
+ for(const v of top.colliderVertices){const w=v.clone().applyQuaternion(q).add(p),floor=Math.hypot(w.x+.53,w.z-.06)<.073?.014:.05;gap=Math.min(gap,w.y-floor);if(w.y<floor-.0005)below++;}
  check('arrivals the top rests tilted on its shoulder in its recess',tilt>25&&tilt<60&&below===0&&gap<.002,`tilt ${tilt.toFixed(1)} deg, lowest contact gap ${(gap*1000).toFixed(2)} mm, ${below} points below`);
  const live=new T.Vector3(0,1,0).applyQuaternion(top.object.quaternion).applyQuaternion(shelf.root.quaternion.clone().invert());
  check('arrivals the stored top body takes the tilted pose',Math.abs(Math.acos(live.y)*180/Math.PI-tilt)<1,`${(Math.acos(live.y)*180/Math.PI).toFixed(2)} deg`);}

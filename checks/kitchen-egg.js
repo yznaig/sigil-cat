@@ -5,7 +5,7 @@ cat.auto=false;const C=E.box.recipe,W=site.world,B=E.bird;
 check('egg none before the bird',!keepsakes.has('egg')&&!C.state.egg);
 B.debug.skipTo(89.4);await until(()=>B.state==='flying',4000);
 check('egg bird flies on',B.state==='flying');
-await until(()=>keepsakes.has('egg'),4000);const egg=keepsakes.get('egg');await egg?.worldTask;
+await until(()=>keepsakes.has('egg'),6000);const egg=keepsakes.get('egg');await egg?.worldTask;
 check('egg the bird drops one physical egg',egg?.worldReady&&!egg.worldError&&W.entries.has('egg')&&C.state.egg,egg?.worldError||'');
 await sleep(stage.reducedMotion?0:250);await __shot('kitchen-egg-falling');
 await until(()=>egg.worldEntry.body.isSleeping(),12000);await sleep(300);

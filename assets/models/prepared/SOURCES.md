@@ -73,7 +73,7 @@ Render: `node tools/art/render.mjs hay`. Original CC0 dedication above applies.
 
 ## Cake (`cake.js`)
 Original extruded 298-degree sponge layers, jam/cream filling, icing top and piped
-beads; removed wedge exposes real cut faces. Original 256² crumb/crust maps (seed
+beads (chocolate since playtest 3: dark sponge, ganache top, milk-chocolate buttercream); removed wedge exposes real cut faces. Original 256² crumb/crust maps (seed
 111033); no downloaded food image. .18 play mass, one conservative cylinder.
 No separate pore meshes or physics crumbs. Render: `node tools/art/render.mjs cake`.
 

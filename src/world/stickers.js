@@ -111,8 +111,9 @@ export function defineSticker(site, def) {
   function def_tap(inst) {
     const face = inst.el.querySelector('.face'); if (!face) return;
     // fx lane, playtest 3 (Aaron: "'ding-small-bell-sfx' should be used for the sound when you click a sticker"): the
-    // small bell, a hair lower for the GOOD JOB sticker, a little different each tap (was the glass tink, star-tink)
-    audio.play('bell', {gain: def.art === 'star' ? .8 : .72, rate: (def.art === 'star' ? 1 : .95) + (Math.random() * 2 - 1) * .03});
+    // small bell (was the glass tink, star-tink). One pitch for every sticker and the Platinum Cat (playtest 3, Aaron:
+    // "need to not be different pitches. It should all just be the same pitch"); only the loudness differs.
+    audio.play('bell', {gain: def.art === 'star' ? .8 : .72, rate: 1});
     def.tapped?.(inst);
     if (stage.reducedMotion) return;
     glintAnim?.cancel();

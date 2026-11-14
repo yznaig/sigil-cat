@@ -91,9 +91,6 @@ export const SITE = {
 
   ui: {
     hint: 'turn him · tap him · draw on the air',
-    // "ask the butter": it never does the trick for you
-    hints: ['the air around him listens', 'draw on the empty space, in one stroke', 'a circle, perhaps', 'b is for…', 'a storm is a zig and a zag',
-      'what is a loaf but half a circle', 'he does not like to be stroked for long', 'his whiskers are in tune', 'spin him once, all the way round, and let go'],
     links: [],                   // social links: [{ label: 'instagram', href: 'https://…' }] once Aaron names them
     // The cat's speech (ui.speak, src/ui/hush.js): the bonk at each sentence, the type size (desktop, phone or short
     // screen) and the smallest it may shrink to, the widest a line may be, how far above his crown it sits (cat

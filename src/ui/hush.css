@@ -54,7 +54,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 #status { position: fixed; z-index: 5; left: 50%; top: 44%; translate: -50% -50%; margin: 0; color: var(--soft); transition: opacity .4s; }
 #status.gone { opacity: 0; }
 
-/* bottom: sound and the butter on the left, the message, marks and hint in the middle, links on the right */
+/* bottom: sound on the left, the message, marks and hint in the middle, links on the right */
 #footer { position: fixed; z-index: 5; left: 0; right: 0; bottom: 0; pointer-events: none; color: var(--soft); transition: opacity .5s;
   padding: 0 var(--edge) calc(30px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; column-gap: 20px; }
 #footer button, #footer a, #footer input { pointer-events: auto; }
@@ -69,7 +69,6 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 #volume::-moz-range-track { height: 2px; background: rgba(43, 39, 36, .22); border-radius: 1px; }
 #volume::-moz-range-progress { height: 2px; background: var(--dark); }
 #volume::-moz-range-thumb { width: 8px; height: 8px; border: 0; border-radius: 50%; background: var(--dark); }
-.dot { display: inline-block; width: 9px; height: 9px; margin-right: 8px; border-radius: 50%; background: var(--butter); box-shadow: 0 0 0 1px rgba(43, 39, 36, .5); vertical-align: -1px; }
 #footer .mid { text-align: center; min-width: 0; }
 .say { margin: 0 0 14px; min-height: 22px; font-size: 17px; font-weight: 800; letter-spacing: .1em; color: var(--dark); white-space: nowrap; opacity: 0; transition: opacity .5s; }
 .say.on { opacity: 1; }
@@ -182,8 +181,8 @@ body.locked canvas#c { cursor: default; }
 @media (max-width: 700px) { .book header { grid-template-columns: 1fr; justify-items: center; text-align: center; } .book .tally { text-align: center; } .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 14px; } }
 
 /* Larger invisible utility targets; the type, slider track and thumb stay quiet. */
-#sound, #ask, #grimoire { position:relative; }
-#sound::before, #ask::before, #grimoire::before { content:""; position:absolute; left:50%; top:50%;
+#sound, #grimoire { position:relative; }
+#sound::before, #grimoire::before { content:""; position:absolute; left:50%; top:50%;
   width:max(100%,44px); height:44px; transform:translate(-50%,-50%); }
 #volume { height:44px; margin-block:-15px; touch-action:none; }
 @media (max-width:700px) { #volume { width:44px; padding-inline:2px; margin-inline:-2px; } }
@@ -305,7 +304,7 @@ body.galaxy-showing #volume::-moz-range-track { background:#666; }
    on it. Every visible button and link-button on the page wears it, so they read as buttons at a glance; the pixel
    chest and the fake Chrome error page keep their own looks on purpose. */
 :root { --felt: #fbede0; --felt-2: #f3e0cf; --line: rgba(43, 39, 36, .38); --stitch: rgba(43, 39, 36, .2); --glow: rgba(243, 211, 107, .55); }
-.felt, #footer .sound, #footer #ask, #footer #grimoire, #footer .fr .ach-mark, .marks li.again button, .forget button,
+.felt, #footer .sound, #footer #grimoire, #footer .fr .ach-mark, .marks li.again button, .forget button,
 body.book .home, body.book .book-links a, body .world-grip button,
 .noscope-video .video-controls button, #bird-screen .bird-actions button {
   position: relative; border: 1.5px solid var(--line); border-radius: 999px; color: var(--dark);
@@ -314,29 +313,28 @@ body.book .home, body.book .book-links a, body .world-grip button,
   box-shadow: inset 0 -2px 0 rgba(120, 80, 40, .07), 0 1px 0 rgba(255, 255, 255, .7), 0 3px 7px -4px rgba(70, 45, 20, .4);
   transition: border-color .2s, box-shadow .2s, translate .12s, color .2s; }
 /* the stitch */
-.felt::after, #footer .sound::after, #footer #ask::after, #footer #grimoire::after, #footer .fr .ach-mark::after, .marks li.again button::after,
+.felt::after, #footer .sound::after, #footer #grimoire::after, #footer .fr .ach-mark::after, .marks li.again button::after,
 .forget button::after, body.book .home::after, body.book .book-links a::after, body .world-grip button::after,
 .noscope-video .video-controls button::after, #bird-screen .bird-actions button::after {
   content: ""; position: absolute; inset: 2.5px; border-radius: inherit; border: 1px dashed var(--stitch); pointer-events: none; }
 @media (hover: hover) {
-  .felt:hover, #footer .sound:hover, #footer #ask:hover, #footer #grimoire:hover, #footer .fr .ach-mark:hover, .marks li.again button:hover,
+  .felt:hover, #footer .sound:hover, #footer #grimoire:hover, #footer .fr .ach-mark:hover, .marks li.again button:hover,
   .forget button:hover, body.book .home:hover, body.book .book-links a:hover, body .world-grip button:hover,
   .noscope-video .video-controls button:hover, #bird-screen .bird-actions button:hover {
     border-color: var(--dark); color: var(--dark); box-shadow: 0 0 0 3px var(--glow), inset 0 -2px 0 rgba(120, 80, 40, .07), 0 4px 9px -4px rgba(70, 45, 20, .45); }
 }
-.felt:active, #footer #ask:active, #footer #grimoire:active, #footer .fr .ach-mark:active, .marks li.again button:active, .forget button:active,
+.felt:active, #footer #grimoire:active, #footer .fr .ach-mark:active, .marks li.again button:active, .forget button:active,
 body .world-grip button:active, .noscope-video .video-controls button:active, #bird-screen .bird-actions button:active {
   translate: 0 1px; box-shadow: inset 0 1px 3px rgba(43, 39, 36, .2); }
 /* the footer's: same type as before, now inside their patches */
 #footer .fl { gap: 12px; } #footer .fr { gap: 8px; }
-#footer #ask, #footer #grimoire { display: inline-flex; align-items: center; height: 30px; padding: 0 14px 0 13px; color: var(--soft); }
-#footer #ask .dot { margin-right: 8px; }
+#footer #grimoire { display: inline-flex; align-items: center; height: 30px; padding: 0 14px 0 13px; color: var(--soft); }
 #footer .sound { height: 30px; padding: 0 12px 0 14px; gap: 9px; }
 #footer #sound { color: var(--soft); border: 0; background: none; box-shadow: none; }
 #footer #sound::after { content: none; }
 #footer .fr .ach-mark { display: inline-grid; width: 30px; height: 30px; margin-left: 0; color: var(--soft); }
 #footer .fr .ach-mark svg { width: 16px; height: 16px; }
-@media (hover: hover) { #footer .sound:hover #sound, #footer #ask:hover, #footer #grimoire:hover, #footer .fr .ach-mark:hover { color: var(--dark); } }
+@media (hover: hover) { #footer .sound:hover #sound, #footer #grimoire:hover, #footer .fr .ach-mark:hover { color: var(--dark); } }
 /* the controller after the row of sigils: a round button that plays the bird game again */
 .marks li.again { width: 32px; height: 32px; margin-left: 9px; }
 .marks li.again button { width: 32px; height: 32px; }
@@ -357,20 +355,15 @@ body .world-grip button { min-width: 44px; min-height: 44px; padding: 0 18px; fo
 body.book .home, body.book .book-links a { display: inline-flex; align-items: center; min-height: 32px; padding: 0 14px; color: var(--soft); }
 body.book header .home { justify-self: start; }
 @media (max-width: 700px) { body.book header .home { justify-self: center; } }
-/* not much width (phone landscape, a small window): sound above the butter, so the row of marks keeps its room */
-@media (max-width: 1240px) and (min-width: 701px) {
-  /* 16 px: two 30 px felt pills stacked keep their 44 px targets apart, 2 px spare (fix round B, playtest-2) */
-  #footer .fl { flex-direction: column; align-items: flex-start; gap: 16px; }
-}
 @media (max-width: 700px) {
   #footer .fl { gap: 10px; }
-  #footer #ask, #footer #grimoire, #footer .sound { height: 28px; padding: 0 11px; }
+  #footer #grimoire, #footer .sound { height: 28px; padding: 0 11px; }
   #footer .fr .ach-mark { width: 28px; height: 28px; margin-left: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .felt, #footer .sound, #footer #ask, #footer #grimoire, #footer .fr .ach-mark, .marks li.again button { transition: none; }
+  .felt, #footer .sound, #footer #grimoire, #footer .fr .ach-mark, .marks li.again button { transition: none; }
 }
-#footer #grimoire[hidden], #footer #ask[hidden], .felt[hidden] { display: none; }
+#footer #grimoire[hidden], .felt[hidden] { display: none; }
 
 /* ---- the achievement reveal (e1112-31, src/ui/achievements.js) ----
    On the message line above the marks: his script settles into the name, then a wax seal stamps down beside it, a
@@ -527,3 +520,24 @@ body.shell-boot .top, body.shell-boot #footer { transition: none; }
   .book-sheet main { padding-top: 16px; }
   .book .lead { margin: 22px 0 24px; }
 }
+
+/* ==== fullscreen lane (playtest-3, 2026-11-13): the full-screen step and button on a phone (src/ui/fullscreen.js) ==== */
+/* the button: a small felt patch just after "Sigil Cat" at the top left (clear of the numbers, the sound, the books,
+   the sigil row and the shelf under it), a 44 px finger target around its 30 px patch */
+.top .fs-toggle { position: absolute; left: calc(100% + 8px); top: calc(50% - 15px); width: 30px; height: 30px; display: inline-grid; place-items: center;
+  pointer-events: auto; color: var(--soft); letter-spacing: 0; }
+.top .fs-toggle[hidden] { display: none; }
+.top .fs-toggle::before { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; translate: -50% -50%; border-radius: 50%; }
+.top .fs-toggle svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+@media (hover: hover) { .top .fs-toggle:hover { color: var(--dark); } }
+/* the step: over the closed loading doors, before he pops in (under "flip sideways", which is z 2000) */
+.fs-step { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 12px max(16px, env(safe-area-inset-right)) 12px max(16px, env(safe-area-inset-left));
+  background: rgba(43, 39, 36, .3); touch-action: none; }
+.fs-card { max-width: 400px; padding: 22px 26px 18px; outline: none; }
+.fs-card p { margin-bottom: 16px; }
+.fs-card p b { color: var(--dark); font-weight: 800; }
+.pill.primary { background: var(--ink); border-color: var(--ink); color: var(--page); --stitch: rgba(251, 243, 234, .3); }
+.pill.primary:hover { color: var(--page); border-color: var(--ink); }
+.fs-later { min-height: 44px; padding: 0 16px; color: var(--soft); font-weight: 800; }
+@media (hover: hover) { .fs-later:hover { color: var(--dark); } }
+@media (max-height: 500px) and (orientation: landscape) { .fs-card { padding: 18px 24px 14px; } .fs-card h2 { margin-bottom: 9px; } .fs-card p { font-size: 13px; margin-bottom: 12px; } }

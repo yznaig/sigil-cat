@@ -115,9 +115,11 @@ export function createShell(site) {
     return (sequence = (async () => {
       boot?.set?.('ready', 1);
       loader?.classList.add('loaded');
-      if (instant) { finish(); checkTurn(); return; }
+      // the full-screen step (fullscreen lane, playtest-3, src/ui/fullscreen.js) comes once the phone is on its side
+      if (instant) { finish(); checkTurn(); landscape().then(() => site.fullscreen?.step()); return; }
       if (want === 'hold') await new Promise((r) => { go = r; });
       await landscape();
+      await site.fullscreen?.step();
       placeRing();
       if (calm()) {
         // one fade, the whole loading screen at once
@@ -168,6 +170,6 @@ export function createShell(site) {
   return {
     reveal, checkTurn, popOver, go() { go?.(); }, doors: DOORS,
     get revealed() { return revealed; }, get masking() { return masking; }, get gap() { return gap; },
-    get instant() { return instant; }, get upright() { return upright(); }, get turnShown() { return !!turnEl; }, log,
+    get instant() { return instant; }, get upright() { return upright(); }, get phone() { return phoneish(); }, get turnShown() { return !!turnEl; }, log,
   };
 }

@@ -22,3 +22,17 @@ await L.setOn(false);await sleep(stage.reducedMotion?100:900);
 check('switched off, the smiley is gone (not drawn)',!s.visible);
 await __shot('gags-lamp-off');
 await L.setOn(true);await sleep(stage.reducedMotion?100:900);check('and back on, it is back',s.visible&&s.material.opacity===1);
+// Polish lane (playtest 3, Aaron: "The glow-in-the-dark smiley face should also be moved closer to the front, just a little
+// bit, because currently it's slightly covered by the controller stand"): with the stand and the egg cup in the row, no
+// point of the face's ring (taken 15 % wide of the drawn line, for its stroke and glow) is hidden by furniture, and on
+// the page it stays clear of the footer's buttons.
+{const cm=await import(new URL('src/flappy/controller.js',document.baseURI).href),{eggCupService}=await import(new URL('src/world/egg-cup.js',document.baseURI).href);
+ store.set('bird.stand',true);await cm.ensureStand(site);await eggCupService(site).ensure();await until(()=>!site.world.stats.listening,15000);L.changed();await sleep(300);
+ const W=site.world,Rp=W.rapier,cam=stage.camera.position,w=s.geometry.parameters.width,d=s.geometry.parameters.height;s.updateMatrixWorld(true);
+ const buttons=[...document.querySelectorAll('button')].map(e=>e.getBoundingClientRect()).filter(r=>r.width>0&&r.height>0&&r.top>stage.height*.5);
+ let hidden=0,under=0;
+ for(let i=0;i<48;i++){const a=i/48*Math.PI*2,u=.6+Math.cos(a)*.27*1.15*410/640*1.08,v=.55+Math.sin(a)*.27*1.15*.94,p=s.localToWorld(new T.Vector3((u-.5)*w,-(v-.5)*d,0)),dir=p.clone().sub(cam),len=dir.length();
+  if(W.physics.castRay(new Rp.Ray(cam,dir.normalize()),len-.01,true,undefined,undefined,undefined,undefined,c=>/^furniture-/.test([...W.entries.values()].find(e=>e.body===c.parent())?.id||'')))hidden++;
+  const q=stage.toScreen(p);if(buttons.some(r=>q.x>r.left&&q.x<r.right&&q.y>r.top&&q.y<r.bottom))under++;}
+ check('the smiley is in front of the controller stand and the egg cup, and clear of the footer buttons',hidden===0&&under===0&&!!site.stand?.ready&&!!site.eggCup?.ready,`${hidden}/48 ring points behind furniture, ${under} under a button`);
+ await __shot('gags-lamp-smiley-by-stand');}

@@ -201,6 +201,12 @@ for size in desktop phone; do
   [ $size = phone ] && run "achievements-view-640x360" "$BASE/?book=achievements" --js checks/achievements-view.js --then checks/achievements-view-reload.js --size 640x360 --out "$SHOTS" --jpeg --timeout 120 --storage "$ACH_STORE"
   run "achievements-badge-$size" "$BASE/" --lib checks/lib.js --js checks/achievements-badge.js --then checks/achievements-badge-reload.js --size $size --out "$SHOTS" --jpeg --timeout 240
   run "achievements-badge-calm-$size" "$BASE/" --lib checks/lib.js --js checks/achievements-badge.js --then checks/achievements-badge-reload.js --size $size --out "$SHOTS" --jpeg --timeout 240 --reduced
+  # polish lane (2026-11-13): Platinum Cat the real way, from a save one short (a drawn sign; a playtest-2 one), and a lost badge given back
+  for last in circle flappy lost; do
+    case $last in circle) skip='["circle","fluent","platinum"]';; flappy) skip='["flappy","platinum"]';; lost) skip='[]';; esac
+    PLAT_STORE=$(node --input-type=module -e "const { ACHIEVEMENTS } = await import('$PWD/src/achievements.js'); const skip = $skip; console.log(JSON.stringify({ achievements: Object.fromEntries(ACHIEVEMENTS.filter((a) => !skip.includes(a.id)).map((a) => [a.id, 1762800000000])) }))")
+    run "platinum-earn-$last-$size" "$BASE/?dpr=$final_dpr&last=$last" --lib checks/lib.js --js checks/platinum-earn.js --then checks/platinum-earn-reload.js --size $size --out "$SHOTS" --jpeg --timeout 180 --storage "$PLAT_STORE"
+  done
   # text lane (playtest-2): the cat's speech, the first-pickup tip, the felt buttons, the sigil-only row, the
   # achievement reveal and its metals, a stored Platinum kept, the hints. Once with motion, once calm.
   TEXT_STORE='{"found":{"butter":1,"circle":1,"bolt":1,"loaf":1,"box":1,"noscope":1,"harp":1,"bird":1,"blastoff":1},"bonks":3,"achievements":{"platinum":1762870000000,"circle":1762820000000}}'
@@ -218,6 +224,8 @@ for size in desktop phone; do
   # Fix round A (playtest-2): a body taken out of the room leaves no collider behind; the box's first place is in view
   run "world-disable-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/world-disable.js --size $size --out "$SHOTS" --jpeg --timeout 120
   run "box-home-$size" "$BASE/" --lib checks/lib.js --js checks/box-home.js --size $size --out "$SHOTS" --jpeg --timeout 90
+  # box-open stray pictures (2026-11-13, Aaron's img10): the swinging lid stays in the box's picture; no atlas tile is painted by another
+  run "box-open-tiles-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/box-open-tiles.js --size $size --out "$SHOTS" --jpeg --timeout 240
   # physics lane, playtest-3: the eyes follow him and show on the badge, chest take-out, too far into him, the flour's place
   run "physics-p3-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/physics-p3.js --then checks/physics-p3-reload.js --size $size --out "$SHOTS" --jpeg --timeout 400
   run "inventory-stress-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/inventory-stress.js --then checks/inventory-stress-reload.js --size $size --out "$SHOTS" --jpeg --timeout 500
@@ -250,6 +258,14 @@ done
 
 # a phone held upright only ever shows "flip sideways" (shell lane, playtest-2): at boot, and mid-game, frozen under it
 run "shell-turn-phone-portrait" "$BASE/?doors=hold&dpr=2" --js checks/shell-turn.js --size phone-portrait --out "$SHOTS" --jpeg --timeout 150
+# full screen on a phone (fullscreen lane, playtest-3): the step after "flip sideways", the button, no element full
+# screen (iPhone Safari), opened from the home screen, loaded upright, and a desktop that gets neither
+run "fullscreen-phone" "$BASE/?doors=hold&fs=1&case=api" --js checks/fullscreen.js --then checks/fullscreen-reload.js --size phone --out "$SHOTS" --jpeg --timeout 180
+run "fullscreen-later-calm-phone" "$BASE/?doors=hold&fs=1&case=later" --js checks/fullscreen.js --size phone --out "$SHOTS" --jpeg --timeout 120 --reduced
+run "fullscreen-noapi-phone" "$BASE/?doors=hold&fs=1&case=noapi" --js checks/fullscreen.js --size phone --out "$SHOTS" --jpeg --timeout 120
+run "fullscreen-standalone-phone" "$BASE/?doors=hold&fs=1&case=standalone" --js checks/fullscreen.js --size phone --out "$SHOTS" --jpeg --timeout 120
+run "fullscreen-phone-portrait" "$BASE/?doors=hold&fs=1&case=portrait" --js checks/fullscreen.js --size phone-portrait --out "$SHOTS" --jpeg --timeout 120
+run "fullscreen-desktop" "$BASE/?doors=hold&fs=1&case=desktop" --js checks/fullscreen.js --size desktop --out "$SHOTS" --jpeg --timeout 120
 
 echo "== sigils"
 if node checks/sigils.test.mjs > "$LOG/sigils.txt" 2>&1; then tail -n 1 "$LOG/sigils.txt"; else tail -n 15 "$LOG/sigils.txt"; fails+=("sigils"); fi

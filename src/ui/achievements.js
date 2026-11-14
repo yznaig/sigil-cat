@@ -199,7 +199,7 @@ export function createAchievements(site) {
     markEl.setAttribute('aria-label', `achievements: ${n} of ${ACHIEVEMENTS.length}`);
     markEl.title = `achievements · ${n} of ${ACHIEVEMENTS.length}`;
   }
-  // The tick turns the icon, not the link: its 44px hit area (::before) stays put beside the ask-the-butter row.
+  // The tick turns the icon, not the link: its 44px hit area (::before) stays put beside the grimoire link.
   function tickMark() { if (!markEl || stage.reducedMotion) return; (markEl.querySelector('svg') || markEl).animate([{ transform: 'scale(1)' }, { transform: 'scale(1.35) rotate(-8deg)', offset: 0.35 }, { transform: 'scale(1)' }], { duration: 650, delay: 260, easing: 'cubic-bezier(.3,1.5,.5,1)' }); }
   showMark();
 
@@ -214,8 +214,11 @@ export function createAchievements(site) {
   }
   if (has('platinum') || store.get('keepsakes.platinum')) loadBadge();
 
-  // boot: credit what was found before (quietly), then listen
-  site.ready?.then?.(() => { evaluate(true); booted = true; });
+  // boot: credit what was found before (quietly), then listen. Polish lane (2026-11-13): Platinum Cat earned but no
+  // badge saved means the badge was lost (it never goes in the chest or the bin, src/world/recipes.js NOT_ITEMS); a
+  // syntax slip in src/world/platinum.js once kept it from ever loading. Give it again, so having Platinum Cat always
+  // means having its badge (e1112-37).
+  site.ready?.then?.(() => { evaluate(true); booted = true; if (has('platinum') && !store.get('keepsakes.platinum')) givePlatinum(0); });
 
   const api = {
     ACHIEVEMENTS, has, unlock, score, evaluate, onUnlock: (f) => listeners.push(f),
@@ -225,7 +228,13 @@ export function createAchievements(site) {
     get chimes() { return chimes; }, get badge() { return badge; },
     // #debug and the checks
     grant: (id, o) => unlock(id, o),
-    grantAll({ except = [], quiet = false } = {}) { for (const a of ACHIEVEMENTS) if (!except.includes(a.id) && a.id !== 'platinum') unlock(a.id, { quiet: true }); if (!except.includes('platinum')) unlock('platinum', { quiet }); },
+    // as though earned: the rest quietly, the last one out loud, and Platinum Cat follows it (meta) with its reveal.
+    // (Polish lane, 2026-11-13: all of them quiet made Platinum quietly through meta, so its own reveal never played.)
+    grantAll({ except = [], quiet = false } = {}) {
+      const rest = ACHIEVEMENTS.filter((a) => a.id !== 'platinum' && !except.includes(a.id) && !has(a.id));
+      rest.forEach((a, n) => unlock(a.id, { quiet: quiet || n < rest.length - 1 }));
+      if (!except.includes('platinum')) unlock('platinum', { quiet });
+    },
     forget() { store.del('achievements'); store.del('achievementProgress'); store.del('rareBonks'); site.ui.showRare?.(); showMark(); },
   };
   return api;

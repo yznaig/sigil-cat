@@ -56,6 +56,14 @@ try {
 <title>Sigil Cat</title>
 <meta name="description" content="A small black felt cat floating in the middle of the page. Turn him. Tap him. Draw on the air.">
 <meta name="theme-color" content="#fdf0e6">
+<!-- opened from the home screen it has the whole screen (fullscreen lane, playtest-3; src/ui/fullscreen.js): the manifest asks for
+     fullscreen and landscape, iOS reads the apple- lines (no element full screen on iPhone Safari: the step points here) -->
+<link rel="manifest" href="site.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sigil Cat">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23121212' d='M6 4l6 6h8l6-6v13a10 10 0 01-20 0z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -136,7 +144,6 @@ try {
 <footer id="footer">
   <div class="fl">
     <span class="sound"><button type="button" id="sound" aria-pressed="true">sound <b>on</b></button><input type="range" id="volume" min="0" max="100" step="1" aria-label="Volume"></span>
-    <button type="button" id="ask"><i class="dot" aria-hidden="true"></i>ask the butter</button>
   </div>
   <div class="mid">
     <p class="say" id="say" aria-live="polite"></p>

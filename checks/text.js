@@ -9,7 +9,7 @@
 //     shimmer, one at a time; a say that comes meanwhile waits and then plays
 //   6 the bonk tiers' metals (wood .. platinum) on the wax, in the reveal and in the book
 //   7 a stored Platinum Cat is kept though new achievements are missing
-//   8 no ask-the-butter hint points at a drawn star
+//   8 "ask the butter" is gone: no button, no list of hints (polish lane, 2026-11-13)
 cat.auto = false;
 const A = site.achievements, C = site.config;
 const calm = stage.reducedMotion;
@@ -32,7 +32,7 @@ const nSig = sigils.filter((f) => registry.has(f.id)).length;
 check('4 "N of M sigils" counts the sigils the row shows', document.getElementById('found').textContent === `${nSig} of ${sigils.length} sigils`, document.getElementById('found').textContent);
 
 // ---- 3: the footer's buttons ----
-for (const [label, el] of [['sound', document.querySelector('#footer .sound')], ['ask the butter', document.getElementById('ask')], ['grimoire', document.getElementById('grimoire')], ['achievements mark', document.getElementById('achievements')]]) {
+for (const [label, el] of [['sound', document.querySelector('#footer .sound')], ['grimoire', document.getElementById('grimoire')], ['achievements mark', document.getElementById('achievements')]]) {
   const cs = getComputedStyle(el), r = el.getBoundingClientRect();
   check(`3 ${label} wears the felt patch (outline, round ends, on screen)`, parseFloat(cs.borderTopWidth) >= 1 && parseFloat(cs.borderTopLeftRadius) >= r.height / 2 - 1 && /gradient/.test(cs.backgroundImage) && r.right <= stage.width && r.left >= 0, `${cs.borderTopWidth} ${cs.borderTopLeftRadius} ${Math.round(r.left)}..${Math.round(r.right)}`);
 }
@@ -136,5 +136,5 @@ check('6 the book draws each earned tier as wax in its metal, and no .seal', tie
 check('6 the reveal wax: the tier\'s metal, Platinum Cat platinum, the rest gold', wax(ACHIEVEMENTS.find((a) => a.id === 'platinum')).includes('metal-platinum') && wax(ACHIEVEMENTS.find((a) => a.id === 'lucky')).includes('metal-gold'));
 
 // ---- 8: the hints ----
-check('8 no ask-the-butter hint points at drawing a star', !C.ui.hints.some((h) => /star|five|point/i.test(h)), C.ui.hints.join(' | '));
+check('8 "ask the butter" is gone: no button, no hint list, no copy on the page', !document.getElementById('ask') && !('hints' in C.ui) && !/ask the butter/i.test(document.getElementById('footer').textContent));
 store.flush();

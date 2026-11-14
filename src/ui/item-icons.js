@@ -1,7 +1,9 @@
 // Inventory icons (kitchen lane, e1111-61): each item's own 3D model, rendered once into a small square picture from
 // a little above the front, then cached (in memory, and in this browser under its own key so an item in the chest
 // keeps its picture after a reload). Uses the stage's renderer, lights and environment, outside the frame loop.
-const KEY = 'sigilcat.icons.v1', SIZE = 96;
+// v2 (polish lane, playtest 3): the cake turned chocolate, so pictures cached under v1 are dropped and drawn again.
+const KEY = 'sigilcat.icons.v2', SIZE = 96;
+try { localStorage.removeItem('sigilcat.icons.v1'); } catch {}
 export function createItemIcons(site) {
   const { THREE: T, stage } = site;
   const cache = new Map();

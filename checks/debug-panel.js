@@ -28,3 +28,12 @@ check('0: the count is zero, the earned tiers stay earned', ui.count === 0 && st
 const mid = catMid(); await tap(mid.x, mid.y); await sleep(200);
 check('and a real bonk counts on from zero', ui.count === 1 && store.get('bonks') === 1, bonksText());
 await sleep(500); await __shot('debug-panel');
+// polish lane (2026-11-13; Aaron: "I used the achievement all debug, and I did not get the platinum cat item"): 'ach all'
+// is earning every achievement, Platinum Cat's reveal and its badge included; the old 'platinum' button (the same) is gone
+check('one button earns them all; no separate platinum button', !!button('ach all') && !button('platinum'));
+await until(() => !A.queued, 60000);   // the bonk tiers' reveals above play out first (they queue, one at a time)
+button('ach all').click();
+check('ach all: every achievement earned, Platinum Cat last', A.count === A.total && A.has('platinum'), `${A.count} of ${A.total}`);
+check('ach all: Platinum Cat\'s reveal plays', await until(() => A.reveal?.classList.contains('platinum'), 20000), A.reveal?.className);
+check('ach all: the Platinum Cat badge falls into the room', await until(() => keepsakes.get('platinum')?.worldReady, 15000), keepsakes.get('platinum')?.worldError || '');
+await sleep(1500); await __shot('debug-panel-platinum');
