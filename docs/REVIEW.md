@@ -5648,3 +5648,383 @@ grid lines unchanged at every zoom (5,693-19,715 such pixels a run, 0 changed); 
 pixels changed, parting: changes only in the gap. Existing checks at desktop dpr 1 and phone dpr 2: world-presentation,
 visual-hairlines, controls (+ controls-reload): all PASS. (world-presentation failed its four parity lines while the
 grid sat in the presentation root, hence its own scene child.) Not run: the full suite.
+
+## Music lane (music round, 2026-11-15)
+
+Aaron (verbatim, 2026-11-15; decisions e1115-12, e1115-13, e1115-14): "sequencer sky take 1 / Glass garden take 3 / phase
+cat take 1 / orbit-loaf take 3 playable in normal game only after the galaxy loaf scene has played / orbit loaf 1 for the
+galaxy loaf scene and extend how long it takes the loaf to float into space. Star Ding at 23 sec / I want all those 4 to
+be ones that randomly cycle throughout gameplay, never the same one twice in a row. / In flappy: it should just quickly
+fade to no background music when playing flappy. / After the 360, it should continue playing the music it was playing
+before, from the same part it paused at. / C418s approach of 1-3 minutes between is fine / Glass garden should be always
+be the very first song to play. And upon opening the game for the first time on mobile, it should flash "turn silence off
+for sound" for like 2 seconds, similar to the "flip screen" screen. / And the debug screen should be toggleable with space
+bar on desktop." Branch `sc/p7-music` from main `46351db`. Every choice below is open to his veto.
+
+### 1. Background music (`src/core/music.js`, `site.music`)
+
+| What | Built | Choices for Aaron's veto |
+|---|---|---|
+| Files | `assets/audio/music/{glass-garden,sequencer-sky,phase-cat,orbit-loaf,orbit-loaf-blastoff}.{m4a,mp3}`, copied unchanged from `hq-tools/songs/sigil/game/` (the repo's [m4a, mp3] pair convention; no re-encode). Facts in `assets/audio/SOURCES.md` (YuE2, weights CC-BY-NC-4.0, non-commercial; takes). Ledgered in `design-manifest.json` (Aaron-supplied, decision ids) and `docs/sound-levels.json`. | The ledger's `processing` points at SOURCES.md: the levelling recipe lives outside this repo (hq-tools). |
+| How it plays | One `<audio>` element (src swapped per song) through a `MediaElementAudioSourceNode` and its own gain into the master bus: mute and volume reach it. | Streaming (the brief's suggestion, taken): a decoded 2-3.5 min song is 40-80 MB on a phone; the element holds seconds, and pause/resume keeps its place for free. m4a where `canPlayType` says so, else mp3 (an m4a error falls back to the mp3). The 24.6 s blast-off stays a decoded buffer (it must land on a moment). |
+| First song | glass-garden, `firstDelay` 2 s after both the doors are open and the first gesture has made the AudioContext. | "Always the very first song" read as: the first song of every visit (every page load), not only the first visit ever. |
+| Rotation | After each song a random song of the pool, never the one just played (uniform among the others). Pool: glass-garden, sequencer-sky, phase-cat; orbit-loaf once `music.orbitLoaf` is in the store. | |
+| Gap | Uniform random 60-180 s of silence between songs (`MUSIC.gap`). `?musicgap=a,b` and `site.music.setGap(a, b)` shrink it for checks. | A gap is frozen while anything holds the music (it counts only time in the room), and goes on after. |
+| Level | `MUSIC.gain` .12 (-18.4 dB) into the master bus. Measured on the bus at volume .8 (checks/music.js, desktop): a typical stretch (glass-garden 60-64 s) RMS -42.9 dBFS, loudest 43 ms -37.1; the loudest 4 s of the loudest song (sequencer-sky 98-102 s, found offline) -35.7 dBFS, loudest 43 ms -31.1; tap bonk (at the taps' .5) peaks -27.5 dBFS, the cast's wind (.5) -32.0. So the bonk stands 15 dB over a typical stretch and 8 dB over the loudest; the wind 11 and 4. | Picked so every effect stays over even the loudest 4 s of the loudest song. If it reads too quiet on a phone speaker, .18 is the next step (the wind would then only just clear sequencer-sky's peak). |
+| Holds | `site.music.hold(reason, { fade })` returns a release; holds stack (a release twice counts once). The first hold fades the music (0.8 s; Flappy 0.35 s) and pauses it; the last release resumes the same song from the same place, fading in over 1 s. | |
+| Freeze, hidden tab | `audio.suspend()` (the freeze of the books, flip sideways, the cake screen; flappy in a hidden tab) pauses it at once (the audio clock stops, so a fade would not play); a hidden tab fades it (0.3 s) and pauses it; both resume like a hold. New hooks `audio.onContext`, `audio.onSuspend`, `audio.suspended` (`src/core/audio.js`, small, commented). | Pausing in a hidden tab (rather than letting it play on) is mine: phones would cut it anyway (the 'ambient' session) and a background tab playing music is rude on desktop. |
+| iPhone | It plays through the AudioContext, so the 'ambient' session applies: the silent switch mutes it like every sound (hence item 3). The element is `load()`-ed inside the first gesture (Howler's unlock) so iOS lets it play later; a play refused for want of a gesture retries on the next one. | Not testable here: a real iPhone. |
+| Off | `?music=0`; under automation off unless `?music=1`, so no other check hears it. | |
+| Debug | A `music` line in the #debug readout (phase, held by what, track position/length, gap left, gap range, last song) and a "music next" button (ends the song / the gap now). | |
+
+Scenes that hold the music (the 360 rule: fade, pause, resume where it paused), each a one- or two-line commented edit:
+
+| Scene | Where | Fade | Note |
+|---|---|---|---|
+| The 360 (cutscene + riser) | `src/eggs/noscope-video.js` fire / restore | 0 | The 360 already cuts the whole page bus on its first frame (its own design); a fade would play out unheard and the song would come back 0.8 s further on, so it pauses on the cut. |
+| Flappy (the game) | `src/flappy/screen.js` open / restore (every exit) | 0.35 | Resumes when the game closes, like the 360: Flappy ends on the room (give up / return), nothing plays there to clash with. |
+| The trailer (YOU JUST LOST THE GAME) | the same screen | 0.8 | |
+| Butterman's scenes | `src/eggs/butterman.js` play / finish (a scene restarted mid-run keeps one hold) | 0.8 | The cameo/whisper loop is not a scene: untouched. |
+| Furniture arrivals | `src/world/arrival.js` begin: from the scrape's start until the fanfare's source has ended | 0.8 | The first arrival holds ~40 s (15 s scrape, 15 s slide, the fanfare). Not exercised by a check (arrivals are instant under automation); see below. |
+| The galaxy (its hum) | `src/eggs/galaxy.js` open / fully closed | 0.8 | |
+| The cake's error page and party | `src/gags/party.js` eatCake / restore | 0 in effect | Its freeze stops the clock on the same frame. Resumes when the room is back, under the toot. |
+| The galaxy loaf scene | `src/eggs/bread.js` blastOff, start to the cat's pop back | 0.8 | Crossfades into its own song. |
+| The freeze holders (books, flip sideways) | via `audio.suspend` | 0 | |
+| Not held | the paradox's 10 s hum, the loaf's riser and pop, the purr, achievements' chimes | | Room sounds, not scenes that take the stage. |
+
+### 2. The galaxy loaf scene (`src/eggs/bread.js` `blastOff`, `BREAD.blast`)
+
+- `orbit-loaf-blastoff` plays from the scene's first moment (decoded buffer, `trackGain` .9 like the arrival fanfares;
+  fetched as he turns to bread; a spin before it arrives waits for it at most 1.2 s). The twinkle is scheduled on the
+  audio clock at `twinkleAt` 23.0 s after the song starts; the tremble (1.6 s) and the float (`fly` 21.4 s, was 6) follow
+  the audio clock, so the star lands with it. Without a running clock the scene keeps the page's time as before.
+- The float (`curve(u)`, exported on the egg): it gathers speed over its first 7%, then shrinks at a steady rate on a log
+  scale (half its size about every 3.8 s, to 2% at the star), and closes on its point the way a thing drifting away does
+  (its offset follows 1 - size). The same straight path to the same point inside the middle circle; the roll is the same
+  0.65 rad, spread over the longer float. Reduced motion: no roll, as before.
+- The music holds for the scene and comes back after; `music.orbitLoaf` is set when the star twinkles (the scene has
+  reached its point: a scene cut short before it does not count). The replay (`site.again('blastoff')`) is the same code.
+- The galaxy hum plays under the blast-off's dark (it is the galaxy's space); left as is.
+
+### 3. "turn silence off for sound" (`src/ui/silence.js`)
+
+The flip card's look (the same translucent grey sheet, a line drawing above one line): a bell whose slash lifts away
+and which then rings, looping; the words "turn silence off for sound". Once per device (`shell.silenceTold`, set when it
+shows), phones only (the shell's rule). In the way in: after "flip sideways" and the full-screen step, over the still
+closed doors, before he pops in, so it never covers him or the room; 2 s, then a 0.3 s fade (a tap ends it sooner).
+No sound. Reduced motion: no fades, the bell still. `?silence=0` off; under automation off unless `?silence=1`.
+Choices: before the pop (adds 2 s to a phone's very first way in, once); one line of words, no small second line;
+told once even if the visitor taps it away at once.
+
+### 4. Space toggles the debug screen (`src/main.js`, `#debug` only)
+
+Built as briefed: with #debug, on a desktop (fine pointer, not the shell's phone), Space shows and hides the readout and
+the button bar together (`site.debugScreen`), and in #debug Space no longer taps the cat (Enter still does). Not while
+typing in a field, while any aria-modal is up (the books, the chest, flappy, the cake's page, the full-screen step), or
+while the page is locked (a scene); a held key toggles once; a focused debug button is not pressed by it. Without #debug
+or on a phone nothing changes. While hidden the readout is not rewritten each frame (`src/core/stage.js`, one line).
+
+### Edits outside this lane's files (small, commented)
+
+`src/core/audio.js` (onContext / onSuspend / suspended), `src/core/stage.js` (the hidden readout is not rewritten),
+`src/main.js` (music, silence, `begin()` after the doors, the Space toggle, a "music next" button), `src/ui/shell.js`
+(the silence step after the full-screen step), the hold lines in `src/eggs/noscope-video.js`, `src/flappy/screen.js`,
+`src/eggs/butterman.js`, `src/world/arrival.js`, `src/eggs/galaxy.js`, `src/gags/party.js`; `src/ui/books.js` (a credit
+line in the grimoire: "The music: made for this page with YuE2 by M-A-P (model weights CC BY-NC 4.0; non-commercial)");
+`tools/serve.py` answers one byte range (206) as the real host does, so the streamed song can seek in the preview (the
+check seeks to measure the loudest bar; without it a dev server could not seek at all).
+Checks updated honestly for the new timing: `bread-float.js` (21.4 s float, the new curve), `sky.js` (40 s wait for the
+~25 s scene), `sounds-playtest.js` (40 s wait; the scene's song is a known clip, not "unnamed"), `run-all.sh` (bread-float
+timeouts 150 s; the new runs).
+
+### Checks
+
+New: `checks/music.js` + `music-reload.js` (at `?music=1&musicgap=0.4,0.8`), `checks/silence.js` + `silence-reload.js`,
+`checks/debug-space.js`; wired into `run-all.sh` (music and debug-space at desktop, phone and 1536x864; debug-space
+without #debug; silence phone, calm phone, desktop). Shots: `docs/shots/p7-music/`.
+
+Runs (port 8741, headless, load 3-4; desktop = 1536x864 dpr 1, phone = 844x390 dpr 2), pass counts desktop / phone:
+music 38 / 38 (+ reload), debug-space 14 (#debug) / 2 (phone: nothing changes) and 2 without #debug, silence phone 7,
+calm phone 6, desktop 1. Touched: bread 14 / 14, bread-calm 14 / 14, bread-float 6 / 6, bread-float-calm 6 / 6,
+bread-float-shots 2 / 2, sky 21 / 21, noscope-video 13 / 13, noscope-footer 9 / 9, noscope-playtest 5 / 5,
+flappy-unfreeze 12 / 16, bird 58 / 58, party 17 / 17, debug-panel 13 / 13, sounds 17 / 17, sounds-playtest 26 / 26
+(it failed 12+2 at desktop before the update above: the 20 s wait and the "unnamed" song), world-arrivals 37 / 37,
+shell-boot 8 / 8, shell-books 24 / 24, grimoire 8 / 8, fullscreen phone 10 and desktop 1, shell-turn-phone-portrait 7;
+`sounds-files.py`, `sound-originals.py`, `sound-playtest-files.py` and the asset-exists check pass. All pass.
+Measured: the star at 23.007 s on the audio clock (both sizes), the twinkle heard on the bus at 23.031 s; every hold
+resumed from exactly the paused position (0.00 s apart); a 2 s gap held 1.5 s mid-way started the next song after 3.50 s.
+Not tested here: a real iPhone (the 'ambient' session with the element, the gesture unlock), a real hidden tab (simulated
+with `document.hidden` and its event), the furniture arrivals' hold (they are instant under automation; the hook is two
+lines on the fanfare's `ended`). Not run: the full suite.
+
+### Books keep the music playing (e1116-02, 2026-11-16)
+Aaron: "the music shouldnt stop when you open the achievements panel or the grimoire". The books hold the shared freeze,
+which suspends the page's one AudioContext; the music rode it. Now the music has an AudioContext of its own, made in the
+same first gesture (and resumed by any later gesture if iOS leaves it suspended): element -> its gain -> a mirror of the
+sound control (mute x volume via `audio.onChange`) -> its own meter (`site.music.level()`) -> out. The page's clock still
+stops for a book, so the room loops (paradox hum, purr, whisper, galaxy hum) and every scheduled scene sound stop as
+before. The music now pauses by reason: at once for any freeze reason other than 'book' ('turn' = flip sideways,
+'party' = the cake's error page, also a turn while a book is open) and for any other suspension (flappy in a hidden tab);
+its holds, the hidden-tab fade and everything else are unchanged. Small hooks: `audio.onSuspend(on, reasons)` now fires on
+every change, `audio.suspendReasons()`, `site.freeze.onChange(fn)`. The iOS 'ambient' session is page-wide, so the silent
+switch still mutes it. Not testable here: two contexts on a real iPhone.
+Checks (`checks/music.js`): the grimoire and the achievements open, the music plays on (its place moves ~1.5 s in 1.5 s,
+heard on its meter) while the page clock holds; closing changes nothing (no pause, no resume, full level); flip sideways on
+top of an open book pauses it at once and resumes it in place; flip sideways alone and the cake's page still pause and
+resume in place; mute silences it on its meter; volume .4 / .8 sets its control as the master's; it runs on its own
+context. The hold-timing line now reads where the song was when the hold came (Flappy loads before it holds).
+Runs (port 8741, desktop 1536x864 dpr 1 / phone 844x390): music 45 / 45, shell-books 24 / 24, debug-panel 13 / 13, party
+17 / 17, sounds-playtest 26 / 26, silence-phone 7. Two lines failed once and passed on the rerun: party phone's known
+toot level-0 and hop lines (music is off in that check; it fails the same way on main), and music phone's cast-wind margin
+(+2.8 dB vs 3) because its 25 ms polling missed the wind's loudest window. Effect peaks are now sampled every ~6 ms
+(the gate is unchanged); the rerun measured +3.7.
+
+## Floor lane (music round, 2026-11-15)
+
+Aaron picked the floormock lane's look b, "go with your rec" (e1115-55): the thin dark ink outline (~1.4 px), but only on
+the seven items that melt into the floor: the recipe card, the googly eyes, the measure of flour (white disc), the
+rejected paper, the broken glass (shards), the cup of milk, the light bulb. Everything else draws exactly as on main.
+Built from main `46351db`, ported from the mock (`sc/p7-floormock`, eee3548), not cherry-picked: no `?floorvis`, no
+looks a and c, no card-to-item index rebuilt per lookup.
+
+| Choice | Why |
+|---|---|
+| Always on; `?outline=0` leaves it out; `site.floorOutline.set(on)` switches it live | Checks and before/after shots. One look, no flag needed to see it. |
+| Tied to the kind, not an id list: `def.outline` set where each kind is defined (card stocks `paper`, `recipe` in `src/world/cards.js` STOCK; ingredient kinds `recipe-flour`, `recipe-milk` in `ingredients.js`, so a second measure keyed `recipe-flour-2` would carry it; the `shards` fragment; the eyes; the bulb) | Another item of the same kind is outlined with nothing to update. `src/world/floor-outline.js` holds the rule and the measured reasons. |
+| When: while the item is loose, wherever its own picture is drawn (on the floor, held, thrown, falling, on top of another item, scooted out from behind furniture, summoned, restored after a reload); never while it sits in a support (pinboard, shelf, rack, lamp socket, his face, the badge) | The mock-up's rule, kept. A line that came and went as an item touched down would flicker; on a support the item is drawn inside the furniture's or his picture, and is easy to see. Supports call `site.floorOutline.seated(e)` on mount and detach (two lines in `src/core/supports.js`), so an item taken off the board without moving gets its line back at once. |
+| Drawn by the picture batch's own shader (`src/core/world-presentation.js`), in the same draw; the set of outlined pictures worked out once per batch build | Nothing per frame: the batch is rebuilt only when a picture changes, which already happens for every state that matters (it moves, appears, hides). Pictures not outlined take the old path (one branch per quad, identical pixels). The program is the same one `warmShared` compiles behind the doors. |
+| Fixed from the mock: the screen-pixel step (`fwidth`) is taken before the branch | Inside the branch (which differs pixel to pixel at the silhouette's rim) the derivative is undefined: the mock's line was faint along every other row of a straight edge (the recipe card's front edge, half of it a pale grey). Now even all round. |
+| Fixed from the mock: a pixel that is only line takes the depth of the silhouette pixel it borders (not the empty region's far depth) | The line also shows where the item lies over a picture behind it (the recipe card's edge over the postcard). |
+| Full-screen scenes | Nothing to do: the line is part of the item's picture, so wherever the room's pictures are hidden (galaxy dark, flappy, the trailer, the grimoire sheet, the error page, the closed doors) it is hidden with them. |
+| Reduced motion | Nothing to do: static. |
+| Grimoire / achievements item icons | Untouched: those are drawn from the models separately, not through the batch. |
+
+Check: `checks/floor-outline.js` + `floor-outline-reload.js` (shared code in `floor-outline-lib.mjs`), in run-all at
+1536x864 dpr 1, 844x390 dpr 1 (where the mock-up measured) and phone dpr 2. Items laid out on the floor as the mock-up's
+rows: the outline state is on exactly the seven; the canvas with it on and off (page clock held): pixels change round each
+of the seven and not one pixel round the nine others (rifle, ticket, tin, top, postcard, crumbs, butter pat, egg, butter
+measure), off their neighbours' lines; edge contrast by the mock-up's measure (ported to the page: silhouettes from the
+item's picture drawn alone, the screen as shown from a lossless screenshot, `__png` added to `checks/run.mjs`; outside
+pixels on another item skipped as the mock's all-item mask did) >= 15 for each of the seven, gated at dpr 1; no rebuild
+and no callback over an idle window; held (a real press-and-drag, checked between moves), thrown (a real flick of the
+eyes, in flight and landed), pinned to the board (gone) and taken off without moving (back); after a reload the seven
+again, pixels included. `checks/world-presentation.js`'s parity lines switch the outline off while comparing the batch
+with independent quads (it is batch-only, and checked here); it passed with it on too (2,094 px of the paper's line,
+0.16%, under its 0.5%).
+Shots: `~/.sigil-cat-wt/codex/p7-floor/` (`floor-row-<size>.jpg` before over after, `compare-<size>.jpg` side
+by side, `before-`/`after-<size>.png`), from one page load each (`checks/diag/floor-outline-shot.js` and
+`floor-outline-compare.sh`); "before" is the outline switched off, which draws what main draws.
+
+Edge contrast, the mock-up's measure (median dE across the outline against the floor; before -> after):
+
+| Item | 1536x864 dpr 1 | 844x390 dpr 1 | phone dpr 2 (reported) |
+|---|---|---|---|
+| recipe card | 3 -> 47 | 3 -> 52 | 3 -> 59 |
+| googly eyes | 4 -> 50 | 4 -> 42 | 4 -> 13 (28 counting only opaque parts) |
+| measure of flour | 6 -> 59 | 6 -> 48 | 6 -> 26 |
+| rejected paper | 7 -> 52 | 6 -> 48 | 6 -> 49 |
+| broken glass | 9 -> 31 | 9 -> 16 | 9 -> 25 |
+| cup of milk | 7 -> 55 | 8 -> 60 | 7 -> 23 |
+| light bulb | 8 -> 30 | 10 -> 25 | 9 -> 31 |
+
+Everything else unchanged to the decimal. The eyes' 13 at dpr 2 is the measure, not the look: their clear plastic domes
+(25-60% alpha) count as silhouette there, and the line, by design, follows the white discs (zoomed, the eyes read clearly
+outlined); counting only opaque parts they measure 28. So the gate stays where the mock-up measured (dpr 1), and the dpr 2
+numbers are reported. Proceed unless objected.
+
+Speed gate (`checks/world-final-cost.js`, median p95 of five runs, ms; main 46351db and this lane alternated on one port,
+load 5.5-7.9 from other sessions; the twenty includes six of the seven, moving every frame):
+
+| | 1536x864 dpr 1 twenty / maximum | phone dpr 2 twenty / maximum |
+|---|---|---|
+| main, run 1 / 2 | 2.7 / 1.9, 1.8 / 2.0 | 2.2 / 3.1, 2.0 / 2.7 |
+| floor, run 1 / 2 | 2.9 / 2.2, 1.6 / 2.5 | 2.1 / 2.1, 2.6 / 1.9 |
+
+All under the 4.0 ms gate; the difference is within the run-to-run noise. GPU, the room's pictures alone 300 times: 0.137
+ms with the outline against 0.145 ms without (1536x864), 0.160 against 0.154 (phone), noise. A batch rebuild: ~0.01-0.05 ms.
+
+Results (port 8743): floor-outline 1536x864 16/16, 844x390 16/16, phone 15/15 (contrast a note there) PASS. Existing checks
+at 1536x864 dpr 1 and phone dpr 2: world-presentation, world-presentation-rotor, visual-hairlines, box-open-tiles,
+world-atlas, world-final-scene, physics-p3 (+reload), kitchen-card (+reload), gags-glass, egg-cup (+reload), bulb
+(+reload), world-small (+reload), achievements-view (+reload): all PASS. physics2 at 1536x864 ("a body more than 80% off
+the page starts its respawn": half share .77) and physics-p2 on the phone ("anything inside the box when it shuts is tipped
+out") fail identically on main at the same size, same port (rerun both on main and here): not this lane's. Not run: the
+full suite.
+
+## Integration (music round, 2026-11-15, sc/p7-final)
+- sc/p7-final = sc/p7-music (f826e42, ef8c289) + sc/p7-floor (256ac2e, 97387bb, 24dae92), merged at 0791a3f. Conflicts were
+  additions only (main.js imports, the two REVIEW sections), both kept.
+- Decisions: e1115-12/13/14 (the round), e1115-54 (Space toggles the debug screen only with #debug, desktop; in #debug Space
+  no longer taps the cat, Enter still does), e1115-55 (ink outline on the seven faint floor items only).
+- Checks on the merge (port 8744, 1536x864 dpr 1 and phone 844x390 dpr 2; script codex/p7-final-checks.sh, logs codex/p7-final-out/):
+  music 38/38 both; debug-space 14 + 2 + off-desktop 2; floor-outline 16 + 15 + 844x390 dpr 1 16 (one reload line failed once
+  under load, passed on rerun); silence phone 7, calm 6, desktop 1; bread 14 desktop, phone 14 on its third run (the crumbs
+  "at once" gate is 450 ms wall time; at load 7-10 main measured 218 and 391 ms and the branch 482, 675, then 0 ms: load,
+  not the branch); bread-float 6/6; world-presentation 11/11; flappy-unfreeze 12/16; noscope-video 13/13; debug-panel 13/13;
+  sounds-playtest 26/26; world-final-cost (speed gate) 25/25 both. No full suite.
+- Preview for Aaron: http://localhost:8745 (detached worktree p7-preview at the branch tip).
+
+
+
+## Galaxy lane (music round, 2026-11-16)
+Aaron: "And then there are all these little visual imperfections in the galaxy" (screenshot, Windows Chrome, 2464x1307),
+then narrowed: "the spiral is part of the galaxy and his whiskers are fine, I was just talking about all the lines
+primarily". So the spiral at his ear (designed: `GALAXY.galaxy`, "a slowly turning spiral galaxy") and the whiskers are
+untouched; this lane is the lines. All in `src/eggs/galaxy.js`'s shader; the music hold lines are untouched.
+
+| Fault in his shot | Cause | Fix | Reproduced here? |
+|---|---|---|---|
+| Thin faint rectangle outlines all over the sky inside him (zoomed: 1-2 px lines in a star's colour, on the star grids' cell edges) | The star layers sized each star from `fwidth()` placed before an early return ("no star in this cell"), and the whole sky runs inside a per-pixel branch. A compiler may sink the derivative past the return; Windows Chrome's D3D11 path (ANGLE to HLSL/FXC) does such code motion. Then a 2x2 pixel block straddling a cell with a star and one without takes the derivative from a neighbour that already returned: garbage, the star is drawn huge on those pixels, so every cell edge next to a star becomes a line. Also each bright star's halo was cut at its cell's edge (a 1-3 level step). | No screen-space derivatives in the pass at all: the star functions take `px` (one screen pixel in their own units), worked out from the mapping (`1 / cat height px` for the portal; the swirl's exact Jacobian for the dark, checked against finite differences to 1e-9). Stars and halos fade out before their cell's edge (`hCell`). | The derivative lines: no, not on any headless backend here (NVIDIA and AMD through Mesa D3D12, SwiftShader); fixed by reasoning from his zooms (the lines sit exactly on the cell edges, stair-stepping in 2 px blocks). The halo steps: yes, faintly (1-3/255, `crop-1-halo-box-edges-diff-x8.png`), gone. |
+| Thin bright white streaks at his outline (left, mid-height; two along the bottom) | Two things make a lone straight white rule: the same derivative fault on the bright stars' grid (core x 2.2 smeared along a cell edge: white and even along its length, as his are), and a bright star whose core lies outside him throwing its spike in through his outline, bent into a hook where it meets the rim's lensing. | The derivative fix above; and a spike shows only if its star's core is inside him (his picture read once at the core, only on spike pixels), fading out in the rim's lensing band. | The coreless spike with its hook: yes (the ear, `crop-2-coreless-spike-ear.png`), gone. The even white rules: by reasoning. |
+| Jagged white bits at the bottom-left of the outline | The ends and corners of those rules (an L where a cell edge turns, or the spike's hook). Not the opening's embers (square sparks at the dissolve's front): at full open the front lies past him, and none show in any pose rendered here. | As above. | As above. |
+| Stair-step and boxy lines among the swirling stars in the dark | The dark's two star layers had the same derivative-before-return fault, in the swirled grid: cell edges become stair-steps in 2 px blocks, coloured by the star in the cell. | As above (the swirl's own Jacobian gives `px`, so the streaked look is unchanged). | By reasoning; the look is unchanged here (`crop-5-background-x4.png`). |
+| Whisker colour, rim colour, spiral at the ear | Out of scope (Aaron, above). The warp's `fwidth` across atan's wrap (a bright rule left of his chest while he spins) went with the derivatives. | | |
+
+The look is otherwise the same frame for frame: before/after at 2464x1307 and 1536x864 (same clock, drift and swirl
+pinned) differ by 0.03-0.06/255 on average, mostly at stars near his outline. Images:
+`~/.sigil-cat-wt/codex/p7-galaxy/` (`compare-*.jpg` before over after, `crop-*`, Aaron's zooms `aaron-*`).
+
+**Check** `checks/galaxy-lines.js` (in run-all after galaxy-glow, both sizes): the pass has no `fwidth`/`dFdx`/`dFdy`
+(fails on main: three); held open in three poses at three drifts, no straight thin bright line inside his silhouette
+without a star core on it (24+ px, 10+ levels over the pixels 2 px either side; a real spike carries its core within half
+a cell). Main fails it at 2464x1307 (the coreless spikes); the same measure finds 10 such lines inside him in Aaron's own
+screenshot.
+
+**Cost** (`checks/diag/galaxy-cost.js`, 1920x1080 dpr 1, GPU per held galaxy frame, median of 5, two runs each, main and
+this alternated): AMD integrated sit 9.70/9.58 -> 10.20/10.12 ms, lie 9.78/11.21 -> 10.32/10.30, sleep 10.29/9.65 ->
+9.96/10.27; NVIDIA 0.09-0.11 -> 0.09-0.10. About +0.3 ms on the AMD chip (the cell fades), inside its run-to-run spread
+for two poses of three. No idle cost (the pass only runs while the galaxy shows).
+
+**Checks** (port 8747; 1536x864 dpr 1 and phone 844x390 dpr 2, script `codex/p7-galaxy/checks.sh`, logs `checks-out/`):
+galaxy 8/8 both, galaxy --reduced 9/9 both, galaxy-glow 3/3 both, galaxy-lines 4/4 both, polish-galaxy 6/6 both, sky 21/21
+both, world-final-cost (speed gate) 25/25 both: median p95 twenty / maximum 1.9 / 2.1 ms desktop, 2.9 / 2.1 ms phone (load
+5.4-6.8 from other sessions). The warp (the spin in) looks the same before and after (`crop-warp-sit-1536.png`). No full suite.
+
+Proceed unless objected: (1) stars and their halos fade out over the outer eighth of their grid cell (invisible at these
+sizes; it removes hard cuts); (2) a bright star whose core is outside him shows no spikes inside him, and spikes fade in the
+rim's thin lensing band. Not verifiable here: that his Windows GPU now draws no cell-edge lines; the cause is removed in the
+source (no derivatives left) and the new check fails on any that come back. A look on his machine settles it.
+
+## Harp lane (music round, 2026-11-16)
+Aaron (e1116-11): "the ASD JKL playable whiskers should be playable at all times, I think currently its set so that its
+only possible after you've already done the harp sequence. And on mobile, similar to how the "closer, further" buttons
+are set up, there should be 6 buttons you can click to play the harp whiskers for about ~10s after playing a whisker, and
+then it can disappear (or it can be replaced by the "futher closer" if someone picks something up)".
+Base sc/p7-final 32dc104. Everything is in `src/gags/harp.js`; no other source file changed.
+
+### Keys always on
+- **How it was gated.** `harp.js`'s keydown listener returned early on `!unlocked` (unlocked = the harp found). That one
+  term is gone. Nothing else read the keys.
+- **They count exactly like plucks.** A key calls the same `pluck()` a tap does: same note, same ring, `cat.stay(4)`, the
+  same tune tracker. So the tune on the keys (S S A S D S) finds the harp and plays the encore, once; played again it
+  flares the whiskers, as on the whiskers. No new payoff, no double one: `registry.find` and Butterman's once-ever
+  `encore()` already refuse a second time. The keys are no shortcut to the find: the player still has to know the tune
+  (the riddle in the grimoire), and nothing tells the player about the keys before the encore (the "Did you know you can use
+  your keyboard" lesson still comes after it).
+- **Mapping unchanged:** A S D = the whiskers on the screen's left, top to bottom (B C D); J K L = the screen's right, top
+  to bottom (E F# B).
+- **Where they do nothing (unchanged, plus two):** a modifier, a held (repeating) key, a locked page (a scene, the 360
+  film, the cake: the lock swallows keys before the harp sees them), a pop-up or mode (anything aria-modal: flappy, the
+  chest, the books, a card, the full-screen step), him hidden or stood in for. Added: `#bird-screen` and `#party-error` by
+  id, as the debug screen's Space does (both are aria-modal already; belt and braces).
+- **Changed (proceed unless objected):** "typing in a field" is now a text field only. Before, any focused `input`
+  blocked the letters, so after using the SOUND or ZOOM slider (focus stays on it) A S D J K L silently did nothing until
+  you clicked elsewhere. A slider, checkbox, radio or button takes no letters, so it no longer blocks them.
+- No clash with other keys: Space (#debug toggle / tap), Enter, arrows, Escape, Tab are untouched; no other code reads
+  A S D J K L (checked: every `keydown` listener in `src/`).
+
+### The phone's whisker buttons
+- **When.** On a coarse pointer (Nearer/Deeper's own test, `(pointer: coarse)`), every pluck arms them: a tap on a whisker
+  (as Aaron said, "after playing a whisker"), a press on one of them, or a key. They stay up 10 s after the last pluck
+  (`HARP.buttons.seconds`; each pluck starts the 10 s again), then fade out over .35 s (reduced motion: gone at once).
+  A desktop never builds them (keys there).
+- **Not without a pluck first (as Aaron said; noted, not built):** a phone player cannot bring them up without plucking
+  a real whisker once. If they should also come some other way (a long press on him, or always while he is facing you),
+  that is a small change.
+- **Order.** Left to right A S D J K L: the three whiskers on your left (top, middle, bottom), a gap, the three on your
+  right (top, middle, bottom). Each shows its side's three whiskers fanned as they are on him, its own drawn bold, so
+  the button tells you which string it is. `aria-label` "Pluck the top left whisker" etc.
+- **A press** plucks on pointerdown (a string answers the touch, not the release; two thumbs can play two buttons), through
+  `pluck()` exactly like a tap on the whisker: same sound, same ring on that whisker, counts toward the tune (the tune on
+  the buttons finds the harp; checked). The keyboard's click on a focused button is one pluck.
+- **Where (proceed unless objected).** Not beside the row of sigils like Nearer/Deeper: six 48x44 buttons do not fit
+  there (at 844x390 there are 91 px between ZOOM/SOUND and the row). They sit just over the row of sigils (6 px above
+  it), centred in the safe width under him: the left three below his left whiskers, the right three below his right.
+  Felt patches like Nearer/Deeper (`.felt`), 48x44, 6 px apart, 24 px between the sides. Clear of his face (they start
+  ~120 px below his lowest whisker at 844x390), SOUND, ZOOM, the books, the full-screen toggle and the row; they cover
+  the floor strip in front of his feet while they are up, so an item lying exactly there cannot be picked up for those
+  10 s (it can once they go, or press around them).
+- **Something held.** While Nearer/Deeper are on screen (an item held by a finger, or the box's own bar) the whisker
+  buttons hide; let go within the 10 s and they are back for what is left of it (proceed unless objected; the
+  alternative is that a pick-up ends them). A lock (flappy, the books, the 360 film, the cake) ends them outright, and
+  so does the encore starting (Butterman walks in over that strip; it is his scene). Mine, proceed unless objected.
+- **Cost.** Nothing per frame, shown or hidden: a timeout, and a watch on the page's top level (for Nearer/Deeper
+  appearing) only while they are armed. Built on the first pluck on a phone, never on a desktop.
+
+### Checks
+New, in `checks/run-all.sh`: `checks/harp-keys.js` (1536x864, phone) and `checks/harp-buttons.js` (phone, notch phone
+932x430 with `?safe=59,59,0,21`, phone with reduced motion, 1536x864). `checks/gags-harp.js`: its "before the harp is
+found the keys do nothing" line now expects a pluck. Diagnostic `checks/diag/harp-room.js` (not in run-all).
+
+### Runs (port 8748, headless, load 5-9 from other sessions)
+- New: harp-keys 1536x864 15/15, phone 14/14; harp-buttons phone 19/19, notch phone (932x430, `?safe=59,59,0,21`) 20/20,
+  phone reduced motion 20/20, 1536x864 3/3.
+- Touched, 1536x864 dpr 1 and phone 844x390 dpr 2, all PASS: gags-harp 15 / 11, touchfeel purr 7 / 8, plaster 4 / 4,
+  bird 4 / 4, cloud 5 / 6, stickers 5 / 6, grab-grace 11 / 11, controls 14 / 22 (+ notch-both 24), debug-space 14 / 2
+  (+ off-desktop 2), butterman-p2 26 / 26, text 48 / 48, music 38 / 38. controls-1536x864 failed once ("zoom most: the box
+  0.28 behind the pinboard"; desktop, where nothing of this lane runs), then passed twice here and twice on the base
+  32dc104: a placement flake, not this lane. Not run: the full suite.
+- Shots for Aaron: `~/.sigil-cat-wt/codex/p7-harp/` (`harp-buttons-{up,pluck,held,hidden}-phone.png` at
+  844x390, `-phone-notch.png` at 932x430 with both side insets), from the check itself.
+
+## Shelfshadow lane (music round, 2026-11-16)
+
+Mock-up, then the build of Aaron's pick, branch `sc/p7-shelfshadow` (from sc/p7-final 32dc104). Aaron: "the shelfs shadow should appear further
+back on the floor, more realistically since it is sort of floating mid air" (screenshot
+`inputs/aaron-shots-1116/shelf-shadow-room.png`). The mock-up's options (behind `?shelfshadow=a|b|c`, since removed), shots in
+`~/.sigil-cat-wt/codex/p7-shelfshadow/` (`compare-<size>.jpg`, `closeups-<size>.jpg`; mock commit 7a299af):
+
+**Why it reads wrong today.** The shelf's shadow (`softWallShadow`, e1113-30) is cast onto a wall plane at the back of its
+brackets, but no wall is drawn, so it reads as a floor just under the brackets. Measured at 1536x864: the shelf hangs in
+the air at a height of .74-1.18 (the floor is y=0, his head is ~1), at z -.4 to -1.4 (he is at 0); the floor straight under
+it is at page y 510 (his feet 577), the shelf's own bottom at 304. So any shadow on the floor lands ~200 px below the
+shelf, behind the hat rack and the controller stand, which stand nearer than it and are drawn over it.
+
+| Option | What Aaron sees | Light |
+|---|---|---|
+| today (`wall`) | The soft shadow right under the brackets, as if a wall were behind it. | (-.35,1.6,3.5) onto the wall plane |
+| a | A soft strip on the floor straight under the shelf. It lands at the stand's top bar and the rack's hats, so at every size it reads more like a shadow of the stand than of the shelf. | straight down; blur .07, opacity .22 |
+| b | A long soft streak on the floor further back, between the rack and him, lit by the same light as the cat's, the rack's and the stand's shadows (each lands 1.17 x its height further back and a touch right). | key (-.3,3,3.5); blur .12, opacity .24 |
+| c | The same streak further back still and a little longer and fainter (a lower light from the same side); on the phone its right end comes close to his flank, behind him. | (-.3,2,3.5); blur .14, opacity .20 |
+
+**Built: b (Aaron, "yup b", e1116-23).** On `sc/p7-shelfshadow`; the `?shelfshadow` switch, options a and c, the wall
+shadow (`softWallShadow`, `WALL_SHADOW`) and the mock's diag tools (`checks/diag/shelfshadow-*`, comparisons only) are gone.
+
+| Choice | What is built |
+|---|---|
+| The shadow | `softHungFloorShadow(site, root, parts)` in `src/core/soft-floor-shadow.js` (`HUNG_SHADOW`: key light (-.3,3,3.5), blur .12, opacity .24): the shelf's and hooks' meshes cast along the light onto y=0, blurred once (`paintSilhouette`, the rack's), one floor quad in the world presentation's batch (depth none, renderOrder -5, like every floor shadow). The rack, the stand and he draw over it where they are nearer; it hides wherever the room's pictures hide. The rifle and the other items on the shelf cast none (as before). |
+| When it is painted | Where the wall shadow was: the shelf's art changes, a layout (window size, zoom). Nothing per frame. `site.shelf.shadow` (was `wallShadow`). |
+| The slide-in | Moved, not repainted, by the shelf's movement cast along the same light. **Fades in with the slide** (opacity x the slide's progress): it lies further from the camera than the shelf, so the same slide moves it fewer pixels, and at the start (the shelf just off the page) it would still lie on the floor in view with no shelf above it. Reduced motion: it fades in with the shelf. |
+| Behind him at the largest zoom | At zoom 1.3 on a wide window (1536x864) the shelf's right end already runs behind him (the controls lane's shelf layout); its shadow's right end does too, behind his flank. Left as is: it follows the shelf. Clear of him at the zoom's least and default there, and at every zoom on the phone. **Correction to the mock-up's "never touches him at any size or zoom"**: that was read off the shots at default zoom, not measured. |
+
+**Checks.** New `checks/shelf-shadow.js` (in run-all, 1536x864 and phone, `?arrivals=1`): 0 the slide-in (on the floor in
+every sample, nothing during the 15 s lead-in, opacity .24 x the slide, moves right with the shelf, lands where a fresh paint
+puts it); 1 at zoom .85 / default / 1.3 on the floor (every corner y=.001, face up), further back than the shelf and below
+it on the page, drawn; 2 never under him (its pixels drawn with him hidden against his pixels, 2 px round him), noted
+instead of failed where the shelf itself runs behind him; 3 idle 2.1 s: no repaint, no move, presentation stats unchanged;
+4 the galaxy covers it (max difference 0). Updated: `furniture-p2.js` item 1 (the shadow on the floor, face up, further
+back than the shelf, below it on the page; was "on the wall behind it"); `world-presentation.js` (its comments, and a line
+that the shelf's floor shadow is a batched picture without depth, so the parity reference draws it).
+
+**Results** (port 8746, load 7-9 from other sessions), 1536x864 dpr 1 and phone 844x390 dpr 2, all PASS, no reruns:
+shelf-shadow 18 + 1 note / 19; furniture-p2 (+reload) 44 / 44; world-presentation 12 / 12; world-arrivals (+reload) 37 / 37;
+world-final-cost (speed gate) 25 / 25, median p95 twenty 2.9 / 2.0 ms, maximum 3.2 / 2.8 ms (gate 4.0). Not run: the full suite.
+
+### Final integration (2026-11-16, sc/p7-final after music books fix, galaxy, harp, shelf shadow)
+- Merged on top of the 2026-11-15 integration: sc/p7-music 9f9884a (books keep the music, e1116-02), sc/p7-galaxy
+  (68f2ade, aa8fe40: no screen-space derivatives in the galaxy pass), sc/p7-harp (94a121a, 70d1f14: keys any time, phone
+  whisker buttons, e1116-11), sc/p7-shelfshadow (0e2ef9c: option b, e1116-23). Conflicts were REVIEW.md additions only.
+- 43 runs (codex/p7-final-checks.sh, logs codex/p7-final-out2/), 1536x864 dpr 1 and phone 844x390 dpr 2, plus 844x390 dpr 1
+  outline, notch and calm harp buttons, silence x3: all pass but bread's crumbs "at once" line at both sizes (829, 799 ms
+  vs 450). Alternated with main at load 7.7-11.4: main 126, 460 (fail), 121 ms; branch 201, 161, 305 ms. Load, not the round.
+  Speed gate (world-final-cost) 25/25 both sizes. No full suite.

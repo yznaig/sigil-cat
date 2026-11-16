@@ -284,7 +284,7 @@ export function createStage(canvas) {
         `calls   ${info.calls}\ndpr     ${dpr} of ${deviceDpr}${pinnedDpr ? ' (pinned)' : ''}\ncanvas  ${size.x}×${size.y}\ngpu     ${perf.gpu.slice(0, 48)}` +
         (perf.events.length ? '\n' + perf.events.join('\n') : '') + perfExtra.map((f) => '\n' + f()).join('');
     }
-    if (showDebug) debugEl.textContent = debugExtra.map((f) => f()).join('\n');
+    if (showDebug && !debugEl.hidden) debugEl.textContent = debugExtra.map((f) => f()).join('\n');   // (hidden: Space, src/main.js)
   }
 
   const stage = {

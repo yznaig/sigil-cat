@@ -110,9 +110,20 @@ vec3 hTemp(float h) {
   return mix(c, vec3(1.0, 0.5, 0.3), smoothstep(0.9, 1.0, h));
 }
 
-// One layer of point stars on a grid that repeats every 'per' cells across.
-vec3 hStars(vec2 p, float per, float density, float size, float seed) {
-  float px = max(fwidth(p.x), 1e-4);   // derivatives before any early return (undefined after one on some GPUs)
+// Galaxy lane (music round, 2026-11-16; Aaron's screenshot: thin lines and boxes all over his sky). No screen-space
+// derivatives anywhere in this pass: the star functions take 'px', the size of a screen pixel in their own units, worked
+// out from the mapping itself. fwidth() here sat in front of an early return (and inside the portal's per-pixel branch);
+// a compiler may move it after the return (Windows Chrome's D3D11 path does such code motion), where a 2x2 pixel block
+// that straddles a grid cell with a star and one without has a neighbour that already returned: the derivative is then
+// garbage, the star is drawn enormous on those pixels, and every cell edge next to a star becomes a 1-2 px line in the
+// star's colour (faint boxes from these, bright white rules from the bright stars). Measured from the mapping, px is the
+// same on every GPU. Each star also fades out before its cell's edge (a cell cannot draw past its edge, so a hard cut
+// there was a straight line too).
+float hCell(vec2 f) { return (1.0 - smoothstep(0.38, 0.5, abs(f.x))) * (1.0 - smoothstep(0.38, 0.5, abs(f.y))); }
+
+// One layer of point stars on a grid that repeats every 'per' cells across. px: one screen pixel, in cells.
+vec3 hStars(vec2 p, float per, float density, float size, float seed, float px) {
+  px = max(px, 1e-4);
   vec2 id = floor(p), f = fract(p) - 0.5;
   vec2 key = vec2(mod(id.x, per), id.y) + seed;
   float h = hHash(key);
@@ -123,12 +134,18 @@ vec3 hStars(vec2 p, float per, float density, float size, float seed) {
   vec2 q = f - o;
   float core = exp(-dot(q, q) / (s * s));
   float tw = 0.78 + 0.22 * b;   // steady emission: motion comes from the sky, never brightness pulses
-  return hTemp(fract(h * 7.13 + b)) * core * tw * (0.35 + 1.1 * b * b) * min(1.0, size / s * 1.4);
+  return hTemp(fract(h * 7.13 + b)) * core * hCell(f) * tw * (0.35 + 1.1 * b * b) * min(1.0, size / s * 1.4);
 }
 
-// Sparse bright stars with a halo and four diffraction spikes.
-vec3 hBright(vec2 p, float per, float seed) {
-  float px = max(fwidth(p.x), 1e-4), w = px * 0.8 + 0.002;
+// Sparse bright stars with a halo and four diffraction spikes. sky: p = (cp + sky.xy) * sky.z (cp in cat heights), to
+// find the star's core on the screen; spikeK: how much spike this pixel may show.
+// Galaxy lane (music round, 2026-11-16; Aaron's screenshot: thin bright white streaks along his outline): a star whose
+// core lies outside him still threw its spikes in through his outline, a lone white rule with no star on it, and where
+// a spike reached his rim the rim's lensing bent it into a hook. Now a spike shows only if its star's core is inside
+// him (his picture is read at the core, one fetch, only on a spike), and spikes fade out in the rim's lensing band.
+float maskAt(vec2 frag, float lod);
+vec3 hBright(vec2 p, float per, float seed, float px, vec3 sky, float spikeK) {
+  px = max(px, 1e-4); float w = px * 0.8 + 0.002;
   vec2 id = floor(p), f = fract(p) - 0.5;
   vec2 key = vec2(mod(id.x, per), id.y) + seed;
   float h = hHash(key);
@@ -136,10 +153,11 @@ vec3 hBright(vec2 p, float per, float seed) {
   vec2 q = f - (hHash2(key + 1.7) - 0.5) * 0.25;
   float d2 = dot(q, q);
   float core = exp(-d2 / (0.0008 + px * px));
-  float halo = exp(-sqrt(d2) * 11.0) * 0.28;
+  float halo = exp(-sqrt(d2) * 11.0) * 0.28 * hCell(f);   // the halo too (galaxy lane): cut at the cell's edge it drew faint boxes
   float spikes = exp(-abs(q.y) / w) * exp(-abs(q.x) * 6.5) + exp(-abs(q.x) / w) * exp(-abs(q.y) * 6.5);
   // ...faded out before their grid cell's edge (fx lane, playtest 3): cut there, they drew faint straight lines and squares
-  spikes *= (1.0 - smoothstep(0.3, 0.5, abs(f.x))) * (1.0 - smoothstep(0.3, 0.5, abs(f.y)));
+  spikes *= (1.0 - smoothstep(0.3, 0.5, abs(f.x))) * (1.0 - smoothstep(0.3, 0.5, abs(f.y))) * spikeK;
+  if (spikes > 0.002) spikes *= smoothstep(0.2, 0.6, maskAt(((p - q) / sky.z - sky.xy) * uHoleCat.z + uHoleCat.xy, 1.0));
   float tw = 0.88 + 0.12 * h;
   float b = 0.55 + 0.45 * hHash(key + 9.9);
   return hTemp(fract(h * 23.7)) * (core * 2.2 + halo + spikes * 0.55) * tw * b;
@@ -190,10 +208,13 @@ vec3 hGalaxy(vec2 p, float t) {
 // column's rows staggered so no rings line up; streaks stay a pixel or two wide at any size.
 vec3 hWarp(vec2 cp, float t, float streak) {
   float r = length(cp), a = atan(cp.y, cp.x) / H_TAU;
+  // a's change per screen pixel, from the mapping (galaxy lane: fwidth(a) also jumped by a whole turn on the line
+  // left of his chest where atan wraps round, drawing a bright horizontal rule there while he spins)
+  float da = (abs(cp.x) + abs(cp.y)) / (H_TAU * max(r * r, 1e-6) * uHoleCat.z);
   vec3 col = vec3(0.0);
   for (int i = 0; i < 3; i++) {
     float fi = float(i), per = 90.0 + fi * 47.0;
-    float gx = a * per, fw = max(fwidth(gx), 1e-4);
+    float gx = a * per, fw = max(da * per, 1e-4);
     float column = floor(gx);
     float ckey = mod(column, per) + fi * 11.0;
     float gy = log(r + 0.002) * 2.5 - t * (2.0 + fi * 0.8) + hHash(vec2(ckey, 4.0)) * 7.0;
@@ -247,10 +268,11 @@ vec3 holeUniverse(vec2 frag, float fres, vec3 nrm, out float reveal, out vec3 fr
   col += hNebula(sp + dr * 0.08 + vec2(0.31, 0.12), uHoleClock) * calm;
   vec2 gp = (sp - uHoleGal.xy - dr * 0.12) / uHoleGal.z;   // the galaxy, in his face at rest
   col += hGalaxy(gp, uHoleClock) * calm;
-  col += hStars((sp + dr * 0.25) * 46.0, 1e4, 0.55, 0.06, 0.0) * 0.55 * calm;    // far: dense, faint
-  col += hStars((sp + dr * 0.5) * 22.0, 1e4, 0.4, 0.07, 31.0) * 0.85 * calm;     // middle
-  col += hStars((sp + dr) * 9.0, 1e4, 0.28, 0.06, 57.0) * 1.2 * calm;            // near: few, bright
-  col += hBright((sp + dr * 0.7) * 4.0, 1e4, 91.0) * calm;
+  float pxu = 1.0 / uHoleCat.z;            // one screen pixel in cat heights (the sky is fixed on the screen)
+  col += hStars((sp + dr * 0.25) * 46.0, 1e4, 0.55, 0.06, 0.0, 46.0 * pxu) * 0.55 * calm;    // far: dense, faint
+  col += hStars((sp + dr * 0.5) * 22.0, 1e4, 0.4, 0.07, 31.0, 22.0 * pxu) * 0.85 * calm;     // middle
+  col += hStars((sp + dr) * 9.0, 1e4, 0.28, 0.06, 57.0, 9.0 * pxu) * 1.2 * calm;            // near: few, bright
+  col += hBright((sp + dr * 0.7) * 4.0, 1e4, 91.0, 4.0 * pxu, vec3(dr * 0.7, 4.0), 1.0 - smoothstep(0.55, 0.95, fres)) * calm;
   if (uHoleWarp > 0.001) col += hWarp(sp, uHoleWarpT, uHoleWarp) * uHoleWarp * 1.4;
 
   // Event-horizon rim along the silhouette: deep blue into hot gold right at the edge.
@@ -332,6 +354,11 @@ void main() {
     float ang = atan(cp.y, cp.x), r = length(cp);
     float wheel = uDimT * 0.12 / (0.25 + r);          // uDimT already advances at 30% in reduced motion
     vec2 sw = vec2(cos(ang + wheel), sin(ang + wheel)) * r;
+    // sw.x's change per screen pixel, from the swirl itself (galaxy lane: in place of fwidth, see hCell): sw = R(wheel) cp,
+    // wheel = W / (0.25 + r), so d sw / d cp = R (I + perp(cp) grad(wheel)^T); the sum of its first row's sizes, per pixel.
+    float wq = 0.25 + r, cw = cos(wheel), sn = sin(wheel);
+    vec2 pc = vec2(-cp.y, cp.x), gw = -uDimT * 0.12 / (wq * wq) * cp / max(r, 1e-4);
+    float swPx = (abs(cw * (1.0 + pc.x * gw.x) - sn * pc.y * gw.x) + abs(cw * pc.x * gw.y - sn * (1.0 + pc.y * gw.y))) / uHoleCat.z;
     float rag = (hTex(sw * 0.6 + 0.37).r - 0.5) * 0.35;
     float f = mix(1.25, -0.62, uDim);                 // fully closed (every pixel dark) at the deepest point
     float dark = smoothstep(f, f + 0.4, rn + rag) * uDark;
@@ -340,7 +367,7 @@ void main() {
     float deep = uSky * smoothstep(0.0, 0.8, uDim);
     vec3 neb = hNebula(sw * 0.8 + 3.1, uDimT);
     vec3 space = vec3(0.0010, 0.0011, 0.0016) + vec3(0.8, 0.85, 1.0) * dot(neb, vec3(0.2126, 0.7152, 0.0722)) * mix(0.012, 0.007, deep);
-    space += (hStars(sw * 22.0, 1e4, 0.35, 0.07, 13.0) + hStars(sw * 9.0, 1e4, 0.2, 0.06, 71.0) * 1.3) * uStars;
+    space += (hStars(sw * 22.0, 1e4, 0.35, 0.07, 13.0, 22.0 * swPx) + hStars(sw * 9.0, 1e4, 0.2, 0.06, 71.0, 9.0 * swPx) * 1.3) * uStars;
     float halo = uSky > 0.5 && m < 0.999 ? haloAt(fc, uLod) : 0.0;   // a soft glow round his outline (none over him)
     vec3 glow = mix(vec3(0.35, 0.2, 0.9), vec3(1.0, 0.6, 0.3), halo) * smoothstep(0.03, 0.6, halo) * (1.0 - halo) * uGlow * uDim;
     float out_ = 1.0 - m;
@@ -465,6 +492,7 @@ export default function createGalaxy(site) {
     st.v0 = stage.reducedMotion ? Math.min(speed, 1) : Math.max(speed, CUT.spin);
     st.cancelTurn = cat.landFacing(CUT.spinDown, stage.reducedMotion ? 0 : cat.vel, stage.reducedMotion ? 0 : st.sign * st.v0);
     input.lock('galaxy', true);document.body.classList.add('galaxy-showing');
+    st.music ??= site.music?.hold('galaxy');   // music lane (2026-11-15): its hum owns the dark; the music comes back after
     site.achievements?.unlock('void');
     cat.wantSolids = true; cat.touch();
     // (the 'star' find is gone, playtest 4: the galaxy is Into the Void only)
@@ -512,6 +540,7 @@ export default function createGalaxy(site) {
     if (st.open && !want && st.level <= 0 && st.dim <= 0) {
       st.open = false; st.fast = 0; st.at = null; st.trips++;
       input.lock('galaxy', false);document.body.classList.remove('galaxy-showing'); cat.fling(0); cat.wantSolids = false;
+      st.music?.(); st.music = null;
       if (st.by !== 'pin' && st.by !== 'unpinned' && !keepsakes.has('postcard')) keepsakes.give('postcard', { from: cat.pivotPx });
     }
     cat.freeze('galaxy', st.open);   // frozen in the pose he had when it opened, until it has fully closed

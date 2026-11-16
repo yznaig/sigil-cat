@@ -4,7 +4,8 @@ import {cardGeometry} from './card-geometry.js';
 import {printStock} from './card-print.js';
 import {createPinboard} from './pinboard.js';
 import {clearOfCat,fitResting,floorHome} from '../core/floor-home.js';
-const STOCK={paper:{width:.42,height:.525,thickness:.0015,curl:.008,mass:.015},postcard:{width:.51,height:.34,thickness:.003,curl:.003,mass:.025},ticket:{width:.54,height:.243,thickness:.002,curl:.005,mass:.012,ticket:true},recipe:{width:.38,height:.25,thickness:.0018,curl:.004,mass:.012}};
+const STOCK={paper:{width:.42,height:.525,thickness:.0015,curl:.008,mass:.015,outline:true},postcard:{width:.51,height:.34,thickness:.003,curl:.003,mass:.025},ticket:{width:.54,height:.243,thickness:.002,curl:.005,mass:.012,ticket:true},recipe:{width:.38,height:.25,thickness:.0018,curl:.004,mass:.012,outline:true}};
+// outline: the stock melts into the cream floor, so it gets the floor outline (src/world/floor-outline.js, music round)
 export function cardService(site){return site.cards??=(createCards(site));}
 function createCards(site){
  const {THREE:T,stage,world,keepsakes,supports,store}=site;
@@ -70,7 +71,7 @@ function createCards(site){
  }
  function define(def,transcript){
   supports.registerCategory(def.id,'flat');
-  return keepsakes.define({...def,kind:'gl',make:null,object:(_,inst)=>create(def.id,inst,transcript),place(){},removed(inst){world.remove(inst.id);site.worldLayout.remove(inst.id);inst.picture?.dispose();inst.cardArt?.geometry.dispose();for(const m of inst.cardArt?.material||[])m.dispose();for(const p of inst.prints||[])p.texture.dispose();store.del('worldBodies.'+inst.id);site.pinboard.invalidate();}});
+  return keepsakes.define({outline:!!STOCK[def.id]?.outline,...def,kind:'gl',make:null,object:(_,inst)=>create(def.id,inst,transcript),place(){},removed(inst){world.remove(inst.id);site.worldLayout.remove(inst.id);inst.picture?.dispose();inst.cardArt?.geometry.dispose();for(const m of inst.cardArt?.material||[])m.dispose();for(const p of inst.prints||[])p.texture.dispose();store.del('worldBodies.'+inst.id);site.pinboard.invalidate();}});
  }
  function flip(inst){
   if(inst.worldEntry?.support){site.pinboard.flip(inst);return;}

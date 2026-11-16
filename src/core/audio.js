@@ -21,6 +21,13 @@ let restoreDepth = 0, impactGroups = {}, impactBags = new Map();
 const lastImpact = new Map();
 const counts = { clips: 0, loops: 0, tones: 0, impacts: 0, suppressedImpacts: 0, suppressedRestore: 0, silentContacts: 0, radioVoices: 0 };
 const suspensions = new Set();
+// music round (2026-11-15, e1116-02): the background music (src/core/music.js) plays on a context of its own (so an open
+// book, which holds this clock still, does not stop it); it is made when this one is (inside the first gesture), follows
+// the sound control (onChange), and hears every change to the suspensions (onSuspend(on, reasons)) to pause for them.
+const contextListeners = new Set(), suspendListeners = new Set();
+export const onContext = (f) => { if (ctx) f(ctx); else contextListeners.add(f); };
+export const onSuspend = (f) => { suspendListeners.add(f); };
+const told = () => { for (const f of suspendListeners) { try { f(suspensions.size > 0, [...suspensions]); } catch (e) { console.error(e); } } };
 let suspensionReady = Promise.resolve();
 const park = () => { if (ctx && ctx.state !== 'closed') suspensionReady = ctx.suspend().catch(() => {}); };
 let muted = !!store.get('sound.muted', false), volume = store.get('sound.volume', 0.8);
@@ -108,6 +115,8 @@ export function context(force = false) {
     safety = ctx.createWaveShaper(); safety.curve = safetyCurve(); safety.oversample = '4x';
     finalMeter = ctx.createAnalyser(); finalMeter.fftSize = 2048;
     master.connect(analyser); analyser.connect(safety); safety.connect(finalMeter); finalMeter.connect(ctx.destination);
+    for (const f of contextListeners) { try { f(ctx); } catch (e) { console.error(e); } }
+    contextListeners.clear();
   }
   if (suspensions.size && ctx.state === 'running') park();
   if (!suspensions.size && ctx.state !== 'running' && ctx.state !== 'closed') ctx.resume().catch(() => {});
@@ -116,11 +125,14 @@ export function context(force = false) {
 // Freeze the audio clock, including scheduled source endings, without changing saved mute/volume.
 // context() cannot undo this on a key or tap while the mock unload owns the suspension.
 export function suspend(reason) {
+  const had = suspensions.has(reason);
   suspensions.add(reason);
   park();
+  if (!had) told();
   let released=false;
   return () => {
-    if(released)return;released=true;suspensions.delete(reason);
+    if(released)return;released=true;
+    if (suspensions.delete(reason)) told();
     if (!suspensions.size && ctx && ctx.state !== 'closed') {
       // A mute/slider ramp can be frozen halfway through. Settle the control before
       // any resumed sample; wait for an in-flight suspend even on an immediate skip.
@@ -137,6 +149,8 @@ export function suspend(reason) {
   };
 }
 export const output = () => master;
+export const suspended = () => suspensions.size > 0;
+export const suspendReasons = () => [...suspensions];
 
 // ---- the sound control ----
 function apply() {

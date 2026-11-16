@@ -116,10 +116,12 @@ export function createShell(site) {
       boot?.set?.('ready', 1);
       loader?.classList.add('loaded');
       // the full-screen step (fullscreen lane, playtest-3, src/ui/fullscreen.js) comes once the phone is on its side
-      if (instant) { finish(); checkTurn(); landscape().then(() => site.fullscreen?.step()); return; }
+      // music lane (2026-11-15): then a phone's first-ever "turn silence off for sound" (src/ui/silence.js)
+      if (instant) { finish(); checkTurn(); landscape().then(() => site.fullscreen?.step()).then(() => site.silence?.step()); return; }
       if (want === 'hold') await new Promise((r) => { go = r; });
       await landscape();
       await site.fullscreen?.step();
+      await site.silence?.step();
       placeRing();
       if (calm()) {
         // one fade, the whole loading screen at once

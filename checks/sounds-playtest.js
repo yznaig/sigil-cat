@@ -8,7 +8,9 @@ const named = Object.keys(files).filter((n) => !n.startsWith('impact-'));
 await audio.loadAll(named);
 const started = [], nativeStart = AudioBufferSourceNode.prototype.start;
 AudioBufferSourceNode.prototype.start = function (...a) { started.push({ node: this, buffer: this.buffer, at: a[0] ?? 0, offset: a[1] ?? 0, rate: this.playbackRate.value }); return nativeStart.apply(this, a); };
-const nameOf = (b) => named.find((n) => audio.buffer(n) === b) ?? (b ? `unnamed ${b.duration.toFixed(2)}s` : 'none');
+// music round (e1115-13): the galaxy loaf scene's own song is a known clip too (src/eggs/bread.js BREAD.blast.track)
+const song = { 'orbit-loaf-blastoff': E.bread?.config.blast.track };
+const nameOf = (b) => named.find((n) => audio.buffer(n) === b) ?? Object.keys(song).find((n) => song[n] && b && audio.buffer(song[n]) === b) ?? (b ? `unnamed ${b.duration.toFixed(2)}s` : 'none');
 async function record(task, settle = 300) { const i = started.length; await task(); await sleep(settle); return started.slice(i).map((s) => ({ ...s, name: nameOf(s.buffer) })); }
 const list = (r) => r.map((s) => s.name).join(', ');
 const impactRequests = async () => (await __requests()).filter((u) => /assets\/audio\/impacts\//.test(u));
@@ -52,7 +54,7 @@ await expectOriginal('the googly eyes', 'choir', async () => { site.spells.eight
 await until(settled, 8000);
 await expectOriginal('the bread blast-off', 'twinkle', async () => {
   site.cast('dome'); await until(() => E.bread.isBread, 9000); await sleep(300); E.bread.blastOff();
-  await until(() => keepsakes.has('twinkle') && E.bread.state === 'cat' && !input.locked, 20000);
+  await until(() => keepsakes.has('twinkle') && E.bread.state === 'cat' && !input.locked, 40000);   // ~25 s scene since the music round
 }, 200);
 { const crumbs = keepsakes.get('crumbs') || keepsakes.give('crumbs'); await crumbs.worldTask; await expectOriginal('the crumbs tap', 'bite', () => crumbs.def.tap(crumbs)); }
 { await cat.ensureButter(); const pat = keepsakes.get('pat') || keepsakes.give('pat'); await pat.worldTask; await expectOriginal('the butter pat tap', 'slap', () => pat.def.tap(pat)); }

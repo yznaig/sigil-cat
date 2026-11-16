@@ -3,7 +3,7 @@ import {createMeshPicture} from '../core/mesh-picture.js';
 import {boxVertices} from './solid.js';
 import {css} from '../core/util.js';
 import {furnitureArrivals} from './arrival.js';
-import {softWallShadow} from '../core/soft-floor-shadow.js';
+import {softHungFloorShadow} from '../core/soft-floor-shadow.js';
 css('world-shelf',`.shelf-preview{position:fixed;pointer-events:none;z-index:6;color:#39543e;border:2px dashed #648268;border-radius:8px;background:#d9ead02b;font:600 12px system-ui;letter-spacing:0;text-transform:none;white-space:nowrap;display:grid;place-items:end center;padding:4px}`);
 const IDS=['rifle','top','pat','tin'];
 export const SHELF_IDS=IDS;
@@ -31,7 +31,7 @@ export function shelfService(site){return site.shelf??=createShelf(site);}
 function createShelf(site){
  const {THREE:T,world,stage,supports,keepsakes,store}=site;
  let shelfArt,shelfPhysics;
- let task=null,root,picture,entry,art,preview,dirty=false,last='',stopKey='',home=null,homeRect=null,arrival=null,wall=null;
+ let task=null,root,picture,entry,art,preview,dirty=false,last='',stopKey='',home=null,homeRect=null,arrival=null,shadow=null;
  const arrivals=furnitureArrivals(site);
  const vertices=boxVertices(T,[.71,.27,.20],[0,.07,0]);
  const slots=IDS.map(id=>({id,accepts:[id],position:({rifle:[0,.14,-.09],top:[HOLE.x,.016,.06],pat:[.035,.064,.07],tin:[.46,.05,.035]})[id],quaternion:[0,0,0,1]}));
@@ -82,7 +82,7 @@ function createShelf(site){
   if(vs?.length){const min=Math.min(...vs.map(v=>v.x)),max=Math.max(...vs.map(v=>v.x));stops=[.22,.78].map(t=>{const x=min+(max-min)*t;return {x,y:.14+sectionLow(vs,x)};});}
   const k=JSON.stringify(stops);if(k!==stopKey){
    stopKey=k;for(const id of IDS){const i=keepsakes.get(id);if(i?.worldEntry?.support?.id==='shelf')i.picture.detach();}
-   disposeArt();art=shelfArt({rifleStops:stops});art.traverse(o=>{if(o.material)forPicture(o.material);});root.userData.visual.add(art);wall?.paint();
+   disposeArt();art=shelfArt({rifleStops:stops});art.traverse(o=>{if(o.material)forPicture(o.material);});root.userData.visual.add(art);shadow?.paint();
    if(entry){
     while(entry.body.numColliders())world.physics.removeCollider(entry.body.collider(0),false);
     const R=world.rapier,add=d=>world.physics.createCollider(d.setFriction(.65),entry.body),box=(size,p)=>add(R.ColliderDesc.cuboid(...size.map(v=>v/2)).setTranslation(...p));
@@ -162,8 +162,8 @@ function createShelf(site){
   picture?.draw(true);
   const r=picture.rect,dx=Math.max(0,(stage.insets.left||0)+14-r.x),dy=Math.max(0,stage.insets.top+12-r.y);if(dx||dy){root.position.add(stage.onWall(x+dx,y+dy,root.position.z).sub(stage.onWall(x,y,root.position.z)));root.updateMatrixWorld(true);if(entry)entry.body.setTranslation(root.position,false);picture.draw(true);}
   home=root.position.clone();homeRect={...picture.rect};
-  // Its soft shadow on the wall (e1113-30): repainted for the new turn (the light meets it at another angle), static after.
-  wall?.paint();
+  // Its soft shadow on the floor (e1113-30, e1116-23): repainted for its new place and turn, static after.
+  shadow?.paint();
   supports.update('shelf');supports.update('shelf-hooks');update();applyArrival();
  }
  // Arrival (e1111-37): slide the picture in from the left; the body waits at home, disabled, until it lands.
@@ -172,18 +172,20 @@ function createShelf(site){
   const s=stage.toScreen(home),off=-(1-plan.u)*(homeRect.x+homeRect.w+40);
   root.position.copy(home);if(off||plan.dy){const n=stage.camera.getWorldDirection(new T.Vector3()),hit=stage.ray(s.x+off,s.y+plan.dy).intersectPlane(new T.Plane().setFromNormalAndCoplanarPoint(n,home),new T.Vector3());if(hit)root.position.copy(hit);}
   root.updateMatrixWorld(true);const plane=picture?.card.children[0];if(plane&&plane.material.opacity!==plan.opacity){plane.material.opacity=plan.opacity;}
-  wall?.place(plan.opacity);
+  // (its floor shadow lies further from the camera than the shelf, so the same slide moves it fewer pixels: at u=0, the
+  // shelf just off the page, it would still lie on the floor in view. It fades in with the slide, e1116-23.)
+  shadow?.place(plan.opacity*plan.u);
   picture?.draw(true);
  }
- function land(){arrival=null;root.position.copy(home);root.updateMatrixWorld(true);wall?.place(1);if(entry){entry.body.setTranslation(home,false);entry.body.setEnabled(true);}supports.update('shelf');supports.update('shelf-hooks');update();invalidate();}
+ function land(){arrival=null;root.position.copy(home);root.updateMatrixWorld(true);shadow?.place(1);if(entry){entry.body.setTranslation(home,false);entry.body.setEnabled(true);}supports.update('shelf');supports.update('shelf-hooks');update();invalidate();}
  async function ensure(){if(supports.count('solid')<2)return null;if(!task)task=(async()=>{
   await Promise.all([world.ensure(),stage.ensureEnv(),document.fonts.ready]);
   ({create:shelfArt,physics:shelfPhysics}=await import('../../assets/models/prepared/shelf.js'));
   await Promise.all(IDS.map(id=>keepsakes.get(id)?.worldTask));
   root=new T.Group();root.userData.visual=new T.Group();root.add(receiver);stage.scene.add(root);picture=createMeshPicture(site,root,root.userData.visual,vertices);
-  wall=softWallShadow(site,root,root.userData.visual,()=>[art,hookArt]);fit();layout();
+  shadow=softHungFloorShadow(site,root,()=>[art,hookArt]);fit();layout();
   entry=await world.add({id:'furniture-shelf',object:root,shapes:[],fixed:true,sleeping:true,presentation:picture});
-  hookArt=buildHooks();root.userData.visual.add(hookArt);wall.paint();
+  hookArt=buildHooks();root.userData.visual.add(hookArt);shadow.paint();
   const area=()=>picture&&!arrival?picture.rect:null;
   supports.register({id:'shelf',kind:'slot',object:root,slots,onChange:update,area,onMount(e,{animate}){if(animate)site.audio.impact(e.id,{material:e.id==='pat'?'butter':e.id==='tin'?'tin':e.id==='rifle'?'metal':'wood',size:'small',strength:.3});},shadow:()=>({object:receiver,parent:root.userData.visual,z:0,invalidate}),
    adopt(e){e.presentation?.attach(root.userData.visual,root,invalidate);},release(e){e.presentation?.detach();invalidate();}});
@@ -198,6 +200,6 @@ function createShelf(site){
  })();return task;}
  for(const id of IDS)supports.registerCategory(id,'solid');supports.onDiscover((id,category)=>{if(category!=='solid')return;if(!task&&!arrival)arrival=arrivals.unlock('shelf');ensure();});keepsakes.onGive(i=>{if(IDS.includes(i.id))Promise.resolve(i.worldTask).then(()=>{ensure();hook(i);update();});if(HOOKS.takes.includes(i.id))Promise.resolve(i.worldTask).then(()=>{if(entry)hook(i);});});stage.onResize.push(layout);
  function hang(id,hook,animate=true){const i=keepsakes.get(id);if(!i?.worldEntry||!entry||arrival)return false;const free=hookSlots.filter(s=>s.item===id&&(hook==null||s.hook===hook)&&s.accepts(i.worldEntry)&&(!s.occupant||s.occupant===id));return !!free.length&&supports.mount(i.worldEntry,'shelf-hooks',free[0].id,{animate});}
- const api={ensure,store:storeItem,hang,hookRects,hookSlots,fit,invalidate,slots,topRest:()=>topRest.result,get ready(){return !!entry;},get arriving(){return !!arrival;},get task(){return task;},get root(){return root;},get picture(){return picture;},get entry(){return entry;},get art(){return art;},get preview(){return preview;},get home(){return homeRect;},get wallShadow(){return wall;}};
+ const api={ensure,store:storeItem,hang,hookRects,hookSlots,fit,invalidate,slots,topRest:()=>topRest.result,get ready(){return !!entry;},get arriving(){return !!arrival;},get task(){return task;},get root(){return root;},get picture(){return picture;},get entry(){return entry;},get art(){return art;},get preview(){return preview;},get home(){return homeRect;},get shadow(){return shadow;}};
  ensure();return api;
 }

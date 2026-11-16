@@ -12,7 +12,9 @@ import { pausePageCallbacks } from './page-scheduler.js';
 
 export function createFreeze(site) {
   const { stage, audio } = site;
-  const holds = new Set(), viewport = [];
+  const holds = new Set(), viewport = [], changes = new Set();
+  // music round (e1116-02): the music asks why the page is held (a book keeps it playing; the turn and the cake stop it)
+  const changed = () => { for (const f of changes) { try { f([...holds]); } catch (e) { console.error(e); } } };
   let resume = null, resumeAudio = null, animations = [], resized = false, pinned = null;
   // Registered before anything else listens (main.js builds this right after the stage): a capture listener on the
   // window runs first, so while frozen no other resize handler sees the event at all.
@@ -35,10 +37,12 @@ export function createFreeze(site) {
       pinned = { w: c.style.width, h: c.style.height };
       c.style.width = stage.width + 'px'; c.style.height = stage.height + 'px';
     }
+    changed();
     return () => release(reason);
   }
   function release(reason) {
-    if (!holds.delete(reason) || holds.size) return;
+    if (!holds.delete(reason)) return;
+    if (holds.size) { changed(); return; }
     const c = stage.canvas;
     if (pinned) { c.style.width = pinned.w; c.style.height = pinned.h; pinned = null; }
     for (const a of animations) if (a.playState === 'paused') a.play();
@@ -51,10 +55,11 @@ export function createFreeze(site) {
     r?.(); a?.();
     stage.holdLayout(false);
     if (resized) { resized = false; dispatchEvent(new Event('resize')); }
+    changed();
   }
   return {
     hold, release,
     get frozen() { return holds.size > 0; }, get reasons() { return [...holds]; },
-    onViewport(fn) { viewport.push(fn); },
+    onViewport(fn) { viewport.push(fn); }, onChange(fn) { changes.add(fn); },
   };
 }

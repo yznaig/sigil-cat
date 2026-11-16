@@ -274,3 +274,21 @@ Their origin and licence are not recorded (ledgered `licenceCleared: false`, lik
 | `designed/bell.wav` | ding-small-bell.mp3 ("ding-small-bell-sfx") | 0.036-1.10 s, mono | Tapping a sticker (replaces the glass tink, kept unplayed); tapping the Platinum Cat badge |
 | `designed/cast-wind.wav` | wind-magic.mp3 ("yodguard-wind-magic", e1113-09) | 0.00-1.10 s of 8 s, stereo | Every successful sigil cast (replaces `designed/cast.wav` at the cast) |
 | `designed/bolt-beam.wav` | energy-beam-shot.mp3 ("short-energy-beam-shot", e1113-10) | 0.022-1.90 s, mono | The lightning bolt strike (the thunder stays for the cloud's grumble) |
+
+## Background music (music round, 2026-11-15)
+
+Generated 2026-11-15 by command-hq-2a for Aaron, locally with YuE2 (m-a-p; weights CC-BY-NC-4.0) in ComfyUI. **Non-commercial use only.**
+Copied unchanged from `hq-tools/songs/sigil/game/` (its SOURCES.md): each file level-matched to about -18 LUFS (peaks at or
+below -1.5 dBTP), 48 kHz, 160 kbps AAC (.m4a) and MP3; no re-encode here. Picks are Aaron's (decisions e1115-12, e1115-13).
+The page plays the .m4a where the browser can, else the .mp3 (`src/core/music.js`).
+
+| File under assets/audio/music | Take (ComfyUI-Shared/output/audio) | Spec (hq-tools/songs/sigil/…) | Length | Role |
+| --- | --- | --- | --- | --- |
+| `glass-garden` | 01-glass-garden_00003.flac | v2/01-glass-garden.json | 3:28 | background rotation, always the first song |
+| `sequencer-sky` | 19-sequencer-sky_00001.flac | v3/19-sequencer-sky.json | 2:09 | background rotation |
+| `phase-cat` | 03-phase-cat_00001.flac | v2/03-phase-cat.json | 1:30 | background rotation |
+| `orbit-loaf` | 05-orbit-loaf_00003.flac | v2/05-orbit-loaf.json | 3:01 | background rotation, unlocked once the galaxy loaf scene has played |
+| `orbit-loaf-blastoff` | 05-orbit-loaf_00001.flac | v2/05-orbit-loaf.json | 0:25 | the galaxy loaf (bread blast-off) scene; fades out from about 19 s and is close to silent by 23 s, where the star twinkle lands |
+
+Key: every plan was transposed into G major or E minor and checked for out-of-key notes and chords, so the music stays
+consonant with the whisker harp (B3 C4 D4 E4 F#4 B4). Seeds and plans are in each spec's .result.json and .abc.txt (outside this repo).

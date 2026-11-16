@@ -46,7 +46,7 @@ export function createSupports(site) {
     const target=pose(id,name,e.support);setPose(e,target.p,target.q);
     // An attachment supplies an explicit presentation hook. Its parent already
     // owns rendering/invalidation (e.g. the cat picture); it gets no polling loop.
-    r.adopt?.(e,s,e.support); stats.mounts++;world.save(e);r.onChange?.();r.onMount?.(e,{animate});
+    r.adopt?.(e,s,e.support); stats.mounts++;world.save(e);r.onChange?.();r.onMount?.(e,{animate});site.floorOutline?.seated(e);   // floor lane (music round): the outline goes
     if(animate&&!stage.reducedMotion&&r.kind!=='attachment'){
       const kind=s.kind||r.kind;
       motions.set(e,{t:0,start:performance.now(),duration:kind==='pin'?1.6:kind==='hang'?HANG.seconds:.22,kind,pivot:s.pivot||[0,0,0],from,amp:HANG.amp,phase:0});listen();
@@ -75,7 +75,7 @@ export function createSupports(site) {
     if(wake)world.wake(e);else e.body.sleep();
     // A release is a resumable free pose, never a stale occupied slot or a new
     // sleeping pose in mid-air. world.add restores awake:false/true explicitly.
-    if(save)world.save(e,true);stats.detaches++;r?.onChange?.();if(!motions.size)unlisten();return true;
+    if(save)world.save(e,true);stats.detaches++;r?.onChange?.();site.floorOutline?.seated(e);if(!motions.size)unlisten();return true;   // floor lane: the outline comes back
   }
   // Where an item would sit in a slot, on the page: its collider points at the slot pose, projected, padded to at least
   // SNAP.min px and by SNAP.pad. Used for snapping by pointer position (e1111-58, note 7).

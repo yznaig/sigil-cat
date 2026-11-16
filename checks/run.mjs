@@ -95,6 +95,9 @@ page.on('requestfailed', (r) => { if (!/ERR_ABORTED/.test(r.failure()?.errorText
 mkdirSync(out, { recursive: true });
 const ext = flag('jpeg') ? 'jpg' : 'png', shotOpts = flag('jpeg') ? { type: 'jpeg', quality: 74 } : {};
 await page.exposeFunction('__shot', async (name) => { const p = `${out}/${name}-${sizeName}.${ext}`; await page.screenshot({ path: p, ...shotOpts }); console.log('PNG ' + p); return p; });
+// the viewport as the screen shows it (the page's CSS floor under the canvas), lossless, as a base64 PNG for the page to
+// measure (floor lane, music round: checks/floor-outline.js)
+await page.exposeFunction('__png', async () => (await page.screenshot({ type: 'png' })).toString('base64'));
 await page.exposeFunction('__say', (s) => print(String(s)));
 await page.exposeFunction('__done', () => finished());
 await page.exposeFunction('__loadAverage', () => loadavg());

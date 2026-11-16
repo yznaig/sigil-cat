@@ -48,6 +48,7 @@ export function grimoireHTML() {
     <ul>
       <li>The cow: &ldquo;<a href="https://sketchfab.com/3d-models/farm-cow-animated-dairy-cattle-0e780cb5ab6d457198ded7d4e191a03e" target="_blank" rel="noopener">Farm Cow Animated Dairy cattle</a>&rdquo; by <a href="https://sketchfab.com/rukh3d" target="_blank" rel="noopener">Rukh3D</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>. Materials and walk/graze animation adapted.</li>
       <li>The second fanfare: &ldquo;RPG Victory Fanfare 2&rdquo; by <a href="https://www.youtube.com/@LuxAeterna22878" target="_blank" rel="noopener">Lux Aeterna Audio</a>.</li>
+      <li>The music: made for this page with YuE2 by M-A-P (model weights <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a>; non-commercial).</li>
     </ul>
   </section>
   <p class="forget"><button type="button" class="start-over" data-start-over>start over</button></p>`,

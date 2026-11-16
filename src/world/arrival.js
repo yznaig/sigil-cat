@@ -67,6 +67,10 @@ function createArrivals(site){
    plan.fanfareWhen=t0+seconds;plan.fanfare=audio.play(C.first.fanfare,{when:plan.fanfareWhen,gain:C.first.gain});
   }else{plan.fanfareWhen=t0;plan.fanfareOffset=reduced?C.second.bong-seconds:0;plan.fanfare=audio.play(C.second.fanfare,{when:t0,gain:C.second.gain,offset:plan.fanfareOffset});}
   plan.scrape=scrape;
+  // music lane (2026-11-15): the scrape and the fanfare own the room; the background music pauses from the first sound
+  // until the fanfare has played out, then comes back where it paused (src/core/music.js)
+  const music=site.music?.hold('arrival');
+  if(plan.fanfare)plan.fanfare.addEventListener('ended',music,{once:true});else plan.landed.then(music);
   const tick=()=>{
    const now=performance.now(),dt=Math.min(.1,(now-lastPerf)/1000);lastPerf=now;
    // The audio clock when it runs (a hidden tab catches up on return); the frame clock if it ever stalls.

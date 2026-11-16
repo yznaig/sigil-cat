@@ -73,8 +73,11 @@ export function defineIngredients(site,chain){
  ];
  // One prepared solid. id is its kind (what it looks and behaves like); key is its keepsake id (the cakes after the
  // first are 'cake-2', 'cake-3', ... of kind 'cake', playtest 2, e1112-65).
+ // The two measures (white flour disc, cream cup of milk) melt into the cream floor: every keepsake of those kinds gets the
+ // floor outline (src/world/floor-outline.js, music round).
+ const OUTLINED=new Set(['recipe-flour','recipe-milk']);
  const defineOne=(id,label,loadModel,createName,physicsName,size,aspect,tap,key=id)=>{
-  solidDefinition(site,{id:key,label,category:'recipe',size,aspect,home:()=>({x:id==='flour'?-.85:id==='bucket'?.85:0,y:-.55}),tap,removed(i){chain.removed?.(key);if(i.solidArt)disposeArt(i.solidArt);}},async inst=>{
+  solidDefinition(site,{id:key,label,category:'recipe',outline:OUTLINED.has(id),size,aspect,home:()=>({x:id==='flour'?-.85:id==='bucket'?.85:0,y:-.55}),tap,removed(i){chain.removed?.(key);if(i.solidArt)disposeArt(i.solidArt);}},async inst=>{
    const s=store.get('worldBodies.'+key+'.adapter.artScale',scale()*(id==='cake'?.82:id==='recipe-milk'?.5:id==='pitchfork'?.65:1));
    const module=await loadModel(),physics=module[physicsName];
    const model=module[createName](id==='bucket'?{variant:'empty'}:id==='cake'?{left:cakeLeft(inst)}:undefined);model.scale.setScalar(s);

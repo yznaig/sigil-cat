@@ -99,7 +99,7 @@ async function blast(start) {
   const b0 = E.bread.blasts, g0 = g.trips;
   await start();
   await until(() => E.bread.blasts > b0, 6000);
-  await until(() => E.bread.state === 'cat' && !input.locked, 25000);
+  await until(() => E.bread.state === 'cat' && !input.locked, 40000);   // music round: the scene is ~25 s now (e1115-13)
   stage.onRender.splice(stage.onRender.indexOf(rec), 1);
   const c = circle(), d = (p) => Math.hypot(p.x - c.x, p.y - c.y), first = path[0], last = path.at(-1);
   return { blasted: E.bread.blasts === b0 + 1, galaxy: g.trips !== g0 || g.isOpen, path, c, start: first ? d(first) : NaN, end: last ? d(last) : NaN,

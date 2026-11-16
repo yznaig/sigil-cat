@@ -1,5 +1,5 @@
 // furniture-p2.js: the furniture lane of playtest 2 (2026-11-12), with real pointer input where a player would use it.
-//   1 the shelf is level and larger (p3: turned right, level, right/lower, a wall shadow)          
+//   1 the shelf is level and larger (p3: turned right, level, right/lower; its shadow on the floor, e1116-23)          
 //   2 a drop anywhere over the shelf or the board places the item
 //   3 two hooks under the shelf: the pail and the flour hang, swing, and come off with a pull
 //   4 Collector = every shelf spot (bays and hooks); Curator = a full board
@@ -30,8 +30,14 @@ check('1 the shelf reads level: its front edge slopes under 1 percent (e1113-30)
   const home = { x: 18 + Math.min(stage.width * .34, 450, stage.height * .5) / 2, y: stage.insets.top + Math.min(105, stage.height * .2) };
   const c = stage.toScreen(shelf.root.position);   // its middle, against where it hung before (playtest 2)
   check('1 the shelf sits further right, and lower except on a short screen (e1113-30)', c.x > home.x + stage.width * .045 && (stage.height <= 500 ? Math.abs(c.y - home.y) < 2 : c.y > home.y + stage.height * .075), JSON.stringify({ centre: c, oldHome: home }));
-  const w = shelf.wallShadow;
-  check('1 the shelf casts a soft static shadow on the wall behind it', !!w?.painted && w.card.visible && w.quad.material.opacity > .1 && w.quad.material.map?.image?.width > 16, JSON.stringify({ painted: w?.painted, opacity: w?.quad.material.opacity })); }
+  // Music round (e1116-23, Aaron: "the shelfs shadow should appear further back on the floor"): its soft shadow lies on
+  // the floor (y=0, face up), further back than the shelf along the room's key light, below the shelf on the page.
+  const w = shelf.shadow, q = w?.quad; q?.updateMatrixWorld(true);
+  const at = q ? q.getWorldPosition(new T.Vector3()) : null, up = q ? new T.Vector3(0, 0, 1).transformDirection(q.matrixWorld) : null;
+  const top = q ? Math.min(...[[-.5, .5], [.5, .5]].map(([u, v]) => stage.toScreen(new T.Vector3(u, v, 0).applyMatrix4(q.matrixWorld)).y)) : 0;
+  check('1 the shelf casts a soft static shadow on the floor, further back than it (e1116-23)', !!w?.painted && w.card.visible && q.material.opacity > .1 && q.material.map?.image?.width > 16
+    && Math.abs(at.y - .001) < 1e-4 && up.y > .999 && at.z < shelf.root.position.z && top > shelf.picture.rect.y + shelf.picture.rect.h,
+    JSON.stringify({ painted: w?.painted, opacity: q?.material.opacity, centre: at?.toArray().map((v) => +v.toFixed(3)), shelfZ: +shelf.root.position.z.toFixed(3), shadowTop: Math.round(top), shelfBottom: Math.round(shelf.picture.rect.y + shelf.picture.rect.h) })); }
 const r1 = shelf.picture.rect;
 check('1 the shelf is larger than before (34% of the width, up to 450px; was 31%, 400px)', !MOBILE ? r1.w >= Math.min(stage.width * 0.34, 450) * 0.97 : r1.w > 0, JSON.stringify(r1));
 check('1 the shelf stays on the page and clear of the cat', r1.x >= 0 && r1.y >= 0 && r1.x + r1.w <= cat.screenOf([0, cat.height * 0.45, 0]).x - 40, JSON.stringify({ shelf: r1, cat: catMid() }));

@@ -1727,6 +1727,106 @@
       "processing": "tools/audio/make-p3-sounds.py",
       "steps": "cut 0.022-1.900 s, mono 48 kHz, 2 ms fade in / 0.80 s fade out, one constant gain -14.485000 dB (-22 dBFS loudest-100-ms RMS, true peak at or under -4 dBFS)",
       "role": "The lightning bolt striking (e1113-10)"
+    },
+    "assets/audio/music/glass-garden.m4a": {
+      "source": "ComfyUI-Shared/output/audio/01-glass-garden_00003.flac (spec hq-tools/songs/sigil/v2/01-glass-garden.json); level-matched to about -18 LUFS, peaks <= -1.5 dBTP, 48 kHz, 160 kbps",
+      "author": "Generated for Aaron with YuE2 (m-a-p) in ComfyUI, 2026-11-15",
+      "license": "YuE2 weights CC-BY-NC-4.0: non-commercial use only",
+      "role": "Background music rotation; always the first song of a visit",
+      "suppliedBy": "Aaron",
+      "licenceCleared": true,
+      "processing": "assets/audio/SOURCES.md",
+      "decision": "e1115-12"
+    },
+    "assets/audio/music/glass-garden.mp3": {
+      "source": "ComfyUI-Shared/output/audio/01-glass-garden_00003.flac (spec hq-tools/songs/sigil/v2/01-glass-garden.json); level-matched to about -18 LUFS, peaks <= -1.5 dBTP, 48 kHz, 160 kbps",
+      "author": "Generated for Aaron with YuE2 (m-a-p) in ComfyUI, 2026-11-15",
+      "license": "YuE2 weights CC-BY-NC-4.0: non-commercial use only",
+      "role": "Background music rotation; always the first song of a visit",
+      "suppliedBy": "Aaron",
+      "licenceCleared": true,
+      "processing": "assets/audio/SOURCES.md",
+      "decision": "e1115-12"
+    },
+    "assets/audio/music/sequencer-sky.m4a": {
+      "source": "ComfyUI-Shared/output/audio/19-sequencer-sky_00001.flac (spec hq-tools/songs/sigil/v3/19-sequencer-sky.json); level-matched to about -18 LUFS, peaks <= -1.5 dBTP, 48 kHz, 160 kbps",
+      "author": "Generated for Aaron with YuE2 (m-a-p) in ComfyUI, 2026-11-15",
+      "license": "YuE2 weights CC-BY-NC-4.0: non-commercial use only",
+      "role": "Background music rotation",
+      "suppliedBy": "Aaron",
+      "licenceCleared": true,
+      "processing": "assets/audio/SOURCES.md",
+      "decision": "e1115-12"
+    },
+    "assets/audio/music/sequencer-sky.mp3": {
+      "source": "ComfyUI-Shared/output/audio/19-sequencer-sky_00001.flac (spec hq-tools/songs/sigil/v3/19-sequencer-sky.json); level-matched to about -18 LUFS, peaks <= -1.5 dBTP, 48 kHz, 160 kbps",
+      "author": "Generated for Aaron with YuE2 (m-a-p) in ComfyUI, 2026-11-15",
+      "license": "YuE2 weights CC-BY-NC-4.0: non-commercial use only",
+      "role": "Background music rotation",
+      "suppliedBy": "Aaron",
+      "licenceCleared": true,
+      "processing": "assets/audio/SOURCES.md",
+      "decision": "e1115-12"
+    },
+    "assets/audio/music/phase-cat.m4a": {
+      "source": "ComfyUI-Shared/output/audio/03-phase-cat_00001.flac (spec hq-tools/songs/sigil/v2/03-phase-cat.json); level-matched to about -18 LUFS, peaks <= -1.5 dBTP, 48 kHz, 160 kbps",
+      "author": "Generated for Aaron with YuE2 (m-a-p) in ComfyUI, 2026-11-15",
+      "license": "YuE2 weights CC-BY-NC-4.0: non-commercial use only",
+      "role": "Background music rotation",
+      "suppliedBy": "Aaron",
+      "licenceCleared": true,
+      "processing": "assets/audio/SOURCES.md",
+      "decision": "e1115-12"
+    },
+    "assets/audio/music/phase-cat.mp3": {
+      "source": "ComfyUI-Shared/output/audio/03-phase-cat_00001.flac (spec hq-tools/songs/sigil/v2/03-phase-cat.json); level-matched to about -18 LUFS, peaks <= -1.5 dBTP, 48 kHz, 160 kbps",
+      "author": "Generated for Aaron with YuE2 (m-a-p) in ComfyUI, 2026-11-15",
+      "license": "YuE2 weights CC-BY-NC-4.0: non-commercial use only",
+      "role": "Background music rotation",
+      "suppliedBy": "Aaron",
+      "licenceCleared": true,
+      "processing": "assets/audio/SOURCES.md",
+      "decision": "e1115-12"
+    },
+    "assets/audio/music/orbit-loaf.m4a": {
+      "source": "ComfyUI-Shared/output/audio/05-orbit-loaf_00003.flac (spec hq-tools/songs/sigil/v2/05-orbit-loaf.json); level-matched to about -18 LUFS, peaks <= -1.5 dBTP, 48 kHz, 160 kbps",
+      "author": "Generated for Aaron with YuE2 (m-a-p) in ComfyUI, 2026-11-15",
+      "license": "YuE2 weights CC-BY-NC-4.0: non-commercial use only",
+      "role": "Background music rotation, unlocked once the galaxy loaf scene has played",
+      "suppliedBy": "Aaron",
+      "licenceCleared": true,
+      "processing": "assets/audio/SOURCES.md",
+      "decision": "e1115-12"
+    },
+    "assets/audio/music/orbit-loaf.mp3": {
+      "source": "ComfyUI-Shared/output/audio/05-orbit-loaf_00003.flac (spec hq-tools/songs/sigil/v2/05-orbit-loaf.json); level-matched to about -18 LUFS, peaks <= -1.5 dBTP, 48 kHz, 160 kbps",
+      "author": "Generated for Aaron with YuE2 (m-a-p) in ComfyUI, 2026-11-15",
+      "license": "YuE2 weights CC-BY-NC-4.0: non-commercial use only",
+      "role": "Background music rotation, unlocked once the galaxy loaf scene has played",
+      "suppliedBy": "Aaron",
+      "licenceCleared": true,
+      "processing": "assets/audio/SOURCES.md",
+      "decision": "e1115-12"
+    },
+    "assets/audio/music/orbit-loaf-blastoff.m4a": {
+      "source": "ComfyUI-Shared/output/audio/05-orbit-loaf_00001.flac (spec hq-tools/songs/sigil/v2/05-orbit-loaf.json); level-matched to about -18 LUFS, peaks <= -1.5 dBTP, 48 kHz, 160 kbps",
+      "author": "Generated for Aaron with YuE2 (m-a-p) in ComfyUI, 2026-11-15",
+      "license": "YuE2 weights CC-BY-NC-4.0: non-commercial use only",
+      "role": "The galaxy loaf (bread blast-off) scene; fades out from ~19 s, near silent at 23 s where the star twinkle lands",
+      "suppliedBy": "Aaron",
+      "licenceCleared": true,
+      "processing": "assets/audio/SOURCES.md",
+      "decision": "e1115-13"
+    },
+    "assets/audio/music/orbit-loaf-blastoff.mp3": {
+      "source": "ComfyUI-Shared/output/audio/05-orbit-loaf_00001.flac (spec hq-tools/songs/sigil/v2/05-orbit-loaf.json); level-matched to about -18 LUFS, peaks <= -1.5 dBTP, 48 kHz, 160 kbps",
+      "author": "Generated for Aaron with YuE2 (m-a-p) in ComfyUI, 2026-11-15",
+      "license": "YuE2 weights CC-BY-NC-4.0: non-commercial use only",
+      "role": "The galaxy loaf (bread blast-off) scene; fades out from ~19 s, near silent at 23 s where the star twinkle lands",
+      "suppliedBy": "Aaron",
+      "licenceCleared": true,
+      "processing": "assets/audio/SOURCES.md",
+      "decision": "e1115-13"
     }
   },
   "retained": [

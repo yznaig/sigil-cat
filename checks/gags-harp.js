@@ -1,11 +1,12 @@
 // Gags lane, playtest 2 (items 7, 8, 9): the harp's tune is C C B C D C, a right note glows clearly, plucking keeps
-// him in his pose for 4 s, and once the harp is found the keyboard plays his whiskers (A S D / J K L) and he says so.
+// him in his pose for 4 s, and the keyboard plays his whiskers (A S D / J K L; always, since e1116-11) and he says so.
 // Run with checks/lib.js.
 const H=E.harp,bm=E.butterman;
 cat.auto=false;cat.setYaw(cat.config.rotate.homeYaw);await sleep(400);
 check('the tune is C C B C D C on his whiskers',JSON.stringify(H.config.tune)==='[1,1,0,1,2,1]'&&H.config.tune.map(i=>H.config.notes[i]).join()==='1,1,0,1,3,1');
 const key=k=>dispatchEvent(new KeyboardEvent('keydown',{key:k,bubbles:true}));
-const p0=H.plucks;key('s');check('before the harp is found the keys do nothing',H.plucks===p0&&H.keyPlucks===0);
+// (harp lane, music round, e1116-11: the keys are always on now; checks/harp-keys.js has the rest)
+const p0=H.plucks;key('s');check('before the harp is found the keys pluck too (always on, e1116-11)',H.plucks===p0+1&&H.keyPlucks===1);
 // 7: a pluck holds his pose for four seconds, even when his cycle wants to move.
 const CY=cat.config.cycle,pose=cat.pose,hold=CY.poses[pose].hold;CY.poses[pose].hold=[.05,.05];
 const tapWhisker=async i=>{const w=H.whiskers()[i];await tap((w.pts[1].x+w.pts[2].x)/2,(w.pts[1].y+w.pts[2].y)/2);};

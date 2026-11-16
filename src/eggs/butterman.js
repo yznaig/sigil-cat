@@ -1021,6 +1021,9 @@ export default function createButterman(site) {
     const cs = catScene();
     if (cs?.cfg.cat.pose) world.request(cs.cfg.cat.pose);
     // A cat that already has butter keeps it: the butter scene again brings a fresh pat and slaps it on top.
+    // music lane (2026-11-15): his song owns the stage; the background music pauses and comes back after (finish)
+    r.music = run?.live ? run.music : site.music?.hold('butterman');
+    if (run) run.music = null;
     run = r; lastDone = null;
     if (S.scenes.some((sc) => sc.cfg.ticket)) prepareTicket();      // the encore's ticket, made ahead of its fall
     return S;
@@ -1039,6 +1042,7 @@ export default function createButterman(site) {
       store.set(ENC.seenKey, true);
       dispatchEvent(new CustomEvent('sigilcat:encore-seen'));
     }
+    run.music?.(); run.music = null;   // music lane (2026-11-15)
     lastDone = run; run = null; pushAt(null);
     // the harp's tune finished while another scene was playing: the encore follows it
     if (encoreQueued) { encoreQueued = false; stage.after(1).then(() => { if (!run?.live) encore(); }); }

@@ -81,6 +81,7 @@ export default function createParty(site) {
     // happened while the page was away.
     r.release();
     input.lock('party',false);
+    r.music?.();
     if(r.focus?.isConnected)r.focus.focus({preventScroll:true});
     // Existing hat API: unit 7 replaces its art without any dependency on this module.
     // The cake gives the party hat (and the rack to hang it on) and nothing else (playtest 2, gags lane).
@@ -96,6 +97,7 @@ export default function createParty(site) {
     const r={focus:document.activeElement,children:[...document.body.children].map(n=>[n,n.inert]),resolve:null};
     r.promise=new Promise(resolve=>r.resolve=resolve);run=r;
     input.lock('party',true);
+    r.music=site.music?.hold('party');   // music lane (2026-11-15): the error page and the party's toot; back after (restore)
     r.release=site.freeze.hold('party');
     r.children.forEach(([n])=>n.inert=true);
     document.body.classList.add('party-error');

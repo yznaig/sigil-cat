@@ -173,9 +173,9 @@ for size in desktop phone; do
   run "party-$size" "$BASE/" --lib checks/lib.js --js checks/party.js --size $size --out "$SHOTS" --jpeg --timeout 180
   run "party-calm-$size" "$BASE/" --lib checks/lib.js --js checks/party.js --size $size --out "$SHOTS" --jpeg --timeout 180 --reduced
   run "audit-polish-$size" "$BASE/" --lib checks/lib.js --js checks/audit-polish.js --size $size --out "$SHOTS" --jpeg --timeout 150
-  run "bread-float-$size" "$BASE/" --lib checks/lib.js --js checks/bread-float.js --size $size --out "$SHOTS" --jpeg --timeout 90
-  run "bread-float-calm-$size" "$BASE/" --lib checks/lib.js --js checks/bread-float.js --size $size --out "$SHOTS" --jpeg --timeout 90 --reduced
-  run "bread-float-shots-$size" "$BASE/" --lib checks/lib.js --js checks/bread-float-shots.js --size $size --out "$SHOTS" --jpeg --timeout 90
+  run "bread-float-$size" "$BASE/" --lib checks/lib.js --js checks/bread-float.js --size $size --out "$SHOTS" --jpeg --timeout 150
+  run "bread-float-calm-$size" "$BASE/" --lib checks/lib.js --js checks/bread-float.js --size $size --out "$SHOTS" --jpeg --timeout 150 --reduced
+  run "bread-float-shots-$size" "$BASE/" --lib checks/lib.js --js checks/bread-float-shots.js --size $size --out "$SHOTS" --jpeg --timeout 150
   run "noscope-footer-$size" "$BASE/" --lib checks/lib.js --js checks/noscope-footer.js --size $size --out "$SHOTS" --jpeg --timeout 100
   run "noscope-video-$size" "$BASE/" --lib checks/lib.js --js checks/noscope-video.js --size $size --out "$SHOTS" --jpeg --timeout 100
   run "look-pet-pass-$size" "$BASE/" --lib checks/lib.js --js checks/look-pet-pass.js --then checks/look-pet-seven.js --size $size --out "$SHOTS" --jpeg --timeout 90
@@ -269,8 +269,22 @@ for size in desktop phone; do
   run "bolt-visual-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/bolt-visual.js --size $size --out "$SHOTS" --jpeg --timeout 120
   run "bolt-visual-calm-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/bolt-visual.js --size $size --out "$SHOTS" --jpeg --timeout 120 --reduced
   run "galaxy-glow-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/galaxy-glow.js --size $size --out "$SHOTS" --jpeg --timeout 240
+  # galaxy lane (music round, 2026-11-16): no derivatives in the galaxy pass (cell-edge lines on Windows GPUs), no coreless star lines inside him
+  run "galaxy-lines-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/galaxy-lines.js --size $size --out "$SHOTS" --jpeg --timeout 300
   run "debug-panel-$size" "$BASE/?dpr=$final_dpr#debug" --lib checks/lib.js --js checks/debug-panel.js --size $size --out "$SHOTS" --jpeg --timeout 180
+  # music lane (2026-11-15, e1115-12/13/14): the background music (first song, no repeats, the gap, the master bus, the
+  # holds of every scene that owns the stage, orbit-loaf after the galaxy loaf scene, whose twinkle lands at 23.0 s);
+  # Space toggles the #debug screen on a desktop only (and nothing changes without #debug)
+  run "music-$size" "$BASE/?dpr=$final_dpr&music=1&musicgap=0.4,0.8" --lib checks/lib.js --js checks/music.js --then checks/music-reload.js --size $size --out "$SHOTS" --jpeg --timeout 500
+  run "debug-space-$size" "$BASE/?dpr=$final_dpr#debug" --lib checks/lib.js --js checks/debug-space.js --size $size --out "$SHOTS" --jpeg --timeout 200
 done
+run "music-1536x864" "$BASE/?dpr=1&music=1&musicgap=0.4,0.8" --lib checks/lib.js --js checks/music.js --then checks/music-reload.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 500
+run "debug-space-1536x864" "$BASE/?dpr=1#debug" --lib checks/lib.js --js checks/debug-space.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 200
+run "debug-space-off-desktop" "$BASE/?dpr=1" --lib checks/lib.js --js checks/debug-space.js --size desktop --out "$SHOTS" --jpeg --timeout 200
+# music lane: a phone's first-ever visit says "turn silence off for sound" for ~2 s after the full-screen step, once
+run "silence-phone" "$BASE/?doors=hold&fs=1&silence=1&case=phone" --js checks/silence.js --then checks/silence-reload.js --size phone --out "$SHOTS" --jpeg --timeout 150
+run "silence-calm-phone" "$BASE/?doors=hold&fs=1&silence=1&case=calm" --js checks/silence.js --size phone --out "$SHOTS" --jpeg --timeout 150 --reduced
+run "silence-desktop" "$BASE/?doors=hold&fs=1&silence=1&case=desktop" --js checks/silence.js --size desktop --out "$SHOTS" --jpeg --timeout 150
 # (Bird lane, playtest-2: flappy and the stand at 844x390 touch are the bird-phone runs above; "phone" is landscape now.)
 
 # a phone held upright only ever shows "flip sideways" (shell lane, playtest-2): at boot, and mid-game, frozen under it
@@ -300,6 +314,25 @@ run "floor-grid-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/floor-grid
 run "floor-grid-notch" "$BASE/?dpr=2&safe=59,59,0,21" --lib checks/lib.js --js checks/floor-grid.js --size phone-notch --out "$SHOTS" --jpeg --timeout 300
 run "floor-grid-doors-desktop" "$BASE/?dpr=1&doors=hold" --lib checks/lib.js --js checks/floor-grid.js --size desktop --out "$SHOTS" --jpeg --timeout 180
 run "floor-grid-doors-phone" "$BASE/?dpr=2&doors=hold" --lib checks/lib.js --js checks/floor-grid.js --size phone --out "$SHOTS" --jpeg --timeout 180
+# The shelf's soft shadow on the floor (shelfshadow lane, music round, e1116-23): its slide-in (?arrivals=1, ~35 s), the
+# floor plane at the zoom's least/default/most, never under him, nothing per frame, covered by the galaxy.
+run "shelf-shadow-1536x864" "$BASE/?arrivals=1&dpr=1" --lib checks/lib.js --js checks/shelf-shadow.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 240
+run "shelf-shadow-phone" "$BASE/?arrivals=1&dpr=2" --lib checks/lib.js --js checks/shelf-shadow.js --size phone --out "$SHOTS" --jpeg --timeout 240
+# floor lane (music round, e1115-55): the ink line round the seven items that melt into the floor, only them; edge
+# contrast >= 15 at dpr 1 (1536x864, and 844x390 as the mock-up measured), held, thrown, pinned and back, after a reload
+FO_STORE='{"bird":{"seen":true,"away":-100000000,"gap":300000}}'
+run "floor-outline-1536x864" "$BASE/?dpr=1" --lib checks/lib.js --js checks/floor-outline.js --then checks/floor-outline-reload.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 300 --storage "$FO_STORE"
+run "floor-outline-844x390" "$BASE/?dpr=1" --lib checks/lib.js --js checks/floor-outline.js --then checks/floor-outline-reload.js --size 844x390 --out "$SHOTS" --jpeg --timeout 300 --storage "$FO_STORE"
+run "floor-outline-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/floor-outline.js --then checks/floor-outline-reload.js --size phone --out "$SHOTS" --jpeg --timeout 300 --storage "$FO_STORE"
+# harp lane (music round, e1116-11): A S D J K L pluck the whiskers at any time (before the harp is found, the tune on
+# them finds it once; not in fields, modes or locks); on a phone a pluck brings six whisker buttons for 10 s after the
+# last pluck, Nearer/Deeper win while an item is held, a desktop never gets them
+run "harp-keys-1536x864" "$BASE/?dpr=1" --lib checks/lib.js --js checks/harp-keys.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 240
+run "harp-keys-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/harp-keys.js --size phone --out "$SHOTS" --jpeg --timeout 240
+run "harp-buttons-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/harp-buttons.js --size phone --out "$SHOTS" --jpeg --timeout 300
+run "harp-buttons-notch" "$BASE/?dpr=2&safe=59,59,0,21" --lib checks/lib.js --js checks/harp-buttons.js --size phone-notch --out "$SHOTS" --jpeg --timeout 300
+run "harp-buttons-calm-phone" "$BASE/?dpr=2&rm=1" --lib checks/lib.js --js checks/harp-buttons.js --size phone --out "$SHOTS" --jpeg --timeout 300 --reduced
+run "harp-buttons-1536x864" "$BASE/?dpr=1" --lib checks/lib.js --js checks/harp-buttons.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 120
 
 echo "== sigils"
 if node checks/sigils.test.mjs > "$LOG/sigils.txt" 2>&1; then tail -n 1 "$LOG/sigils.txt"; else tail -n 15 "$LOG/sigils.txt"; fails+=("sigils"); fi

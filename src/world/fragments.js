@@ -12,7 +12,8 @@ export function defineCrumbs(site) {
   },MODELS.crumbs,{fitLobes:3,sound:{material:'butter',size:'small'}});
 }
 export function defineShards(site) {
-  return defineSmallBody(site,{id:'shards',label:'the broken glass',size:.3,aspect:.46,home:()=>({x:.75,y:-.5}),
+  // outline: clear glass melts into the cream floor (src/world/floor-outline.js, music round)
+  return defineSmallBody(site,{id:'shards',label:'the broken glass',size:.3,aspect:.46,home:()=>({x:.75,y:-.5}),outline:true,
     tap(inst){if(site.stage.reducedMotion)site.audio.play('hit',{gain:.28,rate:1.8});else hop(site,inst,.3);}
   },MODELS.shards,{fitLobes:3,sound:{material:'glass',size:'small'},material:{friction:.65,restitution:.02,linearDamping:.65,angularDamping:2.8,skin:.001,softCcdPrediction:.08}});
 }

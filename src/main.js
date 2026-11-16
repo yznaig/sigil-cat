@@ -29,6 +29,9 @@ import { createBooks } from './ui/books.js';
 import { createFullscreen } from './ui/fullscreen.js';
 import { createZoom } from './ui/zoom.js';
 import { floorGrid } from './world/floor-grid.js';
+import { createMusic } from './core/music.js';
+import { createSilence } from './ui/silence.js';
+import { floorOutline } from './world/floor-outline.js';
 
 installPageScheduler();
 const stage = createStage(document.getElementById('c'));
@@ -54,6 +57,8 @@ site.worldProps = createWorldProps(site);
 warmShared(site);        // speed lane (e1112-59): the programs every keepsake shares, drawn once ahead
 // grid lane (playtest-4, e1114-13): faint grid lines on the floor, under everything; ?grid=0 leaves them out
 if (stage.opt('grid') !== '0') site.floorGrid = floorGrid(site);
+// floor lane (music round, e1115-55): a thin ink line round the seven items that melt into the floor; ?outline=0 leaves it out
+floorOutline(site);
 // Unit 1 installs the service; units 2/3 opt art adapters into rigid-body ownership.
 const solidIds = new Set(['rifle', 'top', 'pat', 'tin', 'box', 'rack']);
 const loadWorld = i => { if (solidIds.has(i.id)) site.world.ensure().catch(e => console.warn('world:', e.message)); };
@@ -65,6 +70,9 @@ const { cat, ui, registry, input } = site;
 site.shell = createShell(site);
 site.books = createBooks(site);
 site.fullscreen = createFullscreen(site);   // fullscreen lane (playtest-3): the step after "flip sideways" and the button
+site.silence = createSilence(site);         // music lane (2026-11-15): a phone's first-ever visit, "turn silence off for sound"
+// music lane (2026-11-15, e1115-12): the background music (src/core/music.js); scenes that take the stage hold it
+site.music = createMusic(site);
 // (the loading screen's doors count as busy: no shader warm-up hitches the pop or the slide)
 stage.setBusyCheck(() => cat.pressing || Math.abs(cat.vel) > 0.5 || cat.popping || (site.shell && !site.shell.revealed));
 
@@ -180,8 +188,27 @@ if (stage.params.has('debug')) {
     add('ach all', () => site.achievements.grantAll());
     add('ach forget', () => { site.achievements.forget(); location.reload(); });
     add('forget all', () => { store.reset(); location.reload(); });
+    // music lane (2026-11-15): the background music's next song now / end of the gap now
+    add('music next', () => (site.music.state.phase === 'gap' ? site.music.skipGap() : site.music.next()));
   });
   document.body.appendChild(bar);
+  // music lane (2026-11-15, e1115-14: "the debug screen should be toggleable with space bar on desktop"). The debug
+  // screen = the #debug readout and this button bar. On a desktop (a fine pointer, not the shell's phone) Space shows
+  // and hides both, so in #debug Space no longer taps the cat (Enter still does). It never fires while typing in a
+  // field, while a pop-up or a mode that uses Space is up (flappy, the cake's error page, the chest, the books: all
+  // aria-modal), or while the page is locked (a scene). Without #debug nothing changes.
+  site.debugScreen = { shown: true, toggles: 0, toggle() {
+    this.shown = !this.shown; this.toggles++;
+    bar.style.display = this.shown ? '' : 'none'; const pre = document.getElementById('debug'); if (pre) pre.hidden = !this.shown;
+  } };
+  const typing = (t) => t?.closest?.('input:not([type=range]):not([type=button]):not([type=checkbox]), textarea, select, [contenteditable=""], [contenteditable="true"]');
+  addEventListener('keydown', (e) => {
+    if (e.key !== ' ' || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!matchMedia('(pointer: fine)').matches || site.shell?.phone) return;
+    if (typing(e.target) || input.locked || document.querySelector('[aria-modal="true"], #bird-screen, #party-error')) return;
+    e.preventDefault(); e.stopImmediatePropagation();      // not the cat's tap, nor a focused button's press
+    if (!e.repeat) site.debugScreen.toggle();
+  }, { capture: true });
 }
 
 // Boot: his first pose (and his butter, if he kept it from an earlier visit), then show him.
@@ -217,7 +244,7 @@ const buttered = !!store.get('butterman.buttered');
     site.timing.shown = performance.now();
     // Then the way in: "flip sideways" on a phone held upright, he pops in over the loading screen, its doors part.
     // An old book address (spellbook.html, achievements.html) opens its pop-up once the doors are open.
-    site.shell.reveal().then(() => site.books.fromAddress());
+    site.shell.reveal().then(() => { site.books.fromAddress(); site.music.begin(); });
   } catch (e) { if (statusEl) statusEl.textContent = 'he could not come: ' + e.message; console.error(e); }
 })();
 site.ready = eggsReady;

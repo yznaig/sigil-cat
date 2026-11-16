@@ -12,10 +12,11 @@ const started=performance.now();await E.bread.blastOff();   // spun off (checks/
 await until(()=>E.bread.state==='cat'&&!input.locked,15000);recording=false;
 const flight=E.bread.flight,first=frames[0],last=frames.at(-1),duration=flight?(flight.ended-flight.started)/1000:NaN;
 const before=flight?{x:flight.from.x*cat.rect.ppu,y:flight.from.y*cat.rect.ppu}:{x:0,y:0};
-check('bread float lasts six seconds',cfg.fly===6&&Math.abs(duration-cfg.fly)<=.15,`${duration.toFixed(3)} s; config ${cfg.fly} s; ${frames.length} samples`);
+// music round (e1115-13): the float is stretched so the star lands 23 s after the scene starts (windup 1.6 + float 21.4)
+check('bread float lasts its 21.4 s, so the star lands at 23 s',cfg.fly===21.4&&Math.abs(cfg.windup+cfg.fly-cfg.twinkleAt)<1e-9&&Math.abs(duration-cfg.fly)<=.15,`${duration.toFixed(3)} s; config ${cfg.fly} s; ${frames.length} samples`);
 const distance=p=>Math.hypot(p.x,p.y),far=last?distance(last):0;
 check('bread float moves monotonically outward',frames.length>30&&frames.every((p,i)=>!i||distance(p)>=distance(frames[i-1])-1e-6),`${far.toFixed(2)} px outward`);
-const eased=u=>u*u*u*(10+u*(-15+6*u));
+const eased=u=>E.bread.curve(u).p;   // music round: the stretched float's own shape (src/eggs/bread.js curve)
 const edges=frames.slice(1).map((p,i)=>({p,a:frames[i]})).filter(({p,a})=>a.u<.08||p.u>.92);
 const excess=Math.max(0,...edges.map(({p,a})=>Math.hypot(p.x-a.x,p.y-a.y)-far*(eased(p.u)-eased(a.u))));
 const launchJump=first?Math.hypot(first.x-before.x,first.y-before.y):Infinity;

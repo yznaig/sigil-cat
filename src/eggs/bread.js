@@ -11,6 +11,15 @@
 // bread is drawn over it) while the bread trembles; then it launches, drifting out into the void inside a circle in
 // the middle of the screen (never off it), shrinks away and is gone with one twinkle. Then the page comes back and the
 // cat pops back into place. The twinkle stays in the sky. No riser and no pop here any more (e1113-06).
+// Music round (2026-11-15, e1115-13; Aaron: "orbit loaf 1 for the galaxy loaf scene and extend how long it takes the
+// loaf to float into space. Star Ding at 23 sec"): the scene plays Aaron's orbit-loaf-blastoff from its first moment,
+// on the audio clock, and the float is stretched so the twinkle and the star land `twinkleAt` (23.0 s) after the scene
+// starts (the song fades out from about 19 s and is close to silent there). The tremble and the float follow the audio
+// clock while it runs (as the furniture arrivals do), so slow frames never put the star out of step with the music.
+// The float reads as drifting off into the distance: it shrinks at a steady rate on a log scale (by half about every
+// 3.8 s) after a gentle start, and closes on its point as things far away do, so it never hangs still nor rushes.
+// The background music holds during the scene (src/core/music.js); when the star twinkles, orbit-loaf joins the
+// music's rotation on this device.
 // Keepsakes: crumbs on the floor, spilled from the bread on every second loaf (playtest 3: "only show up every 2 times
 // you do the loaf (max of 1 per usual)"), and a gold star stuck to the sky (after the first blast-off).
 import {defineCrumbs,warmFragment,prepareFragment} from '../world/fragments.js';
@@ -29,7 +38,13 @@ export const BREAD = {
   rise: { riser: { from: 1.5, end: 5.12, gain: 0.8 }, pop: { gain: 0.9 }, shake: { rot: 0.05, x: 0.012 } },
   // Crumbs spill from the bread on every `crumbsEvery`-th loaf, when he turns back (never more than one pile).
   crumbsEvery: 2,
-  blast: { windup: 1.6, fly: 6, hold: 0.7, back: 1.1,  // seconds: the tremble as the dark closes, the drift out, the twinkle, the page coming back
+  // seconds: the tremble as the dark closes, the drift out (windup + fly = twinkleAt), the twinkle, the page coming back
+  blast: { windup: 1.6, fly: 21.4, hold: 0.7, back: 1.1,
+    // music round (e1115-13): the scene's song and where the twinkle lands, seconds from the scene's start
+    track: ['assets/audio/music/orbit-loaf-blastoff.m4a', 'assets/audio/music/orbit-loaf-blastoff.mp3'], trackGain: 0.9, twinkleAt: 23.0,
+    // the float: its size at the end (it shrinks to this, evenly on a log scale), the gentle start (fraction of the
+    // float over which it gathers speed) and the slow roll (radians over the whole float)
+    far: 0.02, gather: 0.07, roll: 0.65,
     // Where it goes (playtest 2: "more scoped to a circular center of the screen"): a point in the upper part of a
     // circle round the middle of the screen, `ring` x the screen's shorter side across (radius), at `reach` of it.
     ring: 0.3, reach: [0.55, 0.95], spread: 1.1,   // spread: radians either side of straight up
@@ -111,6 +126,7 @@ export default function createBread(site) {
     const R = B.rise, windup = R.riser.end - R.riser.from, c = audio.context(), live = c?.state === 'running', a0 = live ? c.currentTime : 0;
     const riser = audio.play('bread-riser', { gain: R.riser.gain, offset: R.riser.from });
     const pop = live ? audio.play('bread-pop', { gain: R.pop.gain, when: a0 + windup }) : null;
+    audio.load(B.blast.track);     // the blast-off's song (music round), fetched while he is bread, in case he is spun
     let t = 0;
     const run = rising = { riser: a0, pop: live ? a0 + windup : null, swap: null, started: performance.now() };
     // Something else took him meanwhile (hidden, another stand-in, the galaxy): no bread, and the pop is called off.
@@ -148,41 +164,57 @@ export default function createBread(site) {
   site.spells.dome = () => toBread('sigil');
 
   // ---- the blast-off ----
+  // The float's shape at u (0..1 of the float): p, how far along the way to its point; s, its size; rot, its roll.
+  function curve(u) {
+    const T = B.blast, a = T.gather, norm = 1 - a * (1 - Math.exp(-1 / a));
+    const g = Math.max(0, (u - a * (1 - Math.exp(-u / a))) / norm);        // speed gathers over the first `gather`, then steady
+    const s = Math.pow(T.far, g);                                          // steady on a log scale: steadily further away
+    return { g, s, p: (1 - s) / (1 - T.far), rot: T.roll * g };
+  }
   async function blastOff() {
     if (st.state !== 'bread' || st.blasting) return false;
     st.blasting = true; st.blasts++; st.crumbs = false;           // this loaf leaves for space: no crumbs from it
     crumbs?.f.cancel(); crumbs = null;
     input.lock('blastoff', true);
+    const music = site.music?.hold('blastoff');                     // the background music waits (music round)
     const T = B.blast, calm = stage.reducedMotion, space = site.eggs.galaxy;
+    // its song is fetched as he turns to bread; a spin sooner than it arrives waits for it a moment (at most 1.2 s)
+    if (audio.status(T.track) === 'pending') await Promise.race([audio.load(T.track), stage.after(1.2)]);
     space?.space(true, T.windup);                                          // the dark closes in over everything
     const fx = cat.fx, ppu = cat.rect.ppu;
     // the destination, in screen pixels, and so the drift (world units on his card) from where he floats
     const ang = rand(-T.spread, T.spread), radius = T.ring * Math.min(stage.width, stage.height) * rand(...T.reach);
     const goal = { x: stage.width / 2 + Math.sin(ang) * radius, y: stage.height / 2 - Math.cos(ang) * radius };
     const to = { x: (goal.x - cat.pivotPx.x) / ppu, y: -(goal.y - cat.pivotPx.y) / ppu };
-    let t = 0; const a0 = performance.now();
-    await tremble(T.windup, T.shake, (dt) => (t += dt));
+    // The song from the scene's first moment, and the twinkle at twinkleAt, both on the audio clock (decoded buffers:
+    // they have to land on a moment). Without a running clock (no sound yet) the scene keeps the page's own time.
+    const c = audio.context(), live = c?.state === 'running' && !!audio.buffer(T.track);
+    const a0 = live ? c.currentTime + 0.05 : 0, w0 = performance.now();
+    const song = live ? audio.play(T.track, { when: a0, gain: T.trackGain }) : null;
+    const twinkle = live ? audio.play('twinkle', { gain: 0.7, when: a0 + T.twinkleAt }) : null;
+    let wall = 0, lastWall = performance.now();
+    const clock = () => {                                                  // seconds since the scene started
+      if (live) return Math.max(0, c.currentTime - a0);
+      const now = performance.now(); wall += (now - lastWall) / 1000 * stage.timeScale; lastWall = now; return wall;
+    };
+    blastAt = { started: w0, live, a0, songAt: live ? a0 : null, twinkleWhen: live ? a0 + T.twinkleAt : null, song: !!song, twinkle: !!twinkle };
+    await tremble(T.windup, T.shake, () => clock());
     fx.rot = 0; fx.x = 0;
-    blastAt = { windup: t, launch: performance.now(), started: a0 };
+    Object.assign(blastAt, { windup: clock(), launch: performance.now() });
     cat.hideShadow('blastoff', true);
-    // The shared stage clock caps long frames. This drift keeps its six-second
-    // visible duration even under load, while respecting paused review/time-scale controls.
     await new Promise(resolve => {
-      let elapsed = 0, last = performance.now();
-      flight = { u: 0, started: last, ended: null, from: { x: fx.x, y: fx.y }, goal, radius: T.ring * Math.min(stage.width, stage.height) };
+      flight = { u: 0, started: performance.now(), ended: null, from: { x: fx.x, y: fx.y }, goal, radius: T.ring * Math.min(stage.width, stage.height) };
       const update = (u) => {
-        const e = u * u * u * (10 + u * (-15 + 6 * u)); // smooth start, long glide, zero endpoint velocity
-        fx.x = to.x * e; fx.y = to.y * e;
-        fx.scale = 1 - 0.99 * e; fx.rot = calm ? 0 : e * 0.65;
+        const k = curve(u);
+        fx.x = to.x * k.p; fx.y = to.y * k.p;
+        fx.scale = k.s; fx.rot = calm ? 0 : k.rot;
         flight.u = u;
       };
       update(0);
       const frame = () => {
-        const now = performance.now();
-        elapsed += (now - last) / 1000 * stage.timeScale; last = now;
-        update(Math.min(1, elapsed / T.fly));
+        update(Math.min(1, Math.max(0, (clock() - T.windup) / T.fly)));
         if (flight.u === 1) {
-          flight.ended = now;
+          flight.ended = performance.now();
           stage.onFrame.splice(stage.onFrame.indexOf(frame), 1);resolve();
         }
       };
@@ -191,7 +223,9 @@ export default function createBread(site) {
     // gone, with one twinkle where it went
     const at = { x: cat.pivotPx.x + fx.x * ppu, y: cat.pivotPx.y - fx.y * ppu };
     fx.opacity = 0;
-    audio.play('twinkle', { gain: 0.7 });
+    if (!twinkle) audio.play('twinkle', { gain: 0.7 });
+    Object.assign(blastAt, { star: clock(), starAudio: live ? c.currentTime : null, starWall: performance.now() });
+    site.music?.unlock('orbit-loaf');                                      // the scene has reached its star (music round)
     const star = document.createElement('div'); star.className = 'blast-star';
     star.innerHTML = `<svg viewBox="0 0 24 24"><path d="${STAR}" fill="#fff"/></svg>`;
     star.style.transform = `translate(${at.x.toFixed(1)}px, ${at.y.toFixed(1)}px)`;
@@ -210,6 +244,7 @@ export default function createBread(site) {
     fx.scale = 1;
     st.blasting = false;
     input.lock('blastoff', false);
+    music?.();
     if (!keepsakes.has('twinkle')) keepsakes.give('twinkle', { at: keepsakes.toUnits(at.x, Math.max(stage.insets.top + 30, at.y)), from: at });
     return true;
   }
@@ -218,7 +253,7 @@ export default function createBread(site) {
   site.skyItems=defineStar(site);
 
   return {
-    find: 'loaf', config: BREAD, now: (by = 'sigil') => toBread(by), blastOff, toCat,
+    find: 'loaf', config: BREAD, now: (by = 'sigil') => toBread(by), blastOff, toCat, curve,
     get isBread() { return st.state === 'bread' && !st.blasting; }, get state() { return st.blasting ? 'blasting' : st.state; },
     get isRising() { return st.state === 'rising'; },
     get flight() { return flight; }, get blastAt() { return blastAt; }, get rising() { return rising; }, get spilled() { return spilled; },

@@ -36,26 +36,39 @@ function createPresentation(site) {
   // sleeping picture. Past the region lies a neighbour's tile or what an earlier, larger draw left: a 1-px line of some
   // other colour along the card's edge (mostly its top and right, where the region ends). Every lookup is now held half
   // a texel inside the picture's own region (vClamp), so only its own (empty-margined) texels can reach the screen.
-  const fragment=`varying vec2 vUv;varying float vMap;varying vec4 vTint;varying float vDepth;varying vec4 vClamp;uniform sampler2D depthMap;
+  // Floor outline (music round 2026-11-15, e1115-55; src/world/floor-outline.js). A picture marked inked (pictureInk 1,
+  // set per picture at batch build from ink.cards()) gets a thin dark line round its own silhouette: the largest alpha
+  // within inkPx screen pixels (8 directions, at the full and half radius), minus its own, painted under it. Every
+  // lookup stays inside the picture's own region (vClamp), as above. An ink-only pixel takes the depth of the
+  // silhouette pixel it borders, not the empty region's far depth, so the line also shows over a picture behind it.
+  // Pictures not inked skip all of it (one branch, the same for the whole quad). The screen-pixel step d is taken before
+  // the branch: a derivative inside it (which differs pixel to pixel at the silhouette's rim) is undefined, and left the
+  // line faint along every other row of a straight edge.
+  const inkTaps=Array.from({length:8},(_,k)=>[Math.cos(k*Math.PI/4),Math.sin(k*Math.PI/4)].map(v=>(Math.abs(v)<1e-9?0:v).toFixed(6)));
+  const fragment=`varying vec2 vUv;varying float vMap;varying vec4 vTint;varying float vDepth;varying vec4 vClamp;varying float vInk;uniform sampler2D depthMap;uniform float inkPx;uniform vec4 inkColour;
     ${Array.from({length:8},(_,i)=>`uniform sampler2D map${i};`).join('\n')}
-    void main(){vec4 c;vec2 uv=clamp(vUv,vClamp.xy,vClamp.zw);${Array.from({length:8},(_,i)=>`${i?'else ':''}${i<7?`if(vMap<${i+.5})`:''}{c=texture2D(map${i},uv);}`).join('')}
+    vec4 pick(vec2 uv){vec4 c;${Array.from({length:8},(_,i)=>`${i?'else ':''}${i<7?`if(vMap<${i+.5})`:''}{c=texture2D(map${i},uv);}`).join('')}return c;}
+    void main(){vec2 uv=clamp(vUv,vClamp.xy,vClamp.zw),at=uv,d=fwidth(vUv)*inkPx;vec4 c=pick(uv);float own=c.a;
+    if(vInk>0.&&own<.99){vec2 u;float m=0.,a;
+      ${inkTaps.map(([x,y])=>`u=clamp(vUv+vec2(${x},${y})*d,vClamp.xy,vClamp.zw);a=pick(u).a;if(a>m){m=a;at=u;}u=clamp(vUv+vec2(${x},${y})*d*.5,vClamp.xy,vClamp.zw);a=pick(u).a*.85;if(a>m){m=a;at=u;}`).join('\n      ')}
+      float ink=smoothstep(.12,.6,m-own)*(1.-own)*inkColour.a;c=vec4(c.rgb+inkColour.rgb*ink,c.a+ink);}
     gl_FragColor=vec4(c.rgb*vTint.rgb*vTint.a,c.a*vTint.a);
     #ifdef PICTURE_DEPTH
     if(gl_FragColor.a<.004)discard;
-    gl_FragDepth=vDepth<0.?texture2D(depthMap,uv).r:vDepth;
+    gl_FragDepth=vDepth<0.?texture2D(depthMap,own<.5?at:uv).r:vDepth;
     #endif
     }`;
   function makeChunk(depth){
-    const geometry=new T.BufferGeometry(),uniforms={depthMap:{value:white}};for(let n=0;n<8;n++)uniforms['map'+n]={value:white};
+    const geometry=new T.BufferGeometry(),uniforms={depthMap:{value:white},inkPx:{value:0},inkColour:{value:new T.Vector4()}};for(let n=0;n<8;n++)uniforms['map'+n]={value:white};
     const material=new T.ShaderMaterial({uniforms,transparent:true,depthTest:depth,depthWrite:depth,defines:depth?{PICTURE_DEPTH:1}:{},
       blending:T.CustomBlending,blendSrc:T.OneFactor,blendDst:T.OneMinusSrcAlphaFactor,blendSrcAlpha:T.OneFactor,blendDstAlpha:T.OneMinusSrcAlphaFactor,
-      vertexShader:'attribute vec2 pictureUv;attribute float pictureMap;attribute vec4 pictureTint;attribute float pictureDepth;attribute vec4 pictureClamp;varying vec2 vUv;varying float vMap;varying vec4 vTint;varying float vDepth;varying vec4 vClamp;void main(){vUv=pictureUv;vMap=pictureMap;vTint=pictureTint;vDepth=pictureDepth;vClamp=pictureClamp;gl_Position=projectionMatrix*viewMatrix*vec4(position,1.);}',fragmentShader:fragment});
+      vertexShader:'attribute vec2 pictureUv;attribute float pictureMap;attribute vec4 pictureTint;attribute float pictureDepth;attribute vec4 pictureClamp;attribute float pictureInk;varying vec2 vUv;varying float vMap;varying vec4 vTint;varying float vDepth;varying vec4 vClamp;varying float vInk;void main(){vUv=pictureUv;vMap=pictureMap;vTint=pictureTint;vDepth=pictureDepth;vClamp=pictureClamp;vInk=pictureInk;gl_Position=projectionMatrix*viewMatrix*vec4(position,1.);}',fragmentShader:fragment});
     const mesh=new T.Mesh(geometry,material);mesh.frustumCulled=false;root.add(mesh);
     return {geometry,material,mesh,capacity:0,count:0,maps:[],depth,depthMap:null};
   }
   function capacity(c,quads){
     if(c.capacity>=quads)return;c.capacity=Math.max(32,2**Math.ceil(Math.log2(quads)));
-    for(const [name,size] of [['position',3],['pictureUv',2],['pictureMap',1],['pictureTint',4],['pictureDepth',1],['pictureClamp',4]])c.geometry.setAttribute(name,new T.BufferAttribute(new Float32Array(c.capacity*6*size),size).setUsage(T.DynamicDrawUsage));
+    for(const [name,size] of [['position',3],['pictureUv',2],['pictureMap',1],['pictureTint',4],['pictureDepth',1],['pictureClamp',4],['pictureInk',1]])c.geometry.setAttribute(name,new T.BufferAttribute(new Float32Array(c.capacity*6*size),size).setUsage(T.DynamicDrawUsage));
   }
   // Depth against the cat (e1111-58, note 2). His picture is one card at his middle (renderOrder 0, z=0 in the
   // world). A picture whose centre lies deeper along the view than his card draws before him, the rest after him;
@@ -84,11 +97,12 @@ function createPresentation(site) {
   // draw order is handed back through spec.order(n). His felt is drawn in the transparent pass for this.
   // (Still needed with the per-pixel depth between pictures above: he is a splat, which takes no part in that depth,
   // so only draw order puts a keepsake behind him under him. Integration, playtest-2.)
-  let divider=null,dividerKey='';
+  let divider=null,dividerKey='',ink=null;
   function dividerDepth(){const d=divider?.depth();return d==null?null:d;}
   function deepKey(){const d=dividerDepth();if(d==null)return '';stage.camera.getWorldDirection(forward);let n=0,sum=0;for(const p of pictures)if(p.card.visible&&p.quad.material.visible&&behindCat(p,d)){n++;sum+=p.sequence;}return n+':'+sum+':'+(d>catDepth()?1:0);}
   function buildPictures(){
     ordered.length=0;for(const p of pictures)if(p.card.visible&&p.quad.material.visible)ordered.push(p);
+    const inked=ink?.cards();   // floor outline: the cards to outline, worked out once per build
     const limit=catDepth(),bm=dividerDepth();for(const p of ordered){p.behind=behindCat(p,limit);p.deep=bm!=null&&behindCat(p,bm);}
     ordered.sort((a,b)=>(b.behind-a.behind)||(b.deep-a.deep)||a.quad.renderOrder-b.quad.renderOrder||a.sequence-b.sequence);
     for(const c of chunks)if(c){c.count=0;c.maps.length=0;c.mesh.visible=false;}
@@ -109,13 +123,13 @@ function createPresentation(site) {
       // picture's transform. Its cached six world-space vertices stay valid.
       if(p.dirty){p.card.updateWorldMatrix(true,true);for(let k=0;k<6;k++){point.set(corners[k][0],corners[k][1],0).applyMatrix4(p.quad.matrixWorld);point.toArray(p.vertices,k*3);}p.dirty=false;}
       tint.setRGB(1,1,1);if(m.color)tint.copy(m.color).convertLinearToSRGB();
-      const pos=c.geometry.attributes.position,uv=c.geometry.attributes.pictureUv,mi=c.geometry.attributes.pictureMap,col=c.geometry.attributes.pictureTint,dz=c.geometry.attributes.pictureDepth,cl=c.geometry.attributes.pictureClamp;
+      const ik=c.geometry.attributes.pictureInk,inkOn=inked?.has(p.card)?1:0,pos=c.geometry.attributes.position,uv=c.geometry.attributes.pictureUv,mi=c.geometry.attributes.pictureMap,col=c.geometry.attributes.pictureTint,dz=c.geometry.attributes.pictureDepth,cl=c.geometry.attributes.pictureClamp;
       // the picture's own region, half a texel in (see the fragment shader above)
       const rx=region?.x??1,ry=region?.y??1,rz=region?.z??0,rw=region?.w??0,tw=texture.image?.width||0,th=texture.image?.height||0,hx=tw?.5/tw:0,hy=th?.5/th:0;
       const c0=Math.min(rz+hx,rz+rx/2),c1=Math.min(rw+hy,rw+ry/2),c2=Math.max(rz+rx-hx,rz+rx/2),c3=Math.max(rw+ry-hy,rw+ry/2);
-      for(let k=0;k<6;k++){const v=corners[k],n=c.count++,j=k*3;pos.setXYZ(n,p.vertices[j],p.vertices[j+1],p.vertices[j+2]);uv.setXY(n,v[2]*rx+rz,v[3]*ry+rw);mi.setX(n,map);col.setXYZW(n,tint.r,tint.g,tint.b,m.opacity);dz.setX(n,z);cl.setXYZW(n,c0,c1,c2,c3);}
+      for(let k=0;k<6;k++){const v=corners[k],n=c.count++,j=k*3;pos.setXYZ(n,p.vertices[j],p.vertices[j+1],p.vertices[j+2]);uv.setXY(n,v[2]*rx+rz,v[3]*ry+rw);mi.setX(n,map);col.setXYZW(n,tint.r,tint.g,tint.b,m.opacity);dz.setX(n,z);cl.setXYZW(n,c0,c1,c2,c3);ik.setX(n,inkOn);}
     }
-    for(const c of chunks){if(!c)continue;c.mesh.visible=!!c.count;c.geometry.setDrawRange(0,c.count);if(!c.count)continue;for(const a of Object.values(c.geometry.attributes)){a.clearUpdateRanges();a.addUpdateRange(0,c.count*a.itemSize);a.needsUpdate=true;}for(let n=0;n<8;n++)c.material.uniforms['map'+n].value=c.maps[n]||white;c.material.uniforms.depthMap.value=c.depthMap||white;}
+    for(const c of chunks){if(!c)continue;c.mesh.visible=!!c.count;c.geometry.setDrawRange(0,c.count);if(!c.count)continue;for(const a of Object.values(c.geometry.attributes)){a.clearUpdateRanges();a.addUpdateRange(0,c.count*a.itemSize);a.needsUpdate=true;}for(let n=0;n<8;n++)c.material.uniforms['map'+n].value=c.maps[n]||white;c.material.uniforms.depthMap.value=c.depthMap||white;if(ink){c.material.uniforms.inkPx.value=ink.px*stage.dpr;c.material.uniforms.inkColour.value.set(...ink.colour,ink.alpha);}}
     stats.pictureQuads=ordered.length;stats.pictureBatches=index;stats.pictureBuilds++;pictureDirty=false;
     if(bm!=null){dividerKey=deepKey();divider.order(after==null?(bm>limit?-.95:1):after+(after<0?.0005:.5));}
   }
@@ -191,6 +205,10 @@ function createPresentation(site) {
   return {picture,shadow,flush,stats,root,shadowMesh,divider:dividerApi,warm,track,get batching(){return batching;},
     wake(id){const s=shadows.get(id);if(s?.stationary){s.stationary=false;for(const m of s.group.children)m.layers.enable(0);dirtyShadows();}},
     setHidden(on){hidden=on;root.visible=!on;if(!on){dirtyPictures();dirtyShadows();}else{const i=stage.onRender.indexOf(flush);if(i>=0)stage.onRender.splice(i,1);listening=false;}},
+    // Floor outline (music round, src/world/floor-outline.js): spec {px (CSS px), colour [r,g,b], alpha, cards() -> the
+    // set of picture cards to outline now}; null takes it away. refresh(): rebuild the batch once (a change that moves
+    // no picture, such as an item seated in a support without moving, still reaches the outline).
+    setInk(spec){ink=spec||null;dirtyPictures();},refresh(){dirtyPictures();},
     get pending(){return pictureDirty||shadowDirty;},get listening(){return listening;},get pictures(){return pictures.size;},
     // Read-only, for checks (visual lane, playtest-3: checks/visual-hairlines.js scans each card's border).
     get list(){return [...pictures].map(p=>({card:p.card,quad:p.quad,depthMode:p.depthMode}));},get stationaryShadows(){let n=0;for(const s of shadows.values())if(s.stationary)n++;return n;}

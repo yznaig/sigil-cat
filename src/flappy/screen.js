@@ -46,7 +46,7 @@ export function openScreen(site,kind,onClose) {
   const saved={focus:document.activeElement,children:[...document.body.children].map(n=>[n,n.inert]),
     animations:document.getAnimations().filter(a=>a.playState==='running')};
   // The page is frozen at the end of this function, in one guarded step (playtest 4, flappybreak lane: see restore()).
-  let resume=null,closed=false,raf=0,last=0,elapsed=0,closing=null,deathAt=null,game=null,retries=0,wordIndex=-1,nextWordAt=.32,wordAnimation=null,resized=false,hiddenAudio=null;
+  let music=null,resume=null,closed=false,raf=0,last=0,elapsed=0,closing=null,deathAt=null,game=null,retries=0,wordIndex=-1,nextWordAt=.32,wordAnimation=null,resized=false,hiddenAudio=null;
   const timers=new Set(), voices=new Set(), beats=[];
   const later=(fn,ms)=>{const id=wallClock.setTimeout(()=>{timers.delete(id);fn();},ms);timers.add(id);return id;};
   const root=document.createElement('section');root.id='bird-screen';root.className=kind==='trailer'?'trailer':'';
@@ -114,6 +114,7 @@ export function openScreen(site,kind,onClose) {
     step(()=>stage.restartClock());step(()=>{const r=resume;resume=null;r?.();});
     step(()=>{if(resized)dispatchEvent(new Event('resize'));});
     step(()=>input.lock('bird',false));
+    step(()=>{const m=music;music=null;m?.();});   // music lane (2026-11-15): the song comes back where it paused
   }
   function finish(died){
     if(closed)return;closed=true;restore();
@@ -163,6 +164,9 @@ export function openScreen(site,kind,onClose) {
   // Shown and frozen in one guarded step: a failure before it leaves nothing behind, one inside it is undone.
   try{
     document.body.append(root);root.tabIndex=-1;root.focus({preventScroll:true});later(()=>root.classList.add('shown'),16);
+    // music lane (2026-11-15, e1115-13: "In flappy: it should just quickly fade to no background music"): the game fades
+    // it quickly; the trailer like the 360. Both give it back on every exit (restore).
+    music=site.music?.hold(kind==='game'?'flappy':'trailer',{fade:kind==='game'?site.music.config.fade.quick:undefined})??null;
     input.lock('bird',true);resume=pausePageCallbacks();saved.animations.forEach(a=>a.pause());saved.children.forEach(([n])=>n.inert=true);
     input.onEscape.push(escape);document.addEventListener('visibilitychange',visibility);addEventListener('resize',onResize,true);
     raf=wallClock.requestAnimationFrame(tick);

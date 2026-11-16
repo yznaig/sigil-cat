@@ -4,24 +4,32 @@ cat.auto=false;const W=site.world,S=site.supports,T=site.THREE;
 const items=['rifle','top','paper','postcard','ticket','tin','pat'].map(id=>keepsakes.give(id));await Promise.all(items.map(i=>i.worldTask));await site.shelf.task;await sleep(2000);await until(()=>!W.stats.listening&&!S.listening,12000);
 const B=site.worldPresentation;B.flush();
 // One batch per side of the cat (e1111-58: pictures deeper than him draw before him) and per depth kind: a picture
-// that takes no part in the depth between pictures (a soft floor shadow, the shelf's wall shadow: depth 'none', physics
+// that takes no part in the depth between pictures (a soft floor shadow, the shelf's floor shadow: depth 'none', physics
 // and layout lanes) draws in a chunk of its own, so a side holding both kinds has two (presentation check fix,
 // 2026-11-13). The side is worked out here from the camera, apart from the presentation's own sort.
 const groups=()=>{const f=new T.Vector3(),r=new T.Vector3();stage.camera.getWorldDirection(f);const limit=r.copy(site.cat.card.position).sub(stage.camera.position).dot(f),g=new Set();
  for(const p of B.list)if(p.card.visible&&p.quad.material.visible)g.add((r.copy(p.card.position).sub(stage.camera.position).dot(f)>limit)+':'+(p.depthMode==='none'));return g;};
 const kinds=groups();
+// The shelf's soft shadow (on the floor since e1116-23) is one of the batched pictures, without depth, so the parity
+// lines below draw it in their reference too.
+{const s=site.shelf.shadow;check('presentation the shelf\'s floor shadow is a batched picture without depth',!!s?.painted&&B.list.some(p=>p.quad===s.quad&&p.depthMode==='none'),JSON.stringify({painted:s?.painted}));}
 check('presentation one picture batch per side of the cat and depth kind, and stationary shadow layer',B.stats.pictureBatches===kinds.size&&B.stationaryShadows>=4&&B.stats.shadowVertices>0,JSON.stringify({...B.stats,groups:[...kinds]}));
+// The floor outline (floor lane, music round) is drawn by the batch alone, round the paper here: it is switched off for
+// the comparison (2,094 pixels of line at 1536x864 otherwise) and checked by checks/floor-outline.js.
 async function parity(label){
+ const outline=site.floorOutline?.on;site.floorOutline?.set(false);
  B.flush();const R=stage.renderer,w=stage.width,h=stage.height,rt=new T.WebGLRenderTarget(w,h),a=new Uint8Array(w*h*4),b=new Uint8Array(w*h*4),old=R.getRenderTarget();
  R.setRenderTarget(rt);R.clear();R.render(stage.scene,stage.camera);R.readRenderTargetPixels(rt,0,0,w,h,a);
  // Every picture the presentation batches, drawn on its own: keepsakes, world bodies and pictures owned by neither
- // (the shelf's wall shadow, layout lane playtest-3, was left out of a list built from keepsakes and world bodies).
+ // (the shelf's shadow, layout lane playtest-3, on the floor since e1116-23, was left out of a list built from keepsakes
+ // and world bodies).
  const cards=[...new Set(B.list.map(p=>p.card))];
  B.root.visible=false;for(const card of cards)stage.scene.add(card);
  const layers=[];for(const e of site.worldLayout.shadows.values())for(const m of e.group.children){layers.push([m,m.layers.mask]);m.layers.enable(0);}
  R.clear();R.render(stage.scene,stage.camera);R.readRenderTargetPixels(rt,0,0,w,h,b);
  for(const card of cards)card.removeFromParent();for(const [m,mask]of layers)m.layers.mask=mask;B.root.visible=true;R.setRenderTarget(old);rt.dispose();
  let changed=0,worst=0;for(let n=0;n<a.length;n+=4){let delta=0;for(let k=0;k<4;k++)delta=Math.max(delta,Math.abs(a[n+k]-b[n+k]));if(delta>4)changed++;worst=Math.max(worst,delta);}
+ site.floorOutline?.set(outline);B.flush();
  check('presentation '+label+' matches independent quads/shadows',changed/(w*h)<.005,JSON.stringify({changedPixels:changed,fraction:changed/(w*h),maxChannelDelta:worst}));
 }
 await parity('free props');await __shot('world-unit6-batch-floor');

@@ -70,6 +70,7 @@ export function createNoScopeVideo(site) {
     r.video.style.opacity=videoOpacity;
     const restore=()=>{
       r.root.remove();r.video.removeAttribute('src');r.video.load();r.media?.disconnect();
+      r.music?.();   // music lane (2026-11-15, e1115-13): the song picks up where it paused
       if(run!==r)return;
       run=null;document.body.classList.remove('noscope-showing');
       r.soundControl?.classList.remove('controls');input.lock('noscope-video',false);
@@ -104,6 +105,11 @@ export function createNoScopeVideo(site) {
     const r=run={root,video,soundControl,resolve,promise,sources:new Set(),capped:[],phase:'loading',shown:false,returning:false,held:false};
     hold(r,true);
     input.lock('noscope-video',true);
+    // music lane (2026-11-15, e1115-13: "After the 360, it should continue playing the music it was playing before, from
+    // the same part it paused at"): the background music fades and pauses for the whole cutscene (src/core/music.js)
+    // fade 0: the 360 cuts the whole page bus on this frame (sound() below), so a fade would play out unheard and the
+    // song would come back that much further on; it pauses on the cut instead
+    r.music=site.music?.hold('360',{fade:0});
     exit.onclick=skip;
     root.addEventListener('pointerup',e=>{if(!e.target.closest('.video-controls'))skip();});
     root.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();skip();}});

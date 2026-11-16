@@ -104,6 +104,13 @@
     "activeRmsDbfs": -10.444,
     "sha256": "92711fe73d0ec7b3bb23d94146129fa7d504fb02b337ffe7be9225adf3ad7946"
   },
+  "assets/audio/designed/achieve-space.wav": {
+    "seconds": 1.64,
+    "peakDbfs": -7.357,
+    "truePeakDbfs": -7.338,
+    "activeRmsDbfs": -22.0,
+    "sha256": "c66fed2f626cb2fe35b54b8d61d7411be1db134291f54856eba9d6066b0bbcbf"
+  },
   "assets/audio/designed/achieve.wav": {
     "seconds": 1.7,
     "peakDbfs": -14.586,
@@ -117,6 +124,13 @@
     "truePeakDbfs": -15.722,
     "activeRmsDbfs": -22.0,
     "sha256": "cdc1b6b73b8a1124a9f0ff8601a3175cfdece586492821b65a93e82fb97ee78b"
+  },
+  "assets/audio/designed/bell.wav": {
+    "seconds": 1.064,
+    "peakDbfs": -7.522,
+    "truePeakDbfs": -7.042,
+    "activeRmsDbfs": -22.0,
+    "sha256": "bce5f1bb528fca2e5ff9effd56829644a43b88c2d257e4ec6af3b555c313497c"
   },
   "assets/audio/designed/bird-boom.wav": {
     "seconds": 1.6,
@@ -139,6 +153,13 @@
     "activeRmsDbfs": -22.0,
     "sha256": "90732e87345486bbc1585c54ee95b0476fe5c69cbc9aa4eafe66910bab6b1632"
   },
+  "assets/audio/designed/bolt-beam.wav": {
+    "seconds": 1.878,
+    "peakDbfs": -14.932,
+    "truePeakDbfs": -14.874,
+    "activeRmsDbfs": -22.0,
+    "sha256": "3dfc9d6feb477955489be55eeba237f00661dc91a45fa8ba30205e7cee9964a4"
+  },
   "assets/audio/designed/box-thud.wav": {
     "seconds": 0.5,
     "peakDbfs": -10.919,
@@ -159,6 +180,13 @@
     "truePeakDbfs": -11.699,
     "activeRmsDbfs": -21.934,
     "sha256": "f60ee62b9c1310b6491855869dde2e716bdc60c9118a7700c54a18b54a1568b0"
+  },
+  "assets/audio/designed/cast-wind.wav": {
+    "seconds": 1.1,
+    "peakDbfs": -13.667,
+    "truePeakDbfs": -13.391,
+    "activeRmsDbfs": -22.0,
+    "sha256": "3e266120201791f7a101fa8764b96e9853619c0480347bb8e148c8e57a2eafab"
   },
   "assets/audio/designed/cast.wav": {
     "seconds": 1.1,
@@ -650,6 +678,76 @@
     "activeRmsDbfs": -24.0,
     "sha256": "33521ccb2cc73c4fbccdb89e54d3a8e447918331775d590bf15cb91410172261"
   },
+  "assets/audio/music/glass-garden.m4a": {
+    "seconds": 208.32,
+    "peakDbfs": -2.997,
+    "truePeakDbfs": -2.997,
+    "activeRmsDbfs": -9.793,
+    "sha256": "2456960289d1c008eca3f3827b339eee47aa4565934b1d0548c19e315dd6cf6c"
+  },
+  "assets/audio/music/glass-garden.mp3": {
+    "seconds": 208.32,
+    "peakDbfs": -3.413,
+    "truePeakDbfs": -3.413,
+    "activeRmsDbfs": -10.238,
+    "sha256": "365e4acdcfd2006a3321b26fa4887af800d86105dff44da173b7f4e2d4d2f120"
+  },
+  "assets/audio/music/orbit-loaf-blastoff.m4a": {
+    "seconds": 24.6187,
+    "peakDbfs": -4.323,
+    "truePeakDbfs": -4.323,
+    "activeRmsDbfs": -10.66,
+    "sha256": "c86d5b7082537f3c3f1c962d8cb8d98c0a069ad6a1816191587be56ed5a6423c"
+  },
+  "assets/audio/music/orbit-loaf-blastoff.mp3": {
+    "seconds": 24.6,
+    "peakDbfs": -4.775,
+    "truePeakDbfs": -4.775,
+    "activeRmsDbfs": -11.111,
+    "sha256": "096c4d410368a91982fae05c7283f5d75a71b4652a4ca0d1757ab8ad46976b49"
+  },
+  "assets/audio/music/orbit-loaf.m4a": {
+    "seconds": 181.12,
+    "peakDbfs": -4.766,
+    "truePeakDbfs": -4.763,
+    "activeRmsDbfs": -11.601,
+    "sha256": "b29f5fd8940016bd0480d5ae28ccc419ca7d9465eccfe902d727126e2ff17cb4"
+  },
+  "assets/audio/music/orbit-loaf.mp3": {
+    "seconds": 181.12,
+    "peakDbfs": -5.186,
+    "truePeakDbfs": -5.183,
+    "activeRmsDbfs": -12.032,
+    "sha256": "b8392c46063f9eee7e327e029ce4ceb30276ada440a0e42d8f29dbb9ec5e4ab1"
+  },
+  "assets/audio/music/phase-cat.m4a": {
+    "seconds": 90.4533,
+    "peakDbfs": -1.854,
+    "truePeakDbfs": -1.854,
+    "activeRmsDbfs": -7.407,
+    "sha256": "2440f9fa343aca80e18ccb59187b557457796ef46cdb47818dbc602c454af50f"
+  },
+  "assets/audio/music/phase-cat.mp3": {
+    "seconds": 90.44,
+    "peakDbfs": -2.296,
+    "truePeakDbfs": -2.296,
+    "activeRmsDbfs": -7.848,
+    "sha256": "dc608d62a9fd859b0642b16c7d72f1ac1b7b21c02048e96ca03c3a8267983142"
+  },
+  "assets/audio/music/sequencer-sky.m4a": {
+    "seconds": 128.8107,
+    "peakDbfs": -3.071,
+    "truePeakDbfs": -3.07,
+    "activeRmsDbfs": -7.045,
+    "sha256": "fc3457af4438e1d478a5ad722b525197b492d54d40db57a440bc3cbc7d8303b6"
+  },
+  "assets/audio/music/sequencer-sky.mp3": {
+    "seconds": 128.8,
+    "peakDbfs": -3.454,
+    "truePeakDbfs": -3.454,
+    "activeRmsDbfs": -7.484,
+    "sha256": "62b69785bc83ab7617d063af4cc2d956644ae58286a4b79fe323d78a52ba90f8"
+  },
   "assets/audio/noscope-riser.mp3": {
     "seconds": 6.0,
     "peakDbfs": -4.275,
@@ -894,33 +992,5 @@
     "truePeakDbfs": -3.886,
     "activeRmsDbfs": -18.925,
     "sha256": "d7d06585f16dc5bda1af88d7da1987600ab15396292f402493db1da62bd624f4"
-  },
-  "assets/audio/designed/achieve-space.wav": {
-    "seconds": 1.64,
-    "peakDbfs": -7.357,
-    "truePeakDbfs": -7.338,
-    "activeRmsDbfs": -22.0,
-    "sha256": "c66fed2f626cb2fe35b54b8d61d7411be1db134291f54856eba9d6066b0bbcbf"
-  },
-  "assets/audio/designed/bell.wav": {
-    "seconds": 1.064,
-    "peakDbfs": -7.522,
-    "truePeakDbfs": -7.042,
-    "activeRmsDbfs": -22.0,
-    "sha256": "bce5f1bb528fca2e5ff9effd56829644a43b88c2d257e4ec6af3b555c313497c"
-  },
-  "assets/audio/designed/cast-wind.wav": {
-    "seconds": 1.1,
-    "peakDbfs": -13.667,
-    "truePeakDbfs": -13.391,
-    "activeRmsDbfs": -22.0,
-    "sha256": "3e266120201791f7a101fa8764b96e9853619c0480347bb8e148c8e57a2eafab"
-  },
-  "assets/audio/designed/bolt-beam.wav": {
-    "seconds": 1.878,
-    "peakDbfs": -14.932,
-    "truePeakDbfs": -14.874,
-    "activeRmsDbfs": -22.0,
-    "sha256": "3dfc9d6feb477955489be55eeba237f00661dc91a45fa8ba30205e7cee9964a4"
   }
 }

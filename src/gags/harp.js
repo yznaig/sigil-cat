@@ -7,8 +7,11 @@
 // A plucked whisker that is the next right note rings gold and glows (a wide soft halo under a bright line, held a
 // little longer); a wrong note rings pale and thin, and the tune starts over from whatever it can still be the start of.
 // Plucking any whisker keeps him in his pose for four seconds (cat.stay), so he does not pop away mid-tune.
-// Once the harp is found and the encore has been seen, he tells you the keyboard plays them too: A S D for the whiskers
-// on your left, J K L for the ones on your right (playtest 2).
+// The keyboard plays them at any time: A S D for the whiskers on your left (top to bottom), J K L for the ones on your
+// right (playtest 2; always on since the harp lane, music round, e1116-11). A key is a pluck like any other, tune
+// included. Once the harp is found and the encore has been seen, he tells you about the keys.
+// On a phone (a coarse pointer, as Nearer/Deeper), a pluck brings up six whisker buttons at the bottom for 10 s after
+// the last pluck (harp lane, music round, e1116-11); a held item's Nearer/Deeper win the place while it is held.
 // The whiskers' places come from the splats (tools/splats/whiskers.mjs, SITE.cat.whiskers).
 import {cardService} from '../world/cards.js';
 import { css, el } from '../core/util.js';
@@ -24,10 +27,23 @@ export const HARP = {
   stay: 4,               // seconds he keeps his pose after any pluck (playtest 2)
   keys: { a: 0, s: 1, d: 2, j: 3, k: 4, l: 5 },  // the keyboard's whiskers: yours-left top to bottom, then yours-right
   ring: { right: 0.95, wrong: 0.7 },           // seconds a plucked whisker rings
+  // the phone's whisker buttons (harp lane, music round): shown for `seconds` after the last pluck, then faded out over
+  // `fade` s; each `w` x `h` px, `gap` apart, the left three and the right three `split` apart, `lift` px over the sigils
+  buttons: { seconds: 10, fade: 0.35, w: 48, h: 44, gap: 6, split: 24, lift: 6 },
 };
 css('harp', `
 #harp-fx { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; overflow: visible; }
 #harp-fx path { fill: none; stroke-linecap: round; }
+#harp-keys { position: fixed; z-index: 7; display: flex; gap: ${HARP.buttons.split}px; translate: -50% 0; transition: opacity ${HARP.buttons.fade}s;
+  touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+#harp-keys.out { opacity: 0; pointer-events: none; }
+#harp-keys.still { transition: none; }
+#harp-keys .side { display: flex; gap: ${HARP.buttons.gap}px; }
+#harp-keys button { width: ${HARP.buttons.w}px; height: ${HARP.buttons.h}px; padding: 0; display: grid; place-items: center; touch-action: none; }
+#harp-keys button svg { width: 30px; height: 22px; overflow: visible; pointer-events: none; }
+#harp-keys button line { stroke: currentColor; stroke-linecap: round; stroke-width: 1.3; opacity: .3; }
+#harp-keys button line.it { stroke-width: 2.6; opacity: 1; }
+#harp-keys button.on { translate: 0 1px; box-shadow: 0 0 0 3px var(--glow), inset 0 1px 3px rgba(43, 39, 36, .2); border-color: var(--dark); }
 .k-ticket svg { overflow: visible; filter: drop-shadow(1px 2px 2px rgba(60, 40, 20, .28)); rotate: 7deg; }
 `);
 export default function createHarp(site) {
@@ -67,6 +83,7 @@ export default function createHarp(site) {
     cat.stay?.(H.stay);
     audio.play(H.sample.name, { gain: H.gain, rate: 2 ** ((H.notes[index] - H.sample.semitone) / 12) });
     if (w) ringing.push({ w, t: 0, right });
+    padArm();
     if (progress >= H.tune.length) { progress = 0; played = []; encore(); }
     return right;
   }
@@ -85,6 +102,7 @@ export default function createHarp(site) {
         if (!keepsakes.has('ticket')) stage.after(.5).then(() => keepsakes.give('ticket', { from: { x: stage.width / 2, y: stage.insets.top } }));
         if (first) tellKeys(2);
       }
+      if (played) padEnd();                         // the encore has the stage: the phone's whisker buttons go (harp lane)
       if (played) site.ui.speak?.('encore') ?? site.ui.say('encore');   // the cat says it (text lane, e1112-32)
       else flare();
     });
@@ -142,14 +160,96 @@ export default function createHarp(site) {
   const encoreSeen = () => site.eggs.butterman?.encoreSeen ?? !!site.store.get('butterman.encoreSeen');
   addEventListener('sigilcat:encore-seen', () => { if (unlocked) tellKeys(1.2); });
   if (unlocked && !site.store.get('harp.keysTold')) stage.onLoaded.push(() => { if (!site.eggs.butterman?.encore || encoreSeen()) tellKeys(3); });
-  const typing = (t) => t?.closest?.('input, textarea, select, [contenteditable=""], [contenteditable="true"]');
+  // Always on (harp lane, music round, e1116-11: "the ASD JKL playable whiskers should be playable at all times"); a key
+  // is a pluck, so the tune on the keys finds the harp exactly as on the whiskers, once. Not while typing in a text
+  // field (a slider or a button keeps focus without taking letters, so it does not block them), not with a modifier or a
+  // held key, not while the page is locked (a scene, the 360 film, the cake) or a pop-up or mode is up (flappy, the
+  // chest, the books, a card, the full-screen step: all aria-modal).
+  const typing = (t) => t?.closest?.('input:not([type=range]):not([type=button]):not([type=checkbox]):not([type=radio]), textarea, select, [contenteditable=""], [contenteditable="true"]');
   addEventListener('keydown', (e) => {
     const index = H.keys[e.key?.toLowerCase?.()];
-    if (index === undefined || !unlocked || e.repeat || e.ctrlKey || e.metaKey || e.altKey || input.locked || typing(e.target)) return;
-    if (document.querySelector('[aria-modal="true"]') || !cat.loaded || cat.hidden || cat.standIn) return;
+    if (index === undefined || e.repeat || e.ctrlKey || e.metaKey || e.altKey || input.locked || typing(e.target)) return;
+    if (document.querySelector('[aria-modal="true"], #bird-screen, #party-error') || !cat.loaded || cat.hidden || cat.standIn) return;
     keyPlucks++;
     pluck(index, whiskers().find((w) => w.index === index && w.seen) || null);
   });
+
+  // ---- the phone's whisker buttons (harp lane, music round, e1116-11) ----
+  // Aaron: "on mobile, similar to how the "closer, further" buttons are set up, there should be 6 buttons you can click to
+  // play the harp whiskers for about ~10s after playing a whisker, and then it can disappear (or it can be replaced by
+  // the "futher closer" if someone picks something up)". On a coarse pointer (Nearer/Deeper's test), every pluck (a
+  // whisker, a button, a key) arms them for H.buttons.seconds; they fade out when that runs out. Left to right they are
+  // A S D J K L: the three whiskers on your left, top to bottom, then the three on your right, top to bottom; each
+  // shows its side's three whiskers with its own drawn bold. A press plucks on pointerdown, as a finger on a string,
+  // through pluck() like a tap on the whisker. While Nearer/Deeper are up (an item held) they are hidden; let go within
+  // the time and they are back. A lock (a scene, a mode) ends them. Nothing runs while they are away: a timeout, and
+  // a watch on the page's top level (for Nearer/Deeper) only while armed.
+  const coarse = () => matchMedia('(pointer: coarse)').matches;
+  let pad = null, padUntil = 0, padTimer = 0, padGone = 0, padWatch = null, padTaps = 0, padShows = 0;
+  const glyph = (i) => {
+    const side = i < 3 ? 1 : -1, row = i % 3, X = (x) => (side > 0 ? x : 30 - x);
+    return `<svg viewBox="0 0 30 22" aria-hidden="true">${[[8, 3], [11, 11], [14, 19]].map(([y0, y1], r) => `<line class="${r === row ? 'it' : ''}" x1="${X(25)}" y1="${y0}" x2="${X(3)}" y2="${y1}"/>`).join('')}</svg>`;
+  };
+  const NAMES = ['top left', 'middle left', 'bottom left', 'top right', 'middle right', 'bottom right'];
+  function padMake() {
+    pad = el('div'); pad.id = 'harp-keys'; pad.setAttribute('role', 'group'); pad.setAttribute('aria-label', 'His whiskers'); pad.hidden = true; pad.classList.add('out');
+    for (const group of [[0, 1, 2], [3, 4, 5]]) {
+      const side = el('div', 'side');
+      for (const i of group) {
+        const b = el('button', 'felt', glyph(i)); b.type = 'button'; b.dataset.whisker = i; b.setAttribute('aria-label', `Pluck the ${NAMES[i]} whisker`);
+        let pressed = -1e9;
+        const play = () => { padTaps++; pluck(i, whiskers().find((w) => w.index === i && w.seen) || null); };
+        b.addEventListener('pointerdown', (e) => {
+          e.preventDefault(); e.stopPropagation();
+          if (input.locked || !cat.loaded || cat.hidden || cat.standIn) return;
+          pressed = performance.now(); try { b.setPointerCapture(e.pointerId); } catch { /* synthetic */ }
+          b.classList.add('on'); play();
+        });
+        for (const t of ['pointerup', 'pointercancel', 'lostpointercapture']) b.addEventListener(t, () => b.classList.remove('on'));
+        // a click with no press before it is the keyboard's (Enter on a focused button): one pluck
+        b.addEventListener('click', (e) => { e.preventDefault(); if (performance.now() - pressed < 1500 || input.locked || !cat.loaded || cat.hidden || cat.standIn) return; play(); });
+        side.appendChild(b);
+      }
+      pad.appendChild(side);
+    }
+    pad.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.body.appendChild(pad);
+    addEventListener('resize', () => { if (!pad.hidden) padPlace(); });
+  }
+  // Just over the row of sigils, centred in the safe width (under him): the left three below his left whiskers, the
+  // right three below his right. Six thumb-sized buttons do not fit beside the row as Nearer/Deeper do (at 844x390 there
+  // are 91 px between ZOOM/SOUND and the row).
+  function padPlace() {
+    const B = H.buttons, marks = [...document.querySelectorAll('#marks > li')].map((li) => li.getBoundingClientRect()).filter((r) => r.width > 0);
+    const floor = marks.length ? Math.min(...marks.map((r) => r.top)) : stage.height - (stage.insets.bottom || 0);
+    const L = stage.insets.left || 0, R = stage.width - (stage.insets.right || 0);
+    pad.style.left = Math.round((L + R) / 2) + 'px'; pad.style.top = Math.round(floor - B.lift - B.h) + 'px';
+  }
+  const padOpen = () => padUntil > performance.now();
+  function padSync() {
+    if (!pad) return;
+    const show = padOpen() && !input.locked && !document.querySelector('.world-grip');
+    if (show === !pad.classList.contains('out')) return;
+    clearTimeout(padGone);
+    pad.classList.toggle('still', stage.reducedMotion);
+    if (show) { padShows++; pad.hidden = false; padPlace(); void pad.offsetWidth; pad.classList.remove('out'); }
+    else {
+      pad.classList.add('out'); for (const b of pad.querySelectorAll('button.on')) b.classList.remove('on');
+      if (stage.reducedMotion) pad.hidden = true; else padGone = setTimeout(() => { if (pad.classList.contains('out')) pad.hidden = true; }, H.buttons.fade * 1000 + 50);
+    }
+  }
+  function padEnd() { padUntil = 0; clearTimeout(padTimer); padWatch?.disconnect(); padWatch = null; padSync(); }
+  function padArm() {
+    if (!coarse()) return;
+    if (!pad) padMake();
+    padUntil = performance.now() + H.buttons.seconds * 1000;
+    clearTimeout(padTimer); padTimer = setTimeout(padEnd, H.buttons.seconds * 1000);
+    if (!padWatch) { padWatch = new MutationObserver(padSync); padWatch.observe(document.body, { childList: true }); }
+    padSync();
+  }
+  input.onLock.push(() => { if (padUntil) padEnd(); });
+  const buttons = { get el() { return pad; }, get shown() { return !!pad && !pad.hidden && !pad.classList.contains('out'); }, get left() { return Math.max(0, padUntil - performance.now()) / 1000; },
+    get taps() { return padTaps; }, get shows() { return padShows; }, end: padEnd };
 
   cardService(site).define({
     id: 'ticket', label: 'the ticket to the encore', size: 0.4, aspect: 0.45, home: () => ({ x: -0.78, y: -0.44 }),
@@ -157,6 +257,6 @@ export default function createHarp(site) {
     tap(inst) { site.cards?.wiggle(inst); site.audio.play('paper', { gain: 0.4 }); },
   }, 'ADMIT ONE\nBUTTAMAN\nthe encore\nNo. 0001\n\nBack: KEEP THIS STUB. One more for the road.');
 
-  return { find: 'harp', config: HARP, pluck, whiskers, whiskerAt, tellKeys, get progress() { return progress; }, get plucks() { return plucks; }, get keyPlucks() { return keyPlucks; }, get flares() { return flares; }, get unlocked() { return unlocked; },
+  return { find: 'harp', config: HARP, pluck, whiskers, whiskerAt, tellKeys, get progress() { return progress; }, get plucks() { return plucks; }, get keyPlucks() { return keyPlucks; }, get flares() { return flares; }, get unlocked() { return unlocked; }, buttons,
     again: () => site.eggs.butterman?.encore?.() ?? false };   // once ever (butterman lane, playtest-2)
 }

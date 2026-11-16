@@ -141,7 +141,8 @@ export function createPhysicalEyes(site, config) {
   }
   stage.canvas.addEventListener('pointermove',look,{passive:true});stage.canvas.addEventListener('pointerleave',()=>look(null));
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stopPupils();});
-  defineSmallBody(site,{id:'eyes',label:'the googly eyes',size:config.size,aspect:config.aspect,home:()=>config.floor,pad:8,
+  // outline: white eyes melt into the cream floor (src/world/floor-outline.js, music round)
+  defineSmallBody(site,{id:'eyes',label:'the googly eyes',size:config.size,aspect:config.aspect,home:()=>config.floor,pad:8,outline:true,
     tap(i){if(!detach()){audio.play('rattle',{gain:.45});hop(site,i,.45);}}
   },loadModel,{articulated:true,fitLobes:2,rotation:[-Math.PI/2,0,0],sound:{material:'tin',size:'small'},
     // No speculative (soft CCD) contacts for the eyes (integration, playtest-3): the two light lobes spin fast as they

@@ -382,7 +382,8 @@ export function createLamp(site, rack) {
   }
   // Saves from before the sequence: a bulb from the old wet-bolt unlock counts as already charged.
   if (!store.get('lamp.stage') && (store.get('keepsakes.bulb') || store.get('lamp.unlocked'))) setStage(store.get('worldBodies.bulb')?.adapter?.on ? 'lamp' : 'lit');
-  keepsakes.define({id: 'bulb', label: 'the light bulb', kind: 'gl', size: .13, aspect: 1.6, home: () => ({x: -.5, y: .1}),
+  // outline: the clear bulb melts into the cream floor (src/world/floor-outline.js, music round)
+  keepsakes.define({id: 'bulb', label: 'the light bulb', kind: 'gl', size: .13, aspect: 1.6, home: () => ({x: -.5, y: .1}), outline: true,
     object: (_, i) => { i.fresh = !!site.timing?.shown; return create(i); }, place() {}, tap: () => tapped(),
     removed(i) {
       stopHover(); world.remove(i.id); site.worldLayout.remove(i.id); i.picture?.dispose(); i.art?.dispose(); sprite?.material.dispose(); sprite = null;
