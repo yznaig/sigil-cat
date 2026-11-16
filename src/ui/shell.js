@@ -153,13 +153,17 @@ export function createShell(site) {
   // lifted over it by its owner's CSS), he pops in, then the room shows through the gap as move(e) slides the page's
   // halves apart. beforeDoors() runs between the pop and the doors. Reduced motion: no pop, no slide; fade(): the
   // owner fades its page out. Resolves once the room is back.
-  async function popOver({ move, beforeDoors, fade }) {
+  // stay() (gags lane, playtest 4: "the cat should stay there over the error screen for another 15 seconds"): awaited
+  // after the pop, before the doors, while only he is drawn over the page. Calm: he fades in (no pop) and stays too.
+  async function popOver({ move, beforeDoors, fade, stay }) {
     if (masking || !revealed) { beforeDoors?.(); await fade?.(); return; }       // (the loading screen's own run)
-    if (calm()) { beforeDoors?.(); await fade?.(); return; }
-    masking = true; gap = 0; cat.fx.scale = 0; cat.fx.opacity = 0;
+    if (calm() && !stay) { beforeDoors?.(); await fade?.(); return; }
+    masking = true; gap = 0; cat.fx.scale = calm() ? 1 : 0; cat.fx.opacity = 0;
     try {
-      log.push('pop over');
-      await pop();
+      log.push(calm() ? 'calm over' : 'pop over');
+      if (calm()) { await stage.tween(DOORS.fade, (u) => { cat.fx.opacity = u; }); cat.fx.opacity = 1; } else await pop();
+      await stay?.();
+      if (calm()) { masking = false; gap = 1; beforeDoors?.(); await fade?.(); return; }   // the whole room under a fading page
       beforeDoors?.();
       await openDoors(move);
     } finally { masking = false; gap = 1; cat.fx.scale = 1; cat.fx.opacity = 1; }

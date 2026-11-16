@@ -2,10 +2,14 @@
 // and an egg on every visit when the player has none anywhere. Run with ?birdcheck=1 and a saved state whose bird
 // has been away 290 s of a 300 s gap: it must come within the first 15 s of this visit (the visit's settle time).
 cat.auto=false;const B=E.bird,C=E.box.recipe;
+// Playtest 3 (6f2eaa3): the bird flies in for VISITS.arrive s and lets its egg go VISITS.eggAfter s later (it used to
+// drop the egg on arrival), so each wait for the egg keeps its old 6 s margin on top of that delay.
+const { VISITS } = await import(new URL('src/eggs/bird.js', document.baseURI).href);
+const EGG_WAIT=6000+((stage.reducedMotion?1:VISITS.arrive)+VISITS.eggAfter)*1000;
 note('bird visits schedule at load',JSON.stringify(B.schedule));
 check('bird limiter: a bird away 290 of 300 s is due within this visit\'s first 15 s',B.state==='waiting'&&B.schedule.due<=15000,JSON.stringify(B.schedule));
 check('bird limiter: it comes',await until(()=>B.state==='flying',20000)&&B.stats.appearedAt<=16500,`arrived ${B.stats.appearedAt?.toFixed(0)} ms after opening`);
-check('bird every arrival lets an egg go when there is none',await until(()=>keepsakes.get('egg')?.worldReady,6000)&&C.state.egg?.count===1&&B.stats.eggCalls===1);
+check('bird every arrival lets an egg go when there is none',await until(()=>keepsakes.get('egg')?.worldReady,EGG_WAIT)&&C.state.egg?.count===1&&B.stats.eggCalls===1);
 const next=B.schedule;check('bird the next absence is drawn between 4 and 10 minutes',B.schedule.away===0&&next.gap>=240000&&next.gap<=600000,JSON.stringify(next));
 // It stays 2.5 min, then flies off (here, shortened); the flight off is drawn, then the next absence starts.
 check('bird stays 2.5 minutes by default',next.stayLeft>140000&&next.stayLeft<=150000,JSON.stringify(next));
@@ -15,7 +19,7 @@ check('bird is gone after its flight off, the limiter armed',await until(()=>B.s
 // The egg goes into a cake (taken from the room): the next visit brings another.
 keepsakes.take('egg');await sleep(100);
 B.debug.skipTo(89.5);await until(()=>B.state==='flying',3000);
-check('bird the next visit brings another egg for another cake',await until(()=>keepsakes.get('egg')?.worldReady,6000)&&C.state.egg.count===2&&B.stats.arrivals===2);
+check('bird the next visit brings another egg for another cake',await until(()=>keepsakes.get('egg')?.worldReady,EGG_WAIT)&&C.state.egg.count===2&&B.stats.arrivals===2);
 // An egg in the box counts: no drop.
 const egg=keepsakes.get('egg');await until(()=>egg.worldEntry.body.isSleeping(),12000);
 const k=C.state.chest.findIndex(e=>!e);C.state.chest[k]={id:'egg',state:{}};keepsakes.take('egg');C.save(true);

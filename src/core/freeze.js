@@ -45,9 +45,8 @@ export function createFreeze(site) {
     animations = [];
     // The first frame back runs at dt = 0: the stage's last timestamp is from before the hold, and no step may
     // swallow the whole time away (no 100 ms jump in the physics, no skipped tween).
-    const scale = stage.timeScale; stage.timeScale = 0;
-    const rebase = () => { stage.timeScale = scale; const i = stage.onFrame.indexOf(rebase); if (i >= 0) stage.onFrame.splice(i, 1); };
-    stage.onFrame.push(rebase);
+    // (stage.restartClock; playtest 4: the old timeScale 0-then-restore could be captured at 0 by a second release.)
+    stage.restartClock();
     const r = resume, a = resumeAudio; resume = resumeAudio = null;
     r?.(); a?.();
     stage.holdLayout(false);

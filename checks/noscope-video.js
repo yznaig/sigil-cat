@@ -27,11 +27,24 @@ const active=E.noscopeVideo, video=document.querySelector('.noscope-video video'
 check('noscope muted video and riser have zero output',playingMuted&&!!active&&active.audio.riser&&active.audio.gain===0&&active.level()<1e-6&&!!video?.muted&&audio.output().gain.value===0);
 const slider=document.querySelector('#volume');if(slider){slider.value='37';slider.dispatchEvent(new Event('input',{bubbles:true}));}audio.play('thunder');await sleep(100);
 check('noscope volume follows slider while page sounds stay quiet',!!active&&Math.abs(active.audio.gain-.37)<.001&&audio.output().gain.value===0&&audio.level()<1e-6);
-const root=document.querySelector('.noscope-video');const id=++pointerIds;
-(root||canvas).dispatchEvent(new PointerEvent('pointerdown',{pointerId:id,pointerType:KIND,bubbles:true,clientX:20,clientY:200,buttons:1}));
-(root||canvas).dispatchEvent(new PointerEvent('pointerup',{pointerId:id,pointerType:KIND,bubbles:true,clientX:20,clientY:200,buttons:0}));
-await sleep(1100);
-check('noscope tap skips and restores input',!!active&&!E.noscope.active&&!input.locked&&!document.querySelector('.noscope-video')&&Math.abs(audio.output().gain.value-.37)<.001);
+const root=document.querySelector('.noscope-video');
+const tapRoot=()=>{const id=++pointerIds;const el=document.querySelector('.noscope-video')||canvas;
+  el.dispatchEvent(new PointerEvent('pointerdown',{pointerId:id,pointerType:KIND,bubbles:true,clientX:20,clientY:200,buttons:1}));
+  el.dispatchEvent(new PointerEvent('pointerup',{pointerId:id,pointerType:KIND,bubbles:true,clientX:20,clientY:200,buttons:0}));};
+// Playtest 4 (Aaron, on his phone): "you shouldnt be able to skip the 360 cutscene while in the riser". A tap, the
+// skip button and Escape during the riser do nothing; once it is over a tap skips as before.
+tapRoot();await sleep(300);
+const skipHidden=getComputedStyle(document.querySelector('.noscope-video .video-controls')).visibility==='hidden';
+document.querySelector('.noscope-video .video-controls button')?.click();dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await sleep(300);
+check('noscope riser: a tap, the skip button and Escape do not skip',!!active&&E.noscope.active&&active.held&&input.locked&&skipHidden&&!!document.querySelector('.noscope-video'),`phase ${active?.phase}`);
+await sleep(3000);tapRoot();await sleep(200);
+check('noscope riser: a tap late in the black still does not skip',E.noscope.active&&active.held&&['black','playing','waiting'].includes(active.phase),`phase ${active.phase}`);
+await until(()=>!active.held,6000);
+const heldUntil=active.phase,shownSkip=getComputedStyle(document.querySelector('.noscope-video .video-controls')).visibility==='visible';
+tapRoot();await sleep(1100);
+check('noscope tap after the riser skips and restores input',heldUntil==='playing'&&shownSkip&&!!active&&!E.noscope.active&&!input.locked&&!document.querySelector('.noscope-video')&&Math.abs(audio.output().gain.value-.37)<.001,`held until ${heldUntil}`);
 await again;
-const third=site.fire('noscope');await sleep(150);dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await sleep(1100);
-check('noscope Escape skips every subsequent 360',!!active&&!E.noscope.active&&!input.locked);await third;
+const third=site.fire('noscope');await sleep(150);dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await sleep(300);
+const thirdHeld=E.noscope.active;
+await until(()=>!active.held,8000);dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await sleep(1100);
+check('noscope Escape: ignored in the riser, skips after it',thirdHeld&&!!active&&!E.noscope.active&&!input.locked);await third;

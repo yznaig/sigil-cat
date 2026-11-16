@@ -29,8 +29,9 @@ if (!url) { console.error('usage: node checks/run.mjs <url> [--js file] [--size 
 const sizeName = opt('size', 'desktop');
 // phone: a phone on its side (phones play landscape only, shell lane playtest-2); phone-portrait: held upright, which
 // only ever shows the "flip sideways" overlay (checks/shell-turn.js).
-const SIZES = { desktop: [1280, 900, 1], phone: [844, 390, 2], 'phone-portrait': [390, 844, 2] };
-const PHONE = sizeName === 'phone' || sizeName === 'phone-portrait';
+// phone-notch (controls lane, playtest-4): a tall-notch phone on its side (iPhone Pro Max class, 932x430 at dpr 3).
+const SIZES = { desktop: [1280, 900, 1], phone: [844, 390, 2], 'phone-portrait': [390, 844, 2], 'phone-notch': [932, 430, 3] };
+const PHONE = sizeName === 'phone' || sizeName === 'phone-portrait' || sizeName === 'phone-notch';
 const [W, H, D] = SIZES[sizeName] || [...sizeName.split('x').map(Number), 1];
 const dpr = Number(opt('dpr', D)), out = opt('out', 'checks/out'), timeout = Number(opt('timeout', 120)) * 1000, gpu = opt('gpu', 'nvidia');
 const exe = process.env.CHROME || (() => {
@@ -65,6 +66,20 @@ await page.exposeFunction('__pointer', async (points) => {
     for (const p of points.slice(1)) await page.mouse.move(p.x, p.y, { steps: 4 });
     await page.mouse.up();
   }
+});
+// Raw multi-touch (controls lane, playtest-4): __touch('touchStart'|'touchMove'|'touchEnd', [{x, y, id}, ...]) sends one
+// CDP touch event with every finger currently down (ids keep fingers apart), so a check can hold an item with one finger
+// and press a page button with a second, as a player does. Phone sizes only (the context has touch).
+let touchCdp = null;
+await page.exposeFunction('__touch', async (type, points) => {
+  touchCdp ??= await ctx.newCDPSession(page);
+  await touchCdp.send('Input.dispatchTouchEvent', { type, touchPoints: points.map((p) => ({ x: p.x, y: p.y, id: p.id ?? 0 })) });
+});
+// Safe-area insets (controls lane): __safeArea({left, right, top, bottom}) asks Chromium to report them to the page's
+// env(safe-area-inset-*) where its DevTools protocol can (Emulation.setSafeAreaInsetsOverride); false where it can't.
+await page.exposeFunction('__safeArea', async (insets) => {
+  touchCdp ??= await ctx.newCDPSession(page);
+  try { await touchCdp.send('Emulation.setSafeAreaInsetsOverride', { insets }); return true; } catch { return false; }
 });
 await page.exposeFunction('__key', key => page.keyboard.press(key));
 await page.exposeFunction('__resize', (width,height) => page.setViewportSize({width,height}));

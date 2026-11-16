@@ -4,7 +4,9 @@
 // size of screen. A tap (or Enter on its keyboard key) tilts it toward you in 3D with a glint and a small bell (playtest 3).
 // Arrow keys on its keyboard key move it. Each sticker is still a keepsake (keepsakes.has / get / take work as
 // before), but its picture is a canvas drawn once, in its own top-level layer; nothing here runs per frame at rest.
-//   defineSticker(site, {id, label, art: 'star' | 'goodjob', lines: ['GOOD', 'JOB!'], spot: [fx, fy], tilt, tapped})
+// Every sticker stands straight (touchfeel lane, playtest 4, Aaron: "The star stickers all be straight, all of them
+// are at a slight angle and I dont like it"): no turn at rest; the tap's tilt and glint still play and end straight.
+//   defineSticker(site, {id, label, art: 'star' | 'goodjob', lines: ['GOOD', 'JOB!'], spot: [fx, fy], tapped})
 //   stickerLayer(site).place(id, {x, y})   move one (screen px of its middle)
 import {css} from '../core/util.js';
 
@@ -33,14 +35,14 @@ function createLayer(site) {
   const live = new Map();
   const sizeOf = (art) => { const [k, lo, hi] = STICKER.size[art]; return Math.round(Math.max(lo, Math.min(hi, k * Math.min(stage.width, stage.height)))); };
   // Its middle, in px, kept so the whole sticker stays on the screen.
-  // (1.08: room for its slightly turned corners.)
+  // (1.08: room for the tap's 3D turn and the held lift.)
   function clampPx(s, x, y) { const h = s.px / 2 * 1.08 + STICKER.margin; return {x: Math.max(h, Math.min(stage.width - h, x)), y: Math.max(h, Math.min(stage.height - h, y))}; }
   function layout(s) {
     const size = sizeOf(s.art);
     if (size !== s.px) { s.px = size; s.draw(); }
     const p = clampPx(s, s.f[0] * stage.width, s.f[1] * stage.height); s.at = p;
     // Placed by left/top, so the keepsake's own arrival pop and wiggle (CSS scale, rotate, translate) turn about its middle.
-    Object.assign(s.el.style, {width: size + 'px', height: size + 'px', left: (p.x - size / 2).toFixed(1) + 'px', top: (p.y - size / 2).toFixed(1) + 'px', transform: `rotate(${s.tilt}deg)`});
+    Object.assign(s.el.style, {width: size + 'px', height: size + 'px', left: (p.x - size / 2).toFixed(1) + 'px', top: (p.y - size / 2).toFixed(1) + 'px', transform: 'none'});
     s.moved?.(p);
   }
   function place(id, {x, y}, save = true) {
@@ -88,7 +90,7 @@ export function defineSticker(site, def) {
       if (!inst.state.f && old) { const top = stage.insets.top, h = stage.height - top - stage.insets.bottom; inst.state.f = [old[0], (top + old[1] * h) / stage.height]; delete inst.state.sky; }
       // New: where it was given (keepsakes.give's `at`, or its home spot). Saved: where it was left.
       const given = keepsakes.toPx(inst.x, inst.y);
-      const s = {id: def.id, art: def.art, el, px: 0, tilt: def.tilt ?? 0, f: inst.state.f || [given.x / stage.width, given.y / stage.height],
+      const s = {id: def.id, art: def.art, el, px: 0, f: inst.state.f || [given.x / stage.width, given.y / stage.height],
         draw() { paint(canvas, def, s.px); },
         save() { inst.state.f = s.f.map((v) => +v.toFixed(4)); const u = keepsakes.toUnits(s.at.x, s.at.y); inst.x = u.x; inst.y = u.y; inst.setState({}); },
         tap: () => def_tap(inst),

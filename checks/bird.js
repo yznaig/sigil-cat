@@ -106,18 +106,26 @@ const ctx=audio.context(),originalCreate=ctx.createBufferSource.bind(ctx),slamSt
 ctx.createBufferSource=()=>{const node=originalCreate(),start=node.start.bind(node);node.start=(...args)=>{if(node.buffer===audio.buffer('assets/audio/designed/bird-boom.wav'))slamStarts.push({wall:performance.now(),at:args[0]});return start(...args);};return node;};
 const box=inst.box;await __pointer([{x:box.x+box.w*.5,y:box.y+box.h*.43}]);
 check('bird controller click starts the trailer and the controller stays',await poll(()=>B.screen?.root.classList.contains('trailer'))&&keepsakes.has('controller')&&site.world.entries.has('controller'));
-const shotWords=[];for(const word of ['YOU','JUST','LOST','THE','GAME']){
+// Playtest 4 (trailer lane): four slams, THE GAME together with THE in red, then a ~3.8 s dark hold before the fade.
+const shotWords=[];let finalRed=null;for(const word of ['YOU','JUST','LOST','THE GAME']){
   const seen=await poll(()=>B.screen?.word===word,2500);if(seen){await wait(160);
     if(word==='YOU'&&stage.reducedMotion)check('bird reduced trailer fades without scale or shake',document.querySelector('.trailer-word').getAnimations().every(a=>a.effect.getKeyframes().every(f=>!f.transform||f.transform==='none')));
-    await __shot(prefix+'-word-'+word.toLowerCase());shotWords.push(word);}
+    if(word==='THE GAME'){const el=document.querySelector('.trailer-word'),red=el.querySelector('.red'),r=el.firstElementChild.getBoundingClientRect();
+      finalRed={text:el.textContent,red:red?.textContent,redColor:red&&getComputedStyle(red).color,gameColor:getComputedStyle(el).color,left:r.left,right:r.right,width:innerWidth,rows:el.children.length};}
+    await __shot(prefix+'-word-'+word.toLowerCase().replace(' ','-'));shotWords.push(word);}
 }
-check('bird trailer presents all five words on separate beats',shotWords.join(' ')==='YOU JUST LOST THE GAME',shotWords.join(' '));
-check('bird payoff restores controls after silence',await poll(()=>!B.screen,6000)&&!input.locked&&!document.querySelector('#bird-screen')&&registry.has('bird'));
+check('bird trailer presents four slams on separate beats',shotWords.join('|')==='YOU|JUST|LOST|THE GAME',shotWords.join('|'));
+check('bird final slam is THE GAME in one line with THE in red, on screen',!!finalRed&&finalRed.text==='THE GAME'&&finalRed.red==='THE'&&finalRed.rows===1&&/^rgb\(2[0-9]{2}, [0-9]{1,2}, [0-9]{1,2}\)$/.test(finalRed.redColor)&&finalRed.gameColor!==finalRed.redColor&&finalRed.left>=0&&finalRed.right<=finalRed.width,JSON.stringify(finalRed));
+const trailerGone=await poll(()=>!B.screen,9000),goneAt=performance.now();
+check('bird payoff restores controls after silence',trailerGone&&!input.locked&&!document.querySelector('#bird-screen')&&registry.has('bird'));
 const beats=B.stats.beats,intervals=beats.slice(1).map((b,i)=>b.elapsed-beats[i].elapsed);
 ctx.createBufferSource=originalCreate;
 const offsets=beats.map((b,i)=>Math.abs(b.visualAt-(slamStarts[i]?.wall??-1)));
 const wallIntervals=beats.slice(1).map((b,i)=>(b.visualAt-beats[i].visualAt)/1000);
-check('bird boom cue (Aaron\'s cinematic boom) shares each visual beat',beats.length===5&&slamStarts.length===5&&intervals.every(d=>Math.abs(d-.9)<.06)&&wallIntervals.every(d=>Math.abs(d-.9)<.08)&&offsets.every(ms=>ms<25),JSON.stringify(beats.map((b,i)=>({word:b.word,elapsed:+b.elapsed.toFixed(3),offsetMs:+offsets[i].toFixed(3)}))));
+const gaps=[.9,.9,1.8],hold=(goneAt-(beats.at(-1)?.visualAt??goneAt))/1000;
+check('bird boom cue (Aaron\'s cinematic boom) shares each visual beat',beats.length===4&&slamStarts.length===4&&intervals.every((d,i)=>Math.abs(d-gaps[i])<.06)&&wallIntervals.every((d,i)=>Math.abs(d-gaps[i])<.08)&&offsets.every(ms=>ms<25),JSON.stringify(beats.map((b,i)=>({word:b.word,elapsed:+b.elapsed.toFixed(3),offsetMs:+offsets[i].toFixed(3)}))));
+// Aaron: "linger on its final dark screen for a couple more seconds" — 3.8 s of quiet after THE GAME (was 1.8), plus the .24 s fade.
+check('bird trailer lingers on the dark screen before the fade home',hold>=3.95&&hold<4.7,hold.toFixed(3)+'s from the last slam to the room');
 // The stand (playtest-2) comes after the trailer; the controller goes into it and still plays the game from there.
 check('bird the trailer brings the wooden stand',await poll(()=>site.stand?.ready,8000)&&store.get('bird.stand')===true&&site.worldLayout.furniture().stand?.fixed,JSON.stringify(site.stand?.rect));
 // Playtest-3 (layout lane, e1113-07): it falls from above into its place like the hat rack (a fade, calm), then stands
@@ -153,7 +161,7 @@ B.debug.death();await poll(()=>B.screen?.over,3000);await wait(100);
 {const r=document.querySelector('#bird-screen [data-give-up]').getBoundingClientRect();await __pointer([{x:r.x+r.width/2,y:r.y+r.height*.35}]);}
 check('bird a later death gives no second controller',await poll(()=>!B.screen,3000)&&[...keepsakes.live.keys()].filter(id=>id==='controller').length===1&&entry.support?.id==='stand');
 await wait(400);const idle={frames:B.stats.frames,world:site.world.stats.steps};await wait(600);
-check('bird between visits leaves zero added idle work (one return timer)',B.stats.callbacks===0&&B.stats.timer&&B.state==='waiting'&&B.stats.frames===idle.frames&&site.world.stats.steps===idle.world&&stage.onFrame.every(f=>beforeCallbacks.includes(f))&&!await B.start()&&!document.querySelector('.distant-bird')&&B.stats.payoffs===1&&B.schedule.due<=300000,JSON.stringify({stats:B.stats,schedule:B.schedule}));
+check('bird between visits leaves zero added idle work (one return timer)',B.stats.callbacks===0&&B.stats.timer&&B.state==='waiting'&&B.stats.frames===idle.frames&&site.world.stats.steps===idle.world&&stage.onFrame.every(f=>beforeCallbacks.includes(f))&&!await B.start()&&!document.querySelector('.distant-bird')&&B.stats.payoffs===1&&B.schedule.due<=600000,JSON.stringify({stats:B.stats,schedule:B.schedule}));
 // Shared master level is used by every authored bird cue; no second AudioContext/bus.
 audio.setVolume(.27);audio.setMuted(true);const muteAt=audio.context().currentTime;
 await poll(()=>audio.context().currentTime-muteAt>=.25,3000);const clips=audio.diagnostics().clips;

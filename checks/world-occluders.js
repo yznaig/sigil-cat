@@ -43,8 +43,10 @@ async function trial(name,where,cover){
 {let spot=null;for(const [fx,dy] of [[.82,40],[.2,40],[.5,90],[.7,10],[.3,90]]){const q=stage.onFloor(stage.width*fx,site.worldLayout.floorY()+dy);park({x:q.x,y:.05,z:q.z});await until(()=>e.body.isSleeping(),4000);if(O.exposure(e).share>=SCOOT.shown){spot=q;break;}}
  note('occluders plain-view spot',JSON.stringify(spot));spot??=stage.onFloor(stage.width*.82,site.worldLayout.floorY()+40);park({x:spot.x,y:.05,z:spot.z});await until(()=>e.body.isSleeping(),4000);await sleep(SCOOT.every*1000+300);
  check('occluders a tin in plain view is not moved',!e.scoot&&O.exposure(e).share>=SCOOT.shown,JSON.stringify(O.exposure(e)));}
-// the cloud crosses the page left to right and comes in again from the left
+// the cloud never gets stuck: it drifts on by itself. (Touchfeel lane, playtest 4: back and forth between the screen's
+// edges now, turning at each, never off them; was across and round again from off the left. checks/touchfeel-cloud.js
+// covers the sweep in full.)
 {const c=keepsakes.give('cloud');await sleep(300);c.arrival=null;c.x=keepsakes.toUnits(stage.width*.75,0).x;c.cross=null;const xs=[];
  await fast(8,async()=>{for(let n=0;n<40;n++){xs.push(Math.round(c.px.x));await sleep(140);}});
- const rose=xs.slice(1).filter((x,k)=>x>xs[k]).length,wrapped=xs.slice(1).some((x,k)=>x<xs[k]-stage.width*.5);
- check('occluders the cloud drifts left to right across the page and comes round again',rose>=xs.length*.8&&wrapped,JSON.stringify(xs));}
+ const d=xs.slice(1).map((x,k)=>x-xs[k]),turned=d.slice(1).some((v,k)=>v<0&&d[k]>0),onScreen=xs.every((x)=>x-c.box.w/2>=0&&x+c.box.w/2<=stage.width);
+ check('occluders the cloud drifts on by itself, turning at the edge, never off the page',d.filter((v)=>v).length>=xs.length*.8&&turned&&onScreen,JSON.stringify(xs));}

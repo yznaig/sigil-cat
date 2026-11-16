@@ -12,7 +12,7 @@ export const BOX={size:.84,aspect:.74,stay:2.6,fling:{time:.6,up:2.2,side:.6,car
 export default function createBox(site){
  const {THREE:T,stage,cat,world,keepsakes,store,audio}=site;
  let create,physics,lidPhysics;const stats={tipped:0,flings:0};
- const recipe=createRecipes(site);let busy=false,inside=false,count=0,changing=false;
+ const recipe=createRecipes(site);let busy=false,inside=false,count=0,changing=false,introSaid=0;
  audio.loadAll(['box-thud','tap-pop','chest-open','chest-close','click','paper']);
  solidDefinition(site,{id:'box',category:'container',label:'the baking box',size:BOX.size,aspect:BOX.aspect,home:()=>({x:1.15,y:-.38}),tap:()=>recipe.openChest(),removed(i){recipe.removeBox(i);i.object.geometry.dispose();if(i.solidArt)disposeArt(i.solidArt);}},async inst=>{
   ({create,physics,lidPhysics}=await import('../../assets/models/prepared/box.js'));
@@ -93,7 +93,11 @@ export default function createBox(site){
  async function drop(){
   if(busy||cat.hidden||cat.standIn)return false;
   count++;const i=keepsakes.get('box')||keepsakes.give('box');await i.worldTask;
-  if(recipe.state.intro){/* text lane: the cat says the intro (e1112-32) */site.ui.speak?.(['tap the box to open it; hold to lift it.','something could be baked in there.'])??site.ui.say('tap the box to open it; hold to lift it. something could be baked in there.');return true;}
+  // The box is here already: the intro is said once per save (playtest 4, Aaron: "I seem to be getting a 'tap the box to
+  // open it; hold it to lift it' voiceline every single time"). An older save that never heard it hears it once now;
+  // after that the square just gets a nod: he hops, the box gives a little jump where it lies.
+  if(recipe.state.intro){if(!sayIntro()){cat.playEmote('hop','box again');const e=i.worldEntry;
+   if(e&&!e.support&&world.held?.entry!==e&&e.body.isEnabled()&&e.body.isDynamic()&&!stage.reducedMotion){e.body.setLinvel({x:0,y:1.6,z:0},true);world.wake(e);}}return true;}
   busy=true;recipe.state.intro=true;recipe.save(true);const e=i.worldEntry,p=new T.Vector3().copy(e.body.translation()),q=new T.Quaternion().copy(e.body.rotation());
   e.canGrab=false;world.park(e);world.disable(e);
   const target=site.worldLayout.anchor(cat.rect.cx||stage.width/2,cat.screenOf([0,0,0]).y+8);target.y=.004;
@@ -121,7 +125,16 @@ export default function createBox(site){
    e.body.setLinvel({x:d.x/t*drag,y:vy,z:d.z/t*drag},true);e.body.setAngvel({x:F.spin[0],y:side*F.spin[1],z:-side*F.spin[2]},true);
    stats.flings++;
   }
-  e.canGrab=true;world.wake(e);world.save(e,true);busy=false;return true;
+  e.canGrab=true;world.wake(e);world.save(e,true);busy=false;
+  stage.after(stage.reducedMotion?.2:.9).then(sayIntro);   // once he is out and the box has landed: the intro, once
+  return true;
+ }
+ // The box's intro, said by the cat (text lane, e1112-32), at most once per save (store 'box.introSaid').
+ function sayIntro(){
+  if(store.get('box.introSaid'))return false;
+  store.set('box.introSaid',Date.now());introSaid++;
+  site.ui.speak?.(['tap the box to open it; hold to lift it.','something could be baked in there.'])??site.ui.say('tap the box to open it; hold to lift it. something could be baked in there.');
+  return true;
  }
  // Box-specific click/hold semantics, without changing other adapters' input.
  let cancelGrip=null;site.input.onEscape.push(()=>cancelGrip?.());site.input.onLock.push(()=>cancelGrip?.());
@@ -140,7 +153,7 @@ export default function createBox(site){
   const timer=setTimeout(begin,220),clean=()=>{clearTimeout(timer);bar?.remove();stage.canvas.removeEventListener('wheel',wheel,true);cancelGrip=null;};
   cancelGrip=()=>{canceled=true;clean();if(world.held?.entry===e)world.release();};
   return {move(v){if(canceled)return;if(Math.hypot(v.clientX-start.x,v.clientY-start.y)<8&&!moved)return;moved=true;clearTimeout(timer);begin();ray.setFromCamera(new T.Vector2(v.clientX/stage.width*2-1,1-v.clientY/stage.height*2),stage.camera);const p=ray.ray.intersectPlane(plane,new T.Vector3());if(p)world.move(p);},end(v){clean();if(held&&world.held?.entry===e)world.release();if(v.type==='pointerup'&&!held&&!moved&&!canceled)toggle();}};
- });
+ },{near:(x,y,r)=>site.worldInput.near(x,y,r)});   // grab lane: a finger's near miss on the box is the box's too (src/core/input.js GRACE)
  site.spells.square=drop;
- return {find:'box',config:BOX,drop,toggle,setOpen,recipe,get busy(){return busy;},get inside(){return inside;},get napping(){return false;},get count(){return count;},get lidMoving(){return changing;},stats,onLid:()=>{const i=keepsakes.get('box');return i?.worldEntry?onLid(i).map(e=>e.id):[];},within:()=>{const i=keepsakes.get('box');return i?.worldEntry?within(i).map(e=>e.id):[];},again:()=>site.cast('square')};
+ return {find:'box',config:BOX,drop,toggle,setOpen,recipe,get busy(){return busy;},get inside(){return inside;},get napping(){return false;},get count(){return count;},get introSaid(){return introSaid;},get lidMoving(){return changing;},stats,onLid:()=>{const i=keepsakes.get('box');return i?.worldEntry?onLid(i).map(e=>e.id):[];},within:()=>{const i=keepsakes.get('box');return i?.worldEntry?within(i).map(e=>e.id):[];},again:()=>site.cast('square')};
 }

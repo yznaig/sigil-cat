@@ -59,6 +59,9 @@ export function createOccluders(site) {
       const hit = ray.intersectObject(entry.object, true)[0]; if (!hit) continue;
       own++;
       if (x < 0 || x > stage.width || y < top || y > bottom) { hidden++; off++; continue; }
+      // (controls lane, playtest-4) the screen's unsafe sides (a notch, the Dynamic Island: stage.insets.left/right)
+      // hide like furniture, by nothing in the room: it scoots toward the middle
+      if (x < (stage.insets.left || 0) || x > stage.width - (stage.insets.right || 0)) { hidden++; continue; }
       for (const [id, covers] of list) if (covers(ray, hit.distance, x, y)) { hidden++; count.set(id, (count.get(id) || 0) + 1); break; }
     }
     let by = null, most = 0; for (const [id, k] of count) if (k > most) { most = k; by = id; }
@@ -78,7 +81,7 @@ export function createOccluders(site) {
     const mid = box.x + box.w / 2;
     let dir = cx >= mid ? 1 : -1;
     const edge = box ? (dir > 0 ? box.x + box.w + r.w / 2 : box.x - r.w / 2) : cx + dir * r.w;
-    if (edge - r.w / 2 < 8 || edge + r.w / 2 > stage.width - 8) dir = -dir;
+    if (edge - r.w / 2 < (stage.insets.left || 0) + 8 || edge + r.w / 2 > stage.width - (stage.insets.right || 0) - 8) dir = -dir;
     return dir;
   }
   function judge(entry) {
@@ -125,7 +128,7 @@ export function createOccluders(site) {
     const r = e.presentation.rect, dir = direction(e, by);
     let box = by === 'cat' ? site.cat.rect : world.entries.get(by)?.presentation?.rect;
     const x = box && box.w ? (dir > 0 ? box.x + box.w + r.w * .6 : box.x - r.w * .6) : stage.width / 2;
-    const p = site.worldLayout.anchor(Math.max(r.w / 2 + 8, Math.min(stage.width - r.w / 2 - 8, x)));
+    const p = site.worldLayout.anchor(Math.max((stage.insets.left || 0) + r.w / 2 + 8, Math.min(stage.width - (stage.insets.right || 0) - r.w / 2 - 8, x)));
     p.y = Math.max(e.body.translation().y, e.reach * .6);
     e.body.setTranslation(p, true); e.body.setLinvel({ x: 0, y: 0, z: 0 }, true); world.wake(e); stats.placed++;
   }

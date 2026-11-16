@@ -42,6 +42,11 @@ function isAir(x, y) {
   if (x < 10 || y < stage.insets.top + 8 || x > stage.width - 10 || y > stage.height - stage.insets.bottom - 8) return false;
   if (cat.hitTest(x, y) || E.harp?.whiskerAt(x, y)) return false;
   if (E.bird?.hit(x, y)) return false;
+  // a finger's press within reach of an item is the item's (grab lane, src/core/input.js GRACE): not air on a phone
+  if (MOBILE && site.worldInput?.near(x, y, 16)) return false;
+  // and the page-drawn keepsakes too (the cloud, the stickers): src/core/keepsakes.js near(), the same box test
+  // (suite fix: play phone's circle and gag-1 strokes began 12 px from the drifting cloud, so the grace gave the press to it)
+  if (MOBILE && [...keepsakes.live.values()].some((i) => !i.physical && !i.def.inert && !i.stored && i.box && x >= i.box.x - 16 && x <= i.box.x + i.box.w + 16 && y >= i.box.y - 16 && y <= i.box.y + i.box.h + 16)) return false;
   return ![...keepsakes.live.values()].some((k) => !k.def.inert && k.hits(x, y));
 }
 // Draw a sigil somewhere its first point is on empty air. Returns what the recognizer made of it.
@@ -83,7 +88,14 @@ async function swipe(pxPerSec, dir = 1) {
 }
 // Press and hold him still for a moment (not a tap): stops a coasting spin, so a swipe that happens to come to rest
 // one full turn round is not taken for the 360 no-scope.
-async function catchHim() { const m = catMid(), id = ++pointerIds; fire('pointerdown', m.x, m.y, id); await sleep(500); fire('pointerup', m.x, m.y, id, 0); await sleep(40); }
+// The press goes on his body clear of his whiskers: a press on a whisker is the harp's (a pluck, priority 60), so it
+// would not stop him and his coast could still end one full turn round (phone, 2026-11-13: a whisker swept under
+// catMid at the catch, the 360 fired, and its video held the page locked through the galaxy's swipes).
+async function catchHim() {
+  const h = cat.height, at = [0.45, 0.3, 0.2, 0.6, 0.12].map((k) => cat.screenOf([0, h * k, 0]));
+  const m = at.find((p) => cat.hitTest(p.x, p.y) && !E.harp?.whiskerAt(p.x, p.y)) || at[0], id = ++pointerIds;
+  fire('pointerdown', m.x, m.y, id); await sleep(500); fire('pointerup', m.x, m.y, id, 0); await sleep(40);
+}
 // Swipe hard, again and again, until `done()` (or `max` swipes): how a player spins him really fast. If it never
 // happens he is caught at the end, so the run's last swipe cannot fire the 360.
 async function spinHard(done, { pxPerSec = 2600, max = 40 } = {}) {

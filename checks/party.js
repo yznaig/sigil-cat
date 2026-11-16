@@ -1,7 +1,8 @@
-// Unit 8's non-world half. Real wait (playtest 3: ~9 s on the error page, then the cat pops in over it and it opens
-// like the loading screen's doors, ~10.7 s in all); native wall timer stays alive while the app is suspended.
+// Unit 8's non-world half. Real wait (playtest 4: ~4.5 s on the error page, then the cat pops in over it and stays
+// ~15 s, bonkable with a real tap / click, then it opens like the loading screen's doors, ~20.5 s in all); native wall
+// timer stays alive while the app is suspended.
 const names = ['fork drawn stroke finds and emits one event', 'party replaces the whole page with an accessible error',
-  'party freezes callbacks, world and audio', 'party waits about 9 seconds, the cat pops in over it, it opens like the doors, restored once',
+  'party freezes callbacks, world and audio', 'party waits about 4.5 seconds, the cat pops in over it and stays 15 s, it opens like the doors, restored once',
   'party restores the same page and keepsakes', 'party returns with hat, bilateral 3D confetti and a toot',
   'party effects finish without retained callbacks', 'party has no way out: Escape, Enter and a click on its Reload change nothing (e1112-33)',
   'party muted return stays silent', 'party immediate mute is silent on the first return sample'];
@@ -55,27 +56,48 @@ else {
   check(names[2], Object.values(counts).every(n=>n===0) && stage.clock===clock0 && ctx.state==='suspended' && ctx.currentTime-audio0<.12 && site.world.stats.steps===world0,
     JSON.stringify({...counts,clock:stage.clock-clock0,audio:ctx.currentTime-audio0}));
   await __shot(stage.reducedMotion?'party-error-calm':'party-error');
-  // playtest 3: at ~9 s he pops in over the page (only him: the room is still covered), then it opens down the middle
-  const errorSeconds=E.party&&(await import(new URL('src/gags/party.js',document.baseURI))).PARTY.errorSeconds;
-  const seen={popAt:null,popScale:0,doorsAt:null,doorsMoved:0,lockedThrough:true,shotPop:false,shotDoors:false,stillAt8:null};
-  await wait(()=>(performance.now()-start)/1000>8.3,12000);
-  seen.stillAt8=!!document.getElementById('party-error')&&!P.state.reopening&&!document.body.classList.contains('party-pop')&&input.locked;
+  // playtest 4: at ~4.5 s he pops in over the page (only him: the room is still covered), stays ~15 s and can be bonked
+  // (a real tap on him: the bonk sound, the count, his hop; a tap beside him does nothing), then it opens down the middle
+  const {PARTY:CFG}=await import(new URL('src/gags/party.js',document.baseURI));
+  const seen={popAt:null,popScale:0,doorsAt:null,doorsMoved:0,lockedThrough:true,shotPop:false,shotDoors:false,stillAt4:null,bonkableFrom:null,bonkableTo:null,
+    bonk:null,miss:null,keyBonk:null,openedEarly:false};
+  await wait(()=>(performance.now()-start)/1000>4.0,8000);
+  seen.stillAt4=!!document.getElementById('party-error')&&!P.state.reopening&&!document.body.classList.contains('party-pop')&&input.locked&&cat.fx.scale===1;
+  let tries=0;
   while(P.state.active){
     const t=(performance.now()-start)/1000,root=document.getElementById('party-error'),doors=root?[...root.querySelectorAll('.pe-door')]:[];
     if(document.body.classList.contains('party-pop')){seen.popAt??=t;seen.popScale=Math.max(seen.popScale,cat.fx.scale);}
+    if(P.state.bonkable){seen.bonkableFrom??=t;seen.bonkableTo=t;}
     if(root?.classList.contains('opening')){seen.doorsAt??=t;const tr=doors[0]&&getComputedStyle(doors[0]).transform,m=tr&&tr!=='none'?new DOMMatrix(tr).m41:0;seen.doorsMoved=Math.min(seen.doorsMoved,m||0);}
     if(P.state.active&&!input.locked)seen.lockedThrough=false;
     if(!stage.reducedMotion&&!seen.shotPop&&seen.popAt&&cat.fx.scale>.9&&!seen.doorsAt){seen.shotPop=true;await __shot('party-pop');}
+    // a bonk, a second after he is up: real input where he is (touch on a phone, the mouse on a desktop)
+    if(P.state.bonkable&&!seen.bonk&&t>seen.popAt+1.2&&tries<4){tries++;
+      const m=catMid(),b0={count:ui.count,taps:cat.taps,mine:P.state.bonks,emotes:cat.emoteLog.length};
+      await __pointer([{x:m.x,y:m.y}]);await wallSleep(250);
+      const hop=cat.emoteLog.slice(b0.emotes).some(s=>/^tap: hop/.test(s));
+      if(ui.count===b0.count+1)seen.bonk={count:ui.count-b0.count,taps:cat.taps-b0.taps,mine:P.state.bonks-b0.mine,hop,saved:store.get('bonks')===ui.count,level:audio.level(),at:+t.toFixed(2)};}
+    // a tap beside him: nothing (no bonk, no way out)
+    if(P.state.bonkable&&seen.bonk&&!seen.miss&&t>seen.popAt+3){const c0=ui.count;await __pointer([{x:12,y:stage.height*.5}]);await wallSleep(200);
+      seen.miss={bonks:ui.count-c0,active:P.state.active,locked:input.locked,bonkable:P.state.bonkable};}
+    // Enter bonks too (keyboard players); Escape still does nothing
+    if(P.state.bonkable&&seen.miss&&!seen.keyBonk&&t>seen.popAt+5){const c0=ui.count;await __key('Escape');await __key('Enter');await wallSleep(200);
+      seen.keyBonk={bonks:ui.count-c0,active:P.state.active,bonkable:P.state.bonkable,focus:document.activeElement?.id};}
+    if(seen.popAt&&!seen.doorsAt&&t<seen.popAt+CFG.catSeconds-.5&&(root?.classList.contains('opening')||!P.state.active))seen.openedEarly=true;
     if(!stage.reducedMotion&&!seen.shotDoors&&seen.doorsMoved<-stage.width*.15){seen.shotDoors=true;await __shot('party-doors');}
     await wallSleep(16);
   }
   await done;
   const elapsed=(performance.now()-start)/1000;
-  check('party nothing changes before ~9 s: still the error page, no skip',seen.stillAt8&&errorSeconds===9,`at 8.3 s: ${seen.stillAt8}`);
-  if(stage.reducedMotion) check('party calm: no pop, no doors; the page fades and the room is back',!site.shell.log.includes('pop over')&&seen.doorsMoved===0&&!seen.popAt,JSON.stringify(seen));
-  else check('party at ~9 s he pops in over the page, then it opens like the loading doors',seen.popAt>=8.9&&seen.popAt<9.6&&seen.popScale>.99&&seen.doorsAt>seen.popAt+.5&&seen.doorsMoved<-stage.width*.4&&site.shell.log.includes('pop over'),
+  check('party nothing changes before ~4.5 s: still the error page, no skip',seen.stillAt4&&CFG.errorSeconds===4.5&&CFG.catSeconds===15,`at 4.0 s: ${seen.stillAt4}`);
+  check('party a real tap on him over the error page is a bonk: the count, the hop, saved',!!seen.bonk&&seen.bonk.count===1&&seen.bonk.taps===1&&seen.bonk.mine===1&&seen.bonk.hop&&seen.bonk.saved&&(audio.state().muted||seen.bonk.level>0),JSON.stringify(seen.bonk));
+  check('party a tap beside him and Escape do nothing; Enter bonks',!!seen.miss&&seen.miss.bonks===0&&seen.miss.active&&seen.miss.locked&&seen.miss.bonkable&&!!seen.keyBonk&&seen.keyBonk.bonks===1&&seen.keyBonk.bonkable,JSON.stringify({miss:seen.miss,key:seen.keyBonk}));
+  check('party he stays ~15 s over the page, bonkable all that time, before it opens',!seen.openedEarly&&seen.bonkableFrom-seen.popAt<1.2&&seen.bonkableTo-seen.popAt>=14.3&&seen.doorsAt-seen.popAt>=14.6&&seen.doorsAt-seen.popAt<=15.8,
+    JSON.stringify({pop:seen.popAt?.toFixed(2),bonkable:[seen.bonkableFrom?.toFixed(2),seen.bonkableTo?.toFixed(2)],doors:seen.doorsAt?.toFixed(2)}));
+  if(stage.reducedMotion) check('party calm: no pop, no doors; he fades in, stays, the page fades and the room is back',!site.shell.log.includes('pop over')&&site.shell.log.includes('calm over')&&seen.doorsMoved===0,JSON.stringify(seen));
+  else check('party at ~4.5 s he pops in over the page, then later it opens like the loading doors',seen.popAt>=4.4&&seen.popAt<5.1&&seen.popScale>.99&&seen.doorsAt>seen.popAt+.5&&seen.doorsMoved<-stage.width*.4&&site.shell.log.includes('pop over'),
     JSON.stringify({...seen,popAt:seen.popAt?.toFixed(2),doorsAt:seen.doorsAt?.toFixed(2),doorsMoved:seen.doorsMoved.toFixed(0)}));
-  check(names[3], elapsed>=9.4&&elapsed<=12.5 && seen.lockedThrough && done===duplicate && P.state.returns===1 && !input.locked, `${elapsed.toFixed(3)}s; returns ${P.state.returns}`);
+  check(names[3], elapsed>=19.9&&elapsed<=23 && seen.lockedThrough && done===duplicate && P.state.returns===1 && !input.locked, `${elapsed.toFixed(3)}s; returns ${P.state.returns}`);
   check(names[4], document.title===originalTitle && body.every(e=>e.isConnected&&!e.inert) && document.activeElement===focus &&
     saved.every(s=>keepsakes.get(s.id)===s.i && s.i.x===s.x && s.i.y===s.y),
     JSON.stringify({title:document.title===originalTitle,inert:body.filter(e=>!e.isConnected||e.inert).map(e=>e.id||e.tagName),focus:document.activeElement?.id,moved:saved.filter(s=>keepsakes.get(s.id)!==s.i||s.i.x!==s.x||s.i.y!==s.y).map(s=>s.id)}));

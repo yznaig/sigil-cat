@@ -6,7 +6,15 @@ import {PLAYER,CLONE_IMAGES,flightLayout} from './config.js';
 export {loadFlightArt} from './art.js';
 // The trailer lands each word on Aaron's cinematic boom (playtest-2; tools/audio/make-boom.py).
 export const SOUNDS = {flap:'assets/audio/designed/bird-flap.wav',boom:'assets/audio/designed/bird-boom.wav',pop:'assets/audio/designed/controller-pop.wav'};
-export const WORDS = ['YOU','JUST','LOST','THE','GAME'];
+// Playtest 4 (trailer lane; Aaron: "'THE GAME' should be merged into just one slam, so 'YOU' 'JUST' 'LOST' 'THE GAME' with
+// THE in red"): four slams, one boom each. The first three keep the 900ms grid; the payoff skips one beat (a held breath)
+// so THE GAME lands on the next bar's downbeat, the same moment GAME landed before.
+export const WORDS = ['YOU','JUST','LOST','THE GAME'];
+export const RED_WORD = 'THE';
+// Seconds from each slam to the next, then from the last slam to the fade home. Aaron: "should linger on its final dark
+// screen for a couple more seconds before fading back to the sigil cat" — the quiet tail was 1.8 s, now 3.8 s.
+export const SLAM_GAPS = [.9,.9,1.8];
+export const FINAL_HOLD = 3.8;
 css('bird-screen',`
 @font-face{font-family:BirdTrailer;src:url('assets/bird/Anton-Regular.ttf') format('truetype');font-display:swap}
 #bird-screen{position:fixed;inset:0;z-index:1100;opacity:0;transition:opacity .22s ease;background:#f1e7d8;touch-action:none;color:#302f29;overflow:hidden;isolation:isolate}
@@ -22,6 +30,8 @@ css('bird-screen',`
 #bird-screen .bird-over[hidden]{display:none}
 #bird-screen.trailer{background:radial-gradient(ellipse at center,#292722 0%,#11110f 57%,#050505 100%);color:#f4ecdc}
 #bird-screen .trailer-word{position:absolute;inset:0;display:grid;place-items:center;margin:0;font:clamp(110px,25vw,320px)/1 BirdTrailer,Impact,sans-serif;letter-spacing:-.025em;text-shadow:0 4px 0 #b0a795,0 16px 50px #0008;opacity:0;will-change:transform,opacity}
+#bird-screen .trailer-word.final{font-size:clamp(84px,16.5vw,250px);white-space:nowrap}
+#bird-screen .trailer-word .red{color:#e2261b;text-shadow:0 4px 0 #6f100b,0 16px 50px #0008}
 #bird-screen.trailer button{color:#c2baac;border-color:#ddd3;background:#151512}
 @media(prefers-reduced-motion:reduce){#bird-screen{transition-duration:.18s}}
 `);
@@ -35,9 +45,8 @@ export function openScreen(site,kind,onClose) {
   let best=Math.max(0,Number(store?.get('flappy.best',0))||0);
   const saved={focus:document.activeElement,children:[...document.body.children].map(n=>[n,n.inert]),
     animations:document.getAnimations().filter(a=>a.playState==='running')};
-  input.lock('bird',true);
-  const resume=pausePageCallbacks();saved.animations.forEach(a=>a.pause());saved.children.forEach(([n])=>n.inert=true);
-  let closed=false,raf=0,last=0,elapsed=0,closing=null,deathAt=null,game=null,retries=0,wordIndex=-1,nextWordAt=.32,wordAnimation=null,resized=false,hiddenAudio=null;
+  // The page is frozen at the end of this function, in one guarded step (playtest 4, flappybreak lane: see restore()).
+  let resume=null,closed=false,raf=0,last=0,elapsed=0,closing=null,deathAt=null,game=null,retries=0,wordIndex=-1,nextWordAt=.32,wordAnimation=null,resized=false,hiddenAudio=null;
   const timers=new Set(), voices=new Set(), beats=[];
   const later=(fn,ms)=>{const id=wallClock.setTimeout(()=>{timers.delete(id);fn();},ms);timers.add(id);return id;};
   const root=document.createElement('section');root.id='bird-screen';root.className=kind==='trailer'?'trailer':'';
@@ -69,9 +78,6 @@ export function openScreen(site,kind,onClose) {
     retryButton.onclick=()=>retry();giveUpButton.onclick=()=>close(true);
     resize();
   } else {word=document.createElement('p');word.className='trailer-word';word.setAttribute('aria-live','off');root.append(word);}
-  document.body.append(root);
-  root.tabIndex=-1;root.focus({preventScroll:true});
-  later(()=>root.classList.add('shown'),16);
   function play(src,gain=1) {const v=audio.play(src,{gain});if(v){voices.add(v);v.addEventListener('ended',()=>voices.delete(v),{once:true});}return v;}
   function flap(){if(game?.flap()){instruction.hidden=true;play(SOUNDS.flap,.55);}}
   function retry(){
@@ -86,21 +92,41 @@ export function openScreen(site,kind,onClose) {
     if(e.key==='Tab'){e.preventDefault();const ring=[sound,exit,...(over&&!over.hidden?[retryButton,giveUpButton]:[])];ring[(ring.indexOf(document.activeElement)+(e.shiftKey?ring.length-1:1))%ring.length].focus();}
   });
   // Escape (and the return button) leave; once he has died in this sitting, leaving is giving up.
-  const escape=()=>close(died);input.onEscape.push(escape);
+  const escape=()=>close(died);
+  // Playtest 4 (flappybreak lane; Aaron, on his phone: "after I played Flappy Bird ... my drawing lines stopped
+  // disappearing. The cat is no longer bobbing. I can't actually move my items"). Every exit (give up, return, Escape,
+  // the trailer's end, a failed open) goes through this once, and each frozen part is given back in its own guarded
+  // step, so one that throws cannot keep the rest frozen. The page's first frame back runs at dt 0 through
+  // stage.restartClock(): the old timeScale-0-then-restore, run after the turn overlay's own release while the game
+  // was open, read back the 0 and kept it for good (the page drew but its clock never moved).
+  let restored=false;
+  function restore(){
+    if(restored)return;restored=true;
+    const step=f=>{try{f();}catch(e){console.error('flappy restore',e);}};
+    step(()=>{wallClock.cancelAnimationFrame(raf);raf=0;for(const t of timers)wallClock.clearTimeout(t);timers.clear();});
+    step(()=>{for(const v of voices){try{v.stop();}catch{}} voices.clear();});
+    step(()=>wordAnimation?.cancel());step(()=>root.remove());
+    step(()=>document.removeEventListener('visibilitychange',visibility));step(()=>removeEventListener('resize',onResize,true));
+    step(()=>{const i=input.onEscape.indexOf(escape);if(i>=0)input.onEscape.splice(i,1);});
+    step(()=>saved.children.forEach(([n,inert])=>n.inert=inert));
+    step(()=>saved.animations.forEach(a=>{if(a.playState==='paused')a.play();}));
+    step(()=>{hiddenAudio?.();hiddenAudio=null;});
+    step(()=>stage.restartClock());step(()=>{const r=resume;resume=null;r?.();});
+    step(()=>{if(resized)dispatchEvent(new Event('resize'));});
+    step(()=>input.lock('bird',false));
+  }
   function finish(died){
-    if(closed)return;closed=true;wallClock.cancelAnimationFrame(raf);for(const t of timers)wallClock.clearTimeout(t);timers.clear();
-    for(const v of voices){try{v.stop();}catch{}} voices.clear();wordAnimation?.cancel();root.remove();
-    document.removeEventListener('visibilitychange',visibility);removeEventListener('resize',onResize,true);
-    input.onEscape.splice(input.onEscape.indexOf(escape),1);saved.children.forEach(([n,inert])=>n.inert=inert);
-    saved.animations.forEach(a=>{if(a.playState==='paused')a.play();});hiddenAudio?.();
-    const scale=stage.timeScale;stage.timeScale=0;const rebase=()=>{stage.timeScale=scale;stage.onFrame.splice(stage.onFrame.indexOf(rebase),1);};stage.onFrame.push(rebase);
-    resume();if(resized)dispatchEvent(new Event('resize'));input.lock('bird',false);
+    if(closed)return;closed=true;restore();
     if(saved.focus?.isConnected&&!saved.focus.inert)saved.focus.focus({preventScroll:true});
     onClose(died);return true;
   }
   function close(died){if(closed||closing!==null)return;closing={at:elapsed,died};root.classList.remove('shown');}
   function showWord(index){
-    wordIndex=index;word.textContent=WORDS[index];word.dataset.word=WORDS[index];wordAnimation?.cancel();
+    wordIndex=index;word.dataset.word=WORDS[index];word.classList.toggle('final',index===WORDS.length-1);wordAnimation?.cancel();
+    // One line per slam; the red word sits in its own span (THE GAME stays one slam, one boom).
+    // One wrapping span keeps the line a single grid item (bare text and a span would stack as two).
+    const line=document.createElement('span');word.replaceChildren(line);
+    WORDS[index].split(' ').forEach((w,i)=>{if(i)line.append(' ');line.append(w===RED_WORD?Object.assign(document.createElement('span'),{className:'red',textContent:w}):w);});
     const frames=stage.reducedMotion?[{opacity:0},{opacity:1,offset:.15},{opacity:1,offset:.8},{opacity:0}]:
       [{opacity:0,transform:'scale(1.38) translateY(-5px)'},{opacity:1,transform:'scale(1) translateY(3px)',offset:.09},
        {opacity:1,transform:'scale(1.025) translateY(-1px)',offset:.17},{opacity:1,transform:'scale(1.04)',offset:.78},{opacity:0,transform:'scale(1.055)'}];
@@ -109,6 +135,9 @@ export function openScreen(site,kind,onClose) {
   }
   function tick(now){
     raf=0;if(closed||document.hidden)return;
+    // Held still while the page is frozen over it (a phone turned upright mid-game: the "flip sideways" overlay covers
+    // the game and stops the sound), as the room is; it picks up where it was when the phone turns back.
+    if(site.freeze?.frozen){last=0;raf=wallClock.requestAnimationFrame(tick);return;}
     const dt=last?Math.max(0,(now-last)/1000):0;last=now;elapsed+=dt;
     if(closing!==null){if(elapsed-closing.at>=.24){finish(closing.died);return;}}
     else if(kind==='game'){
@@ -119,10 +148,11 @@ export function openScreen(site,kind,onClose) {
       drawFlight(c,game,elapsed,stage.reducedMotion,view,overAt===null?0:stage.reducedMotion?1:(elapsed-overAt)/.25,best);
       if(score.textContent!==String(game.score)){score.textContent=game.score;site.achievements?.score(game.score);}
     }else {
-      // Five 900ms beats, then an entire quiet beat before the fade home.
+      // Four slams on SLAM_GAPS, then FINAL_HOLD of quiet dark before the fade home.
       // Keep every word even after a long frame, never compress missed beats into flashes.
-      if(wordIndex<4&&elapsed>=nextWordAt){showWord(wordIndex+1);nextWordAt=elapsed+.9;}
-      if(wordIndex===4&&elapsed>=nextWordAt+.9)close(true);
+      const lastSlam=WORDS.length-1;
+      if(wordIndex<lastSlam&&elapsed>=nextWordAt){showWord(wordIndex+1);nextWordAt=elapsed+(SLAM_GAPS[wordIndex]??FINAL_HOLD);}
+      else if(wordIndex===lastSlam&&elapsed>=nextWordAt)close(true);
     }
     raf=wallClock.requestAnimationFrame(tick);
   }
@@ -130,8 +160,13 @@ export function openScreen(site,kind,onClose) {
     if(document.hidden){wordAnimation?.pause();hiddenAudio=audio.suspend('bird-hidden');}
     else {hiddenAudio?.();hiddenAudio=null;wordAnimation?.play();raf=wallClock.requestAnimationFrame(tick);}}
   function onResize(e){resized=true;e.stopImmediatePropagation();resize();}
-  document.addEventListener('visibilitychange',visibility);addEventListener('resize',onResize,true);
-  raf=wallClock.requestAnimationFrame(tick);
+  // Shown and frozen in one guarded step: a failure before it leaves nothing behind, one inside it is undone.
+  try{
+    document.body.append(root);root.tabIndex=-1;root.focus({preventScroll:true});later(()=>root.classList.add('shown'),16);
+    input.lock('bird',true);resume=pausePageCallbacks();saved.animations.forEach(a=>a.pause());saved.children.forEach(([n])=>n.inert=true);
+    input.onEscape.push(escape);document.addEventListener('visibilitychange',visibility);addEventListener('resize',onResize,true);
+    raf=wallClock.requestAnimationFrame(tick);
+  }catch(e){closed=true;restore();throw e;}
   const api={root,game,beats,close,retry,get view(){return {...view};},get elapsed(){return elapsed;},get active(){return !closed;},get callbacks(){return Number(!!raf)+timers.size;},get word(){return WORDS[wordIndex]??null;},
     get over(){return overAt!==null;},get died(){return died;},get retries(){return retries;},get best(){return best;}};
   return api;

@@ -78,8 +78,10 @@ export function createHats(site){
  function place(){
   root.position.set(0,0,0);root.updateMatrixWorld(true);
   const zero=stage.toScreen(new T.Vector3()),ps=vertices.map(v=>stage.toScreen(v.clone().applyQuaternion(root.quaternion))),left=Math.min(...ps.map(p=>p.x))-zero.x;
-  root.position.copy(site.worldLayout.anchor(14-left,site.worldLayout.floorY()-12));root.updateMatrixWorld(true);
-  for(let n=0;n<3;n++){const actual=vertices.map(v=>stage.toScreen(v.clone().applyMatrix4(root.matrixWorld))),min=Math.min(...actual.map(p=>p.x)),base=stage.toScreen(root.position);root.position.copy(site.worldLayout.anchor(base.x+18-min,base.y));root.updateMatrixWorld(true);}
+  // (controls lane, playtest-4: its left edge 18 px inside the safe left, stage.insets.left: clear of a notch or Dynamic Island)
+  const L=stage.insets.left||0;
+  root.position.copy(site.worldLayout.anchor(L+14-left,site.worldLayout.floorY()-12));root.updateMatrixWorld(true);
+  for(let n=0;n<3;n++){const actual=vertices.map(v=>stage.toScreen(v.clone().applyMatrix4(root.matrixWorld))),min=Math.min(...actual.map(p=>p.x)),base=stage.toScreen(root.position);root.position.copy(site.worldLayout.anchor(base.x+L+18-min,base.y));root.updateMatrixWorld(true);}
  }
  function layout(){
   if(!root||!picture)return;const key=world.layoutKey().join(',');if(key===last)return;last=key;
@@ -169,7 +171,7 @@ export function createHats(site){
   if(old)supports.mount(hats.get(old).worldEntry,'rack',old,{animate:false});
   if(name)supports.mount(hats.get(name).worldEntry,'cat-hat','hat',{animate:false});changed();return true;}
  async function hang(name,animate=true){await ready();const e=hats.get(name)?.worldEntry;return !!e&&supports.mount(e,'rack',name,{animate});}
- defining=true;keepsakes.define({id:'rack',label:'the hat rack',kind:'gl',fixed:true,size:.42,aspect:1.9,home:()=>keepsakes.toUnits(Math.max(46,stage.width*.07),site.worldLayout.floorY()),
+ defining=true;keepsakes.define({id:'rack',label:'the hat rack',kind:'gl',fixed:true,size:.42,aspect:1.9,home:()=>keepsakes.toUnits((stage.insets.left||0)+Math.max(46,(stage.width-(stage.insets.left||0)-(stage.insets.right||0))*.07),site.worldLayout.floorY()),   // controls lane: inside the safe left
   object:(_,i)=>{i.physical=true;i.restored=defining;const g=new T.Group();i.worldTask=Promise.resolve().then(()=>ready());return g;},place(){},tap:()=>site.eggs.hat?.cycle()});defining=false;
  for(const name of HAT_NAMES)keepsakes.define({id:'rack/'+name,label:name+' hat',kind:'gl',size:.32,aspect:1,home:()=>({x:0,y:.2}),object:(_,i)=>buildHat(name,i),place(){},tap:()=>site.eggs.hat?.wear(worn()===name?null:name),removed(i){world.remove(i.id);site.worldLayout.remove(i.id);i.picture?.dispose();i.art?.dispose();hats.delete(name);changed();}});
  stage.onResize.push(layout);

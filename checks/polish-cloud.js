@@ -25,6 +25,8 @@ await __shot('polish-cloud-home');
 // Playtest-2 (physics lane): the cloud now drifts left to right across the page all the time, so "in place" means
 // no further than that drift carried it (and no second arrival).
 const {BOLT}=await import('/src/eggs/bolt.js');
+// Touchfeel lane, playtest 4: the drift is a back-and-forth sweep between the screen's edges (src/eggs/bolt.js), at
+// most its top speed (half the sweep's span x pi / BOLT.cloud.legSeconds per second).
 const x0=cloud.box.x,t0=stage.clock;site.cast('zigzag');await until(()=>!E.bolt.busy,8000);await sleep(400);
-const drift=stage.reducedMotion?0:(stage.width+cloud.box.w+60)/BOLT.cloud.crossSeconds*(stage.clock-t0);
-check('a second bolt darkens the cloud in place, no second arrival',!cloud.arrival&&Math.abs(cloud.box.x-x0-drift)<cloud.u*.2,JSON.stringify({moved:cloud.box.x-x0,drift}));
+const drift=stage.reducedMotion?0:(stage.width-cloud.box.w-2*BOLT.cloud.edge)/2*Math.PI/BOLT.cloud.legSeconds*(stage.clock-t0);
+check('a second bolt darkens the cloud in place, no second arrival',!cloud.arrival&&Math.abs(cloud.box.x-x0)<=drift+cloud.u*.2,JSON.stringify({moved:cloud.box.x-x0,drift}));

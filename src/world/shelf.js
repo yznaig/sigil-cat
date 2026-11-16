@@ -138,9 +138,15 @@ function createShelf(site){
   const key=[...world.layoutKey(),...Object.values(SHELF_VIEW)].join(",");if(last===key){applyArrival();return;}last=key;
   // One shelf everywhere (phones play on their side, shell lane playtest-2); on a short screen it also keeps to
   // SHELF_VIEW.ofHeight x the height, so it and its hooks fit (.5: the shell lane's landscape layout).
-  const width=Math.min(stage.width*SHELF_VIEW.width,SHELF_VIEW.maxWidth,stage.height*SHELF_VIEW.ofHeight),ppu=width/1.42;
+  // (controls lane, playtest-4: drawn at the zoom like the rest of the room, never past .4 of the width. On a short
+  // screen it hangs level with his head, so a zoom past 1 grows it only as far as his whiskers' reach (.8 units each
+  // side of him) allows, and may take it down to .85 of its size for that: a notched phone at a close zoom.)
+  const base=Math.min(stage.width*SHELF_VIEW.width,SHELF_VIEW.maxWidth,stage.height*SHELF_VIEW.ofHeight),z=stage.zoom||1;
+  let width=Math.min(stage.width*.4,base*z);
+  if(z>1&&stage.height<=SHELF_VIEW.short){const catLeft=stage.toScreen(new T.Vector3(0,.5,0)).x-.8*stage.pxPerUnit(),room=catLeft-10-((stage.insets.left||0)+18+stage.width*SHELF_VIEW.dx);width=Math.min(width,Math.max(base*.85,room));}
+  const ppu=width/1.42;
   const distance=stage.height/(2*Math.tan(stage.camera.fov*Math.PI/360)*ppu),normal=stage.camera.getWorldDirection(new T.Vector3()),centre=stage.camera.position.clone().addScaledVector(normal,distance);
-  const x=18+width/2+stage.width*SHELF_VIEW.dx,y=stage.insets.top+Math.min(105,stage.height*.2)+stage.height*(stage.height<=SHELF_VIEW.short?SHELF_VIEW.dyShort:SHELF_VIEW.dy);
+  const x=(stage.insets.left||0)+18+width/2+stage.width*SHELF_VIEW.dx,   /* controls lane: inside the safe left */ y=stage.insets.top+Math.min(105,stage.height*.2)+stage.height*(stage.height<=SHELF_VIEW.short?SHELF_VIEW.dyShort:SHELF_VIEW.dy);
   const plane=new T.Plane().setFromNormalAndCoplanarPoint(normal,centre);root.position.copy(stage.ray(x,y).intersectPlane(plane,new T.Vector3()));
   // Square to the screen (SHELF_VIEW.square), or facing the camera across (the old look), then SHELF_VIEW.yawDeg
   // further. A shallow display tilt reveals the recessed tray and padded saddles.
@@ -154,7 +160,7 @@ function createShelf(site){
    root.userData.rollDeg=+(r1*180/Math.PI).toFixed(2);}
   if(entry){entry.body.setTranslation(root.position,false);entry.body.setRotation(root.quaternion,false);}
   picture?.draw(true);
-  const r=picture.rect,dx=Math.max(0,14-r.x),dy=Math.max(0,stage.insets.top+12-r.y);if(dx||dy){root.position.add(stage.onWall(x+dx,y+dy,root.position.z).sub(stage.onWall(x,y,root.position.z)));root.updateMatrixWorld(true);if(entry)entry.body.setTranslation(root.position,false);picture.draw(true);}
+  const r=picture.rect,dx=Math.max(0,(stage.insets.left||0)+14-r.x),dy=Math.max(0,stage.insets.top+12-r.y);if(dx||dy){root.position.add(stage.onWall(x+dx,y+dy,root.position.z).sub(stage.onWall(x,y,root.position.z)));root.updateMatrixWorld(true);if(entry)entry.body.setTranslation(root.position,false);picture.draw(true);}
   home=root.position.clone();homeRect={...picture.rect};
   // Its soft shadow on the wall (e1113-30): repainted for the new turn (the light meets it at another angle), static after.
   wall?.paint();

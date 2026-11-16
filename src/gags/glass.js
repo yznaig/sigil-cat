@@ -186,7 +186,9 @@ export default function createGlass(site) {
   keepsakes.define({
     // About twice the floor area it had (e1111-58: 1.414 x 1.414). Drawn first of the floor things (renderOrder below
     // every floor shadow's -5), so shadows land on the water.
-    id: 'puddle', label: 'the puddle', kind: 'gl', fixed:true, inert:true, size: 0.7 * WIDE, aspect: 0.36, anchor: 'center', home: () => ({ x: 0.3, y: -0.45 }),
+    id: 'puddle', label: 'the puddle', kind: 'gl', fixed:true, inert:true, size: 0.7 * WIDE, aspect: 0.36, anchor: 'center',
+    // (controls lane, playtest-4: at a close zoom .45 below his feet reaches under the footer; it stays 4 px above it)
+    home: () => ({ x: 0.3, y: Math.max(-0.45, keepsakes.toUnits(0, stage.height - stage.insets.bottom - 4 - (keepsakes.get('puddle')?.box?.h ?? 50) / 2).y) }),
     object() {
       const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material(PUDDLE_FRAG, pu));
       m.frustumCulled = false; m.renderOrder = PUDDLE_ORDER;

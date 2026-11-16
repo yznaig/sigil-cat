@@ -5279,3 +5279,372 @@ calm phone, shell-turn phone-portrait 7/7, shell-books phone, text phone: all pa
 Shots: `docs/shots/fullscreen/fullscreen-step-phone.jpg`, `fullscreen-button-phone.jpg`, `fullscreen-hint-phone.jpg`.
 Not testable here: a real phone. Android Chrome should behave as headless Chromium did; iPhone Safari's home-screen
 launch and the orientation lock need a device.
+
+## Grab lane (2026-11-13)
+Aaron: "mobile users should get a little bit more grace with grabbing items, some extra grab area perhaps".
+- **Where it lives.** One place, `src/core/input.js` (the press router), so every taker of items gets it the same way
+  and taps get it exactly as drags do. A press is first routed as before, exactly, through every taker down to the
+  air's (sigil strokes, priority 10). Only when a touch or pen press (or one of unknown kind on a coarse-pointer
+  screen) has missed them all, and just before the air would take it, is it offered round: probe points on rings 4,
+  8, 12, 16 px out (a point every ~4 px, nearest ring first), and at each point the takers are walked in their usual
+  priority order, so what is in front still wins. The first taker that takes a probe point gets the press, and its
+  move/end events are read shifted by the same offset (a Proxy over the event): the item keeps the grip it was given
+  at its edge, so it does not jump to the finger on the first move, and a tap's position is the item's.
+- **Who opts in.** `input.claim(priority, fn, {near, covers})`. `near(x, y, r)`: the world's items
+  (`world-input.js`: any grabbable entry whose projected bounds are within r; over-generous is fine, the probes ask
+  the world's own pick), the box's own press (`box.js`, so a near miss on the box is its tap-to-open / hold-to-lift,
+  not a generic lift), and the page-drawn keepsake layers (`keepsakes.js`). `covers(x, y)`: ground that is never given
+  away; a probe point there ends that point's walk, so no grace reaches through him to an item behind: the cat
+  (`input.js`), his whiskers (`harp.js`), the bird's circle (`bird.js`, already 24 px generous), the idea bulb
+  (`lamp.js`, already 10 px). The rack's post keeps its own 14 px window and takes no grace.
+- **Not stolen.** Him, his whiskers, the bird, the bulb: an exact press on them is routed before grace is ever asked,
+  and their ground stops the probes. UI buttons, the fullscreen button and the books are page elements above the
+  canvas: their presses never reach it. Open air far from everything pays one cheap `near()` per item taker and draws
+  as before; past 16 px of everything it is air.
+- **The radius: 16 CSS px.** A fingertip's contact is ~8-10 mm (~30-40 CSS px) and the reported point wanders ~2-3 mm
+  (8-12 px) from the aim, with the edge under the finger; 16 px covers that with margin and makes the smallest items
+  (egg, top: ~30-38 px across on an 844x390 phone) ~60-70 px targets, past the 44-48 px platform guidelines. More
+  starts eating sigil strokes begun beside things and blurs neighbours on the board. CSS px, so the same physical reach
+  at any dpr. `GRACE` is exported from `input.js`.
+- **Mouse unchanged.** `pointerType === 'mouse'` never gets grace, on any screen.
+- **Frame cost flat.** Nothing per frame: the search runs only on a touch pointerdown that missed everything, and
+  only when an item is within reach (at most 50 probes, each a world pick, ~0.01 ms measured on the phone fixture).
+- **Checks.** New `checks/grab-grace.js` (wired into `run-all.sh` beside cards-tap, desktop + phone). `checks/lib.js`
+  `isAir()` on a phone now also skips points within 16 px of a world item: a finger's press there is the item's, so
+  the sigil helpers start strokes clear of it (what a player would see happen).
+- **Run (under load 10-15, another suite running).** grab-grace phone 11/11 and desktop 11/11 (touch: egg, pinned
+  postcard, racked party hat, shelved tin lifted from 8 px outside; a near-miss tap flips the pinned postcard and
+  opens the box; a press on him 2 px from the egg turns him; open air and 22 px out draw. Mouse: none of the near
+  misses take anything, each starts a stroke). Touched checks, phone + desktop, all pass: gags-harp, gags-box,
+  gags-lamp, cards-tap, world-small, world-shelf-drag-all, world-rack-off, look-pet-pass, look-use, achievements,
+  world-board, sky (phone failed its swipe-speed gates once at load 15 and passed on the rerun). bird fails on both
+  sizes on one gate this lane does not touch: "between visits ... schedule.due <= 300000" while `VISITS.gap` is
+  240-600 s since 6f2eaa3 (bird rarer), so `due` reads ~450 s; a stale gate from that commit, left for its owner.
+  Not run: the full suite.
+
+## Suite fix: play and UI groups (2026-11-13)
+Branch `sc/p4-fixplay` from `sc/p3-polish` (c5d8035, newer than the final suite's 986e9ad). The final suite's failures in
+my groups, plus the groups whose timings changed tonight without a run, and tonight's new checks, each run on this build
+(port 18892, headless, desktop 1280x900 dpr 1 / phone 844x390 dpr 2, args as `checks/run-all.sh`; load 6-20, other
+lanes and a parallel physics fix lane running). The full suite was not run. No runtime code changed: every fix is a check.
+
+| Group | Result here | Class | What changed |
+|---|---|---|---|
+| furniture-p2-desktop | PASS | fixed since (707cfb3) | Suite: timed out waiting for the Platinum badge; `src/world/platinum.js` did not parse on 986e9ad. Parses now; the run passes. |
+| world-presentation desktop, phone | PASS, PASS | fixed since (a8c40ac) | The stale reference (no wall shadow); already fixed. |
+| world-water-phone | PASS (+ desktop, both calm) | flaky check | See *The water rotor* below. `checks/world-water.js`. |
+| sky-phone | PASS 8 of 8 after (desktop too); 8 of 26 failed before | flaky check (not load, not the game) | See *The galaxy on a phone* below. `checks/lib.js` `catchHim`. |
+| bird, bird-visits (+ reloads) | bird PASS both; bird-visits desktop failed once, PASS after | stale timing (6f2eaa3) | See *The bird's egg* below. `checks/bird-visits.js`. |
+| kitchen-egg (+ reload), egg-cup (+ reload) | PASS both sizes | | |
+| box-open-tiles | PASS both | | |
+| platinum-earn circle / flappy / lost (+ reloads) | PASS all six | | |
+| fullscreen api (+ reload), later calm, noapi, standalone, portrait, desktop | PASS all six | | |
+| grab-grace | PASS both | | |
+
+### The galaxy on a phone
+Suite: "about seven seconds of hard swiping ... 91 swipes at 2600 px/s, 11.64 s FAIL", the rest of the galaxy lines
+failing after it. Reproduced here in 8 of 26 phone runs (none of them load-starved), so I traced the tally, the input lock and each catch:
+- The swipes reach the galaxy on a phone: every run, passing or failing, that was not locked opened it at 7.04-7.15 s
+  (game clock equal to real time within 0.01 s, ~60 fps, also at load 17). Nothing for a phone player to hit; the
+  swipe path is fine. The grab lane's `isAir()` is not involved (the swipes and catches never ask it).
+- In the failing runs the page was locked from the first swipe for ~10 s: the 360 no-scope's video (lock
+  `noscope-video`, fired at 420-440 degrees). It fired from the coast after the four-second section's last swipe,
+  which `catchHim()` is there to stop. The catch had not stopped him (his speed 16.9 rad/s before, 2.5 after):
+  a whisker had swept under the press point (`E.harp.whiskerAt(catMid)` true in each failing catch, false in each
+  good one). A still press on a whisker is the harp's (priority 60, a pluck on release), not the cat's. The video
+  then held the page for ~33 s, past the check's 20 s wait to settle, into the swipes.
+- **Change (check only).** `catchHim()` presses on his body clear of his whiskers (the first of 45, 30, 20, 60, 12 %
+  of his height that is on him and not on a whisker), as a player catching him by the body would. Gates unchanged.
+- After: sky phone 8 of 8 PASS (7.11-7.16 s), desktop PASS (7.18 s), at load 15-18.
+- **For Aaron (a question, not built):** a press on a fast-spinning cat that lands on a whisker plucks it and he keeps
+  spinning. That is the harp's rule ("a tap on a whisker is a pluck") and matches how it was built, but a player
+  trying to stop him by pressing his face can miss the stop and, by chance, get the 360. If he wants a press to catch
+  him whenever he is spinning fast, that is a one-line harp change for the gags owner.
+
+### The water rotor
+Suite: "water visual rotor changes only with motion enabled: FAIL", phone, no detail. The line compared the top's
+orientation before and after 30 s. The charged rotor's angle is 20 rad/s times the game clock, mod a full turn, so
+after 30 s it lands within .05 rad of where it started about 1 run in 60 (0.1 / 2 pi; it was the same chance at the old
+12 rad/s). Not reproduced in 5 runs here; nothing else in the run failed. **Change (check only):** the line also
+samples the orientation over two 70 ms gaps after the 30 s; with motion one of the three steps must exceed .05 rad,
+calm none may move (1e-6). It prints the steps (`[0.739,1.666,1.334]` moving, `[0,0,0]` calm).
+
+### The bird's egg
+`bird-visits-desktop` failed once at load 16: "every arrival lets an egg go when there is none". Since 6f2eaa3 the
+bird flies in for `VISITS.arrive` (2.4 s) and lets its egg go `VISITS.eggAfter` (0.4 s) after, where it used to drop
+it on arrival, but the check's two waits for the egg stayed 6 s, so their margin fell from 6 s to 3.2 s. Stale
+timing, not a game bug. **Change (check only):** each wait is 6 s plus the arrival and the egg's delay, read from
+`VISITS` (1 s arrival when calm). PASS after on desktop (load 20) and phone. The `due <= 300000` gate the grab lane saw
+was already fixed in c5d8035; bird passes at both sizes.
+
+## Suite fix: physics groups (2026-11-13)
+Branch `sc/p4-fixphys` from `sc/p3-polish` c5d8035 (newer than the suite's 986e9ad). Each failing group of the final
+suite rerun with run-all's own line, port 18891, load 6-18 throughout (other sessions' suites running).
+
+| Group | Rerun here | Verdict | Change |
+|---|---|---|---|
+| world-rack desktop + phone, wizard 100 drops | failed the same seeds (35, 37) before the fix: deterministic | **real bug** (physics lane item 5) | REST lift capped, see 1 |
+| world-cake-solids desktop, recipe-flour seed 67 | passed twice (before and after the fix) | not reproduced; the check's start state depends on wall clock (items given async), so the suite's run can't be replayed. The only never-sleep mechanism found in these drop checks is 1 | none beyond 1 |
+| world-final-rest desktop (cost) | passed: full frame delta .1 / 0 ms, GPU .087 / .088 (gate .1) | **load**: the suite started it at load 7.35 (just under run-all's quiet bar, so no retry) and load rose to 9-12 during it | none |
+| world-small-drops desktop, eyes energy .0101 | fails identically every run (.010145): deterministic, not load | **real, Rapier's**, see 2; **not fixed** | none (open) |
+| physics-p3 desktop chest line | passed (twice) | flake (flour not yet asleep under load), as noted before | none |
+| play desktop "where they were left" | passed | flake | none |
+| play phone | failed differently on this branch: the circle and gag-1 strokes "no stroke taken" | **stale check helper** (grab lane, newer than the suite), see 3 | `checks/lib.js` |
+| play phone "where they were left" | after 3, three full runs: 2 pass (the last one the whole group, ALL lines), 1 fail on a different body (shards, kept at y .946 in the air); one other run lost a line to a load flake (the noscope flick, the eyes on the cloud) | not reproduced as the suite saw it; see 4 | none |
+| butterman-p3 desktop scene 3 drift | passed | flake (sub-mm, the paper and the recipe; nothing found) | none |
+
+1. **The wizard hat never slept: REST lifted it every 4 steps.** Traced seed 37: on its brim, Rapier's floor contacts
+   read +.001 (resting, normal up) while the brim's lowest hull vertex is .0022-.003 inside the floor (Rapier's own
+   collider vertices agree with `lowest()`, so the narrow phase is what is off). Item 5's lift moved it .003 up, it fell
+   straight back to the same pose, and again: 187-200 lifts per drop, never asleep in 8 s. Fix (`world.js`): a body is
+   lifted at most `REST.lifts` (2) times per rest, then judged by its contacts as before item 5; the count clears when
+   it sleeps or is let go. world-rack now passes both sizes with the p2 suite's numbers (wizard worst 2.95 s, gap
+   .94 px desktop); world-board's postcard drops (item 5's own case) still pass, worst gap .34 px; cake-solids pass.
+2. **The eyes' energy gain is one bad Rapier contact.** Seed 41 (only in the check's full order: crumbs and shards first
+   change the frame count CCD is staggered by): at step 56 a lobe's floor manifold reads depth 8.43 units with a normal
+   of (.71, .27, .65), and the solver kicks the eyes .72 m/s sideways (.0101 J, gate .01). Counted over 150 drops each
+   (`checks/diag/fixphys-floor-contacts.js`): with the floor's 100-unit cuboid, 6-13 drops of every hull item (eyes,
+   crumbs, shards, recipe card, postcard, wizard) have such a step; with a floor cuboid of half 14 (or 3), none in
+   1050 drops. Not built: a room-sized floor changes every contact's history, and in a first try it left the wizard
+   spinning slowly on its brim in 3-4 of 100 drops (lifts 0: another Rapier rest artefact). A halfspace floor was worse
+   (the eyes sank .09). Recommendation: a physics round that sizes the floor to the room (|x|,|z| <= 12 is the world
+   already) and fixes what that exposes, with the drop checks at both sizes; until then the eyes line reads .0101.
+3. **play phone, "no stroke taken".** The grab lane's grace gives a finger's press within 16 px of a page-drawn keepsake
+   to it (`keepsakes.js` near()); `isAir` knew only the world items' near(). The circle (and gag 1) began 12 px from the
+   drifting cloud, so the stroke dragged the cloud. `isAir` now applies the same box test on a phone. Both pass after.
+4. **Reload moves (play phone).** Measured on this branch only. Two mechanisms that move restored bodies, for the owner if
+   it recurs: the bin, stand and egg cup run `clearFootprint` on every load and layout, not only when they arrive
+   (a body saved overlapping a footprint by more than .01 is moved on the reload); and a keep record taken while a body
+   is still in the air (run 3's shards).
+
+Cost: one runtime change, REST's lift count (a compare per calm frame of an awake body), so frame cost is flat; the
+rest cost check passes (above). Diagnostics kept in `checks/diag/` (`fixphys-*.js`, not in run-all). Not run: the full suite.
+
+## Controls lane (playtest-4, 2026-11-14)
+Aaron (on his phone): "The Nearer and Deeper buttons don't work. You should be able to hold them to move it nearer or
+deeper, and they should also show up at the very bottom of the screen. They can overlay the Turn Him, Tap Him, and Draw
+on the Hair stuff." and "everything could be a little bit bigger and tighter in on mobile ... the hat rack is covered by
+the little black pill phones have now. Perhaps there could be a zoom slider alongside the sound slider?"
+Shots: `docs/shots/p5-controls/` (`before-*` from main 55fd0c1, `after-*` this branch).
+
+### Nearer / Deeper
+- **Why they did nothing.** Measured with real touch (CDP `Input.dispatchTouchEvent`, 844x390): the bar exists only
+  while a finger holds an item, so the press on a button is always a second finger. `pointerdown` reached the button;
+  no `click` ever came (a phone makes no click from a tap while another finger is down), and the buttons acted on click.
+- **Now** (`src/core/world-input.js` `gripBar`, `DEPTH_HOLD`): a press acts on `pointerdown` (pointer captured): one
+  .08 step at once (a quick tap still nudges as before), then after .2 s it keeps moving while the finger stays, .8 u/s
+  rising 1.4 u/s per s to 2.2 u/s, along the view. `world.js` `bound()` stops it 1.2 from the lens or 3.5 behind him;
+  a push that no longer moves it stops pushing (so the drag plane does not run off). Letting go, a cancel, or the item
+  being let go ends it. Frame work only while a button is held (`stage.onFrame`, removed on release). `touch-action:
+  none`, no text selection, no long-press menu. The keyboard's click (no pointer press before it) is one step.
+  The box's own bar (`box.js`) uses the same `gripBar`, so it gets all of this.
+- **Where** (`placeBar`): at the very bottom of the screen (4 px above the safe bottom), Nearer just left of the row of
+  sigils, Deeper just right of it, 44 px tall, over the ends of the hint line, clear of SOUND, ZOOM, the grimoire,
+  achievements and the sigils, inside the safe sides. Too little room beside the row (the bird game's button lengthens
+  it on a narrow phone): a 28 px pair side by side under the row, over the hint line. Neither fits (a narrow window):
+  the old tray just above the footer. Re-placed on resize. Choice for veto: the pair is split around the row rather
+  than side by side under it, so each stays a full 44 px thumb target (under the row there are only 29 px).
+
+### Safe area (the Dynamic Island on its side)
+- The page was already `viewport-fit=cover` and its chrome kept to `env(safe-area-inset-*)`, but the room did not: at
+  932x430 with a 59 px left inset the rack, the shelf and the hats sat in the inset (`before-room-safe-phone-notch`).
+- `src/core/stage.js`: `stage.insets.left/right` read from `env(safe-area-inset-left/right)` (a hidden probe, on every
+  layout); the camera fits him into the safe width too and centres him in it (view offset). The room plans inside it
+  (each a one-line, commented change): rack (`hats.js`, `world-layout.js` `rackX()`), shelf (`shelf.js`), board
+  (`pinboard.js`), bin (`recycle.js`), the collection rows and page clamps (`keepsakes.js`), floor homes
+  (`floor-home.js`), `reachable()` (`world-layout.js`). The scoot rule (`world-occluders.js`) counts the inset strips
+  as hiding, by nothing in the room: an item lying under the island scoots toward the middle. `world.layoutKey()` and
+  the board's key include the sides. Top and bottom were already the chrome's (`hush.js` `fit()`).
+- The page still paints under the island (paper colour); only the plan keeps out.
+
+### Zoom
+- `src/ui/zoom.js` (`ZOOM`): a felt patch with a magnifier and a slider beside SOUND (desktop: after it in the row; a
+  phone on its side: stacked over it, 28 px patches 6 px apart, which keeps the footer as tall as its middle column, so
+  the room keeps its height; side by side they ran into the hint line). 85% to 130% in 5% steps, `aria-label` "Zoom",
+  `aria-valuetext` "N percent", arrows work. `stage.setZoom(z)` brings the camera closer by z; everything re-plans
+  through `onResize` like a resize, once the slider settles (140 ms after its last move, and on release); nothing
+  per frame, nothing while idle. Remembered on the device (store `view.zoom`, wiped by start over like the volume);
+  unset, the device's default: **a phone 110%** (the "bigger and tighter" default), desktop and tablets 100% (unchanged).
+  `?zoom=` overrides for a visit (checks). Hidden with the rest of the footer in the galaxy (its existing rule).
+- Px-sized furniture follows the zoom: the shelf's width times the zoom (at most .4 of the width; on a short screen,
+  past 100% it grows only as far as his whiskers' reach allows, down to .85 of its size: a notched phone at 130%).
+  The board, rack, stand, bin and keepsakes are world-sized and follow the camera already.
+- The puddle (a floor decal, `glass.js`) at .45 below his feet went under the footer at a close zoom: its home now
+  stays 4 px above the footer.
+- At 130% on a phone the room is full (he is ~70% of the room's height); it is the player's choice, and every rule
+  still holds there (below). Desktop at 130%: the shelf's right end meets his ear (Aaron accepted overlap of that kind
+  for the rifle, e1111-54); not limited on tall screens.
+
+### Checks
+New `checks/controls.js` + `controls-reload.js` (wired into `run-all.sh`: phone, notch-left `?safe=59,0,0,0`,
+notch-both `?safe=59,59,0,21`, desktop, 1536x864). `checks/run.mjs`: `--size phone-notch` (932x430 dpr 3, touch),
+`__touch()` (raw multi-touch through CDP) and `__safeArea()` (`Emulation.setSafeAreaInsetsOverride`). Diagnostics in
+`checks/diag/controls-*.js` (not in run-all).
+- 1 (touch): a finger holding the tin shows the pair; at the very bottom, clear of the controls and the safe sides; a
+  second finger on Nearer moves it .08 at once and ~1.1 more in .9 s, stops on release, the item stays held; Deeper the
+  same the other way; a quick tap is one .08 step; held 4 s it stops at 1.2; letting go removes the bar and its frame
+  work. (CDP cannot lift one of two fingers, so the second finger's release is a pointerup on the button it is
+  captured to; everything else is real touch.)
+- 2: the slider beside SOUND, named, the device default, arrows; with the whole final collection at 85%, the default
+  and 130%: all furniture and every keepsake on the page inside the safe sides, no furniture and no keepsake more
+  than 15% under the page's controls, nothing left under the scoot rule's 35% shown; the reload keeps 130%.
+- 3 (?safe): him centred in the safe width, the shelf, rack and board inside it.
+
+### Runs (port 18901, headless, load 10-17 with other lanes running)
+- controls: phone 22/22, notch-left 24/24, notch-both 24/24, desktop 14/14, 1536x864 14/14 (with the reloads).
+- Touched checks, all PASS: shell-boot phone + desktop, physics2 phone + desktop, text phone, fullscreen phone (api,
+  with reload), gags-lamp phone + desktop, grab-grace phone, world-layout phone + desktop + 1536x864, world-occluders
+  phone + desktop, world-shelf phone + desktop, world-rack phone, world-board phone, gags-box phone, noscope-footer
+  phone, kitchen-recycle phone. Not run: the full suite.
+- Not testable here: a real iPhone's Dynamic Island (the insets are emulated through DevTools) and a real second thumb's
+  release (see 1 above).
+## Gags lane (playtest-4, 2026-11-14)
+
+Aaron's playtest-4 items for the gags (`~/.sigil-cat-wt/inputs/playtest-4.md`, all seen on his phone), branch
+`sc/p5-gags` from main 55fd0c1. Checks run here at desktop dpr 1 and phone 844x390 (touch input), calm where motion
+changed. Every choice is open to his veto. Nothing pushed.
+
+| # | Ask | What is built | Choices for Aaron's veto |
+|---|---|---|---|
+| 1 | "you shouldnt be able to skip the 360 cutscene while in the riser" | "The riser" = the 360's build-up: the riser clip under the 5 s fade to black, and its last second that carries on into the video's 1 s fade-in. Through all of that a tap, a click, the skip button and Escape do nothing (`run.held` in `src/eggs/noscope-video.js`), and the skip button is hidden. From the moment the riser ends (6 s in) skipping is as before: a tap anywhere, the button, Escape. `api.stop()` (checks) still ends it at any point. | If the video is still loading when the black is done (riser silent, screen black), it can be skipped then, so a slow phone is never stuck on black. |
+| 2 | "the star can be removed from the grimoire its no longer in the game" | The `star` find is gone from `src/finds.js` (17 finds). The fast spin still opens the galaxy and earns Into the Void (an achievement since playtest 2); it just finds nothing now (`src/eggs/galaxy.js`, two lines). Counts follow the list: the grimoire's "x of 17", the registry's count, Completionist (all 17), Platinum. An old save's `found.star` is left in place and never read: such a save loads, counts 17 of 17 and earns Completionist from what it has. | That card was the galaxy's grimoire entry (riddle "faster than any cat should turn"), so the galaxy now has only its achievement. If he would rather keep a card for it, it can come back renamed (e.g. "The Void") with its own mark. |
+| 3 | Error page: cat at ~4.5 s, stays ~15 s over it, bonkable, then the screen opens | `PARTY.errorSeconds = 4.5`, `PARTY.catSeconds = 15` (counted from the pop, on the page's clock). At 4.5 s the page runs again underneath (input still locked, no skip), he pops in over the error page and stays; a tap on him (touch or mouse, press and release as a canvas tap), or Enter / Space, is a normal bonk (`cat.tap`: the bonk sound, the count, the hop, bonk achievements); a tap beside him and Escape do nothing. At 19.5 s the halves slide apart and the party follows as before. `site.shell.popOver` takes a `stay()` awaited between the pop and the doors. Measured (phone and desktop): pop 4.52 s, bonkable 4.52-19.5 s, doors 19.53 s, back 20.5 s. Calm: he fades in (0.6 s, no pop), stays and is bonkable the same, then the page fades off the room. | A bonk that earns an achievement while the error page is up plays its chime, but the reveal is hidden under the page. |
+| 4 | The box's "tap the box to open it; hold it to lift it" line on every circle sigil | Two causes. (a) Every square after the first said the intro again (and the first arrival never did). Now it is said once per save (`box.introSaid`), when he is out of the first box; a later square just gets a nod (he hops, the box gives a little jump where it lies); an old save that has the box hears it once more, then never. (b) The real reason it came with the circle: on a phone a quick circle is a dozen to a few dozen points ~30-50 px apart, often running a little past its start, and the recognizer took it for the square. Its round-or-square test (`roundness` in `src/sigils/recognize.js`) cut the loop at the nearest point to the start, which with sparse points lay past it, so the closed shape doubled back at the seam (a sharp turn), and its chords turned only at the points; both read as corners. Now the loop is cut on the segment that passes nearest the start (`seam`), and a loop of under 72 points is drawn through its points as a smooth closed curve first (`smooth`, Catmull-Rom). Measured with phone-sampled strokes (new section 4d of `checks/sigils.test.mjs`): circles cast the box 67/150 before, 3/150 after; boxes stay boxes (147/150); the dense-stroke accuracies are unchanged or better (circle 94 -> 96 %). Other one-time lines checked: the harp's keyboard tip (`harp.keysTold`), the encore (once ever), recycling's lines (once per sticker) were already once; "thank you, cow." answers each tap on a full bucket by design. | The nod for a repeated square (hop + small jump) is mine. |
+
+Edits outside this lane's files, small and commented: `src/ui/shell.js` (`popOver`'s `stay`, calm variant),
+`src/eggs/galaxy.js` (no star find), `src/sigils/recognize.js` (`seam`, `smooth`).
+
+Checks. New: `checks/grimoire-star.js` (an old save with the star: no star card, 17 of 17, Completionist, the marks
+row, the galaxy finds nothing), `checks/box-intro.js` + `-reload.js` (first square says it once, second square and two
+circles do not, quick 12- and 16-point circles drawn as real touch / mouse strokes are the circle, a reload says nothing;
+before the recognizer fix both quick circles were read as the square). Both in `run-all.sh`, desktop and phone.
+Updated: `noscope-video.js` (a tap, the skip button and Escape in the riser do nothing, late in the black too; a tap
+after it skips; Escape after it skips), `party.js` (still the error page at 4.0 s, pop ~4.5 s, a real tap on him is a
+bonk with count, hop and save, a tap beside him and Escape do nothing, Enter bonks, bonkable the whole ~15 s, doors at
+pop + ~15 s, back at ~20.5 s; calm), `world-cake-ending.js` (cuts the stay to 1 s as it cuts the wait), `sky.js` (no star
+find), `sigils.test.mjs` (4d, phone strokes).
+Ran, all pass at desktop and phone unless said: noscope-video, noscope-footer (phone), grimoire-star, grimoire, sky,
+party (+ calm), world-cake-ending (+ calm phone), box-intro (+ reload), gags-box (+ calm phone), sigils.test, world-cake.
+One failing line, not mine: party phone (not calm) "returns with hat, bilateral 3D confetti and a toot" reads audio
+level 0 at the toot sample; it fails the same way on main 55fd0c1 (run here with this lane's party edits taken out).
+Not run: the full suite.
+## Flappybreak lane (playtest-4, 2026-11-14)
+Aaron, on his phone: "after I played Flappy Bird, ... my drawing lines stopped disappearing. The cat is no longer bobbing.
+I can't actually move my items." Reproduced headless at 844x390 touch: the page kept drawing, but its clock never moved
+again (`stage.timeScale` 0): strokes never fade (ink fades by dt), no bob, a held item never follows (no world steps).
+
+**Root cause.** Turning the phone upright while flappy is open (its playfield is portrait, so it is the natural thing to
+do). The flappy screen pauses the page's callbacks itself (`pausePageCallbacks`); the "flip sideways" overlay then asked
+the shared freeze for its hold, and the scheduler threw on a second pause ("page callbacks already suspended"), leaving
+the `turn` hold half made. Turned back, the freeze's release did its "first frame back at dt 0" trick: timeScale 0 now,
+the old value restored by a stage callback next frame. No frame ran (flappy still had the page paused), so when the game
+closed, its own copy of the same trick read the 0 as the value to restore. Next frames: the first rebase set 1, the
+second set 0, for good. Evidence: the new check on main 55fd0c1, phone: after give up `timeScale 0, clock +0, bob 1
+value, ink stuck, drag moved 0`; with the fix every path reads `timeScale 1, clock +1.0 s, ink faded, drag ~70 px`.
+Desktop never shows the overlay, which is why it only broke on his phone. Score 50 and the achievements are innocent:
+the reveals wait for the input lock (`blocked()`), and they play after the return in both runs.
+
+**Fix (each exit path gives back each frozen part once).**
+- `src/core/page-scheduler.js`: pauses nest (a count); each returns its own idempotent release; the last one resumes.
+  `pageCallbacksPaused()` exported for checks.
+- `src/core/stage.js`: `stage.restartClock()` (the next frame runs at dt 0 by clearing the frame clock's last stamp,
+  as a visibility change already does). `src/core/freeze.js` and `src/flappy/screen.js` use it instead of the timeScale
+  0-then-restore, so no state is saved and restored and any number of releases agree.
+- `src/flappy/screen.js`: one `restore()` for every exit (give up, return, Escape, the trailer's end, a failed open),
+  run once, each part in its own guarded step (timers, voices, the screen, listeners, Escape handler, inert, CSS
+  animations, hidden-tab audio, clock, scheduler, resize, input lock), so one that throws cannot keep the rest frozen.
+  The screen is attached and the page frozen in one guarded block at the end of opening: a failure before it leaves
+  nothing behind, one inside it is undone. The Escape handler is removed by lookup (a missing one no longer splices the
+  last handler off).
+- While the page is frozen over the game (the upright phone's overlay, z 2000, covers it and stops the sound), the game
+  holds still too and picks up when the phone turns back; a close asked meanwhile finishes then. It used to run on
+  unseen under the overlay, and would now have been silent (the overlay's freeze suspends audio).
+- No edit to `src/eggs/bird.js` (the touchfeel lane's SIZE is untouched).
+
+**Check.** `checks/flappy-unfreeze.js` (run-all, desktop + phone, after bird-calm): the circle to 50 past Flappy and
+Pipe Dream, upright mid-game and back on a phone (a resize on desktop), death, give up; the return button; a hidden tab
+then Escape; the controller's first click (trailer); the controller replay with death, retry, give up; on a phone,
+upright then closed while upright. After each: clock runs at timeScale 1, he bobs, a tap's ink fades, an item (the
+paper, or another resting item when the stand covers it) follows a drag, and nothing is held (freeze, input lock,
+scheduler pause, inert node, extra Escape handler, rebase callback). It fails on main 55fd0c1 (phone) as Aaron saw it.
+
+Runs (load 8-20 from the parallel lanes), desktop dpr 1 + phone 844x390: flappy-unfreeze (12 / 16 PASS), bird (56 / 56),
+kitchen-replay (phone pass; desktop's "a death ... leaves one" timed out once at load and passed on the rerun),
+shell-books (24 / 24), shell-turn-phone-portrait, fullscreen-phone, flappy.test.mjs: all pass. Audio-level lines fail at
+this load on main 55fd0c1 as on this branch: party "returns with hat ... and a toot" audioLevel 0 (base 2 of 2, branch
+3 of 3) and bird-calm-phone "boom respects mute" RMS 0 (bird-desktop/phone pass it) — the headless audio meter, not this
+change. Not run: the full suite.
+## Touchfeel lane (playtest-4, 2026-11-14)
+Aaron's items 9, 10, 12, 13 and 8 of playtest 4, all seen on his phone (landscape). Branch `sc/p5-touchfeel` from main
+`55fd0c1`. Checks: `checks/touchfeel-{purr,plaster,bird,cloud,stickers}.js`, in `run-all.sh` at both sizes; the phone
+runs of the cloud and stickers checks also resize to 932x430 (a wide-notch phone). Shots: `docs/shots/p5-touchfeel/`.
+
+| # | Aaron | What changed | Choices |
+|---|---|---|---|
+| 1 | "I didnt hear him purring when I pet him on mobile, and purr sound should be about double as long" | **Why it was silent:** not the touch path. A real-touch stroke on a phone (CDP touch events) counts strokes and plays a burst per stroke, exactly like the mouse. The recording is all rumble: 99.8% of its energy is under 300 Hz (most at 50-100 Hz), where a phone speaker gives almost nothing; measured above 300 Hz it sits at -49 to -53 dBFS against about -28 for the bell, the taps and the bite. **Fix:** on a coarse-pointer device the same recording gets its own overtones mixed in (`phoneVoice` in `src/gags/petbite.js`: a soft clip of it, band 260-1400 Hz, mixed at its own RMS), replacing the decoded 'purr' under the same name (`audio.reshape`, new in `src/core/audio.js`), so the loop and the bursts both use it. Above 300 Hz it is now -28 dBFS (the bell's level), whole level +3 dB, and the pulse (37 ms apart, 27 a second) is unchanged: the ear hears the purr's rhythm and pitch from its overtones. Desktop is byte-for-byte the recording. **Twice as long:** each stroke's burst is 0.64-0.92 s (was 0.32-0.46; still one unbroken slice of the 7 s clip, so no seam; its swell scales with it), and the purr rings on twice as long after the last stroke (`purrFade` .55 -> .275). | The phone voice is chosen by `(pointer: coarse)` (the speaker is the device's, not the input's); a phone with headphones gets it too, which still sounds like the purr. Not changeable here: a phone's very first gesture being a stroke is silent until the finger lifts (browsers only allow sound after a tap's release; `main.js` already makes the AudioContext on pointerup). If Aaron still hears nothing on the phone, check the ring/silent switch: the page uses iOS's 'ambient' audio session (e1107-37), which the switch mutes, but then every sound would be gone, not only the purr. |
+| 2 | "If youre on mobile, there should be no bandaid for when you drag your finger around" | The touch plaster (the 36x16 badge that rested by the controls and followed a held finger) is gone: its element, CSS and listeners. The mouse pointer keeps its plaster cursor. | Nothing becomes unreachable on a phone: the plaster was never a condition for anything. The bite still finds 'bite', credits Purr-fect, gives the tin, saves `plaster: true` and makes him refuse strokes (checked on the phone). Removed the resting badge too ("no bandaid" on mobile at all); it also sat where the controls lane's new bottom buttons may go. `checks/look-bite-reload.js` now asserts no `.touch-plaster` (it required one on a phone). |
+| 3 | "The bird is the perfect size on desktop but its way too big on mobile" | The distant bird is SIZE (70) on a 1280x900 page and scales with the room's own scale at the egg's depth (`stage.pxPerUnit` at z -1.5 over 280.2, its value at 1280x900), so it keeps the egg's proportion on any screen and follows any zoom; it never grows past 70. Measured: 1280x900 bird 70 / egg 67 px (1.04); 844x390 28 / 29-30 (.93-.97); 932x430 32 / 33 (.97). It still flies in from past the right edge. The size is re-read each flying frame (a dot product) and the sprite's box is laid out again only when the rounded size changes. | Capped at 70: bigger windows look exactly as before (Aaron called desktop perfect). A desktop window shorter than 900 px now shows a smaller bird too, in step with its smaller egg. `checks/kitchen-egg.js`: "in proportion" was `bird >= 30 px`; now `bird >= .4 x egg` (on a phone the bird is ~22 px across mid-flap). |
+| 4 | "The cloud goes way too far off to the left and right off the screen, it should be going back and forth between the edges of the screen" | It sweeps back and forth between the screen's edges (`src/eggs/bolt.js` cloud `frame`): its middle moves as a cosine between the two places where its card is 4 px inside an edge, slowing into each turn, one leg in 40 s (`BOLT.cloud.legSeconds`), at every size. The billows fill the card (read back: 1-2% to 100% of its width), so the visible cloud reaches 6-7 px from each edge and never past it (1280x900, 844x390, 932x430). A drag lets go and it carries on the way it was going; a cloud left past a turn (a resize from a wider screen) glides back in at the sweep's top speed. | Its first arrival still floats in from off the nearer side (e1111-58, an arrival, not the drift). Nothing rides on the cloud (eyes dropped on it fall off by design, playtest 2); the bolt still darkens it in place; the bird circles at .73 of the width and is unaffected; the galaxy does not read it. The wide-notch phone's island sits at mid-height on the side, below the cloud's band. Average speed is about what it was (~26 px/s at 1280 wide, was ~21). `checks/world-occluders.js` (it asserted the wrap round) and `checks/polish-cloud.js` (the drift formula) follow the sweep now. |
+| 5 | "The star stickers all be straight, all of them are at a slight angle and I dont like it" | Every sticker rests at 0 degrees: the layer sets no turn (`src/world/stickers.js`), and the tilts are gone from the gold star (`sky-items.js`, was -8) and the six recycling stars (`recycle.js`, -10 to 9). The tap's 3D tilt and glint still play and end straight; drag, resize and reload keep them straight. | |
+
+Checks run (desktop dpr 1 and phone 844x390, phone resizing to 932x430 where said): the five touchfeel checks, and the
+existing ones these changes touch: gags-stickers (+reload), gags-stickers-legacy, polish-cloud (+calm), world-occluders,
+sounds-playtest, look-pet-pass (+seven), look-butterman-bite (+bite-reload), bird (+calm), kitchen-egg (+reload),
+achievements (+reload), play (+after-reload). All pass at both sizes except two lines that fail on main `55fd0c1` too:
+sounds-playtest "the star bell varies a little each tap" (the bell plays at one pitch since playtest 3; that check and
+code are main's, unchanged here), and play desktop's after-reload "are where they were left" (top/shards/recipe move a
+little on the reload; main fails it the same way in a baseline run: the deferred physics round). achievements-phone
+failed its rare-bonk tap once and passed on the rerun. Not run: the full suite.
+## Trailer lane (playtest-4, 2026-11-14)
+Aaron: "The 'YOU JUST LOST THE GAME' should linger on its final dark screen for a couple more seconds before fading back
+to the sigil cat. and 'THE GAME' should be merged into just one slam, so 'YOU' 'JUST' 'LOST' 'THE GAME' with THE in red".
+Branch `sc/p6-trailer` from main `bf83990`. Only `src/flappy/screen.js` and `checks/bird.js` change. Shots: `docs/shots/p6-trailer/`.
+
+| What changed | Choices |
+|---|---|
+| Four slams: `WORDS = ['YOU','JUST','LOST','THE GAME']`, one boom each (four booms, was five; no new sound). The last slam is one line, THE in red (`#e2261b`, a dark red underlay `#6f100b` in place of the beige one), GAME in the trailer's off-white. | Timing (`SLAM_GAPS = [.9,.9,1.8]`): YOU, JUST, LOST keep the 900 ms grid; THE GAME skips one beat, a held breath of dark, and lands on the next bar's downbeat, the exact moment GAME landed before (3.97 s in). An even fourth beat would have put the payoff on the bar's weakest beat. The final slam's font is smaller (`clamp(84px,16.5vw,250px)`, `nowrap`) so the two words fit one line with the slam's 1.38x start: 60% of the width at 1280 and 844. The line sits in one wrapping span (the word box is a grid; bare text plus a span would stack as two rows). |
+| The quiet dark after the last slam is 3.8 s (was 1.8: two seconds longer), then the same .24 s fade home (`FINAL_HOLD`). | Measured 4.07-4.19 s from the THE GAME slam to the room. The stand still arrives after it. Reduced motion: the same timeline with the opacity-only frames. Exits unchanged: the tail is only a later `close(true)`, so every exit still goes through `restore()` once. |
+
+Checks: `checks/bird.js` asserts four slams in order, the final slam's text, the red THE (computed colour) on one row
+inside the screen, the four gaps (.9/.9/1.8 by the trailer clock and the wall clock, each boom within 25 ms of its slam),
+and the hold (3.95-4.7 s from the last slam to the room). Runs (desktop dpr 1 + phone 844x390): bird (58 / 58 both),
+bird-calm (60 / 60 both), flappy-unfreeze (12 / 12 desktop, 16 / 16 phone). Not run: the full suite.
+
+## Grid lane (playtest-4, 2026-11-14)
+
+Aaron picked the ground grid mock-up's variant a: "A it is for the grid lines." (e1114-13). Shipped always on, from main
+`bf83990`. The mock (branch `sc/p5-gridmock`, 431cd70, section "Gridmock lane" above it on that branch) was ported, not
+cherry-picked: `src/world/floor-grid.js` keeps only variant a, and its diagnostics (`checks/diag/gridmock-*.js`) stay on
+the mock branch (their cost line is now in the focused check).
+
+| Choice | Why |
+|---|---|
+| Always on; `?grid=0` leaves it out | Debugging and before/after shots. Variants b and c dropped from the shipping code (one look, one shader, no `#if`). |
+| Same look as the mock-up a | One .25-unit cell, ~0.9 px lines at 8.5%, the floor shadows' brown; fades: full in front of z -.6, gone by -4.6 (no horizon line), toward the screen's left/right edges and its bottom 14%. What Aaron picked is what ships. |
+| Static import in `src/main.js`, built right after `warmShared` | Its program compiles behind the loading doors with the room's first frame; nothing loads later. |
+| No resize or zoom hook | Every fade is worked out per pixel from its own floor and screen position, so a new window, zoom (85-130%) or safe area needs nothing re-fitted. The plane grew to x -12..12, z -7..12 so it reaches past the screen's sides and bottom at the least zoom and the widest window (measured). |
+| Under everything | The main pass's first draw (opaque list, renderOrder -20, no depth test or write): every floor shadow, keepsake, piece of furniture and the cat paint over it. |
+| Where it lives | Its own child of the scene, beside the world presentation's root (the mock put it in that root; checks/world-presentation.js draws the root's pictures one by one with the root hidden and compares, so the grid there made every parity line fail). |
+| When it hides | It is part of the room, so it shows wherever the room shows (Butterman's scenes are played in the room, the grimoire's dimmed margin, the error page as it opens) and is covered wherever the room is: the galaxy's dark, the bread's space launch (the same dark), flappy, the YOU JUST LOST THE GAME trailer, the grimoire's sheet, the cake's error page (`body.party-error` hides the canvas), the closed loading doors (their cat-only pass hides the room's root; while they part the room, grid and all, is drawn only in the gap). No scene needed a change. |
+| Reduced motion | Nothing to do: it never moves. |
+
+Cost: one draw call, nothing a frame on the CPU (no frame, render, present or resize hook), GPU measured by the check (the
+grid alone 300 times, synced by a pixel read): see the results below; the mock measured ~0.01 ms.
+
+Check: `checks/floor-grid.js` (in run-all: desktop, 1536x864, phone 844x390 dpr 2, a notched phone with both safe sides,
+and the loading doors at desktop and phone). With the page's clock held it compares the frame with and without the grid
+(and a second frame without it, to show nothing else moved), at the zoom's default, least and most: the grid draws, it is
+the main pass's first draw, every opaque pixel of the cat, the keepsakes and the furniture lying over a grid line (the grid
+alone drawn into a target says where its lines are) is identical with and without it, one draw call, and the plane reaches
+past the screen's sides and bottom; then the cost; then each full-screen scene: the galaxy (pixels with and without it),
+flappy's game and trailer and the grimoire's sheet (an opaque element over every grid point), the error page (the canvas
+hidden), the doors (closed: no pixel changes; parting: changes only inside the gap).
+Shots: `docs/shots/p6-grid/` (`grid-zoom85|100|130-<size>`, `grid-galaxy-`, `grid-grimoire-`, `grid-room-`, `grid-doors-open-`).
+
+Results (port 18921, load 4-10 from other sessions): floor-grid desktop, 1536x864, phone (dpr 2, default zoom 110%),
+notched phone (932x430 dpr 3, safe 59/59/0/21), doors desktop and doors phone: all PASS. GPU 0.006 ms (1280x900),
+0.008 ms (1536x864), 0.012 ms (1688x780), 0.009 ms (1864x860) a frame; one draw call; no hook added. Opaque pixels over
+grid lines unchanged at every zoom (5,693-19,715 such pixels a run, 0 changed); galaxy max difference 0; doors closed 0
+pixels changed, parting: changes only in the gap. Existing checks at desktop dpr 1 and phone dpr 2: world-presentation,
+visual-hairlines, controls (+ controls-reload): all PASS. (world-presentation failed its four parity lines while the
+grid sat in the presentation root, hence its own scene child.) Not run: the full suite.

@@ -10,16 +10,20 @@ export function createWorldLayout(site) {
  const depthDirection=new T.Vector3(.3,0,-3.5).normalize(); // opposite key light (-.3,3,3.5)
  const feet=()=>stage.toScreen(new T.Vector3());
  const floorY=()=>Math.min(feet().y+Math.max(40,stage.height*.10),stage.height-stage.insets.bottom-28);
+ // (controls lane, playtest-4: x inside the safe sides, stage.insets.left/right: a notch or Dynamic Island covers none of it)
+ const L=()=>stage.insets.left||0,R=()=>stage.insets.right||0;
  const furniture=()=>({
-  shelf:{x:18,y:stage.insets.top+18,w:Math.min(220,stage.width*.28),h:100},
-  pinboard:{x:stage.width-Math.min(240,stage.width*.32)-18,y:stage.insets.top+18,w:Math.min(240,stage.width*.32),h:150},
-  rack:{x:Math.max(42,stage.width*.08),y:floorY(),fixed:true},
+  shelf:{x:L()+18,y:stage.insets.top+18,w:Math.min(220,stage.width*.28),h:100},
+  pinboard:{x:stage.width-R()-Math.min(240,stage.width*.32)-18,y:stage.insets.top+18,w:Math.min(240,stage.width*.32),h:150},
+  rack:{x:rackX(),y:floorY(),fixed:true},
   ...Object.fromEntries(reservations)
  });
+ // The rack's middle on the page: 8% in from the left safe edge, at least 42 px (shared with hats.js and keepsakes.js).
+ function rackX(){return L()+Math.max(42,(stage.width-L()-R())*.08);}
  function anchor(x,y=floorY()){return stage.onFloor(x,y);}
  function reachable(p,margin=40){
   const q=stage.toScreen(new T.Vector3(p.x,0,p.z));
-  const x=Math.max(margin,Math.min(stage.width-margin,q.x));
+  const x=Math.max(L()+margin,Math.min(stage.width-R()-margin,q.x));
   const y=Math.max(feet().y+28,Math.min(stage.height-stage.insets.bottom-28,q.y));
   const v=anchor(x,y);v.y=p.y;return v;
  }
@@ -63,7 +67,7 @@ export function createWorldLayout(site) {
  stage.onResize.push(()=>{stats.layouts++;});
  // Speed lane (e1112-59): the same material as shadow() makes, for the boot warm-up (src/core/warm-shared.js).
  const warmMaterial=()=>new T.ShaderMaterial({uniforms:{sourceMatrix:{value:new T.Matrix4()},receiverMatrix:{value:new T.Matrix4()},receiverInverse:{value:new T.Matrix4()},receiverZ:{value:.018},supported:{value:false}},vertexShader:vertex,fragmentShader:fragment,transparent:true,depthWrite:false,side:T.DoubleSide});
- return {warmMaterial,floorY,anchor,reachable,furniture,reserve(id,rect){if(rect)reservations.set(id,{...rect});else reservations.delete(id);},depthDirection,shadow,invalidateShadow,remove,shadows,stats,
+ return {warmMaterial,floorY,rackX,anchor,reachable,furniture,reserve(id,rect){if(rect)reservations.set(id,{...rect});else reservations.delete(id);},depthDirection,shadow,invalidateShadow,remove,shadows,stats,
   pose(inst){if(inst.worldEntry){const b=inst.worldEntry.body,p=b.translation(),q=b.rotation();return {version:1,position:[p.x,p.y,p.z],quaternion:[q.x,q.y,q.z,q.w],support:'floor'};}const p=anchor(inst.px.x,inst.box.y+inst.box.h);return {version:1,position:p.toArray(),quaternion:inst.object?inst.object.quaternion.toArray():[0,0,0,1],support:inst.id==='rack'?'fixed':'floor'};}
  };
 }

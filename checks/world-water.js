@@ -27,7 +27,12 @@ await until(()=>!W.stats.listening,8000);
 const start=C.stats.frames,p={...b.translation()},steps=W.stats.steps;
 await sleep(stage.reducedMotion?1200:30000);
 check('water supported spin lasts 30s or is static when reduced',C.active&&(stage.reducedMotion?C.stats.frames===start:C.stats.frames>start+30)&&Math.hypot(b.translation().x-p.x,b.translation().z-p.z)<1e-6&&W.stats.steps===steps,JSON.stringify({frames:C.stats.frames-start,steps:W.stats.steps-steps}));
-check('water visual rotor changes only with motion enabled',stage.reducedMotion?orientation.angleTo(top.object.quaternion)<1e-6:orientation.angleTo(top.object.quaternion)>.05);
+// The rotor's angle is 20 rad/s times the game clock, mod a full turn: after 30 s it can by chance come back within
+// .05 rad of where it started (about 1 run in 60; suite on p3-final, phone). So the turn is also sampled over a few
+// short gaps after the 30 s: with motion one of the steps must show a turn; calm, none may.
+const rotorQs=[orientation,top.object.quaternion.clone()];for(let i=0;i<2;i++){await sleep(70);rotorQs.push(top.object.quaternion.clone());}
+const rotorSteps=rotorQs.slice(1).map((q,i)=>rotorQs[i].angleTo(q));
+check('water visual rotor changes only with motion enabled',stage.reducedMotion?rotorSteps.every(a=>a<1e-6):rotorSteps.some(a=>a>.05),JSON.stringify(rotorSteps.map(a=>+a.toFixed(3))));
 const desc=Object.getOwnPropertyDescriptor(document,'hidden');
 Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));
 const hiddenFrames=C.stats.frames;await sleep(500);

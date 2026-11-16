@@ -2,6 +2,7 @@
 // remembered on the device) reaches all of it. Clips are fetched and decoded after the cat is on screen, then played
 // on one AudioContext made inside the first gesture.
 //   audio.play('sfx/ding')            a clip by its name in SITE.sounds (or a path / a [m4a, mp3] list)
+//   audio.reshape(src, fn)            rework a clip's samples after decoding, same name (the purr on a phone)
 //   audio.loop(src, { gain })         a seamless loop (two copies crossfading), returns { gain(v, seconds), stop() }
 //   audio.setMuted(true)  audio.setVolume(0.6)  audio.level   the sound control
 //   audio.impact(item, { material, size, strength, sleeping, restoring })  debounced world contacts (off: e1111-58)
@@ -78,6 +79,18 @@ export function load(src) {
   return p;
 }
 export const loadAll = (list) => Promise.all(list.map(load));
+// Rework a clip's samples once it is decoded, kept under the same name (touchfeel lane, playtest 4: the purr's overtones
+// on a phone, src/gags/petbite.js). fn(channels: Float32Array[], sampleRate) -> Float32Array[] of the same length.
+export function reshape(src, fn) {
+  return load(src).then((buf) => {
+    if (!buf || !decoder) return buf;
+    const out = fn(Array.from({ length: buf.numberOfChannels }, (_, i) => buf.getChannelData(i).slice()), buf.sampleRate);
+    const made = decoder.createBuffer(out.length, out[0].length, buf.sampleRate);
+    out.forEach((d, i) => made.copyToChannel(d, i));
+    buffers.set(keyOf(src), made);
+    return made;
+  });
+}
 export const buffer = (src) => buffers.get(keyOf(src)) || null;
 export const status = (src) => (buffers.has(keyOf(src)) ? (buffers.get(keyOf(src)) ? 'loaded' : 'failed') : 'pending');
 

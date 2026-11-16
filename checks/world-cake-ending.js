@@ -11,9 +11,9 @@ const ids=['box','flour','bucket','pat'],same=ids.map(id=>keepsakes.get(id));
 // e1111-34 removed the Box & baking panel: a real tap on the cake eats it.
 const hitOn=i=>{const b=i.picture.rect;for(let y=b.y+4;y<b.y+b.h-4;y+=3)for(let x=b.x+4;x<b.x+b.w-4;x+=3)if(site.worldInput.pick({clientX:x,clientY:y})?.entry===i.worldEntry)return {x,y};return null;};
 // Playtest 2 (shell lane, e1112-33/e1112-41): the crash screen is Chrome's "Aw, Snap!" page with no way out; it lifts
-// on its own when its timer runs out (playtest 3: the cat pops in over it at ~9 s and it opens like the loading doors).
-// party.js waits the real 9 s; here the same timer is cut to 3 s.
-const {PARTY}=await import(new URL('src/gags/party.js',document.baseURI)),errorSeconds=PARTY.errorSeconds;PARTY.errorSeconds=3;
+// on its own when its timer runs out (playtest 4: the cat pops in over it at ~4.5 s, stays ~15 s, then it opens like
+// the loading doors). party.js waits the real times; here they are cut to 3 s and 1 s.
+const {PARTY}=await import(new URL('src/gags/party.js',document.baseURI)),errorSeconds=PARTY.errorSeconds,catSeconds=PARTY.catSeconds;PARTY.errorSeconds=3;PARTY.catSeconds=1;
 const spot=hitOn(cake);// Page timers pause with the interlude, so the press is timed on the wall clock (lib's tap() would wait out the frozen page).
 if(spot){const pid=++pointerIds;fire('pointerdown',spot.x,spot.y,pid);await wallSleep(45);fire('pointerup',spot.x,spot.y,pid,0);}
 // Playtest 2: the cake does not despawn once clicked; it stays as a keepsake.
@@ -38,4 +38,4 @@ check('cake party leaves zero idle world work',JSON.stringify(before)===JSON.str
 // The mute ramps the bus to silence (15 ms) before the crash suspends the sound, so the meter's last buffer is quiet.
 audio.setMuted(true);await wallSleep(200);await until(()=>!cat.popping&&!E.hat.busy,5000);const muted=P.eatCake();check('cake muted crash fixture starts',P.state.active);
 if(P.state.active){await __key('Escape');await wallSleep(150);check('cake muted Escape does not lift the crash screen',P.state.active&&input.locked);await muted;check('cake muted crash screen lifts silently on its own',!input.locked&&audio.output().gain.value===0&&audio.level()<.00001,JSON.stringify({locked:input.locked,gain:audio.output().gain.value,level:audio.level()}));await until(()=>stage.timeScale===1,5000);await fast(40,()=>until(()=>!P.state.effects,12000));}
-PARTY.errorSeconds=errorSeconds;
+PARTY.errorSeconds=errorSeconds;PARTY.catSeconds=catSeconds;

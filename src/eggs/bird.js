@@ -11,6 +11,11 @@ import {PLAYER} from '../flappy/config.js';
 // Distant bird size in px (was 27, then 40; playtest 3, Aaron: "a little bit bigger so it kind of matches the size of the
 // egg when it initially drops": the egg lands about 60 px across at desktop size, the bird draws .66-.9 of SIZE).
 const SIZE=70;
+// Touchfeel lane, playtest 4 (Aaron: "The bird is the perfect size on desktop but its way too big on mobile"): SIZE is
+// its size on a 1280x900 page, where the room draws REF_PPU px per unit at the egg's depth (z -1.5; the egg lands at
+// about z -1.44). Elsewhere it is scaled by the room's own scale there, so it keeps the egg's proportion on any screen
+// (and with any zoom): 844x390 draws ~.40 of it (28 px). Never larger than SIZE: big screens look as they always did.
+const REF_PPU=280.2,SCALE_MIN=.25;
 // Playtest 3 (Aaron: "make the Flappy Bird quite a bit rarer, and let's actually change that guarantee to 10 minutes"):
 // later visits come after 4 to 10 minutes without it (was 1.5 to 5), never longer than 10. The first visit stays at
 // 90 s so a new player still meets it. arrive: it flies in from the right edge (Aaron: "come from the side of the
@@ -33,6 +38,9 @@ export default function createBird(site) {
   let away=num(store.get('bird.away'))+performance.now(),gap=Math.min(VISITS.cap,num(store.get('bird.gap'),store.get('bird.seen')?draw():VISITS.first));
   let state='waiting',timer=null,armedAt=0,forced=null,stayLeft=VISITS.stay,flightTime=0,leaving=null,arriving=null,eggOwed=false,eggWait=0;
   const drawn={x:0,y:0};
+  // The bird's size now (CSS px across): SIZE times the room's scale at the egg's depth against a 1280x900 page.
+  let size=SIZE,eggDepth=null;
+  function sizeNow(){eggDepth??=new site.THREE.Vector3(0,0,-1.5);return Math.round(SIZE*Math.max(SCALE_MIN,Math.min(1,stage.pxPerUnit(eggDepth)/REF_PPU)));}
   let bird=null,key=null,focusRing=null,listening=false,screen=null,resources=null;
   const stats={frames:0,appearedAt:null,arrivals:0,departures:0,eggCalls:0,gameStarts:0,returns:0,payoffs:0,beats:[],loads:0,replays:0};
   const circle={x:0,y:0,rx:0,ry:0};
@@ -53,7 +61,7 @@ export default function createBird(site) {
     if(arriving){
       // In it comes from past the right edge, a little high, easing onto its circle. Reduced motion: a fade in place.
       arriving.t+=dt;const u=Math.min(1,arriving.t/(stage.reducedMotion?1:VISITS.arrive)),k=1-(1-u)**2;
-      if(!stage.reducedMotion){const sx=stage.width+SIZE,sy=circle.y-90;x=sx+(x-sx)*k;y=sy+(y-sy)*k;facing=u<.85?-1:facing;}
+      if(!stage.reducedMotion){const sx=stage.width+size,sy=circle.y-90;x=sx+(x-sx)*k;y=sy+(y-sy)*k;facing=u<.85?-1:facing;}
       else opacity=.64*u;
       if(u>=1)arriving=null;
     }
@@ -66,17 +74,19 @@ export default function createBird(site) {
       opacity=.64*Math.min(1,(1-u)*2.5);if(u>=1){gone();return;}
     }
     drawn.x=x;drawn.y=y;
-    const sprite=flightArt().player,ratio=SIZE/PLAYER.frameWidth;
-    const anchor=sprite?PLAYER.pivot.map(v=>v*ratio):[SIZE/2,SIZE*12/27];
+    // A new size (a resize, the zoom): the sprite's box is laid out again, once.
+    const now=sizeNow();if(now!==size){size=now;bird.classList.remove('sprite');Object.assign(bird.style,{width:size+'px',height:Math.round(size*24/27)+'px',transformOrigin:''});delete bird.dataset.frame;}
+    const sprite=flightArt().player,ratio=size/PLAYER.frameWidth;
+    const anchor=sprite?PLAYER.pivot.map(v=>v*ratio):[size/2,size*12/27];
     bird.style.transform=`translate3d(${x-anchor[0]}px,${y-anchor[1]}px,0) scale(${facing*(.78+.12*Math.sin(a))},${.78+.12*Math.sin(a)})`;
     if(bird.style.opacity!==String(opacity))bird.style.opacity=opacity;
     if(sprite){
       if(!bird.classList.contains('sprite')){
         bird.innerHTML='';bird.classList.add('sprite');bird.dataset.playerSource=PLAYER.src;
-        Object.assign(bird.style,{width:SIZE+'px',height:PLAYER.frameHeight*ratio+'px',backgroundImage:`url("${PLAYER.src}")`,backgroundSize:`${PLAYER.columns*SIZE}px ${PLAYER.frameHeight*ratio}px`,transformOrigin:anchor.map(v=>v+'px').join(' ')});
+        Object.assign(bird.style,{width:size+'px',height:PLAYER.frameHeight*ratio+'px',backgroundImage:`url("${PLAYER.src}")`,backgroundSize:`${PLAYER.columns*size}px ${PLAYER.frameHeight*ratio}px`,transformOrigin:anchor.map(v=>v+'px').join(' ')});
       }
       const frame=playerFrame(flightTime,stage.reducedMotion,true);
-      if(bird.dataset.frame!==String(frame)){bird.dataset.frame=String(frame);bird.style.backgroundPosition=(-frame*SIZE)+'px 0';}
+      if(bird.dataset.frame!==String(frame)){bird.dataset.frame=String(frame);bird.style.backgroundPosition=(-frame*size)+'px 0';}
     }else bird.querySelector('.wing').style.transform=stage.reducedMotion?'none':`scaleY(${.5+.5*Math.cos(flightTime*4.8)})`;
   }
   function clearBird(){unlisten();bird?.remove();key?.remove();focusRing?.remove();bird=key=focusRing=null;}
@@ -126,6 +136,7 @@ export default function createBird(site) {
   }
   function showBird(){
     bird=document.createElement('div');bird.className='distant-bird';bird.innerHTML=birdSVG;document.getElementById('back').append(bird);
+    size=sizeNow();Object.assign(bird.style,{width:size+'px',height:Math.round(size*24/27)+'px'});
     focusRing=document.createElement('div');focusRing.className='bird-orbit-focus';document.getElementById('back').append(focusRing);
     key=document.createElement('button');key.className='bird-key';key.type='button';key.textContent='Follow the distant bird';key.onclick=start;document.body.append(key);
     layout();tick(0);listen();
@@ -193,7 +204,7 @@ export default function createBird(site) {
     if(!hit(e.clientX,e.clientY))return null;
     const x=e.clientX,y=e.clientY;let moved=false;
     return {move(ev){if(Math.hypot(ev.clientX-x,ev.clientY-y)>12)moved=true;},end(ev){if(!moved&&ev.type==='pointerup')start();}};
-  });
+  },{covers:hit});   // grab lane: its circle (already 24 px generous) is its own; a finger's grace for items stops there
   input.cursors.push(e=>hit(e.clientX,e.clientY)?'pointer':null);
   stage.onResize.push(layout);
   document.addEventListener('visibilitychange',()=>{
@@ -203,6 +214,7 @@ export default function createBird(site) {
   addEventListener('pagehide',()=>{if(state==='waiting'){pauseTimer();store.flush();}});
   layout();arm();
   return {find:'bird',again:()=>replay(),replay,start,hit,leave,get screen(){return screen;},get state(){return state;},get circle(){return {...circle};},
+    get size(){return bird?size:sizeNow();},
     get stats(){return {...stats,beats:screen?.beats??stats.beats,listening,timer:timer!==null,callbacks:Number(listening)+(screen?.callbacks||0)};},
     get schedule(){return {away:Math.round(away+(state==='waiting'&&timer!==null?performance.now()-armedAt:0)),gap:Math.round(gap),stayLeft:Math.round(stayLeft),due:Math.round(due())};},
     // Only the dedicated headless fixture gets a skip; ordinary visits cannot summon it early.

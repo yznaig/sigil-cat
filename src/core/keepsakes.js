@@ -115,8 +115,9 @@ export function createKeepsakes(site) {
   }
   function constrain(i) {
     const bounds = extent(i), x = toPx(i.x, i.y).x;
-    const half = Math.min(stage.width / 2, bounds.w / 2 + 12);
-    const next = Math.max(half, Math.min(stage.width - half, x));
+    // (controls lane, playtest-4: inside the safe sides, stage.insets.left/right)
+    const L = stage.insets.left || 0, R = stage.insets.right || 0, half = Math.min((stage.width - L - R) / 2, bounds.w / 2 + 12);
+    const next = Math.max(L + half, Math.min(stage.width - R - half, x));
     if (next !== x) i.vx = -(i.vx || 0) * .15;
     i.x = toUnits(next, 0).x;
     const topOffset = i.def.anchor === 'center' ? bounds.h / 2 : bounds.h;
@@ -131,7 +132,7 @@ export function createKeepsakes(site) {
   // keep it on the page: its middle never leaves the screen, and it stays clear of the bottom row of controls
   function clampUnits(def, p) {
     const m = 12, w = widthOf(def), h = w * (def.aspect ?? 1);
-    const px = Math.min(stage.width - m - w * 0.5, Math.max(m + w * 0.5, feet.x + p.x * u));
+    const px = Math.min(stage.width - (stage.insets.right || 0) - m - w * 0.5, Math.max((stage.insets.left || 0) + m + w * 0.5, feet.x + p.x * u));   // (controls lane: the safe sides)
     const top = def.anchor === 'center' ? h / 2 : h, py = Math.min(stage.height - stage.insets.bottom + 26, Math.max(m + top, feet.y - p.y * u));
     return toUnits(px, py);
   }
@@ -145,15 +146,15 @@ export function createKeepsakes(site) {
   function collectionHome(id) {
     const sizes = [['rifle',1,.26],['top',.3,1],['pat',.2,.55],['ticket',.4,.45],
       ['tin',.34,.7],['postcard',.44,.667],['paper',.36,1.25],['box',.84,.74]];
-    const gap = 10, left = Math.max(42, stage.width*.08) + .42*u/2 + 22;
+    const gap = 10, left = site.worldLayout.rackX() + .42*u/2 + 22, right = stage.width - (stage.insets.right || 0);   // (controls lane: after the rack, inside the safe sides)
     let x=left, bottom=Math.min(floorY()+60,stage.height-stage.insets.bottom-28), rowHeight=0;
     for (const [key,size,aspect] of sizes) {
       const w=size*u*Math.min(1,stage.width/600), h=w*aspect;
       const lean=materials[key]?.lean||0;
       const bw=Math.abs(Math.cos(lean))*w+Math.abs(Math.sin(lean))*h;
       const bh=Math.abs(Math.sin(lean))*w+Math.abs(Math.cos(lean))*h;
-      if(x+bw>stage.width-12&&x>left){bottom-=rowHeight+gap;x=left;rowHeight=0;}
-      if(key===id)return {x:(key==='box'?stage.width-12-bw/2:x+bw/2),y:bottom};
+      if(x+bw>right-12&&x>left){bottom-=rowHeight+gap;x=left;rowHeight=0;}
+      if(key===id)return {x:(key==='box'?right-12-bw/2:x+bw/2),y:bottom};
       x+=bw+gap;rowHeight=Math.max(rowHeight,bh);
     }
     return null;
@@ -342,8 +343,10 @@ export function createKeepsakes(site) {
       },
     };
   };
-  input.claim(90, taker('front'));
-  input.claim(40, taker('back'));
+  // grab lane (2026-11-13): a finger's near miss on a page-drawn keepsake is offered to it too (src/core/input.js GRACE)
+  const near = (layer) => (x, y, r) => [...live.values()].some((i) => i.layer === layer && !i.physical && !i.def.inert && !i.stored && i.box && x >= i.box.x - r && x <= i.box.x + i.box.w + r && y >= i.box.y - r && y <= i.box.y + i.box.h + r);
+  input.claim(90, taker('front'), { near: near('front') });
+  input.claim(40, taker('back'), { near: near('back') });
   input.cursors.push((e) => ([...live.values()].some((i) => !i.def.inert && i.hits(e.clientX, e.clientY) && (!i.def.hit || i.def.hit(i, e.clientX, e.clientY))) ? 'grab' : null));
 
   stage.onFrame.push((dt) => {

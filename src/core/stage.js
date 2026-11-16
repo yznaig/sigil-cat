@@ -69,23 +69,38 @@ export function createStage(canvas) {
   let early = false;
   onEarly.push = (f) => { if (early) { try { f(); } catch (e) { console.error(e); } return onEarly.length; } return Array.prototype.push.call(onEarly, f); };
   function prepare() { if (early) return; early = true; for (const f of onEarly) { try { f(); } catch (e) { console.error(e); } } }
-  const insets = { top: 0, bottom: 0 };
+  // top/bottom: the page's chrome (src/ui/hush.js fit()). left/right (controls lane, playtest-4): the screen's safe
+  // area at the sides, env(safe-area-inset-left/right) (the page is viewport-fit=cover): on a phone on its side the
+  // notch or the Dynamic Island sits there. The room is planned inside them (furniture, homes, the scoots), the
+  // canvas still paints to the screen's edges.
+  const insets = { top: 0, bottom: 0, left: 0, right: 0 };
+  const safeProbe = document.createElement('div');
+  safeProbe.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding:0 env(safe-area-inset-right,0px) 0 env(safe-area-inset-left,0px)';
+  (document.body || document.documentElement).appendChild(safeProbe);
+  function readSides() { const cs = getComputedStyle(safeProbe); insets.left = parseFloat(cs.paddingLeft) || 0; insets.right = parseFloat(cs.paddingRight) || 0; }
+  // Zoom (controls lane, playtest-4; Aaron: "a zoom slider alongside the sound slider ... to customize their zoom and
+  // screen tightness"): the camera comes closer by this factor, so he, the room and every keepsake are drawn larger.
+  // src/ui/zoom.js owns the setting (ZOOM there: range, device defaults, remembered); a change re-plans the room like
+  // a resize (every onResize listener runs once). 1: the framing as it was.
+  let zoom = 1;
   let width = 1, height = 1, layoutHeld = false, layoutPending = false, layoutGate = () => false;
   function frame() {
     // Shell lane (playtest-2): while the page is frozen (src/core/freeze.js), or about to be (a phone just turned
     // upright: the gate), a resize waits for the release.
     if (layoutHeld || layoutGate()) { layoutPending = true; return; }
-    width = innerWidth; height = innerHeight;
+    width = innerWidth; height = innerHeight; readSides();
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     const half = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     const usable = Math.max(0.3, 1 - (insets.top + insets.bottom) / height);     // the share of the height he may use
-    const dist = Math.max(VIEW.needH / 2 / (half * usable), VIEW.needW / 2 / (half * camera.aspect));
+    const usableW = Math.max(0.5, 1 - (insets.left + insets.right) / width);     // and of the width (the safe sides)
+    const dist = Math.max(VIEW.needH / 2 / (half * usable), VIEW.needW / 2 / (half * camera.aspect * usableW)) / zoom;
     camera.position.set(0, VIEW.camY + dist * VIEW.camRise, dist);
     camera.lookAt(...VIEW.lookAt);
-    // slide the picture so he is centred between the top and bottom chrome, whatever their sizes
-    const shift = (insets.bottom - insets.top) / 2;
-    if (shift) camera.setViewOffset(width, height, 0, shift, width, height); else camera.clearViewOffset();
+    // slide the picture so he is centred between the top and bottom chrome, whatever their sizes, and between the
+    // safe sides
+    const shift = (insets.bottom - insets.top) / 2, side = (insets.right - insets.left) / 2;
+    if (shift || side) camera.setViewOffset(width, height, side, shift, width, height); else camera.clearViewOffset();
     camera.updateProjectionMatrix(); camera.updateMatrixWorld();
     for (const f of onResize) f();
   }
@@ -278,8 +293,14 @@ export function createStage(canvas) {
     get width() { return width; }, get height() { return height; }, get dpr() { return dpr; },
     get clock() { return clock; }, get reducedMotion() { return forcedReduced || motion.matches; },
     get loaded() { return loaded; }, get insets() { return insets; },
+    // controls lane: the zoom (src/ui/zoom.js); a change re-plans like a resize
+    get zoom() { return zoom; }, setZoom(z) { z = Number(z) || 1; if (z === zoom) return; zoom = z; frame(); },
     get timeScale() { return timeScale; }, set timeScale(v) { timeScale = v; },
     get paused() { return paused; }, set paused(v) { paused = v; },
+    // The next frame runs at dt = 0 (after a pause: no step swallows the time away). Playtest 4 (flappybreak lane): this
+    // replaced setting timeScale to 0 and restoring it a frame later, which two releases before one frame (the flappy
+    // screen and the phone's turn overlay) left at 0 for good. It touches only the frame clock, so any number of calls agree.
+    restartClock() { last = 0; },
     get longestFrame() { return perf.longest; }, resetLongest() { perf.longest = 0; },
     frame, setInsets, toScreen, ray, onFloor, onWall, pxPerUnit, ensureEnv, warm, warmDraw, warmAll, compile, after, tween, warmLog,
     setBusyCheck(f) { busyCheck = f; },

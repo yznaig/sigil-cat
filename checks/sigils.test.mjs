@@ -480,6 +480,32 @@ function placeLine(rng) {
   check(!SIGILS.star && cast / N <= MAX_SCRIBBLE_HIT, `drawn stars cast a sign ${cast}/${N} (need <= ${MAX_SCRIBBLE_HIT * 100}%, no 'star' sigil)${cast ? ': ' + JSON.stringify(said) : ''}`);
 }
 
+// 4d. Phone strokes (gags lane, playtest 4: Aaron's circles on his phone kept casting the box). A phone reports about
+// 60 points a second, so a quick sign is a dozen to a few dozen points, 25-55 px apart, often running a little past
+// its start. Every sign is drawn that way at phone size (90-220 px); the circle and the box must not swap.
+{
+  const pr = makeRng(20261114), N = 150, sparse = (dense, step) => {
+    const out = [dense[0]]; let acc = 0;
+    for (let i = 1; i < dense.length; i++) { acc += dist(dense[i - 1], dense[i]); if (acc >= step) { out.push(dense[i]); acc = 0; } }
+    if (out[out.length - 1] !== dense[dense.length - 1]) out.push(dense[dense.length - 1]);
+    return out;
+  };
+  const phone = (shape) => {
+    const xs = shape.map((p) => p.x), ys = shape.map((p) => p.y), w = Math.max(...xs) - Math.min(...xs) || 1, h = Math.max(...ys) - Math.min(...ys) || 1;
+    const k = pr.range(90, 220) / Math.max(w, h), aspect = pr.range(0.8, 1.35), tilt = pr.range(-15, 15) * Math.PI / 180;
+    const placed = shape.map((p) => { const x = p.x * k * aspect, y = p.y * k; return pt(420 + x * Math.cos(tilt) - y * Math.sin(tilt), 200 + x * Math.sin(tilt) + y * Math.cos(tilt)); });
+    return sparse(placed, pr.range(25, 55)).map((p) => jitterPoint(pr, p, pr.range(0.5, 1.5)));
+  };
+  const said = {};
+  for (const name of ['circle', 'square']) {
+    said[name] = {};
+    for (let i = 0; i < N; i++) { const r = recognizer.recognize(phone(DRAWERS[name](pr))); const o = outcomeOf(r); said[name][o] = (said[name][o] ?? 0) + 1; }
+  }
+  const right = (n) => said[n][n] ?? 0;
+  check(right('circle') >= N * 0.9 && (said.circle.square ?? 0) <= N * 0.02, `phone circles (few points far apart) cast the circle ${right('circle')}/${N}, the box ${said.circle.square ?? 0} (need >= 90%, box <= 2%): ${JSON.stringify(said.circle)}`);
+  check(right('square') >= N * 0.85 && (said.square.circle ?? 0) <= N * 0.05, `phone boxes (few points far apart) cast the box ${right('square')}/${N}, the circle ${said.square.circle ?? 0} (need >= 85%, circle <= 5%): ${JSON.stringify(said.square)}`);
+}
+
 // 5. Template self-check: a clean template, replayed with the same points, is recognised as itself.
 {
   let bad = [];

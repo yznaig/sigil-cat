@@ -63,7 +63,8 @@ await expectOriginal('the bread blast-off', 'twinkle', async () => {
   for (let i = 0; i < 4; i++) { taps.push(...await record(() => star.def.tap(star), 700)); }
   const bells = taps.filter((s) => s.name === 'bell');
   check('playtest the star tap plays the small bell, not the twinkle or the old tink', bells.length === 4 && !taps.some((s) => s.name === 'twinkle' || s.name === 'star-tink'), list(taps));
-  check('playtest the star bell varies a little each tap', new Set(bells.map((s) => s.rate.toFixed(4))).size >= 3 && bells.every((s) => Math.abs(s.rate - 1) <= .03 + 1e-6), bells.map((s) => s.rate.toFixed(3)).join(', '));
+  // Playtest 3 (Aaron: "It should all just be the same pitch", 6f2eaa3): every sticker tap rings at rate 1.
+  check('playtest the star bell rings at one pitch every tap', bells.length >= 3 && bells.every((s) => Math.abs(s.rate - 1) <= 1e-6), bells.map((s) => s.rate.toFixed(3)).join(', '));
   const b = audio.buffer('bell'); let pk = 0; for (const v of b.getChannelData(0)) pk = Math.max(pk, Math.abs(v));
   check('playtest the bell is short and peak-safe', b.duration < 1.2 && b.numberOfChannels === 1 && 20 * Math.log10(pk) <= -4, `${b.duration.toFixed(3)} s, peak ${(20 * Math.log10(pk)).toFixed(2)} dBFS`); }
 await until(settled, 8000);

@@ -20,7 +20,8 @@ export const FLOOR={side:12,top:8,footer:30};
 // rule allows, checks/world-layout.js; well inside the occluders' SCOOT.shown, so nothing placed this way is scooted). The old rule counted a lying card's whole screen box, so a room with its cards
 // on the floor had no front band left (physics lane item 4's limit: 33% covered).
 export const FRONT={overlap:.15,flat:.02,shown:.8};
-export function floorRect(stage){return {left:FLOOR.side,right:stage.width-FLOOR.side,top:stage.insets.top+FLOOR.top,bottom:stage.height-stage.insets.bottom-FLOOR.footer};}
+// (controls lane, playtest-4: inside the safe sides, stage.insets.left/right)
+export function floorRect(stage){return {left:(stage.insets.left||0)+FLOOR.side,right:stage.width-(stage.insets.right||0)-FLOOR.side,top:stage.insets.top+FLOOR.top,bottom:stage.height-stage.insets.bottom-FLOOR.footer};}
 // vertices: the body-local points its picture spans (collider or picture vertices). reach: for a body still in the
 // air, its farthest point from its origin, so the spot it will land on is kept above the footer too.
 export function fitResting(site,entry,vertices,{reach=0}={}){
@@ -148,7 +149,7 @@ export function clearOfCat(site,vertices,q,p,{sideways=false}={}){
  if(!hits(p))return p;
  const s=stage.toScreen(new T.Vector3(p.x,0,p.z));
  if(sideways){
-  const fits=n=>{const xs=vertices.map(v=>stage.toScreen(v.clone().applyQuaternion(q).add(n)).x);return Math.min(...xs)>=16&&Math.max(...xs)<=stage.width-16;};
+  const fits=n=>{const xs=vertices.map(v=>stage.toScreen(v.clone().applyQuaternion(q).add(n)).x);return Math.min(...xs)>=(stage.insets.left||0)+16&&Math.max(...xs)<=stage.width-(stage.insets.right||0)-16;};
   const away=Math.sign(s.x-stage.toScreen(new T.Vector3().copy(body.translation())).x)||-1;
   for(const dir of [away,-away])for(let dx=12;dx<stage.width;dx+=12){const n=stage.onFloor(s.x+dir*dx,s.y);n.y=p.y;if(!fits(n))break;if(!hits(n))return n;}
   // Then toward the viewer, in front of his paws, while it stays above the footer.
@@ -252,7 +253,7 @@ export function placer(site){
   // The old foreground-only band could not hold the complete collection.
   // Also search the same floor beside/behind the cat; hit tests still exclude
   // its silhouette, furniture and controls, and art keeps its physical scale.
-  if(!best||best.score>0)for(let y=Math.max(stage.insets.top+24,keepsakes.feet.y-240);y<=footer-26;y+=12)for(let x=18;x<stage.width-12;x+=16)consider(x,y);
+  if(!best||best.score>0)for(let y=Math.max(stage.insets.top+24,keepsakes.feet.y-240);y<=footer-26;y+=12)for(let x=(stage.insets.left||0)+18;x<stage.width-(stage.insets.right||0)-12;x+=16)consider(x,y);
   return best;
  }
  return {bounds,project,visual,occupied,cost,choose,furniture,flatOf};

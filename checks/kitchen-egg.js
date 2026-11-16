@@ -12,9 +12,10 @@ await until(()=>egg.worldEntry.body.isSleeping(),12000);await sleep(300);
 const p=egg.worldEntry.body.translation(),r=egg.picture.rect,bird=B.circle;
 check('egg lands on the floor, on the page, under the bird\'s side',p.y<.2&&r.x>0&&r.x+r.w<stage.width&&r.y+r.h<stage.height-stage.insets.bottom+4&&Math.abs((r.x+r.w/2)-bird.x)<stage.width*.35,JSON.stringify({p,r,bird}));
 // Playtest-2 (Aaron's two pictures): it lands well back in the room, behind his feet on the page and small with
-// distance, under the bird, so it reads as the bird's egg (not a big egg at the front).
+// distance, under the bird, so it reads as the bird's egg (not a big egg at the front). (Touchfeel lane, playtest 4:
+// the bird scales with the room now, so on a phone it is under 30 px; "in proportion" is against the egg.)
 {const feet=stage.toScreen(new site.THREE.Vector3()).y,bird=document.querySelector('.distant-bird')?.getBoundingClientRect();
- check('egg lands far back, under the bird, in proportion to it',p.z<-.5&&r.y+r.h<feet+8&&Math.abs((r.x+r.w/2)-B.circle.x)<B.circle.rx+r.w&&r.w<=bird.width*2.6&&bird.width>=30,JSON.stringify({z:p.z,bottom:r.y+r.h,feet,egg:r.w,bird:bird?.width}));}
+ check('egg lands far back, under the bird, in proportion to it',p.z<-.5&&r.y+r.h<feet+8&&Math.abs((r.x+r.w/2)-B.circle.x)<B.circle.rx+r.w&&r.w<=bird.width*2.6&&bird.width>=r.w*.4,JSON.stringify({z:p.z,bottom:r.y+r.h,feet,egg:r.w,bird:bird?.width}));}
 await __shot('kitchen-egg-landed');
 // It cannot break: a hard throw at the floor leaves the same egg.
 {const e=egg.worldEntry;e.body.setTranslation({x:p.x,y:1.2,z:p.z},true);e.body.setLinvel({x:0,y:-8,z:0},true);W.wake(e);await until(()=>e.body.isSleeping(),12000);

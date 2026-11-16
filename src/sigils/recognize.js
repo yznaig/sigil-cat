@@ -84,8 +84,41 @@ function loop(pts) {
 //          (soft corners and a wobbly hand bring it to about 0.8), a circle or oval is 0.79, a triangle 0.5.
 //   share  how much of its turning happens in a third of its length. A circle turns evenly (about a third); a box
 //          does nearly all its turning at its corners, however soft.
+// A fast finger leaves few points (a phone reports ~60 a second: a quick circle is 12-20 points, 30-50 px apart), and
+// the straight chords between them turn only at the points: a circle of 12 chords turns at 12 corners, so its turning
+// looked as bunched as a box's and it was taken for the box (playtest 4, gags lane: Aaron's circles on his phone said
+// the box's intro line). So a sparse loop is first drawn through its points as a smooth closed curve (Catmull-Rom),
+// at least `dense` points round; a box's sharp corners stay where most of its turning is.
+function smooth(p, dense = 72) {
+  const n = p.length;
+  if (n < 4 || n >= dense) return p;
+  const k = Math.ceil(dense / n), out = [];
+  for (let i = 0; i < n; i++) {
+    const p0 = p[(i - 1 + n) % n], p1 = p[i], p2 = p[(i + 1) % n], p3 = p[(i + 2) % n];
+    for (let j = 0; j < k; j++) {
+      const t = j / k, t2 = t * t, t3 = t2 * t;
+      out.push({ x: 0.5 * (2 * p1.x + (-p0.x + p2.x) * t + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3),
+                 y: 0.5 * (2 * p1.y + (-p0.y + p2.y) * t + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3) });
+    }
+  }
+  return out;
+}
+// loop(), cut where the stroke passes nearest its start along a segment, not only at a point: with points far apart
+// the nearest one can lie well past the start, and the closed shape would double back there (a sharp turn at the seam).
+function seam(pts) {
+  let end = pts.length - 1, at = pts[end], near = Infinity;
+  for (let i = Math.max(1, Math.floor(pts.length * 0.7)); i < pts.length; i++) {
+    const a = pts[i - 1], b = pts[i], dx = b.x - a.x, dy = b.y - a.y, L = dx * dx + dy * dy;
+    const t = L ? Math.min(1, Math.max(0, ((pts[0].x - a.x) * dx + (pts[0].y - a.y) * dy) / L)) : 0;
+    const c = { x: a.x + dx * t, y: a.y + dy * t }, d = dist(c, pts[0]);
+    if (d < near) { near = d; end = i; at = c; }
+  }
+  const out = pts.slice(0, end);
+  if (dist(at, pts[0]) > 1e-6 && dist(at, out[out.length - 1]) > 1e-6) out.push(at);
+  return out;
+}
 function roundness(pts) {
-  const p = loop(pts), a = Math.abs(area(p));
+  const p = smooth(seam(pts)), a = Math.abs(area(p));
   let box = Infinity;
   for (let deg = 0; deg < 90; deg += 3) {
     const c = Math.cos(deg * Math.PI / 180), s = Math.sin(deg * Math.PI / 180);

@@ -3,15 +3,18 @@
 import { css } from '../core/util.js';
 import { wallClock } from '../core/page-scheduler.js';
 import { celebrate } from './party-effects.js';
-// errorSeconds: how long the error page stays before he pops in over it (playtest 3, proceed-unless-objected: "After
-// about 9 seconds on the error page, the cat should pop up overtop like how it does on the loading screen"); then the
-// page opens like the loading screen's doors (~1.7 s more, src/ui/shell.js) and the player is back in the room.
-export const PARTY = { errorSeconds:9, celebrationSeconds:4.8, reducedSeconds:1.6,
+// errorSeconds: how long the error page stays before he pops in over it; catSeconds: how long he then stays over it,
+// counted from the pop, before the page opens like the loading screen's doors (~1 s, src/ui/shell.js) and the player is
+// back in the room. Playtest 4 (Aaron, on his phone): "the cat should appear sooner, after about 4.5 seconds after the
+// error screen comes on, then the cat should stay there over the error screen for another 15 seconds. You should be
+// able to bonk him in the meantime, and THEN the screen opens up back to the original game" (was 9 s, then the doors).
+export const PARTY = { errorSeconds:4.5, catSeconds:15, celebrationSeconds:4.8, reducedSeconds:1.6,
   toot:'assets/audio/designed/party-toot.wav', tootGain:.8 };
 // The crash screen copies Chrome's "Aw, Snap!" page (e1112-33, Aaron's aw-snap-crash.png): Chrome's own layout,
 // sad-tab icon, fonts and colours, at Chrome's own sizes (its screenshot was taken at 150% display scaling). No way
 // out: no working control, no Escape, no skip; when the timer runs out the cat pops in over it, as on the loading
-// screen, and it opens down the middle like the loading screen's doors. "Learn more" and "Reload" are drawn as part of
+// screen, stays a while (he can be bonked: a tap on him, or Enter/Space, counts as a normal bonk; nothing else works),
+// and it opens down the middle like the loading screen's doors. "Learn more" and "Reload" are drawn as part of
 // the picture, not buttons ("itll just be a screenshot"). The page is two halves of the same picture (the right one
 // hidden from screen readers), so it can open.
 css('party', `
@@ -23,6 +26,7 @@ body.party-error > :not(#party-error) {visibility:hidden !important;}
 #party-error .pe-l {clip-path:inset(0 50% 0 0);}
 #party-error .pe-r {clip-path:inset(0 0 0 50%);}
 #party-error.opening {background:transparent;}
+#party-error.bonkable.on-cat {cursor:pointer;}
 body.party-pop canvas#c {visibility:visible !important;z-index:1001;pointer-events:none;transition:none;}
 body.party-opening > :not(#party-error) {visibility:visible !important;}
 #party-error .snap {box-sizing:border-box;width:100%;max-width:600px;margin:0 auto;padding:80px 20px 40px;}
@@ -43,18 +47,24 @@ const SAD_TAB = '<svg class="sad" viewBox="0 0 74 62" fill="currentColor" shape-
   '<rect x="17" y="48" width="6" height="2.6"/><rect x="23.6" y="44" width="21" height="2.6"/><rect x="45" y="48" width="7" height="2.6"/><rect x="52.6" y="50.6" width="7.4" height="2.4"/></svg>';
 export default function createParty(site) {
   const {stage,cat,audio,input}=site;
-  let run=null, effects=null, returns=0, toots=0;
+  let run=null, effects=null, returns=0, toots=0, bonks=0;
   audio.load(PARTY.toot);
-  // The way back (playtest 3): the page runs again under the error page, he pops in over it, it opens like the
-  // loading screen's doors, and the room is back. Input stays locked until the end; still no skip.
+  // The way back (playtest 3, 4): the page runs again under the error page, he pops in over it and stays catSeconds
+  // (bonkable), it opens like the loading screen's doors, and the room is back. Input stays locked until the end;
+  // still no skip. Calm: he fades in instead of popping, stays the same, and the page fades off the room.
   async function reopen(r) {
     if(run!==r||r.reopening)return;r.reopening=true;
     r.release();
     const body=document.body.classList,[l,rt]=r.root.querySelectorAll('.pe-door');
-    if(!stage.reducedMotion)body.add('party-pop');   // (calm: the page just fades off the room, no canvas over it)
+    body.add('party-pop');   // the canvas over the page, drawing only him
+    const t0=stage.clock;r.bonkable=true;r.root.classList.add('bonkable');   // bonkable from the moment he appears
     try{
       await site.shell.popOver({
-        beforeDoors(){r.root.classList.add('opening');body.add('party-opening');},
+        // he stays over the page, counted from the pop on the page's own clock (a phone turned upright freezes it too)
+        stay:async()=>{
+          await stage.after(Math.max(0,PARTY.catSeconds-(stage.clock-t0)));
+          r.bonkable=false;r.root.classList.remove('bonkable','on-cat');},
+        beforeDoors(){r.root.classList.add('opening');body.add('party-opening');if(stage.reducedMotion)body.remove('party-pop');},
         move(e){l.style.transform=`translate3d(${(-e*50).toFixed(3)}%,0,0)`;rt.style.transform=`translate3d(${(e*50).toFixed(3)}%,0,0)`;},
         fade:()=>r.root.animate([{opacity:1},{opacity:0}],{duration:600,easing:'ease-in-out',fill:'forwards'}).finished.catch(()=>{}),
       });
@@ -97,11 +107,22 @@ export default function createParty(site) {
     root.innerHTML=`<div class="pe-door pe-l">${snap(true)}</div><div class="pe-door pe-r" aria-hidden="true">${snap(false)}</div>`;
     document.body.append(root);
     // Nothing on it can be reached: Tab stays put, and Escape does nothing here (e1112-33, e1112-41).
-    root.addEventListener('keydown',e=>{if(e.key==='Tab')e.preventDefault();});
+    // While he stays over it he can be bonked (playtest 4): a press and release on him, as a tap on the canvas would
+    // be (the canvas lets presses through to this page meanwhile), or Enter / Space. The bonk is the page's own
+    // (cat.tap: the sound, the count, the hop, the bonk achievements).
+    root.addEventListener('keydown',e=>{if(e.key==='Tab')e.preventDefault();
+      else if(r.bonkable&&(e.key==='Enter'||e.key===' ')){e.preventDefault();if(cat.tap())bonks++;}});
+    let press=null;const R=cat.config.rotate;
+    root.addEventListener('pointerdown',e=>{press=r.bonkable&&(e.pointerType!=='mouse'||e.button===0)&&cat.hitTest(e.clientX,e.clientY)?{id:e.pointerId,x:e.clientX,y:e.clientY,t:e.timeStamp}:null;});
+    root.addEventListener('pointerup',e=>{const p=press;press=null;
+      if(!p||!r.bonkable||e.pointerId!==p.id||e.timeStamp-p.t>=R.tapMs||Math.hypot(e.clientX-p.x,e.clientY-p.y)>R.tapSlop)return;
+      if(cat.tap(e.clientX,e.clientY))bonks++;});
+    root.addEventListener('pointercancel',()=>{press=null;});
+    root.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')root.classList.toggle('on-cat',!!r.bonkable&&cat.hitTest(e.clientX,e.clientY));});
     root.focus({preventScroll:true});
     r.timer=wallClock.setTimeout(()=>reopen(r),PARTY.errorSeconds*1000);
     return r.promise;
   }
-  return {eatCake,get state(){return {active:!!run,reopening:!!run?.reopening,returns,toots,effects:!!effects?.active,
+  return {eatCake,get state(){return {active:!!run,reopening:!!run?.reopening,bonkable:!!run?.bonkable,bonks,returns,toots,effects:!!effects?.active,
     confetti:effects?.confetti||0,blower:!!effects?.blower,sides:effects?.sides||0};}};
 }

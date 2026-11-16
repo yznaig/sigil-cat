@@ -54,7 +54,7 @@ export function createPinboard(site){
  }
  function dimensions(){width=BOARD_VIEW.desktop.width;height=BOARD_VIEW.desktop.height;}
  function layout(){
-  if(!root)return;const key=[stage.width,stage.height,stage.dpr,stage.insets.top,stage.insets.bottom].join(',');if(last===key){applyArrival();return;}last=key;
+  if(!root)return;const key=[stage.width,stage.height,stage.dpr,stage.insets.top,stage.insets.bottom,stage.insets.left,stage.insets.right,stage.zoom].join(',');   // (controls lane: the safe sides and the zoom too)if(last===key){applyArrival();return;}last=key;
   const oldWidth=width,oldHeight=height;dimensions();
   if(!art||oldWidth!==width||oldHeight!==height){
    // Rebuild only on the breakpoint: paper keeps its physical dimensions.
@@ -65,12 +65,12 @@ export function createPinboard(site){
   const found=document.querySelector('#found'),tally=document.querySelector('#tally');
   const top=Math.max(stage.insets.top,found?.getBoundingClientRect().bottom||0,tally?.getBoundingClientRect().bottom||0)+12;
   const ppu=stage.pxPerUnit(new T.Vector3()),px=width*ppu,py=height*ppu,normal=stage.camera.getWorldDirection(new T.Vector3()),wall=new T.Plane(normal,0);
-  root.position.copy(stage.ray(stage.width-18-px/2,top+py/2).intersectPlane(wall,new T.Vector3()));
+  root.position.copy(stage.ray(stage.width-(stage.insets.right||0)-18-px/2,top+py/2).intersectPlane(wall,new T.Vector3()));
   stage.camera.updateMatrixWorld();const c=root.position.clone().applyMatrix4(stage.camera.matrixWorldInverse),face=Math.atan2(-c.x,-c.z);
   root.quaternion.copy(stage.camera.quaternion).multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),face+BOARD_VIEW.yawDeg*Math.PI/180));root.updateMatrixWorld(true);
   // Turned, its projected corners move: put the actual right edge and top back on their margins.
   for(let n=0;n<2;n++){let right=-Infinity,up=Infinity;for(const v of art.vertices){const p=stage.toScreen(corner.copy(v).applyMatrix4(root.matrixWorld));right=Math.max(right,p.x);up=Math.min(up,p.y);}
-   const s=stage.toScreen(root.position),hit=stage.ray(s.x+(stage.width-18-right),s.y+(top-up)).intersectPlane(new T.Plane().setFromNormalAndCoplanarPoint(normal,root.position),new T.Vector3());if(hit)root.position.copy(hit);root.updateMatrixWorld(true);}
+   const s=stage.toScreen(root.position),hit=stage.ray(s.x+(stage.width-(stage.insets.right||0)-18-right),s.y+(top-up)).intersectPlane(new T.Plane().setFromNormalAndCoplanarPoint(normal,root.position),new T.Vector3());if(hit)root.position.copy(hit);root.updateMatrixWorld(true);}
   // Pivot on the right edge: it keeps its depth and the inner edge recedes, so the board reads smaller and deeper.
   {let near=null,best=Infinity;const view=new T.Vector3();for(const v of art.vertices){if(v.x<=0||v.y<=0||v.z<.05)continue;const w=corner.copy(v).applyMatrix4(root.matrixWorld);const d=view.copy(w).sub(stage.camera.position).dot(normal);if(d<best){best=d;near=w.clone();}}
    const want=stage.camera.position.clone().sub(root.position).dot(normal)*-1;if(near){const s0=stage.toScreen(near);root.position.addScaledVector(normal,want-best);root.updateMatrixWorld(true);

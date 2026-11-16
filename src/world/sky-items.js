@@ -6,7 +6,7 @@ import {defineSticker} from './stickers.js';
 export function defineStar(site) {
   const {stage} = site;
   site.store.del('worldBodies.twinkle');   // an older save's physical star has nothing to restore into
-  defineSticker(site, {id: 'twinkle', label: 'the star that stayed', art: 'star', spot: [.7, .2], tilt: -8});
+  defineSticker(site, {id: 'twinkle', label: 'the star that stayed', art: 'star', spot: [.7, .2]});
   // Older callers and checks: a sticker is always stuck; there is nothing to peel.
   return {stick: () => true, peel: () => false, get glinting() { return !stage.reducedMotion && !!site.keepsakes.get('twinkle')?.el.querySelector('.face')?.getAnimations().length; }};
 }

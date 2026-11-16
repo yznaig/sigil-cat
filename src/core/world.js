@@ -49,7 +49,7 @@ export const CAT_IN = { deep: .06, wedge: .008, free: .003, after: .4, grace: 10
 // put back where it was saved and to sleep, whatever order the bodies were added in. Anything that really moves it
 // (the hand, an adapter's own wake, a tap) ends the hold at once (wake()).
 export const RESTORE = { hold: 60 };
-export const REST = { px: 5, after: .25, slow: 150, angular: 6, linear: 3, touch: .004, sunk: .002, lift: .0008, group: 8 };
+export const REST = { px: 5, after: .25, slow: 150, angular: 6, linear: 3, touch: .004, sunk: .002, lift: .0008, lifts: 2, group: 8 };
 export function createWorld(site) {
   const { stage, THREE } = site, entries = new Map(), active = new Set(), pushers = new Map();
   const stats = { steps: 0, syncs: 0, frames: 0, listening: false, requestedAt: null, initializedAt: null, stepMs: 0, respawns: 0, unsunk: 0, ccdToggles: 0, settled: 0, jams: 0, unjammed: 0, catRespawns: 0 };
@@ -317,10 +317,14 @@ export function createWorld(site) {
     // (measured: the postcard, seed 30 of world-board's drops, 2.59 px in). The solver never pushes it out and the
     // contact distance above looks like a rest, so REST slept it there. Its lowest collider point (lowest()) says
     // where it really is: a calm body more than REST.sunk inside the floor is lifted out and settles again.
+    // At most REST.lifts times per rest (suite fix, 2026-11-13): Rapier's narrow phase can hold a hull with a vertex
+    // .002-.003 inside the floor while its contacts read +.001 (measured: the wizard hat on its brim, world-rack seeds 35
+    // and 37). Lifted, it falls straight back to the same pose, so it was lifted every 4 steps and never slept. After
+    // the lifts it is judged by its contacts alone, as before item 5. The count clears when it sleeps.
     const deep = lowest(entry);
-    if (deep < -REST.sunk) {
+    if (deep < -REST.sunk && (entry.lifts || 0) < REST.lifts) {
       b.setTranslation({ x: p.x, y: p.y - deep + REST.lift, z: p.z }, true); if (v.y < 0) b.setLinvel({ x: v.x, y: 0, z: v.z }, true);
-      entry.calmAt = null; stats.unsunk++; return;
+      entry.lifts = (entry.lifts || 0) + 1; entry.calmAt = null; stats.unsunk++; return;
     }
     entry.calmAt ??= simTime;
     // Stopped here and put to sleep just before the next physics step (step()), never between steps: in this Rapier build
@@ -332,7 +336,7 @@ export function createWorld(site) {
       // it at the next step, and the two took turns for ever (fix round A, note 3). Now the awake bodies it touches,
       // and theirs (up to REST.group), go to sleep in the same step once every one of them is slow too; until then it waits.
       const group = restingGroup(entry); if (!group) return false;
-      for (const e of group) { e.body.setLinvel({ x: 0, y: 0, z: 0 }, false); e.body.setAngvel({ x: 0, y: 0, z: 0 }, false); e.sleepNext = true; calm(e); stats.settled++; }
+      for (const e of group) { e.body.setLinvel({ x: 0, y: 0, z: 0 }, false); e.body.setAngvel({ x: 0, y: 0, z: 0 }, false); e.sleepNext = true; e.lifts = 0; calm(e); stats.settled++; }
       return true;
     }
     return false;
@@ -494,7 +498,8 @@ export function createWorld(site) {
     restLater.clear();
   }
   function sameLayout(saved) { const now = layoutKey(); return Array.isArray(saved) && saved.length === now.length && saved.every((v, i) => Math.abs(v - now[i]) < 1e-6); }
-  function layoutKey() { return [stage.width,stage.height,stage.insets.top,stage.insets.bottom,...stage.camera.matrixWorld.elements,...stage.camera.projectionMatrix.elements]; }
+  function layoutKey() { return [stage.width,stage.height,stage.insets.top,stage.insets.bottom,stage.insets.left,stage.insets.right,   // (controls lane: the safe sides)
+...stage.camera.matrixWorld.elements,...stage.camera.projectionMatrix.elements]; }
   function save(entry, resume = false) {
     if(!entry.persist||(!entry.support&&!entry.body.isSleeping()&&!resume))return;
     const p=entry.body.translation(),q=entry.body.rotation();
@@ -648,7 +653,7 @@ export function createWorld(site) {
       if (vl > R2.speed) b.setLinvel({ x: v.x * R2.speed / vl, y: v.y * R2.speed / vl, z: v.z * R2.speed / vl }, true);
       if (wl > R2.spin) b.setAngvel({ x: w.x * R2.spin / wl, y: w.y * R2.spin / wl, z: w.z * R2.spin / wl }, true);
     }
-    wake(entry); ccd(entry, true); entry.released?.();
+    entry.lifts = 0; wake(entry); ccd(entry, true); entry.released?.();
   }
   function visibility() { release(); if (document.hidden) unlisten(); else listen(); }
   document.addEventListener('visibilitychange', visibility);

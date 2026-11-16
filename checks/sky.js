@@ -1,5 +1,5 @@
 // Sky lane (playtest 2, 2026-11-12). Run with checks/lib.js, desktop at dpr 1 (and 844x390 for a landscape phone):
-//   1. the star is a secret found by spinning him really fast, not a sigil; Starstruck is gone, Fluent is nine signs
+//   1. the star is no sign and (playtest 4) no find at all: no grimoire entry; Starstruck is gone, Fluent is nine signs
 //   2. two spin thresholds: one fast flick earns Spin Doctor and never the galaxy; ~7 s of hard swiping opens it
 //   3. the galaxy has no black hole, comes in about 3x slower, and holds until a click (Esc too)
 //   4. spinning the bread really fast blasts it off (playtest 3: no riser or pop here, they are the loaf's), the
@@ -13,8 +13,8 @@ const W = stage.width, H = stage.height;
 
 // ---- 1. the star ----
 const star = FINDS.find((f) => f.id === 'star'), fluent = ACHIEVEMENTS.find((a) => a.id === 'fluent');
-check('sky the star is a secret, not a sigil', star.kind === 'secret' && !star.sigil && !SIGILS.star && !site.spells.star
-  && !site.combos.ROWS.some((r) => r.second === 'star'), `kind ${star.kind}; templates ${Object.keys(SIGILS).join(' ')}`);
+check('sky the star is not a find (playtest 4) nor a sigil', !star && !registry.byId.has('star') && !SIGILS.star && !site.spells.star
+  && !site.combos.ROWS.some((r) => r.second === 'star'), `finds ${FINDS.length}; templates ${Object.keys(SIGILS).join(' ')}`);
 { // a five-point star drawn on the air: a scribble now
   await until(settled, 8000);
   const c = { x: W * 0.2, y: stage.insets.top + 130 }, R = 60, pts = [];
@@ -54,7 +54,7 @@ let swipes = 0;
 const t0 = performance.now();
 const opened = await spinHard(() => { swipes++; return g.isOpen; }, { pxPerSec: 2600, max: 90 });
 const spun = (performance.now() - t0) / 1000;
-check('sky about seven seconds of hard swiping opens the galaxy and finds the star', opened && registry.has('star') && A.has('void') && input.locked
+check('sky about seven seconds of hard swiping opens the galaxy (Into the Void, no star find)', opened && !registry.has('star') && A.has('void') && input.locked
   && g.config.spin.seconds === 7 && spun >= 6.3 && spun <= 9.5, `${swipes - 1} swipes at 2600 px/s, ${spun.toFixed(2)} s`);
 {
   const at = stage.clock, trace = [];
@@ -84,7 +84,7 @@ check('sky about seven seconds of hard swiping opens the galaxy and finds the st
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   const esc = g.phase === 'recede';
   await until(() => !g.isOpen && !input.locked, 8000);
-  check('sky Esc ends the hold; the star mark replays the galaxy', esc && !g.isOpen && !input.locked);
+  check('sky Esc ends the hold; galaxy.again replays it', esc && !g.isOpen && !input.locked);
 }
 
 // ---- 4. the bread ----

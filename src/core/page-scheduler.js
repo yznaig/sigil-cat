@@ -42,13 +42,25 @@ export function installPageScheduler() {
     window.cancelIdleCallback=id=>cancel(id,'cancelIdleCallback');
   }
 }
+// Pauses nest (playtest 4, flappybreak lane): the flappy screen and the shared freeze (src/core/freeze.js: the phone's
+// "flip sideways" overlay, the books, the party) each hold their own pause. A second pause used to throw, which on a
+// phone turned upright mid-flappy left the turn hold half made and the stage clock stopped for good after the game
+// (cat still, strokes never fading, items stuck). Now each pause returns its own release (idempotent); the page's
+// callbacks resume when the last one lets go.
+let holders = 0;
 export function pausePageCallbacks() {
-  if(paused)throw new Error('page callbacks already suspended');
-  paused=true;
-  for(const job of pending.values()) {
-    if(job.native!==null)wallClock[cancelName(job.kind)](job.native);
-    job.native=null;job.left=Math.max(0,job.at-now());
+  if (holders++ === 0) {
+    paused = true;
+    for (const job of pending.values()) {
+      if (job.native !== null) wallClock[cancelName(job.kind)](job.native);
+      job.native = null; job.left = Math.max(0, job.at - now());
+    }
   }
-  let released=false;
-  return () => { if(released)return;released=true;paused=false;for(const job of pending.values())arm(job); };
+  let released = false;
+  return () => {
+    if (released) return; released = true;
+    if (--holders > 0) return;
+    paused = false; for (const job of pending.values()) arm(job);
+  };
 }
+export const pageCallbacksPaused = () => paused;

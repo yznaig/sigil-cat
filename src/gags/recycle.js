@@ -12,19 +12,19 @@ import {puff} from '../core/puff.js';
 import {css} from '../core/util.js';
 import {clearFootprint} from '../flappy/stand.js';
 const BIN = { margin: 18, slide: .7, leaveAfter: 2.4, pad: 16 };
-// The six stars: their words, what he says, its slight turn, and `spot` (fractions of the screen): only its keepsake
+// The six stars: their words, what he says, and `spot` (fractions of the screen): only its keepsake
 // home now. Nothing goes straight onto the pinboard (cards lane, playtest 3: "they should always be droped for the
 // player"), and the old spots were on the board, so a star hops out of the bin and lands on the floor beside it
 // (landing() below), for the player to stick wherever they like.
 export const RECYCLE = {
   total: 6,
   tiers: [
-    { lines: ['GOOD', 'JOB!'], said: 'good job.', spot: [.86, .32], tilt: -6 },
-    { lines: ['GREAT', 'JOB!'], said: 'GREAT JOB!', spot: [.95, .44], tilt: 7 },
-    { lines: ['THANK', 'YOU!'], said: 'THANK YOU!', spot: [.86, .56], tilt: -3 },
-    { lines: ['WOW'], said: 'WOW', spot: [.77, .44], tilt: 9 },
-    { lines: ['WOW'], said: 'WOW', spot: [.77, .22], tilt: -10 },
-    { lines: ['WOW'], said: 'WOW', spot: [.95, .2], tilt: 4 },
+    { lines: ['GOOD', 'JOB!'], said: 'good job.', spot: [.86, .32] },
+    { lines: ['GREAT', 'JOB!'], said: 'GREAT JOB!', spot: [.95, .44] },
+    { lines: ['THANK', 'YOU!'], said: 'THANK YOU!', spot: [.86, .56] },
+    { lines: ['WOW'], said: 'WOW', spot: [.77, .44] },
+    { lines: ['WOW'], said: 'WOW', spot: [.77, .22] },
+    { lines: ['WOW'], said: 'WOW', spot: [.95, .2] },
   ],
 };
 const ITEMS = ['crumbs', 'shards'];
@@ -45,14 +45,14 @@ export default function createRecycle(site) {
   const stats = { slides: 0, leaves: 0, binned: [], refused: 0 };
 
   // ---- the stars ----
-  RECYCLE.tiers.forEach((t, n) => defineSticker(site, { id: stickerId(n + 1), label: `the ${t.lines.join(' ').toLowerCase()} sticker`, art: 'goodjob', lines: t.lines, spot: t.spot, tilt: t.tilt }));
+  RECYCLE.tiers.forEach((t, n) => defineSticker(site, { id: stickerId(n + 1), label: `the ${t.lines.join(' ').toLowerCase()} sticker`, art: 'goodjob', lines: t.lines, spot: t.spot }));
   // An older save's physical sticker body has nothing to restore into any more.
   store.del('worldBodies.goodjob');
   // Where a new star lands (px, its middle): on the floor just left of the bin (or of where the bin stands, when it is
   // away), the nearest spot clear of the pinboard, him, the bin and the stars already there, above the footer.
   function landing() {
     const px = stickerLayer(site).sizeOf('goodjob'), half = px / 2 * 1.08 + 4, gap = 6;
-    const b = bin?.picture.rect || { x: stage.width - BIN.margin - px * 1.1, y: stage.height - stage.insets.bottom - 10 - px * 1.2, w: px * 1.1, h: px * 1.2 };
+    const b = bin?.picture.rect || { x: stage.width - (stage.insets.right || 0) - BIN.margin - px * 1.1, y: stage.height - stage.insets.bottom - 10 - px * 1.2, w: px * 1.1, h: px * 1.2 };
     const pad = (r, m) => r && { x: r.x - m, y: r.y - m, w: r.w + 2 * m, h: r.h + 2 * m };
     const avoid = [pad(site.pinboard?.picture?.rect, gap), pad(b, gap), pad(site.cat?.rect, 0),
       ...[...stickerLayer(site).live.values()].map((s) => s.at && { x: s.at.x - s.px / 2, y: s.at.y - s.px / 2, w: s.px, h: s.px })].filter(Boolean);
@@ -91,7 +91,7 @@ export default function createRecycle(site) {
     for (let k = 0; k < 3; k++) {
       place(site.worldLayout.anchor(x, y), false);
       const r = bin.picture.rect;
-      x += stage.width - BIN.margin - (r.x + r.w); y += Math.min(0, stage.height - stage.insets.bottom - 10 - (r.y + r.h));
+      x += stage.width - (stage.insets.right || 0) - BIN.margin - (r.x + r.w);   // (controls lane: inside the safe right) y += Math.min(0, stage.height - stage.insets.bottom - 10 - (r.y + r.h));
     }
     bin.home = site.worldLayout.anchor(x, y); bin.wide = bin.picture.rect.w;
     if (!bin.sliding) place(bin.home);

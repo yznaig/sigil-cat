@@ -27,11 +27,14 @@ import { createFreeze } from './core/freeze.js';
 import { createShell } from './ui/shell.js';
 import { createBooks } from './ui/books.js';
 import { createFullscreen } from './ui/fullscreen.js';
+import { createZoom } from './ui/zoom.js';
+import { floorGrid } from './world/floor-grid.js';
 
 installPageScheduler();
 const stage = createStage(document.getElementById('c'));
 const site = { THREE: stage.THREE, config: SITE, store, audio, stage, eggs: {}, spells: {} };
 window.site = site;
+site.zoom = createZoom(site);   // controls lane (playtest-4): the zoom beside SOUND, set before anything lays out
 site.timing = { main: performance.now(), eggs: 0 };      // ms: when this file ran, building the eggs, his pose in, shown
 // The whole page held still (the pop-up books, the "flip sideways" overlay, the cake's crash screen): built before
 // anything else listens to the window, so its resize hold comes first (src/core/freeze.js).
@@ -49,6 +52,8 @@ site.worldInput = createWorldInput(site);
 site.occluders = createOccluders(site);   // physics lane, playtest-2: nothing lost behind the cat or furniture
 site.worldProps = createWorldProps(site);
 warmShared(site);        // speed lane (e1112-59): the programs every keepsake shares, drawn once ahead
+// grid lane (playtest-4, e1114-13): faint grid lines on the floor, under everything; ?grid=0 leaves them out
+if (stage.opt('grid') !== '0') site.floorGrid = floorGrid(site);
 // Unit 1 installs the service; units 2/3 opt art adapters into rigid-body ownership.
 const solidIds = new Set(['rifle', 'top', 'pat', 'tin', 'box', 'rack']);
 const loadWorld = i => { if (solidIds.has(i.id)) site.world.ensure().catch(e => console.warn('world:', e.message)); };

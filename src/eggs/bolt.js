@@ -1,7 +1,7 @@
 // The bolt (the zig-zag sigil): a real storm moment. The page darkens, a leader forks down from the top of the page,
 // the bolt connects with his head in a hot white core and a blue glow, the screen flashes once, sparks fly off where it
 // hit and a soft afterglow lingers there, the page shakes a little, the energy beam fires, and he jumps. It leaves a
-// cloud, which drifts along the top of the page from then on.
+// cloud, which drifts back and forth along the top of the page from then on, never off its edges.
 // The flash: one per cast, never a strobe, and none at all under prefers-reduced-motion (revamp brief, Decided 5).
 // The bolt itself (fx lane, playtest 3, e1113-10: "make the lightning bolt a way sicker/cooler visual effect"): a
 // branching, jagged bolt drawn additively ('lighter') into a 2D canvas sized to the bolt's own box, never the whole
@@ -38,7 +38,12 @@ export const BOLT = {
   glow: 240,             // px across, the strike's glow sprite at full power
   after: { px: 260, seconds: 1.6 },   // the afterglow left where it struck
   beamGain: 0.9,         // e1113-10: Aaron's energy beam (assets/audio/designed/bolt-beam.wav)
-  cloud: { size: 0.72, aspect: 0.56, drift: 0.16, driftSeconds: 26, crossSeconds: 75, fps: 8, steps: 26,
+  // legSeconds: one drift from edge to edge (touchfeel lane, playtest 4, Aaron: "The cloud goes way too far off to the
+  // left and right off the screen, it should be going back and forth between the edges of the screen"); it slows and
+  // turns at each edge (a cosine sweep), its card `edge` px inside the screen. The billows fill the card edge to edge
+  // (the shader's lumps reach +-1.52 of the card's +-1.54; read back: 1.4% to 100% of its width), so the card is the
+  // cloud's visible width.
+  cloud: { size: 0.72, aspect: 0.56, drift: 0.16, driftSeconds: 26, legSeconds: 40, edge: 4, fps: 8, steps: 26,
     arrive: 7 },         // seconds the first cloud takes to float in from the nearer side of the page (e1111-58)
 };
 
@@ -334,19 +339,29 @@ export default function createBolt(site) {
       obj.quaternion.copy(stage.camera.quaternion); obj.scale.set(inst.box.w / ppu, inst.box.h / ppu, 1);
     },
     frame(inst, dt) {
-      // Physics lane, playtest-2 (Aaron, item 4: "the cloud also gets stuck, but this could be solved by simply letting
-      // it float all the way from left to right"): it drifts across the whole page, left to right, crossing in
-      // C.crossSeconds, and once wholly past the right edge it comes in again from the left, at the height it was left
-      // at. Its own x moves (not an offset), so a drag picks it up where it is; held or calm motion, it waits.
-      // Its page x is kept here (inst.cross), so a re-layout that clamps keepsakes onto the page cannot pull it back.
+      // Physics lane, playtest-2 (Aaron: "simply letting it float all the way from left to right") made it cross the
+      // whole page and come round again from off the left. Touchfeel lane, playtest 4: it goes back and forth between
+      // the screen's edges instead, never off them, at every size: its middle sweeps between the two places where it
+      // is C.edge px inside an edge, as a cosine (slowing into each turn), one leg in C.legSeconds. inst.cross
+      // is the sweep's phase (0: at the left turn, pi: at the right); inst.drift the way it is going. Its own x moves
+      // (not an offset), so a drag picks it up where it is; let go, it carries on from there the way it was going.
+      // Held or calm motion, it waits. A cloud left beyond a turn (a smaller screen, a drag) glides back in first.
       inst.ox = 0;
       if (inst.arrival && inst.held) inst.arrival = null;
       if (inst.held || stage.reducedMotion || inst.arrival || !inst.w) inst.cross = null;
       else {
-        const clear = 30, speed = (stage.width + inst.w + 2 * clear) / C.crossSeconds;
-        inst.cross = (inst.cross ?? keepsakes.toPx(inst.x, inst.y).x) + speed * dt;
-        if (inst.cross - inst.w / 2 > stage.width + clear) inst.cross = -inst.w / 2 - clear;
-        inst.x = keepsakes.toUnits(inst.cross, 0).x;
+        const half = inst.w / 2 + C.edge, lo = half, hi = Math.max(lo, stage.width - half), mid = (lo + hi) / 2, amp = (hi - lo) / 2;
+        const x = keepsakes.toPx(inst.x, inst.y).x, w = Math.PI / C.legSeconds;
+        let nx;
+        if (inst.cross == null && (x < lo - 1 || x > hi + 1)) {          // outside the sweep: back in at the sweep's top speed
+          const v = Math.max(amp * w, 20) * dt; nx = x < lo ? Math.min(lo, x + v) : Math.max(hi, x - v); inst.drift = x < lo ? 1 : -1;
+        } else {
+          if (inst.cross == null) { const c = Math.acos(amp > 0 ? Math.max(-1, Math.min(1, (mid - x) / amp)) : 1); inst.cross = (inst.drift ?? 1) > 0 ? c : 2 * Math.PI - c; }
+          inst.cross = (inst.cross + w * dt) % (2 * Math.PI);
+          inst.drift = Math.sin(inst.cross) >= 0 ? 1 : -1;
+          nx = mid - amp * Math.cos(inst.cross);
+        }
+        inst.x = keepsakes.toUnits(nx, 0).x;
       }
       if (inst.arrival) {                             // floating in: a long, slowing glide (no stop, no bounce)
         const a = inst.arrival, u = Math.min(1, (a.t += dt) / C.arrive), e = 1 - (1 - u) ** 2.4;

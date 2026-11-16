@@ -1,7 +1,9 @@
 // Pet, pet, bite (gag 8; no sigil). Stroke him up and down and a purr builds with the stroking. Keep on too long and
 // he bites.
 // After one bite the plaster and refusal to be petted stay until Forget everything.
-// On touch screens a plaster rests by the controls and follows a held finger; the tin only rustles.
+// The plaster is the mouse pointer's (a plaster on the arrow); on a touch screen there is none at all (touchfeel lane,
+// playtest 4, Aaron: "If youre on mobile, there should be no bandaid for when you drag your finger around"; the old
+// resting/following finger plaster is gone). The tin only rustles.
 import { css, clamp } from '../core/util.js';
 import {defineTin} from '../world/tin.js';
 import {shelfService} from '../world/shelf.js';
@@ -9,14 +11,26 @@ import {shelfService} from '../world/shelf.js';
 export const PET = {
   stroke: 14,            // minimum px in a vertical pass; at most one stroke per pass
   purrPer: 0.2,          // how much each stroke adds to the purr (0-1)
-  purrFade: 0.55,        // how fast the purr dies away once the stroking stops (per second)
+  // how fast the purr dies away once the stroking stops (per second). Touchfeel lane, playtest 4 (Aaron: "purr sound
+  // should be about double as long"): halved from .55, so the purr rings on twice as long after the last stroke.
+  purrFade: 0.275,
   purrGain: 0.5,
   patience: 7,          // strokes before he bites
   twitchFrom: 0.6,       // the share of his patience gone when he starts to twitch
   // Each counted stroke: a short low burst of his purr (Aaron, e1111-58: "so the player knows they're actually doing
   // something"). A slice of the same purr recording, slowed a little, from a fresh place each time; it rides over the
   // building loop and is never closer than `gap` seconds to the last one.
-  burst: { seconds: [0.32, 0.46], rate: [0.82, 0.92], gain: [0.55, 0.75], lowpass: 900, attack: 0.05, gap: 0.16 },
+  // Playtest 4: each burst is twice as long (was 0.32-0.46 s): one unbroken slice of the same 7 s recording, so there
+  // is no seam to hear; its swell in and out scales with it.
+  burst: { seconds: [0.64, 0.92], rate: [0.82, 0.92], gain: [0.55, 0.75], lowpass: 900, attack: 0.05, gap: 0.16 },
+  // The purr on a phone (touchfeel lane, playtest 4: "I didnt hear him purring when I pet him on mobile"). The strokes
+  // counted and the bursts played on a phone; nothing was heard because the recording is all rumble: 99.8% of its
+  // energy is under 300 Hz (most of it 50-100 Hz), where a phone's speaker gives nothing. Above 300 Hz it sat at
+  // -53 dBFS against about -28 for every other sound. On a coarse-pointer device the same recording gets its own
+  // overtones added (a soft clip of it, kept to `band` Hz, mixed in at `mix` of its level): the ear hears the purr's
+  // 27-a-second pulse from those (the "missing fundamental"), so it is the same purr, now about +21 dB in the band a
+  // phone plays (-32 dBFS). Desktop keeps the recording untouched.
+  phone: { drive: 6, band: [260, 1400], mix: 1 },
   // Leave him be and he calms down: his patience comes back (strokes per second) once the stroking has stopped for
   // calmAfter seconds. Without it a few strokes short of a bite left him twitching for the rest of the visit
   // (e1111-58: "The cat somehow got stuck shaking constantly").
@@ -26,13 +40,14 @@ export const PET = {
 const CURSOR = `url("data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M5 3v20l5-4.500 3.500 8 3.500-1.600-3.500-7.900H21z" fill="#fff" stroke="#121212" stroke-width="1.6" stroke-linejoin="round"/><g transform="rotate(-38 12 14)"><rect x="3" y="11" width="18" height="6.500" rx="3" fill="#f1c6a4" stroke="#b9805a" stroke-width=".8"/><rect x="9" y="11.600" width="6" height="5.300" fill="#f9e1cd"/><g fill="#b9805a"><circle cx="5.500" cy="13" r=".5"/><circle cx="5.500" cy="15.500" r=".5"/><circle cx="18.500" cy="13" r=".5"/><circle cx="18.500" cy="15.500" r=".5"/></g></g></svg>')}") 5 3, auto`;
 css('petbite', `
 html.plaster, html.plaster * { cursor: ${CURSOR} !important; }
-.touch-plaster { display: none; position: fixed; left: 18px; bottom: 82px; width: 36px; height: 16px; pointer-events: none; z-index: 30; transform: rotate(-25deg); }
-.touch-plaster.following { bottom: auto; transform: translate(-50%, -50%) rotate(-25deg); }
-@media (pointer: coarse) { html.plaster .touch-plaster { display: block; } }
 `);
 export default function createPetBite(site) {
   const { stage, cat, audio, keepsakes, store, registry } = site, P = PET;
   audio.loadAll(['purr', 'bite', 'hiss', 'paper']);
+  // A phone's speaker: the purr with its overtones (PET.phone, phoneVoice below), under the same name, so the loop, the
+  // bursts and anything else that plays 'purr' all get it.
+  const phone = matchMedia('(pointer: coarse)').matches;
+  if (phone) audio.reshape('purr', (ch, rate) => ch.map((d) => phoneVoice(d, rate)));
   let purr = null, level = 0, shown = 0, annoy = 0, travel = 0, dir = 0, countedPass = false, lastStroke = -Infinity, bites = 0, strokes = 0, touch = false;
 
   let bitten = store.get('plaster') === true || !!store.get('found.bite');
@@ -92,14 +107,6 @@ export default function createPetBite(site) {
   });
   let twitching = false;
 
-  const badge = document.createElement('span'); badge.className = 'touch-plaster';
-  badge.setAttribute('role', 'img'); badge.setAttribute('aria-label', 'a plaster for a bitten finger');
-  badge.innerHTML = '<svg viewBox="0 0 36 16" aria-hidden="true"><rect x="1" y="1" width="34" height="14" rx="7" fill="#f1c6a4" stroke="#b9805a"/><rect x="13" y="2" width="10" height="12" rx="2" fill="#f9e1cd"/><path d="M6 5h2m-2 6h2m20-6h2m-2 6h2" stroke="#b9805a"/></svg>';
-  document.body.appendChild(badge);
-  const park = () => { badge.style.left=''; badge.style.top=''; badge.classList.remove('following'); };
-  const follow = e => { if(e.pointerType==='touch' && bitten && e.buttons) {badge.style.left=`${e.clientX}px`;badge.style.top=`${e.clientY-24}px`;badge.classList.add('following');} };
-  addEventListener('pointerdown', follow); addEventListener('pointermove', follow);
-  addEventListener('pointerup', park); addEventListener('pointercancel', park);
   function plaster(on) {
     // Once bitten, even the tin or another gag cannot remove it.
     on = bitten || on;
@@ -125,7 +132,27 @@ export default function createPetBite(site) {
   defineTin(site);
   shelfService(site);
 
-  return { find: 'bite', config: PET, stroke, bite, plaster,
+  return { find: 'bite', config: PET, stroke, bite, plaster, voice: phone ? 'phone' : 'recording',
     get purr() { return level; }, get twitching() { return twitching; }, get annoyance() { return annoy / P.patience; }, get bites() { return bites; }, get strokes() { return strokes; }, get bursts() { return bursts; }, purrBurst,
     get plastered() { return document.documentElement.classList.contains('plaster'); }, again: () => bite() };
+}
+
+// The purr's overtones for a phone speaker (PET.phone): a soft clip of the recording (its peak at `drive`) makes
+// harmonics of the 50-100 Hz rumble, a 4th-order band of `band` Hz keeps the ones a small speaker plays (260 Hz up,
+// nothing buzzy past 1.4 kHz), and they are mixed under the untouched recording at `mix` of its RMS. The pulse rate
+// (37 ms apart, as recorded) is unchanged. Runs once on the decoded clip (7 s: a few ms).
+export function phoneVoice(x, rate, { drive, band, mix } = PET.phone) {
+  const biquad = (d, type, f0, Q) => {
+    const w = 2 * Math.PI * f0 / rate, c = Math.cos(w), a = Math.sin(w) / (2 * Q), k = type === 'hp' ? (1 + c) / 2 : (1 - c) / 2;
+    const b0 = k, b1 = type === 'hp' ? -2 * k : 2 * k, a0 = 1 + a, a1 = -2 * c, a2 = 1 - a;
+    let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+    for (let i = 0; i < d.length; i++) { const v = d[i], y = (b0 * v + b1 * x1 + b0 * x2 - a1 * y1 - a2 * y2) / a0; x2 = x1; x1 = v; y2 = y1; y1 = y; d[i] = y; }
+    return d;
+  };
+  let peak = 0; for (const v of x) peak = Math.max(peak, Math.abs(v));
+  if (!peak) return x;
+  const h = Float32Array.from(x, (v) => Math.tanh(drive * v / peak));
+  for (const Q of [0.5412, 1.3066]) { biquad(h, 'hp', band[0], Q); biquad(h, 'lp', band[1], Q); }   // Butterworth pairs
+  const rms = (d) => Math.sqrt(d.reduce((s, v) => s + v * v, 0) / d.length), g = mix * rms(x) / (rms(h) || 1);
+  return Float32Array.from(x, (v, i) => v + g * h[i]);
 }

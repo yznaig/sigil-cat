@@ -467,7 +467,7 @@ export default function createGalaxy(site) {
     input.lock('galaxy', true);document.body.classList.add('galaxy-showing');
     site.achievements?.unlock('void');
     cat.wantSolids = true; cat.touch();
-    if (by === 'spin') site.registry.find('star');                        // the star is found by spinning (a secret)
+    // (the 'star' find is gone, playtest 4: the galaxy is Into the Void only)
     return true;
   }
   const taking = () => st.at !== null && !st.recede;
@@ -554,7 +554,7 @@ export default function createGalaxy(site) {
   audio.load('paper');
 
   const api = {
-    find: 'star', open, config: HOLE, uniforms, skip,
+    open, config: HOLE, uniforms, skip,
     get level() { return st.level; }, get isOpen() { return st.open; }, get dim() { return st.dim; }, get trips() { return st.trips; },
     get cutscene() { return taking(); }, get fast() { return st.fast; }, get holding() { return holding(); }, wayIn: WAY_IN,
     get phase() { if (!st.open) return st.space ? 'space' : 'closed'; if (st.at === null) return st.by; if (st.recede) return 'recede'; return holding() ? 'hold' : 'spin'; },

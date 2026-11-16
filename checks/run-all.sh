@@ -108,6 +108,8 @@ for size in desktop phone; do
   run "gags-glass-calm-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/gags-glass.js --size $size --out "$SHOTS" --jpeg --timeout 150 --reduced
   run "gags-box-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/gags-box.js --size $size --out "$SHOTS" --jpeg --timeout 120
   run "gags-box-calm-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/gags-box.js --size $size --out "$SHOTS" --jpeg --timeout 120 --reduced
+  # gags lane (playtest 4): the box's intro is said once per save; quick phone circles are the circle, not the box
+  run "box-intro-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/box-intro.js --then checks/box-intro-reload.js --size $size --out "$SHOTS" --jpeg --timeout 150
   run "gags-cakes-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/gags-cakes.js --then checks/gags-cakes-reload.js --size $size --out "$SHOTS" --jpeg --timeout 500
   run "gags-stickers-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/gags-stickers.js --then checks/gags-stickers-reload.js --size $size --out "$SHOTS" --jpeg --timeout 180
   run "gags-stickers-legacy-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/gags-stickers-legacy.js --size $size --out "$SHOTS" --jpeg --timeout 120 --storage '{"keepsakes":{"twinkle":{"autoHome":false,"x":0.5,"y":1.2,"state":{"sky":[0.3,0.2]},"order":3},"goodjob":{"autoHome":false,"x":1,"y":1,"state":{"sky":[0.84,0.3]},"order":4}},"worldBodies":{"twinkle":{"version":1}},"recycle":{"shown":true,"crumbs":true,"shards":true,"sticker":true,"gone":true}}'
@@ -134,6 +136,8 @@ for size in desktop phone; do
   # Bird lane (playtest-2): retry / give up, the controller stand (and its reload), the visitor schedule and its egg.
   run "bird-$size" "$BASE/?birdcheck=1" --lib checks/lib.js --js checks/bird.js --then checks/bird-stand-reload.js --size $size --out "$SHOTS" --jpeg --timeout 180
   run "bird-calm-$size" "$BASE/?birdcheck=1" --lib checks/lib.js --js checks/bird.js --then checks/bird-stand-reload.js --size $size --out "$SHOTS" --jpeg --timeout 180 --reduced
+  # Playtest 4 (flappybreak): every way in and out of flappy leaves the page alive (phone: turned upright mid-game).
+  run "flappy-unfreeze-$size" "$BASE/?birdcheck=1" --lib checks/lib.js --js checks/flappy-unfreeze.js --size $size --out "$SHOTS" --jpeg --timeout 300
   run "bird-visits-$size" "$BASE/?birdcheck=1" --lib checks/lib.js --js checks/bird-visits.js --then checks/bird-visits-reload.js --size $size --out "$SHOTS" --jpeg --timeout 180 --storage '{"bird":{"seen":true,"away":290000,"gap":300000}}'
   run "world-impacts-$size" "$BASE/" --lib checks/lib.js --js checks/world-impacts.js --size $size --out "$SHOTS" --jpeg --timeout 120
   # Furniture arrivals at real time (~75 s): the slides are skipped under automation unless ?arrivals=1.
@@ -143,6 +147,8 @@ for size in desktop phone; do
   run "world-board-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/world-board.js --then checks/world-board-reload.js --size $size --out "$SHOTS" --jpeg --timeout 240
   # cards lane, playtest 3: each card kind clicked (page with one (x) / flip / wiggle), drags, nothing onto the board by itself
   run "cards-tap-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/cards-tap.js --then checks/cards-tap-reload.js --size $size --out "$SHOTS" --jpeg --timeout 300
+  # grab lane (2026-11-13): a finger's near miss (8 px outside) takes the egg, a pinned card, a racked hat, a shelved tin, the box; a mouse's does not; him and open air stay theirs
+  run "grab-grace-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/grab-grace.js --size $size --out "$SHOTS" --jpeg --timeout 240
   cost "world-board-cost-$size" "$BASE/" --lib checks/lib.js --js checks/world-board-cost.js --size $size --out "$SHOTS" --jpeg --timeout 240
   run "world-supports-$size" "$BASE/" --lib checks/lib.js --js checks/world-supports.js --size $size --out "$SHOTS" --jpeg --timeout 120
   run "world-board-integration-$size" "$BASE/" --lib checks/lib.js --js checks/world-board-integration.js --size $size --out "$SHOTS" --jpeg --timeout 180
@@ -186,6 +192,9 @@ for size in desktop phone; do
   # the books are pop-ups now (shell lane, playtest-2): their old addresses send you to ./?book=...
   run "grimoire-$size" "$BASE/?book=grimoire" --js checks/grimoire.js --size $size --out "$SHOTS" --jpeg --timeout 90 \
     --storage '{"found":{"butter":1,"circle":1,"bolt":1,"blastoff":1,"harp":1},"bonks":12}'
+  # gags lane (playtest 4): the star is gone from the grimoire; an old save that found it loads and counts 17 of 17
+  run "grimoire-star-$size" "$BASE/" --lib checks/lib.js --js checks/grimoire-star.js --size $size --out "$SHOTS" --jpeg --timeout 120 \
+    --storage '{"found":{"butter":1,"circle":1,"bolt":1,"star":1,"loaf":1,"glass":1,"box":1,"eyes":1,"hat":1,"fork":1,"noscope":1,"blastoff":1,"paradox":1,"fling":1,"harp":1,"bite":1,"whisper":1,"bird":1},"bonks":12}'
   # shell lane (playtest-2): the loading screen and its doors, the books as pop-ups with start over
   run "shell-boot-$size" "$BASE/?doors=hold&dpr=$final_dpr" --js checks/shell-boot.js --size $size --out "$SHOTS" --jpeg --timeout 120
   run "shell-boot-calm-$size" "$BASE/?doors=hold&dpr=$final_dpr" --js checks/shell-boot.js --size $size --out "$SHOTS" --jpeg --timeout 120 --reduced
@@ -242,6 +251,14 @@ for size in desktop phone; do
     js=${p%-calm}; flag=; [ "$js" != "$p" ] && flag=--reduced
     run "polish-$p-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/polish-$js.js --size $size --out "$SHOTS" --jpeg --timeout 240 $flag
   done
+  # touchfeel lane (playtest 4, Aaron's phone): a pet by touch purrs (a phone-speaker voice) and twice as long; no
+  # plaster follows a finger; the bird keeps its size next to the egg; the cloud sweeps between the screen's edges;
+  # every sticker upright. The phone runs also check 932x430 (a wide-notch phone) by resizing.
+  run "touchfeel-purr-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/touchfeel-purr.js --size $size --out "$SHOTS" --jpeg --timeout 150
+  run "touchfeel-plaster-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/touchfeel-plaster.js --size $size --out "$SHOTS" --jpeg --timeout 120
+  run "touchfeel-bird-$size" "$BASE/?dpr=$final_dpr&birdcheck=1" --lib checks/lib.js --js checks/touchfeel-bird.js --size $size --out "$SHOTS" --jpeg --timeout 150
+  run "touchfeel-cloud-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/touchfeel-cloud.js --size $size --out "$SHOTS" --jpeg --timeout 150
+  run "touchfeel-stickers-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/touchfeel-stickers.js --size $size --out "$SHOTS" --jpeg --timeout 120
   # sky lane (playtest 2): the star as a spin, the galaxy without its black hole holding until a click, the bread's spun blast-off, charged water
   run "sky-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/sky.js --size $size --out "$SHOTS" --jpeg --timeout 300
   # gags lane (playtest 3): the loaf's riser and pop, crumbs every second loaf, the blast-off covered like the galaxy
@@ -266,6 +283,23 @@ run "fullscreen-noapi-phone" "$BASE/?doors=hold&fs=1&case=noapi" --js checks/ful
 run "fullscreen-standalone-phone" "$BASE/?doors=hold&fs=1&case=standalone" --js checks/fullscreen.js --size phone --out "$SHOTS" --jpeg --timeout 120
 run "fullscreen-phone-portrait" "$BASE/?doors=hold&fs=1&case=portrait" --js checks/fullscreen.js --size phone-portrait --out "$SHOTS" --jpeg --timeout 120
 run "fullscreen-desktop" "$BASE/?doors=hold&fs=1&case=desktop" --js checks/fullscreen.js --size desktop --out "$SHOTS" --jpeg --timeout 120
+# controls lane (playtest-4): Nearer / Deeper held with real touch at the very bottom; the zoom beside SOUND at its least,
+# default and most (everything on the page, nothing under the controls, nothing lost) and after a reload; the safe area
+# of a notched phone (left only, as the Dynamic Island on its side; and both sides with the home bar's bottom)
+run "controls-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/controls.js --then checks/controls-reload.js --size phone --out "$SHOTS" --jpeg --timeout 400
+run "controls-notch-left" "$BASE/?dpr=2&safe=59,0,0,0" --lib checks/lib.js --js checks/controls.js --then checks/controls-reload.js --size phone-notch --out "$SHOTS" --jpeg --timeout 400
+run "controls-notch-both" "$BASE/?dpr=2&safe=59,59,0,21" --lib checks/lib.js --js checks/controls.js --then checks/controls-reload.js --size phone-notch --out "$SHOTS" --jpeg --timeout 400
+run "controls-desktop" "$BASE/?dpr=1" --lib checks/lib.js --js checks/controls.js --then checks/controls-reload.js --size desktop --out "$SHOTS" --jpeg --timeout 400
+run "controls-1536x864" "$BASE/?dpr=1" --lib checks/lib.js --js checks/controls.js --then checks/controls-reload.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 400
+# grid lane (playtest-4, e1114-13): the floor grid draws, sits under every shadow, keepsake, piece of furniture and the cat
+# at the zoom's default, least and most, reaches past the screen, costs nothing a frame on the CPU, and never shows
+# through the galaxy, flappy, the trailer, the grimoire, the error page or the closed loading doors
+run "floor-grid-desktop" "$BASE/?dpr=1" --lib checks/lib.js --js checks/floor-grid.js --size desktop --out "$SHOTS" --jpeg --timeout 300
+run "floor-grid-1536x864" "$BASE/?dpr=1" --lib checks/lib.js --js checks/floor-grid.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 300
+run "floor-grid-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/floor-grid.js --size phone --out "$SHOTS" --jpeg --timeout 300
+run "floor-grid-notch" "$BASE/?dpr=2&safe=59,59,0,21" --lib checks/lib.js --js checks/floor-grid.js --size phone-notch --out "$SHOTS" --jpeg --timeout 300
+run "floor-grid-doors-desktop" "$BASE/?dpr=1&doors=hold" --lib checks/lib.js --js checks/floor-grid.js --size desktop --out "$SHOTS" --jpeg --timeout 180
+run "floor-grid-doors-phone" "$BASE/?dpr=2&doors=hold" --lib checks/lib.js --js checks/floor-grid.js --size phone --out "$SHOTS" --jpeg --timeout 180
 
 echo "== sigils"
 if node checks/sigils.test.mjs > "$LOG/sigils.txt" 2>&1; then tail -n 1 "$LOG/sigils.txt"; else tail -n 15 "$LOG/sigils.txt"; fails+=("sigils"); fi

@@ -258,7 +258,8 @@ export function createLamp(site, rack) {
     });
   }
   stage.canvas.addEventListener('pointerdown', prewarm);
-  site.input.claim(96, (ev) => (hitsHover(ev) ? {move() {}, end(e2) { if (e2.type === 'pointerup') knock(); }} : null));
+  site.input.claim(96, (ev) => (hitsHover(ev) ? {move() {}, end(e2) { if (e2.type === 'pointerup') knock(); }} : null),
+    {covers: (x, y) => hitsHover({clientX: x, clientY: y})});   // grab lane: a finger's grace never reaches through the bulb
   site.input.cursors.push((ev) => (hitsHover(ev) ? 'pointer' : null));
   // Clicked: the idea goes out and the bulb drops, in a little arc off his head to his side and toward you.
   function knock() {

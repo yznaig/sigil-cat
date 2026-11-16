@@ -17,6 +17,7 @@ css('noscope-video', `
 .noscope-video video { display:block; width:100%; height:100%; object-fit:contain; opacity:0; pointer-events:none; }
 .noscope-video .video-controls { position:absolute; top:max(12px,env(safe-area-inset-top)); right:16px;
   display:flex; align-items:center; justify-content:center; gap:12px; }
+.noscope-video.held .video-controls { visibility:hidden; }
 body.noscope-showing #footer { z-index:101; opacity:1; visibility:hidden; }
 body.noscope-showing #footer * { pointer-events:none; }
 body.noscope-showing #footer .sound.controls { position:relative; left:auto; top:auto; translate:none;
@@ -80,7 +81,13 @@ export function createNoScopeVideo(site) {
     if(!(C.back>0)){r.root.style.opacity=0;restore();return;}
     r.root.animate([{opacity},{opacity:0}],{duration:C.back*1000,fill:'forwards'}).finished.then(restore);
   }
-  const skip=()=>finish('skip');input.onEscape.push(skip);
+  const stop=()=>finish('skip');
+  // A player's skip (tap, click, Escape, the skip button) does nothing while the riser builds (playtest 4, Aaron: "you
+  // shouldnt be able to skip the 360 cutscene while in the riser"): r.held from the trigger through the black and the
+  // riser's last second into the video; the skip button is hidden meanwhile. After it, skipping is as before.
+  // api.stop() (checks, teardown) still ends it at any point.
+  const skip=()=>{if(run?.held)return;stop();};input.onEscape.push(skip);
+  function hold(r,on){r.held=on;r.root.classList.toggle('held',on);}
   function fire() {
     if(run)return run.promise;
     const root=document.createElement('div');
@@ -94,7 +101,8 @@ export function createNoScopeVideo(site) {
     let resolve;const promise=new Promise(r=>{resolve=r;});
     const soundControl=document.querySelector('#footer .sound');
     soundControl?.classList.add('controls');document.body.classList.add('noscope-showing');
-    const r=run={root,video,soundControl,resolve,promise,sources:new Set(),capped:[],phase:'loading',shown:false,returning:false};
+    const r=run={root,video,soundControl,resolve,promise,sources:new Set(),capped:[],phase:'loading',shown:false,returning:false,held:false};
+    hold(r,true);
     input.lock('noscope-video',true);
     exit.onclick=skip;
     root.addEventListener('pointerup',e=>{if(!e.target.closest('.video-controls'))skip();});
@@ -105,6 +113,7 @@ export function createNoScopeVideo(site) {
       r.shown=true;r.phase='playing';
       // If loading held us at black, resume the last second of the riser here.
       riser(r,C.black,C.in);
+      hold(r,true);setTimeout(()=>{if(run===r)hold(r,false);},C.in*1000);
       video.animate([{opacity:0},{opacity:1}],{duration:C.in*1000,fill:'forwards',easing:'linear'});
     };
     const ctx=audio.context();
@@ -124,13 +133,14 @@ export function createNoScopeVideo(site) {
         if(performance.now()-start>=C.black*1000){
           r.phase='waiting';
           if(video.readyState>=3){video.play().catch(()=>finish('blocked'));return;}
+          if(r.held)hold(r,false);   // the riser's black part is over and the video is still loading: that can be skipped
         }
         r.raf=requestAnimationFrame(frame);
       };r.raf=requestAnimationFrame(frame);
     });
     return promise;
   }
-  const api={fire,stop:skip,get active(){return !!run;},get phase(){return run?.phase??'idle';},get lastEnd(){return lastEnd;},
+  const api={fire,stop,get active(){return !!run;},get phase(){return run?.phase??'idle';},get held(){return !!run?.held;},get lastEnd(){return lastEnd;},
     get audio(){return {gain:bus?.gain.value??0,riser:!!run?.sources.size,pageGain:audio.output()?.gain.value??0,
       riserGain:[...(run?.sources||[])].map(s=>s.gain.gain.value),capped:run?[...run.capped]:[]};},
     capCurve,

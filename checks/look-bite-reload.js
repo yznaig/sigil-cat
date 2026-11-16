@@ -1,6 +1,7 @@
 cat.auto=false;
 const pet=E.petbite;
-check('look permanent plaster survives reload',pet.plastered&&store.get('plaster')===true&&getComputedStyle(canvas).cursor.includes('data:image/svg+xml')&&(!MOBILE||(document.querySelector('.touch-plaster')&&getComputedStyle(document.querySelector('.touch-plaster')).display!=='none')),`saved ${store.get('plaster')}, cursor ${pet.plastered}`);
+// touchfeel lane, playtest 4: the plaster is the mouse pointer's only; a phone shows none (was: a finger plaster)
+check('look permanent plaster survives reload',pet.plastered&&store.get('plaster')===true&&getComputedStyle(canvas).cursor.includes('data:image/svg+xml')&&!document.querySelector('.touch-plaster'),`saved ${store.get('plaster')}, cursor ${pet.plastered}`);
 const before=pet.bites, count=pet.strokes;
 // Actual pointer strokes, at a verified body target clear of whiskers.
 const m=catMid(), id=++pointerIds;

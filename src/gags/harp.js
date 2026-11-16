@@ -103,7 +103,7 @@ export default function createHarp(site) {
       },
       end(ev) { if (dragging) cat.dragEnd(ev); else if (ev.type === 'pointerup') pluck(w.index, whiskerAt(ev.clientX, ev.clientY) || w); },
     };
-  });
+  }, { covers: (x, y) => !!whiskerAt(x, y) });   // grab lane: a finger's grace never takes a press off a whisker (src/core/input.js GRACE)
   input.cursors.push((e) => (whiskerAt(e.clientX, e.clientY) ? 'pointer' : null));
   // the plucked whisker rings: a line laid along it that shivers and dies away
   stage.onFrame.push((dt) => {

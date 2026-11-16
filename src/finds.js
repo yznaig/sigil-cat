@@ -12,9 +12,9 @@ export const FINDS = [
     riddle: 'come back to where you began. leave no corner to catch on', does: 'twenty turns. two seconds misplaced.' },
   { id: 'bolt', kind: 'sigil', sigil: 'zigzag', name: 'The Bolt', d: 'M15 3 8 12h7l-6 9',
     riddle: 'a broken path from cloud to earth. the sky remembers', does: 'borrowed weather. one cloud forgets to leave.' },
-  // The star is a secret now, found by spinning him really fast (Aaron, playtest 2: "the star should not be a sigil").
-  { id: 'star', kind: 'secret', name: 'The Star', d: 'M12 3l5.3 16.5L3.4 9.3h17.2L6.7 19.5z',
-    riddle: 'faster than any cat should turn. keep going', does: 'spun past dizzy, something vast borrows his outline. a click brings him back.' },
+  // The star is gone from the grimoire (playtest 4, Aaron: "the star can be removed from the grimoire its no longer in
+  // the game"). The fast spin still opens the galaxy and earns Into the Void; it just is not a find. An old save's
+  // found.star is never read: the count, the tally and Completionist all go by this list.
   { id: 'loaf', kind: 'sigil', sigil: 'dome', name: 'The Loaf', d: 'M4 17a8 8 0 0 1 16 0M3 17h18',
     riddle: 'an oven roof, drawn from one end of the crust to the other', does: 'he becomes what he was already pretending to be.' },
   { id: 'glass', kind: 'sigil', sigil: 'cup', name: 'The Cup', d: 'M7 4l1 14a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-14zM7.5 10h9',
