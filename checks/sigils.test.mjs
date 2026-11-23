@@ -216,6 +216,17 @@ function drawFork(rng) {
   return handPolyline(rng, c);
 }
 
+// His own sign (the Journey's ending, docs/journey/design.md §5.2): the head outline, open at the bottom. Sides that bow
+// or not, ears pointy or soft, the dip deep or shallow, a lean; mostly from his left (the start dot), sometimes not.
+function drawCathead(rng) {
+  const side = rng.range(26, 46), ear = rng.range(-8, 6), dip = rng.range(12, 30), inner = rng.range(28, 42), bow = rng.range(0, 10), wob = () => rng.range(-4, 4);
+  const sideRun = (x, dir) => Array.from({ length: 21 }, (_, i) => { const t = i / 20, y = 100 + (side - 100) * t; return pt(x + dir * bow * Math.sin(Math.PI * t), y); });
+  const left = sideRun(wob(), -1), rightDown = sideRun(100 + wob(), 1).reverse();
+  const top = handPolyline(rng, [left[left.length - 1], pt(rng.range(2, 14), ear), pt(inner + wob(), dip + wob()), pt(100 - inner + wob(), dip + wob()), pt(rng.range(86, 98), ear + wob()), rightDown[0]]);
+  const pts = [...left, ...top.slice(1), ...rightDown.slice(1)];
+  return rng.chance(0.25) ? pts.reverse() : pts;
+}
+
 const DRAWERS = {
   butter: drawButter,
   circle: drawCircle,
@@ -226,6 +237,7 @@ const DRAWERS = {
   eight: drawEight,
   triangle: drawTriangle,
   fork: drawFork,
+  cathead: drawCathead,
 };
 
 // ---- non-sigils: scribbles, lines, taps --------------------------------------------------
@@ -365,7 +377,7 @@ const tally = (cls, outcome) => {
 
 // 1. Each sigil: >= 90% recognised as itself.
 const worst = {}, misses = {};
-for (const name of Object.keys(SIGILS).filter(n => n !== 'fork')) {
+for (const name of Object.keys(SIGILS).filter(n => n !== 'fork' && n !== 'cathead')) {   // fork and cathead have their own sections (own RNG)
   let right = 0;
   const scores = [];
   for (let i = 0; i < TRIALS; i++) {
@@ -465,6 +477,33 @@ function placeLine(rng) {
   }
   check(right>=90, `fork perturbed: ${right}/100 (need >=90)`);
   check(clean.every(n => n==='fork') && confusion===0, `fork cross-template confusion: ${confusion}/${(Object.keys(DRAWERS).length - 1) * 100} other signs cast fork (need 0)`);
+}
+
+// 4b2. His own sign (the cat-head outline, the Journey's ending). Its own RNG, like the fork's, so the sections above
+// see the same strokes as before. It must cast itself, at desk and phone sizes, and steal no other sign's strokes.
+{
+  const cr = makeRng(20261122), N = 100;
+  let right = 0, stolen = 0, scrib = 0;
+  const stole = {};
+  for (let i = 0; i < N; i++) { const r = recognizer.recognize(placeOnScreen(cr, drawCathead(cr))); tally('cathead', outcomeOf(r)); if (r.name === 'cathead') right++; }
+  for (const [name, draw] of Object.entries(DRAWERS)) if (name !== 'cathead') {
+    for (let i = 0; i < 100; i++) if (recognizer.recognize(placeOnScreen(cr, draw(cr))).name === 'cathead') { stolen++; stole[name] = (stole[name] ?? 0) + 1; }
+  }
+  for (const kind of Object.keys(SCRIBBLES)) for (let i = 0; i < 40; i++) if (recognizer.recognize(placeOnScreen(cr, SCRIBBLES[kind](cr))).name === 'cathead') scrib++;
+  check(right >= 90, `cathead (his sign) accuracy ${right}/${N} (need >= 90)`);
+  check(stolen === 0, `cathead steals no other sign: ${stolen}/${(Object.keys(DRAWERS).length - 1) * 100} other signs cast it (need 0)${stolen ? ' ' + JSON.stringify(stole) : ''}`);
+  // at phone size with a phone's few, far-apart points (see 4d)
+  let phoneRight = 0;
+  for (let i = 0; i < N; i++) {
+    const shape = drawCathead(cr), xs = shape.map((p) => p.x), ys = shape.map((p) => p.y);
+    const k = cr.range(90, 220) / Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)), step = cr.range(25, 50);
+    const out = [shape[0]]; let acc = 0;
+    for (let j = 1; j < shape.length; j++) { acc += dist(shape[j - 1], shape[j]) * k; if (acc >= step) { out.push(shape[j]); acc = 0; } }
+    out.push(shape[shape.length - 1]);
+    if (recognizer.recognize(out.map((p) => jitterPoint(cr, pt(400 + p.x * k, 200 + p.y * k), 1))).name === 'cathead') phoneRight++;
+  }
+  check(phoneRight >= 80, `cathead at phone size, sparse points: ${phoneRight}/${N} (need >= 80)`);
+  check(scrib <= 4, `scribbles taken for cathead ${scrib}/${Object.keys(SCRIBBLES).length * 40} (need <= 4)`);
 }
 
 // 4c. The star is no longer a sign (playtest 2: it is found by spinning him). A drawn star is a scribble: it casts no

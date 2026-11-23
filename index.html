@@ -143,6 +143,8 @@ try {
 
 <footer id="footer">
   <div class="fl">
+    <button type="button" id="settings-btn" class="felt set-mark" aria-label="settings" aria-haspopup="dialog" aria-controls="settings" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg></button>
+    <!-- the master sound, shown only while a scene (the galaxy, the 360) has the page; in the room it is in settings -->
     <span class="sound"><button type="button" id="sound" aria-pressed="true">sound <b>on</b></button><input type="range" id="volume" min="0" max="100" step="1" aria-label="Volume"></span>
   </div>
   <div class="mid">
@@ -152,6 +154,19 @@ try {
   </div>
   <nav class="fr" id="links"><a id="grimoire" href="spellbook.html" hidden>grimoire</a><a id="achievements" class="ach-mark" href="achievements.html" hidden aria-label="achievements"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.4a5.6 5.6 0 1 0 .01 0M9.1 13.8 7.6 21l4.4-2.3 4.4 2.3-1.5-7.2"/><path d="M12 6.1l.73 1.89 2.03.11-1.57 1.29.51 1.96L12 10.25l-1.7 1.1.51-1.96-1.57-1.29 2.03-.11z"/></svg></a></nav>
 </footer>
+<!-- the settings screen (src/ui/settings.js): the volumes and the zoom -->
+<div id="settings" class="settings-pop" role="dialog" aria-labelledby="settings-title" hidden>
+  <section class="settings-card" tabindex="-1">
+    <header><h2 id="settings-title">settings</h2><button type="button" class="felt set-close" data-close aria-label="close settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></button></header>
+    <div class="set-rows">
+    <div class="set-row set-master"><label for="set-volume">sound</label><button type="button" id="set-sound" class="felt set-toggle" aria-pressed="true" aria-label="sound on or off"><b>on</b></button><input type="range" id="set-volume" min="0" max="100" step="1"></div>
+    <div class="set-row"><label for="vol-music">music</label><input type="range" id="vol-music" data-level="music" min="0" max="100" step="1"></div>
+    <div class="set-row"><label for="vol-sfx">sound effects</label><input type="range" id="vol-sfx" data-level="sfx" min="0" max="100" step="1"></div>
+    <div class="set-row"><label for="vol-cat">cat sounds</label><input type="range" id="vol-cat" data-level="cat" min="0" max="100" step="1"></div>
+    <div class="set-row set-zoom"><label for="zoom">zoom</label></div>
+    </div>
+  </section>
+</div>
 <ul id="keepsake-keys" class="sr" aria-label="Your keepsakes"></ul>
 <pre id="debug" hidden></pre>
 <pre id="perf" hidden></pre>

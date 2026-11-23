@@ -89,6 +89,10 @@ export function clearFootprint(site,root,{hx,hz,h,margin=-.01}){
  }
  return moved;
 }
+// The row is only where it stands for good once the rack it lines up with is laid out (floorRow's fallback row, used
+// before that at a reload, is further forward): no keepsake is moved out of a footprint before then. The rack's own
+// layout re-lays the row (src/world/hats.js relayout) and clears it from its real place.
+export function rowSettled(site){return !site.keepsakes?.has?.('rack')||!!(site.rack?.root&&site.rack.picture);}
 export function standService(site){return site.stand??=createStand(site);}
 function createStand(site){
  const {THREE:T,stage,world,supports}=site,S=STAND.scale;
@@ -108,7 +112,7 @@ function createStand(site){
   if(entry){entry.body.setTranslation(root.position,false);supports.update('stand');clearRow();}
   site.worldLayout.invalidateShadow('stand');invalidate();
  }
- const clearRow=()=>clearFootprint(site,root,{hx:.37*S,hz:.17*S,h:.4*S});
+ const clearRow=()=>rowSettled(site)&&clearFootprint(site,root,{hx:.37*S,hz:.17*S,h:.4*S});
  // The seated controller casts its part of the soft shadow (the rack does the same for its hats).
  function seatShadow(e){
   seat?.removeFromParent();seat=null;

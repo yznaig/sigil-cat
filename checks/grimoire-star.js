@@ -1,6 +1,7 @@
 // grimoire-star.js (gags lane, playtest 4): Aaron, "the star can be removed from the grimoire its no longer in the game".
 // Run with checks/lib.js and an OLD save that found everything, the star included (run-all's --storage): the page
-// loads without error, the grimoire has no star card and counts "17 of 17", Completionist is earned from the save,
+// loads without error, the grimoire has no star card and counts "17 of 17", Completionist is not earned (since p8 it
+// also wants every other achievement),
 // the marks row and the achievements stay consistent, and the galaxy (the fast spin that used to find the star) is
 // Into the Void only.
 const { FINDS } = await import(new URL('src/finds.js', document.baseURI).href);
@@ -12,7 +13,7 @@ check('grimoire-star the old save still holds found.star (nothing rewrites it)',
 check('grimoire-star the star is no find any more', !FINDS.some((f) => f.id === 'star' || /\bstar\b/i.test(f.name)) && !registry.byId.has('star') && registry.total === FINDS.length,
   `${FINDS.length} finds`);
 check('grimoire-star the old save counts only real finds: all of them', registry.count() === registry.total && registry.total === 17, `${registry.count()} of ${registry.total}`);
-check('grimoire-star Completionist is earned from the old save', A.has('complete'), `${A.count} of ${A.total} achievements`);
+check('grimoire-star Completionist waits: every page, but not every achievement', !A.has('complete'), `${A.count} of ${A.total} achievements`);
 check('grimoire-star the achievements list has no star and counts stay whole', !ACHIEVEMENTS.some((a) => a.id === 'star' || a.find === 'star') && A.total === ACHIEVEMENTS.length
   && A.count === ACHIEVEMENTS.filter((a) => A.has(a.id)).length, `${A.count} of ${A.total}`);
 check('grimoire-star the marks row: nine sigils and the controller', document.querySelectorAll('#marks button').length === 10 && !document.querySelector('#marks [data-find="star"]')

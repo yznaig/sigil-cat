@@ -35,7 +35,7 @@ const KIND = { sigil: 'a sign', combo: 'two things together', secret: 'a secret'
 export function grimoireHTML() {
   const has = (id) => !!store.get('found.' + id);
   const found = FINDS.filter((f) => has(f.id)).length;
-  const cards = FINDS.filter((f) => f.kind !== 'combo' || has(f.id)).map((f) => (has(f.id)
+  const cards = FINDS.filter((f) => f.kind !== 'combo' || has(f.id) || !!globalThis.site?.journey?.visibleCombos?.().includes(f.id)).map((f) => (has(f.id)
     ? `<li class="card ${f.kind}"><div class="fig">${f.kind === 'sigil' ? shape(f) : markSvg(f.d)}</div><h2>${esc(f.name)}</h2><p>${esc(f.does)}</p><small>${KIND[f.kind]}</small></li>`
     : `<li class="card unknown"><div class="fig" aria-hidden="true">???</div><h2>not yet found</h2><p>${esc(f.riddle)}</p><small>${KIND[f.kind]}</small></li>`)).join('');
   return {
@@ -121,6 +121,10 @@ export function createBooks(site) {
 
   function render(name) {
     const b = BOOKS[name]();
+    // The Journey's pages in the book (docs/journey/design.md §7: the last page, "what he said", the room card button):
+    // its parts register sections with site.journey.addSection(); they go before the credits
+    const extra = site.journey?.bookSections?.(name) || '';
+    if (extra) b.body = b.body.includes('<section class="credits"') ? b.body.replace('<section class="credits"', extra + '<section class="credits"') : b.body + extra;
     pop.setAttribute('aria-label', b.title);
     sheet.innerHTML = `<main><header>
     <button type="button" class="home" data-close>&larr; the cat</button>
@@ -129,6 +133,7 @@ export function createBooks(site) {
   ${b.body}</main>`;
     sheet.scrollTop = 0;
     sheet.dataset.book = name;
+    site.journey?.mountBook?.(name, sheet);
   }
   function open(name) {
     if (!BOOKS[name]) return false;
@@ -160,7 +165,9 @@ export function createBooks(site) {
     if (!showing) return false;
     if (pushed) { pushed = false; if (!fromBack) { skipPop++; history.back(); } }
     const was = pop, r = release;
+    const closing = showing;
     showing = null; release = null; pop = sheet = confirmEl = null;
+    site.journey?.emit?.('book-closed', { name: closing });
     for (const [n, v] of inertBefore) n.inert = v;
     inertBefore = [];
     document.body.classList.remove('book-open');

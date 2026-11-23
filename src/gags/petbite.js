@@ -68,7 +68,7 @@ export default function createPetBite(site) {
     if (!c || !buf || stage.clock - lastBurst < B.gap) return null;
     if (!burstFilter || burstFilter.context !== c) {
       burstFilter = c.createBiquadFilter(); burstFilter.type = 'lowpass'; burstFilter.frequency.value = B.lowpass; burstFilter.Q.value = 0.5;
-      burstFilter.connect(audio.output());
+      burstFilter.connect(audio.bus('cat'));   // his voice: the settings screen's cat volume
     }
     const seconds = pick(B.seconds), rate = pick(B.rate), gain = pick(B.gain) * (0.85 + 0.3 * level);
     let offset;
@@ -117,7 +117,7 @@ export default function createPetBite(site) {
     if (bitten) return;
     bitten = true; bites++; annoy = 0; level = 0;
     if (purr) { shown = 0; purr.gain(0, 0.05); }
-    audio.play('bite', { gain: 0.7 }); audio.play('hiss', { gain: 0.5, when: (audio.context()?.currentTime ?? 0) + 0.08 });
+    audio.play('bite', { gain: 0.7, bus: 'cat' }); audio.play('hiss', { gain: 0.5, when: (audio.context()?.currentTime ?? 0) + 0.08 });
     cat.playEmote('startle', 'bite');
     registry.find('bite');
     if (touch) {                                                  // a finger: the page flinches

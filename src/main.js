@@ -28,20 +28,24 @@ import { createShell } from './ui/shell.js';
 import { createBooks } from './ui/books.js';
 import { createFullscreen } from './ui/fullscreen.js';
 import { createZoom } from './ui/zoom.js';
+import { createSettings } from './ui/settings.js';
 import { floorGrid } from './world/floor-grid.js';
 import { createMusic } from './core/music.js';
 import { createSilence } from './ui/silence.js';
+import { watchBars } from './ui/bars.js';
 import { floorOutline } from './world/floor-outline.js';
+import { createJourney } from './journey/index.js';
 
 installPageScheduler();
 const stage = createStage(document.getElementById('c'));
 const site = { THREE: stage.THREE, config: SITE, store, audio, stage, eggs: {}, spells: {} };
 window.site = site;
-site.zoom = createZoom(site);   // controls lane (playtest-4): the zoom beside SOUND, set before anything lays out
+site.zoom = createZoom(site);   // controls lane (playtest-4): the zoom (in the settings screen since p8), set before anything lays out
 site.timing = { main: performance.now(), eggs: 0 };      // ms: when this file ran, building the eggs, his pose in, shown
 // The whole page held still (the pop-up books, the "flip sideways" overlay, the cake's crash screen): built before
 // anything else listens to the window, so its resize hold comes first (src/core/freeze.js).
 site.freeze = createFreeze(site);
+watchBars();   // loadbars lane (p8): the theme-color follows the root's colour under the grey sheets (src/ui/bars.js)
 audio.setNames(SITE.sounds.files, SITE.sounds.collisions ? SITE.sounds.impacts : {});
 site.cat = createCat(site);
 site.input = createInput(site);
@@ -69,6 +73,7 @@ const { cat, ui, registry, input } = site;
 // The loading screen's doors and the phone held upright (src/ui/shell.js); the two books as pop-ups (src/ui/books.js).
 site.shell = createShell(site);
 site.books = createBooks(site);
+site.settings = createSettings(site);   // p8 settings lane: the volumes and the zoom behind one button
 site.fullscreen = createFullscreen(site);   // fullscreen lane (playtest-3): the step after "flip sideways" and the button
 site.silence = createSilence(site);         // music lane (2026-11-15): a phone's first-ever visit, "turn silence off for sound"
 // music lane (2026-11-15, e1115-12): the background music (src/core/music.js); scenes that take the stage hold it
@@ -130,7 +135,7 @@ audio.loadAll([...S.tap, S.rare, 'click']);
 const nextTap = audio.bag(S.tap);
 cat.onTap.push(() => {
   const rare = Math.random() * S.rareChance < 1;
-  audio.play(rare ? S.rare : nextTap(), { gain: S.volume, rate: 1 + (Math.random() * 2 - 1) * S.pitchJitter });
+  audio.play(rare ? S.rare : nextTap(), { gain: S.volume, rate: 1 + (Math.random() * 2 - 1) * S.pitchJitter, bus: 'cat' });   // bonking him: the cat volume
   const milestone = ui.bonk();
   ui.hintDone(1);
   if (milestone) cat.playEmote('spin', 'milestone');
@@ -185,6 +190,12 @@ if (stage.params.has('debug')) {
     // polish lane (2026-11-13): 'ach all' is earning them all: the last one made Platinum Cat anyway (quietly, with no
     // reveal), so it now plays Platinum's reveal and drops the badge like the real path; the 'platinum' button that did
     // the same is gone
+    // journey integration: the last page to seven or eight pieces (earned live, so he tells them), and the ending now.
+    // At eight, drawing his sign (the head outline shown on the last page) plays the ending the real way.
+    const pieces = (n) => { for (const id of (site.journey?.PIECES || []).slice(0, n)) site.achievements.grant(id); };
+    add('page 7', () => pieces(7));
+    add('page 8', () => pieces(8));
+    add('ending', () => site.journey?.ending?.play?.());
     add('ach all', () => site.achievements.grantAll());
     add('ach forget', () => { site.achievements.forget(); location.reload(); });
     add('forget all', () => { store.reset(); location.reload(); });
@@ -232,7 +243,8 @@ const buttered = !!store.get('butterman.buttered');
     // with the rack and a lit lamp). At most BOOT_WARM_MS, shared with the warm-ups below.
     stage.prepare();
     const restored = Promise.all([...site.keepsakes.live.values()].map((i) => i.worldTask).filter(Boolean)).catch(() => {});
-    await Promise.race([restored, new Promise((r) => setTimeout(r, BOOT_WARM_MS))]);
+    // (a phone held upright: the room waits for it to turn, stage.js prepare; nothing to wait for here)
+    if (stage.early) await Promise.race([restored, new Promise((r) => setTimeout(r, BOOT_WARM_MS))]);
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));   // their first pictures drawn
     // his floor shadow is first drawn as he pops in (hidden until then): its program is built here too (24 ms otherwise)
     stage.warm(cat.shadow);
@@ -249,3 +261,5 @@ const buttered = !!store.get('butterman.buttered');
 })();
 site.ready = eggsReady;
 site.achievements = createAchievements(site);
+// The Journey (docs/journey/design.md): the cat's hints, the last page, the ending and the room card; its parts load after the page is up
+site.journey = createJourney(site);

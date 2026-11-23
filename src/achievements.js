@@ -120,7 +120,9 @@ export const ACHIEVEMENTS = [
   { id: 'pipes', group: 'bird', name: 'Pipe Dream', hint: '', said: 'fifteen gates.', d: ICON.pipes, secret: true },
   { id: 'lostgame', group: 'bird', find: 'bird', name: 'You Just Lost the Game', hint: '', said: 'you remember now.', d: mark('bird'), secret: true },
 
-  { id: 'complete', group: 'mastery', name: 'Completionist', hint: 'every page of the grimoire', said: 'nothing left unfound.', d: ICON.complete },
+  // the Journey's ending (docs/journey/design.md §5.3): the last page whole, his own sign drawn. His head, asleep.
+  { id: 'ending', group: 'mastery', name: 'Goodnight', hint: 'the last page, whole', said: 'the room was full. he slept.', d: HEAD + 'M8.6 16.2c.6.5 1.4.5 2 0M13.4 16.2c.6.5 1.4.5 2 0M17.5 2.5h3l-3 3h3' },
+  { id: 'complete', group: 'mastery', name: 'Completionist', hint: 'every page, and every seal in this book', said: 'nothing left unfound. nothing left undone.', d: ICON.complete },
   { id: 'platinum', group: 'mastery', name: 'Platinum Cat', hint: 'everything else. all of it', said: 'every last one. even the bonks.', d: ICON.platinum },
 ];
 export const SIGN_IDS = ACHIEVEMENTS.filter((a) => a.group === 'signs' && a.find).map((a) => a.id);

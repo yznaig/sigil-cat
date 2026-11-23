@@ -15,7 +15,9 @@
 //
 // When: the first song (always glass-garden: "always" read as the first song of every visit, i.e. every page load)
 // starts `firstDelay` s after both the doors are open and the first gesture has made the AudioContext. After each song
-// a random `gap` of silence (uniform, 60-180 s), then a random song of the rotation, never the one just played.
+// a random `gap` of silence (uniform, 60-180 s), then a random song of the rotation, never one of the last two played
+// (p8, so two songs can't flip-flop; fewer unlocked songs: src/core/music-pick.js). The songs played are remembered for
+// the visit only (holds, pauses and the books keep them; a reload starts again with glass-garden, as it always does).
 // Holds: site.music.hold(reason, { fade }) returns a release. Holds stack; while any is held the music fades out over
 // `fade` s and pauses; when the last is released it resumes from the same place, fading in. A gap under way is frozen
 // while held (it counts only time in the room) and goes on after. The page's clock held still pauses it at once, by
@@ -29,6 +31,7 @@
 // Off: ?music=0. Under automation it is off unless ?music=1 (as ?doors=1 / ?fs=1), so no other check hears it.
 // ?musicgap=a,b sets the gap (seconds) for checks; site.music.setGap(a, b) the same at run time.
 import { wallClock } from './page-scheduler.js';
+import { pickNext, NO_REPEAT } from './music-pick.js';
 
 export const MUSIC = {
   dir: 'assets/audio/music/',
@@ -48,12 +51,8 @@ export const MUSIC = {
   fade: { hold: 0.8, quick: 0.35, resume: 1.0, start: 0.05, hidden: 0.3 },
 };
 
-// The next song: any of the pool but the one just played (uniform). Exported for the checks.
-export function pickNext(pool, last, rnd = Math.random) {
-  const options = pool.filter((t) => t !== last);
-  if (!options.length) return pool[0] ?? null;
-  return options[Math.min(options.length - 1, Math.floor(rnd() * options.length))];
-}
+// The next song: never one of the last two played (src/core/music-pick.js). Exported for the checks.
+export { pickNext, NO_REPEAT } from './music-pick.js';
 
 export function createMusic(site) {
   const { stage, audio, store } = site, C = MUSIC;
@@ -80,6 +79,7 @@ export function createMusic(site) {
   const pool = () => C.rotation.filter((t) => isUnlocked(t));
   const isUnlocked = (t) => !C.unlocks[t] || !!store.get(C.unlocks[t]);
   const quiet = () => holds.size > 0 || frozen || hidden;
+  const recent = () => history.slice(-NO_REPEAT).map((h) => h.track);   // the songs the next pick keeps out, oldest first
 
   function element() {
     if (el) return el;
@@ -89,7 +89,7 @@ export function createMusic(site) {
     return el;
   }
   // Its own context, made when the page's is (inside the first gesture, src/main.js): element -> gain (fades, MUSIC.gain)
-  // -> control (the sound control's mute x volume) -> meter -> out.
+  // -> control (the sound control's mute x volume x the music volume) -> meter -> out.
   function makeContext() {
     if (ctx) return ctx;
     const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -97,8 +97,10 @@ export function createMusic(site) {
     ctx = new Ctx();
     control = ctx.createGain(); meter = ctx.createAnalyser(); meter.fftSize = 2048;
     control.connect(meter).connect(ctx.destination);
-    audio.onChange(({ muted, volume }) => { control.gain.setTargetAtTime(muted ? 0 : volume, ctx.currentTime, 0.015); });
-    control.gain.value = audio.state().muted ? 0 : audio.state().volume;
+    // the sound control's mute x volume x the settings screen's music volume (p8 settings lane)
+    const level = ({ muted, volume, levels }) => (muted ? 0 : volume * (levels?.music ?? 1));
+    audio.onChange((s) => { control.gain.setTargetAtTime(level(s), ctx.currentTime, 0.015); });
+    control.gain.value = level(audio.state());
     if (ctx.state !== 'running') ctx.resume().catch(() => {});
     return ctx;
   }
@@ -161,7 +163,7 @@ export function createMusic(site) {
     gapTimer = 0;
     if (phase !== 'gap') return;
     if (quiet()) { gapLeft = 0; return; }
-    start(pickNext(pool(), last));
+    start(pickNext(pool(), recent()));
   }
   function maybeFirst() {
     if (phase !== 'waiting' || !doorsOpen || !gestured || !stage.loaded || firstTimer) return;
@@ -246,7 +248,7 @@ export function createMusic(site) {
     if (phase === 'off') return 'music   off';
     const s = api.state, pos = s.track ? `${s.track} ${s.position.toFixed(1)}/${(s.duration || 0).toFixed(1)} s` : '-';
     const g = s.phase === 'gap' ? `  next in ${s.gapLeft.toFixed(0)} s of ${s.gapLength.toFixed(0)}` : '';
-    return `music   ${s.phase}${s.held ? ' (held: ' + s.holds.join(', ') + ')' : ''}  ${pos}${g}  gap ${gap[0]}-${gap[1]} s  last ${s.last ?? '-'}`;
+    return `music   ${s.phase}${s.held ? ' (held: ' + s.holds.join(', ') + ')' : ''}  ${pos}${g}  gap ${gap[0]}-${gap[1]} s  recent ${s.recent.join(', ') || '-'}`;
   });
 
   const api = {
@@ -263,7 +265,7 @@ export function createMusic(site) {
     level() { if (!meter) return 0; const a = new Float32Array(meter.fftSize); meter.getFloatTimeDomainData(a); let s = 0; for (const v of a) s += v * v; return Math.sqrt(s / a.length); },
     get state() {
       const gl = phase !== 'gap' ? 0 : gapTimer ? Math.max(0, (gapEnds - performance.now()) / 1000) : gapLeft;
-      return { phase, track, last, position: el?.currentTime ?? 0, duration: el?.duration || 0, paused: el?.paused ?? true,
+      return { phase, track, last, recent: recent(), position: el?.currentTime ?? 0, duration: el?.duration || 0, paused: el?.paused ?? true,
         level: gain?.gain.value ?? 0, held: quiet(), holds: [...holds.values(), ...(frozen ? ['frozen'] : []), ...(hidden ? ['hidden'] : [])],
         fading: fadingOut, pausedAt, gapLeft: gl, gapLength, gap: [...gap], blocked, format: el ? format() : null,
         unlocked: C.rotation.filter(isUnlocked) };

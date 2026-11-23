@@ -43,7 +43,7 @@ if(!MOBILE){
   const ws=H.whiskers(),low=Math.max(...ws.flatMap(w=>w.pts.map(p=>p.y))),cx=cat.screenOf([0,cat.height*.5,0]).x;
   const lc=(rs[0].x+rs[2].x+rs[2].w)/2,rc=(rs[3].x+rs[5].x+rs[5].w)/2;
   check('harp-buttons 1 below his whiskers (his face stays clear), the left three left of him and the right three right of him',Math.min(...rs.map(r=>r.y))>low+20&&lc<cx&&rc>cx,show({top:Math.min(...rs.map(r=>r.y)),whiskersLow:Math.round(low),lc,rc,cx:Math.round(cx)}));
-  const ui=['.top .tl','.top .name','#tally','.fs-toggle','#footer .sound','#footer .zoom','#footer .fr > *','#marks > li']
+  const ui=['.top .tl','.top .name','#tally','.fs-toggle','#footer .set-mark','#footer .sound','#footer .fr > *','#marks > li']
     .flatMap(s=>[...document.querySelectorAll(s)]).filter(e=>!e.hidden&&getComputedStyle(e).visibility!=='hidden').map(e=>({el:e.id||e.className?.baseVal||e.className||e.tagName,r:rectOf(e)})).filter(u=>u.r);
   const hits=rs.flatMap((r,i)=>ui.filter(u=>overlap(r,u.r)>0).map(u=>i+' over '+u.el));
   check('harp-buttons 1 clear of SOUND, ZOOM, the books, the full-screen toggle, the top line and the row of sigils',!hits.length,show(hits));

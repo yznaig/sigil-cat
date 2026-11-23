@@ -117,7 +117,7 @@ export function createInput(site) {
   let swallowed = 0;
   function swallow(e) {
     if (locks.size && e.type === 'keydown' && e.key === 'Escape') for (const f of onEscape) f();
-    if (!locks.size || e.target?.closest?.('.controls, #footer .sound, #party-error, #bird-screen, .book-pop')) return;   // .book-pop: shell lane (src/ui/books.js)
+    if (!locks.size || e.target?.closest?.('.controls, #footer .sound, #party-error, #bird-screen, .book-pop, .settings-pop')) return;   // .book-pop: shell lane (src/ui/books.js); .settings-pop: src/ui/settings.js
     if (e.type === 'keydown' && e.key === 'Tab') return;          // focus can still move; nothing it lands on will act
     if (e.type === 'pointerdown' && (e.pointerType !== 'mouse' || e.button === 0)) for (const f of onLockedPress) f(e);   // sky lane, playtest 2
     e.stopImmediatePropagation();

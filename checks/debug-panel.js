@@ -7,6 +7,7 @@ const A = site.achievements, R = E.box.recipe;
 await until(() => [...document.querySelectorAll('.controls button')].some((b) => b.textContent === 'cake'), 15000);
 const button = (label) => [...document.querySelectorAll('.controls button')].find((b) => b.textContent === label);
 check('the debug panel has the four new buttons', ['cake', 'bonks 0', 'bonks +1000', 'bonks +1000000'].every(button));
+check('the debug panel has the journey shortcuts (last page to 7 or 8 pieces, the ending)', ['page 7', 'page 8', 'ending'].every(button));
 const bonksText = () => document.getElementById('bonks').textContent;
 
 button('cake').click();

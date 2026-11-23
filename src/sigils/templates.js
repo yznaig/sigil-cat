@@ -166,6 +166,44 @@ function forkTemplates() {
   return out;
 }
 
+// ---- his own sign: the cat-head outline (the Journey's tenth sign, docs/journey/design.md §5.2) ----------------
+// The head mark on every bonk seal (HEAD in src/achievements.js) as one open stroke: up his left side, over the left
+// ear, along the dip between the ears, over the right ear, down his right side. No bottom: the stroke stays open.
+// Not a find (src/finds.js has no row for it): src/journey/lastpage.js casts it to end the game.
+function catheadPath({ ear = 0, dip = 21, inner = 36, bulge = 6, side = 36 } = {}) {
+  // the sides bow out a little, like his cheeks: left from (0,100) up to (0,side), right from (100,side) down
+  const left = arc(0, (100 + side) / 2, bulge, (100 - side) / 2, HALF, Math.PI * 1.5);
+  const right = arc(100, (100 + side) / 2, bulge, (100 - side) / 2, -HALF, HALF);
+  return join(left, polyline([pt(0, side), pt(6, ear), pt(inner, dip), pt(100 - inner, dip), pt(94, ear), pt(100, side)]), right);
+}
+// $1 alone takes some tall M-shaped bolts for it. What an M lacks: his two sides run the opposite way to each other
+// and nearly parallel (up his left cheek, down his right), whatever the tilt or stretch. The first and last fifth of
+// the stroke, as chords, must point within ~25 degrees of opposite, and stay apart.
+function catheadAccept(pts) {
+  let total = 0;
+  const cum = [0];
+  for (let i = 1; i < pts.length; i++) cum.push(total += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
+  if (!total) return false;
+  const at = (s) => pts[Math.max(0, cum.findIndex((c) => c >= s))];
+  const a0 = pts[0], a1 = at(total * 0.2), b0 = at(total * 0.8), b1 = pts[pts.length - 1];
+  const ux = a1.x - a0.x, uy = a1.y - a0.y, vx = b1.x - b0.x, vy = b1.y - b0.y;
+  const cos = (ux * vx + uy * vy) / (Math.hypot(ux, uy) * Math.hypot(vx, vy) || 1);
+  // and they stay as far apart as the stroke's ends (an M's legs lean in toward its middle)
+  const gap = Math.hypot(b0.x - a1.x, b0.y - a1.y) / (Math.hypot(b1.x - a0.x, b1.y - a0.y) || 1);
+  // and it is a head, not a bowl: the middle of the stroke (the dip between the ears) is above its open ends, within
+  // 50 degrees of straight up the screen ($1 cannot tell up from down; a U is not his sign)
+  const m = at(total * 0.5), up = (a0.y + b1.y) / 2 - m.y, aside = Math.abs(m.x - (a0.x + b1.x) / 2);
+  return cos < -Math.cos(Math.PI / 7) && gap > 0.8 && up > 0 && aside < up * Math.tan((50 * Math.PI) / 180);
+}
+function catheadTemplates() {
+  const out = [];
+  for (const shape of [{}, { bulge: 0.01, side: 40 }, { ear: -8, dip: 24, inner: 32 }, { side: 30, dip: 16, inner: 40, bulge: 9 }]) {
+    const head = catheadPath(shape);
+    out.push(head, reversed(head));     // from his left (the dot), or a hand that starts on the other side
+  }
+  return out;
+}
+
 // ---- the table ------------------------------------------------------------------------------
 
 // closed: the stroke must end within this fraction of its size from where it began; open: it must not.
@@ -181,4 +219,5 @@ export const SIGILS = {
   eight: { label: 'The Eyes', templates: [], rule: true },   // a figure eight on its side: found by rule (recognize.js, isEight)
   triangle: { label: 'The Hat', templates: triangleTemplates(), closed: 0.38 },
   fork: { label: 'The Fork', templates: forkTemplates() },
+  cathead: { label: 'His Sign', templates: catheadTemplates(), accept: catheadAccept },
 };

@@ -195,6 +195,17 @@ for size in desktop phone; do
   # gags lane (playtest 4): the star is gone from the grimoire; an old save that found it loads and counts 17 of 17
   run "grimoire-star-$size" "$BASE/" --lib checks/lib.js --js checks/grimoire-star.js --size $size --out "$SHOTS" --jpeg --timeout 120 \
     --storage '{"found":{"butter":1,"circle":1,"bolt":1,"star":1,"loaf":1,"glass":1,"box":1,"eyes":1,"hat":1,"fork":1,"noscope":1,"blastoff":1,"paradox":1,"fling":1,"harp":1,"bite":1,"whisper":1,"bird":1},"bonks":12}'
+  # p8 achievements lane: Completionist waits for every grimoire page (an old found.star is no stand-in) and every other
+  # achievement but Platinum Cat, unlocks the moment the last lands, and is never taken away
+  for gap in gap achgap; do
+    case $gap in gap) skip='["whisper","complete","platinum"]'; nofind='"whisper"';; achgap) skip='["buttaman","collector","complete","platinum"]'; nofind='""';; esac
+    COMP_STORE=$(node --input-type=module -e "const { ACHIEVEMENTS } = await import('$PWD/src/achievements.js'); const { FINDS } = await import('$PWD/src/finds.js'); const skip = $skip;
+      console.log(JSON.stringify({ found: Object.fromEntries([...FINDS.map((f) => f.id).filter((id) => id !== $nofind), 'star'].map((id) => [id, 1])), bonks: 12,
+        achievements: Object.fromEntries(ACHIEVEMENTS.filter((a) => !skip.includes(a.id)).map((a) => [a.id, 1762800000000])) }))")
+    run "completionist-$gap-$size" "$BASE/?ach=$gap" --lib checks/lib.js --js checks/completionist.js --then checks/completionist-reload.js --size $size --out "$SHOTS" --jpeg --timeout 120 --storage "$COMP_STORE"
+  done
+  run "completionist-kept-$size" "$BASE/?ach=kept" --lib checks/lib.js --js checks/completionist.js --size $size --out "$SHOTS" --jpeg --timeout 120 \
+    --storage '{"found":{"circle":1},"bonks":3,"achievements":{"complete":1762800000000}}'
   # shell lane (playtest-2): the loading screen and its doors, the books as pop-ups with start over
   run "shell-boot-$size" "$BASE/?doors=hold&dpr=$final_dpr" --js checks/shell-boot.js --size $size --out "$SHOTS" --jpeg --timeout 120
   run "shell-boot-calm-$size" "$BASE/?doors=hold&dpr=$final_dpr" --js checks/shell-boot.js --size $size --out "$SHOTS" --jpeg --timeout 120 --reduced
@@ -237,6 +248,10 @@ for size in desktop phone; do
   run "box-open-tiles-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/box-open-tiles.js --size $size --out "$SHOTS" --jpeg --timeout 240
   # physics lane, playtest-3: the eyes follow him and show on the badge, chest take-out, too far into him, the flour's place
   run "physics-p3-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/physics-p3.js --then checks/physics-p3-reload.js --size $size --out "$SHOTS" --jpeg --timeout 400
+  # chest-out lane (p8, Aaron: "taking things out of the box spawned them all the way back"): what comes out of the
+  # chest lands in front of his feet when there is room there, the box front right, front left or back; at the most zoom too
+  run "chest-out-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/chest-out.js --size $size --out "$SHOTS" --jpeg --timeout 400
+  run "chest-out-zoom-$size" "$BASE/?dpr=$final_dpr&zoom=1.3&boxes=front-right" --lib checks/lib.js --js checks/chest-out.js --size $size --out "$SHOTS" --jpeg --timeout 300
   run "inventory-stress-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/inventory-stress.js --then checks/inventory-stress-reload.js --size $size --out "$SHOTS" --jpeg --timeout 500
   # speed lane (playtest-2): moving pictures to a pixel budget in big windows, sharp again once still; pops count as motion
   run "speed-motion-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/speed-motion.js --size $size --out "$SHOTS" --jpeg --timeout 240
@@ -264,6 +279,8 @@ for size in desktop phone; do
   # gags lane (playtest 3): the loaf's riser and pop, crumbs every second loaf, the blast-off covered like the galaxy
   run "bread-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/bread.js --size $size --out "$SHOTS" --jpeg --timeout 300
   run "bread-calm-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/bread.js --size $size --out "$SHOTS" --jpeg --timeout 300 --reduced
+  # paradox lane (p8): the strapped loaf rests on his back and its strap wraps him, in every pose and through a pose change
+  run "paradox-strap-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/paradox-strap.js --size $size --out "$SHOTS" --jpeg --timeout 300
 
   # fx lane (playtest 3): the new bolt (calm too), the galaxy's glow in every pose, the #debug panel's cake and bonks
   run "bolt-visual-$size" "$BASE/?dpr=$final_dpr" --lib checks/lib.js --js checks/bolt-visual.js --size $size --out "$SHOTS" --jpeg --timeout 120
@@ -289,6 +306,19 @@ run "silence-desktop" "$BASE/?doors=hold&fs=1&silence=1&case=desktop" --js check
 
 # a phone held upright only ever shows "flip sideways" (shell lane, playtest-2): at boot, and mid-game, frozen under it
 run "shell-turn-phone-portrait" "$BASE/?doors=hold&dpr=2" --js checks/shell-turn.js --size phone-portrait --out "$SHOTS" --jpeg --timeout 150
+# the loading screen on a phone has no bare bands (loadbars lane, p8): it covers the screen, meets Safari's bars in the page
+# colour, keeps its frame and spine clear of the safe areas, also as the toolbar grows and shrinks; desktop untouched
+for size in phone-portrait phone-tall-portrait phone phone-notch desktop; do
+  run "loader-bars-$size" "$BASE/?doors=hold" --js checks/loader-bars.js --size $size --out "$SHOTS" --jpeg --timeout 90
+done
+# turned at every moment (loadbars lane, p8 follow-up): mid-load, under "flip sideways", the full-screen hint, the silence
+# card, as the doors part, in the room (and its toolbar), with a book open: the screen's edges always match the colour
+# Safari fills its bars with, and the room is laid out for the screen it is on
+run "rotate-bars-phone-portrait" "$BASE/?doors=hold&fs=1&silence=1" --js checks/rotate-bars.js --size phone-portrait --out "$SHOTS" --jpeg --timeout 200
+# props spawned far back on a phone (lane p8-farprops): loaded upright then turned, loaded with the address bar showing,
+# then reloaded: every floor prop comes back exactly where it was left
+echo "== far-props-phone"
+if ! node checks/far-props.mjs "$BASE/" "$SHOTS"; then fails+=("far-props-phone"); fi
 # full screen on a phone (fullscreen lane, playtest-3): the step after "flip sideways", the button, no element full
 # screen (iPhone Safari), opened from the home screen, loaded upright, and a desktop that gets neither
 run "fullscreen-phone" "$BASE/?doors=hold&fs=1&case=api" --js checks/fullscreen.js --then checks/fullscreen-reload.js --size phone --out "$SHOTS" --jpeg --timeout 180
@@ -297,7 +327,7 @@ run "fullscreen-noapi-phone" "$BASE/?doors=hold&fs=1&case=noapi" --js checks/ful
 run "fullscreen-standalone-phone" "$BASE/?doors=hold&fs=1&case=standalone" --js checks/fullscreen.js --size phone --out "$SHOTS" --jpeg --timeout 120
 run "fullscreen-phone-portrait" "$BASE/?doors=hold&fs=1&case=portrait" --js checks/fullscreen.js --size phone-portrait --out "$SHOTS" --jpeg --timeout 120
 run "fullscreen-desktop" "$BASE/?doors=hold&fs=1&case=desktop" --js checks/fullscreen.js --size desktop --out "$SHOTS" --jpeg --timeout 120
-# controls lane (playtest-4): Nearer / Deeper held with real touch at the very bottom; the zoom beside SOUND at its least,
+# controls lane (playtest-4): Nearer / Deeper held with real touch at the very bottom; the zoom (settings screen) at its least,
 # default and most (everything on the page, nothing under the controls, nothing lost) and after a reload; the safe area
 # of a notched phone (left only, as the Dynamic Island on its side; and both sides with the home bar's bottom)
 run "controls-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/controls.js --then checks/controls-reload.js --size phone --out "$SHOTS" --jpeg --timeout 400
@@ -305,6 +335,14 @@ run "controls-notch-left" "$BASE/?dpr=2&safe=59,0,0,0" --lib checks/lib.js --js 
 run "controls-notch-both" "$BASE/?dpr=2&safe=59,59,0,21" --lib checks/lib.js --js checks/controls.js --then checks/controls-reload.js --size phone-notch --out "$SHOTS" --jpeg --timeout 400
 run "controls-desktop" "$BASE/?dpr=1" --lib checks/lib.js --js checks/controls.js --then checks/controls-reload.js --size desktop --out "$SHOTS" --jpeg --timeout 400
 run "controls-1536x864" "$BASE/?dpr=1" --lib checks/lib.js --js checks/controls.js --then checks/controls-reload.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 400
+# settings lane (p8): the one settings button opens the screen; music / sound effects / cat sounds each move their own
+# gain (asserted on the audio graph), the master multiplies and its switch silences all three; the zoom zooms; it
+# closes three ways; everything survives a reload; an old save (volume, mute, zoom, no levels) keeps what it had.
+# Upright with ?turn=0 (a real phone upright gets "flip sideways"; a narrow window plays upright).
+run "settings-desktop" "$BASE/?dpr=1&music=1" --lib checks/lib.js --js checks/settings.js --then checks/settings-reload.js --size desktop --out "$SHOTS" --jpeg --timeout 240
+run "settings-phone" "$BASE/?dpr=2&music=1" --lib checks/lib.js --js checks/settings.js --then checks/settings-reload.js --size phone --out "$SHOTS" --jpeg --timeout 240
+run "settings-phone-portrait" "$BASE/?dpr=2&music=1&turn=0" --lib checks/lib.js --js checks/settings.js --then checks/settings-reload.js --size phone-portrait --out "$SHOTS" --jpeg --timeout 240
+run "settings-migrate" "$BASE/?dpr=2&music=1" --lib checks/lib.js --js checks/settings-migrate.js --size phone --out "$SHOTS" --jpeg --timeout 150 --storage '{"migrated":1,"bonks":42,"sound":{"volume":0.37,"muted":true},"view":{"zoom":0.9}}'
 # grid lane (playtest-4, e1114-13): the floor grid draws, sits under every shadow, keepsake, piece of furniture and the cat
 # at the zoom's default, least and most, reaches past the screen, costs nothing a frame on the CPU, and never shows
 # through the galaxy, flappy, the trailer, the grimoire, the error page or the closed loading doors
@@ -329,13 +367,48 @@ run "floor-outline-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/floor-o
 # last pluck, Nearer/Deeper win while an item is held, a desktop never gets them
 run "harp-keys-1536x864" "$BASE/?dpr=1" --lib checks/lib.js --js checks/harp-keys.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 240
 run "harp-keys-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/harp-keys.js --size phone --out "$SHOTS" --jpeg --timeout 240
+run "journey-boot-1536x864" "$BASE/?dpr=1" --lib checks/lib.js --js checks/journey-boot.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 90
+run "journey-boot-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/journey-boot.js --size phone --out "$SHOTS" --jpeg --timeout 90
+# journey unit "voice" (docs/journey/design.md §4, §7): the hook, the stuck nudges walk the hint graph, an achievement
+# resets the stuck clock, quiet under a book and Butterman, every line told ('said'), a reload is welcomed back
+run "journey-voice-1536x864" "$BASE/?dpr=1&nudge=fast" --lib checks/lib.js --js checks/journey-voice.js --then checks/journey-voice-reload.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 400
+run "journey-voice-phone" "$BASE/?dpr=2&nudge=fast" --lib checks/lib.js --js checks/journey-voice.js --then checks/journey-voice-reload.js --size phone --out "$SHOTS" --jpeg --timeout 400
+# journey unit "tells" (docs/journey/design.md §5.4-§5.6): no ghost doodle, scrape, butter shimmer, whisker hum, shelf dust
+# outlines, board pins, empty peg, "what he said" in the grimoire, combo riddles shown once their needs are done
+run "journey-tells-1536x864" "$BASE/?dpr=1" --lib checks/lib.js --js checks/journey-tells.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 400
+run "journey-tells-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/journey-tells.js --size phone --out "$SHOTS" --jpeg --timeout 400
+run "journey-tells-calm" "$BASE/?dpr=1" --lib checks/lib.js --js checks/journey-tells.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 400 --reduced
+# journey unit "ending" (docs/journey/design.md §5.1-5.3): the last page's scraps (0, 3, 7, 8 seeded), his own sign as a real
+# stroke ("not yet." at seven; the ending at eight: locked, four lines, asleep, credits, Goodnight), then a reload: no replay,
+# the page whole, one replay per visit. Desktop, phone, and reduced motion.
+run "journey-ending-1536x864" "$BASE/?dpr=1" --lib checks/lib.js --js checks/journey-ending.js --then checks/journey-ending-reload.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 400
+run "journey-ending-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/journey-ending.js --then checks/journey-ending-reload.js --size phone --out "$SHOTS" --jpeg --timeout 400
+run "journey-ending-calm" "$BASE/?dpr=1&rm=1" --lib checks/lib.js --js checks/journey-ending.js --then checks/journey-ending-reload.js --size 1536x864 --reduced --out "$SHOTS" --jpeg --timeout 400
+# the room card (unit sc/p9-share): render, the grimoire's "my room" button, save / share, the ending card, nothing left behind
+SHARE_STORE='{"found":{"butter":1,"circle":1,"bolt":1},"bonks":321}'
+run "journey-share-1536x864" "$BASE/?dpr=1" --lib checks/lib.js --js checks/journey-share.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 150 --storage "$SHARE_STORE"
+run "journey-share-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/journey-share.js --size phone --out "$SHOTS" --jpeg --timeout 150 --storage "$SHARE_STORE"
+run "journey-share-calm-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/journey-share.js --size phone --out "$SHOTS" --jpeg --timeout 150 --reduced --storage "$SHARE_STORE"
+# the Journey played through (docs/journey/design.md §7, integration): a fresh save, the voice on, the nine signs drawn as
+# strokes, the seven room trophies seeded one at a time (a piece line each, the last page +1 scrap each, nudges never
+# name a done node, the journal keeps them), his sign -> the ending -> Goodnight -> the room card -> save a PNG; a reload
+# is the post-game. Then ten minutes left alone at the real timings: within his caps, no repeats, no errors, no growth.
+run "journey-playthrough-1536x864" "$BASE/?dpr=1&voice=1&nudge=fast" --lib checks/lib.js --js checks/journey-playthrough.js --then checks/journey-playthrough-reload.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 600
+run "journey-playthrough-phone" "$BASE/?dpr=2&voice=1&nudge=fast" --lib checks/lib.js --js checks/journey-playthrough.js --then checks/journey-playthrough-reload.js --size phone --out "$SHOTS" --jpeg --timeout 600
+run "journey-soak-1536x864" "$BASE/?dpr=1&voice=1" --lib checks/lib.js --js checks/journey-soak.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 800
 run "harp-buttons-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/harp-buttons.js --size phone --out "$SHOTS" --jpeg --timeout 300
 run "harp-buttons-notch" "$BASE/?dpr=2&safe=59,59,0,21" --lib checks/lib.js --js checks/harp-buttons.js --size phone-notch --out "$SHOTS" --jpeg --timeout 300
 run "harp-buttons-calm-phone" "$BASE/?dpr=2&rm=1" --lib checks/lib.js --js checks/harp-buttons.js --size phone --out "$SHOTS" --jpeg --timeout 300 --reduced
 run "harp-buttons-1536x864" "$BASE/?dpr=1" --lib checks/lib.js --js checks/harp-buttons.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 120
 
+echo "== journey graph"
+if node checks/journey-graph.test.mjs > "$LOG/journey-graph.txt" 2>&1; then tail -n 1 "$LOG/journey-graph.txt"; else tail -n 30 "$LOG/journey-graph.txt"; fails+=("journey graph"); fi
 echo "== sigils"
 if node checks/sigils.test.mjs > "$LOG/sigils.txt" 2>&1; then tail -n 1 "$LOG/sigils.txt"; else tail -n 15 "$LOG/sigils.txt"; fails+=("sigils"); fi
+
+echo "== music picker"
+# p8: a song can't come back until two others have played (pools of 1, 2, 3, 4, 5; a song unlocked mid-run)
+if node checks/music-pick.test.mjs > "$LOG/music-pick.txt" 2>&1; then cat "$LOG/music-pick.txt"; else tail -n 15 "$LOG/music-pick.txt"; fails+=("music picker"); fi
 
 echo "== bird assets and physics"
 if ! python3 checks/bird-art.py; then fails+=("bird assets"); fi

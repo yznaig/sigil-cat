@@ -82,8 +82,11 @@ export async function floorHome(site,inst,vertices,rotation,preferred){
   // Only a prop still resting where placement put it may be moved. Awake ones
   // (dropping in, or sliding) and ones the player or physics moved (knocked,
   // stacked, poured into the box) keep their place and count as taken floor.
-  const asleep=e.body.isSleeping(),spot=i.floorSpot,untouched=asleep&&!!spot&&Math.hypot(now.x-spot.x,now.z-spot.z)<.05;
-  const r=!asleep&&planned.get(i.id)||visual(i,project(q,now));
+  const asleep=e.body.isSleeping(),spot=i.floorSpot,atSpot=!!spot&&Math.hypot(now.x-spot.x,now.z-spot.z)<.05,untouched=asleep&&atSpot;
+  // An awake prop still dropping onto its planned spot counts by that plan; one moved since (the box pushed to the
+  // front by the player, then awake with its lid open while things come out of it: lane p8-chestout, Aaron "they both
+  // spawned back where that bucket was") counts where it is now, not where it was first placed.
+  const r=!asleep&&atSpot&&planned.get(i.id)||visual(i,project(q,now));
   others.push({i,e,b:q,p:i.floorOrigin||now.clone(),r:flatOf(q)?{...r,flat:true}:r,untouched});
  }
  const area=m=>{const p=m.p.clone();p.y=-m.b.min.y+.002;const r=project(m.b,p);return r.w*r.h;};
@@ -197,7 +200,7 @@ export function placer(site){
    const e=other.worldEntry;
    if(e&&!e.fixed&&other.colliderVertices?.length){
     const b=bounds(other.colliderVertices,new T.Quaternion().copy(e.body.rotation())),p=new T.Vector3().copy(e.body.translation());
-    p.y=-b.min.y+.002;const r=visual(other,project(b,p));out.push(flatOf(b)?{...r,flat:true}:r);
+    p.y=-b.min.y+.002;const r=visual(other,project(b,p));out.push(flatOf(b)?{...r,flat:true,id:other.id}:{...r,id:other.id});
    }else{const r=(!e&&planned.get(other.id))||other.box;out.push(floorArt&&!e&&r?{...r,flat:true}:r);}
   }
   return out;
@@ -216,7 +219,7 @@ export function placer(site){
    const a=over(r,o);if(!a)continue;
    // a flat prop: its floor is taken (the newcomer's base keeps off it), and the newcomer may hide no more of it than
    // 1 - FRONT.shown; without a base (a caller that has none) it counts whole, as before
-   if(o.flat&&base){b??=base();covered+=over(b,o)+Math.max(0,a-(1-FRONT.shown)*o.w*o.h);}else covered+=a;
+   if(o.flat&&base){b??=base();covered+=over(b,o)+Math.max(0,a-(1-FRONT.shown)*o.w*o.h);}else covered+=o.solid?a*100:a;   // solid: keepOffBox below
   }
   // A margin round him: settling, his bob and a flat prop's bounce all move
   // a prop a few pixels from its planned rectangle.
@@ -262,9 +265,22 @@ export function placer(site){
 // item taken out of the chest, a body pushed too far into him). The same search and costs as a new prop's place, near
 // `preferred` (its arrival spot), but nothing else is moved or stored: every other prop counts as taken floor.
 // Returns the body position to rest at (its lowest point just above the floor), or null when no spot is clear.
+// The front band first, as a newcomer's place (floorHome): when the nearest clear spot is behind his feet (or none is
+// clear), a clear spot in front of them is taken instead, or one in front covering at most FRONT.overlap. Nearest
+// alone walked straight up the screen from a spot the box took (the back of the floor is the fewest pixels away), so
+// what came out of the chest landed far back by the board (lane p8-chestout).
+// The box, among a search's obstacles, made one no overlap is allowed with (not even FRONT.overlap): what comes out of
+// the chest lands clear of the box, never in or against it (physics-p3 item 2; recipes.js take-out).
+export const keepOffBox=(obstacles)=>obstacles.map(o=>o?.id==='box'?{...o,solid:true}:o);
 export function clearSpot(site,inst,vertices,rotation,preferred){
- const {THREE:T}=site,{bounds,occupied,choose}=placer(site),b=bounds(vertices,rotation);
- const best=choose(b,preferred,occupied(new Set([inst])));
+ const {THREE:T,keepsakes}=site,{bounds,occupied,choose}=placer(site),b=bounds(vertices,rotation),obstacles=occupied(new Set([inst]));
+ let best=choose(b,preferred,obstacles);
+ if(best&&(best.covered||best.cat||best.r.y+best.r.h<keepsakes.feet.y)){
+  const f=choose(b,preferred,keepOffBox(obstacles),{front:true});
+  // a clear front spot; else, as a newcomer, a slight overlap (FRONT.overlap of its own picture) in front rather than
+  // far back (floorHome may have planned just that spot), but none with the box
+  if(f&&!f.cat&&(!f.covered||f.covered<=FRONT.overlap*f.r.w*f.r.h))best={...f,covered:0};
+ }
  if(!best||best.covered||best.cat)return null;
  site.floorHomes.set(inst.id,best.r);return best.p;
 }

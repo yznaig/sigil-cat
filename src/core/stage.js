@@ -68,7 +68,13 @@ export function createStage(canvas) {
   // so their first build (pictures, shaders) happens before he is shown; ready() runs it too if nobody did.
   let early = false;
   onEarly.push = (f) => { if (early) { try { f(); } catch (e) { console.error(e); } return onEarly.length; } return Array.prototype.push.call(onEarly, f); };
-  function prepare() { if (early) return; early = true; for (const f of onEarly) { try { f(); } catch (e) { console.error(e); } } }
+  // Not in a layout nobody plays in (lane p8-farprops, Aaron: "when I've opened the app on mobile it has spawned my items
+  // way way in the back"): a phone held upright while it loads laid the room out for the upright screen (the camera far
+  // back, the page a narrow strip), and the restored props were fitted, nudged and saved there; turned on its side the
+  // fit never brings them forward again. While the room gate says so (src/ui/shell.js: a phone held upright) the room
+  // waits, and is built at the first layout the gate lets through.
+  let roomGate = () => false, prepareWanted = false;
+  function prepare() { if (early) return; if (roomGate()) { prepareWanted = true; return; } early = true; prepareWanted = false; for (const f of onEarly) { try { f(); } catch (e) { console.error(e); } } }
   // top/bottom: the page's chrome (src/ui/hush.js fit()). left/right (controls lane, playtest-4): the screen's safe
   // area at the sides, env(safe-area-inset-left/right) (the page is viewport-fit=cover): on a phone on its side the
   // notch or the Dynamic Island sits there. The room is planned inside them (furniture, homes, the scoots), the
@@ -103,6 +109,7 @@ export function createStage(canvas) {
     if (shift || side) camera.setViewOffset(width, height, side, shift, width, height); else camera.clearViewOffset();
     camera.updateProjectionMatrix(); camera.updateMatrixWorld();
     for (const f of onResize) f();
+    if (prepareWanted) prepare();
   }
   // (held: the chrome's size for a screen nobody sees is not kept; the resize on the release measures it again)
   function setInsets(top, bottom) { if (layoutHeld || layoutGate() || (top === insets.top && bottom === insets.bottom)) return; insets.top = top; insets.bottom = bottom; frame(); }
@@ -306,6 +313,7 @@ export function createStage(canvas) {
     setBusyCheck(f) { busyCheck = f; },
     holdLayout(on) { layoutHeld = on; if (!on && layoutPending) { layoutPending = false; frame(); } },
     setLayoutGate(f) { layoutGate = f; },
+    setRoomGate(f) { roomGate = f; },
     start() { renderer.setAnimationLoop(loop); },
     // the cat is in: show the canvas, let the warm-ups and everything that waited for him begin
     ready() {

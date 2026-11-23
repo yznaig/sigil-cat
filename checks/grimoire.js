@@ -16,7 +16,9 @@ const shapes = unknown.filter((c) => c.querySelector('svg, path, canvas, img')).
 say('N5 unfound cards show no shape, only ??? and a riddle', unknown.length > 0 && shapes === 0 && unknown.every((c) => c.querySelector('.fig').textContent.trim() === '???' && /not yet found/i.test(c.textContent) && c.querySelector('p').textContent.length > 8),
   `${unknown.length} unfound cards, ${shapes} with a drawing`);
 say('N5 found cards show their shape', found.length === Number(book.querySelector('.tally b').textContent) && found.every((c) => c.querySelector('svg path')), `${found.length} found cards, tally says ${book.querySelector('.tally').textContent}`);
-say('N5 no unfound shape is anywhere in the book', book.querySelectorAll('svg path').length - book.querySelectorAll('.name svg path').length === found.length, `${book.querySelectorAll('.cards svg').length} drawings for ${found.length} found`);
+// (the Journey's last page draws only the scraps already earned, and his sign only when whole: checks/journey-ending.js)
+const lastPage = book.querySelectorAll('[data-journey="lastpage"] svg path').length;
+say('N5 no unfound shape is anywhere in the book', book.querySelectorAll('svg path').length - book.querySelectorAll('.name svg path').length - lastPage === found.length, `${book.querySelectorAll('.cards svg').length} drawings for ${found.length} found`);
 const names = cards.map((c) => c.querySelector('h2').textContent);
 say('combos stay off the page until found', !/paradox|fling/i.test(book.querySelector('.cards').textContent) && names.includes('Blasting off'), `cards: ${cards.length}`);
 await __shot('31-grimoire');

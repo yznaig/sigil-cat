@@ -74,9 +74,11 @@ check('harp-keys 3 the keys do nothing while typing, modified, held, locked or u
  await wsleep(300);await __key('k');await wsleep(120);
  const ok=open&&H.plucks===n0;site.books.close();await wsleep(500);await until(()=>!document.querySelector('.book-pop'),4000);await sleep(400);
  check('harp-keys 3 the grimoire open: the keys do nothing',ok,show({open,plucks:H.plucks-n0}));}
-// a focused slider (the volume) takes no letters, so it does not block them
-{const v=document.getElementById('volume');const n0=H.plucks;v?.focus();await press('k');
- check('harp-keys 3 a focused slider does not block them',!!v&&document.activeElement===v&&H.plucks===n0+1,show({focused:document.activeElement?.id,plucks:H.plucks-n0}));v?.blur();}
+// the settings screen (p8 settings lane: the sliders live there now) is a mode like the books: keys do nothing while
+// it is open, even with a slider focused, and pluck again once it is closed
+{const v=document.getElementById('vol-music');const n0=H.plucks;site.settings.open();await sleep(200);v?.focus();await press('k');
+ const focused=document.activeElement?.id,during=H.plucks-n0;site.settings.close();await sleep(200);
+ check('harp-keys 3 the settings screen open (a slider focused): the keys do nothing',!!v&&focused==='vol-music'&&during===0,show({focused,plucks:during}));}
 check('harp-keys 3 a key still plucks after all that',await(async()=>{await sleep(300);const n0=H.plucks;await press('j');return H.plucks===n0+1;})());
 // 4
 if(!MOBILE)check('harp-keys 4 on a desktop key plucks bring up no whisker buttons',!document.getElementById('harp-keys')&&!H.buttons.el);

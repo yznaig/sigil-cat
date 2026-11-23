@@ -180,7 +180,7 @@ export function createUI(site) {
       speechLine = line;
       const calm = reduced(), { hop = true, sound = true } = job.opts;
       if (hop && !calm && site.cat?.loaded && !site.cat.hidden) site.cat.playEmote('hop', 'speech');
-      if (sound && audio.play(SPEAK.sound, { gain: SPEAK.gain })) speechBonks++;
+      if (sound && audio.play(SPEAK.sound, { gain: SPEAK.gain, bus: 'cat' })) speechBonks++;
       const settle = writeRunes(speechEl, line, { plain: calm, words: true, delay: SPEAK.settleDelay, step: SPEAK.settleStep });
       placeSpeech();
       speechEl.classList.add('on');

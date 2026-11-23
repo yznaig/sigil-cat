@@ -121,7 +121,7 @@ check('fullscreen then he pops in and the doors part, on a room laid out again f
 // ---- the button ----
 const b = btn();
 const r = rect(b), hit = (x, y) => document.elementFromPoint(x, y)?.closest('#fs-toggle') === b, c = centre(b);
-const others = ['.top .tl', '#name', '#tally', '#footer .sound', '#footer .fr', '#marks', '#say', '#hint'].map((s) => [s, document.querySelector(s)]).filter(([, e]) => e && e.getBoundingClientRect().width);
+const others = ['.top .tl', '#name', '#tally', '#footer .set-mark', '#footer .fr', '#marks', '#say', '#hint'].map((s) => [s, document.querySelector(s)]).filter(([, e]) => e && e.getBoundingClientRect().width);
 const clash = others.filter(([, e]) => { const o = e.getBoundingClientRect(); return !(o.right <= r.x - 4 || o.left >= r.x + r.w + 4 || o.bottom <= r.y - 4 || o.top >= r.y + r.h + 4); }).map(([s]) => s);
 check('fullscreen the button: shown, "leave full screen" while in, a 44 px target, clear of the other chrome', shown(b) && b.getAttribute('aria-pressed') === 'true' && b.getAttribute('aria-label') === 'leave full screen' &&
   hit(c.x - 21, c.y) && hit(c.x + 21, c.y) && hit(c.x, c.y + 21) && hit(c.x, Math.max(1, c.y - 21)) && !clash.length && r.y + r.h < stage.insets.top + 8,

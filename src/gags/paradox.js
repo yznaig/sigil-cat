@@ -8,6 +8,7 @@ import {cardService} from '../world/cards.js';
 import {cardSheet} from '../world/card-sheet.js';
 import { forPicture } from '../core/cat.js';
 import { makeSplatMesh } from '../core/splats.js';
+import { PARADOX_FIT } from './paradox-fit.js';
 import { puff } from '../core/puff.js';
 import { css, smooth, ease } from '../core/util.js';
 
@@ -17,8 +18,10 @@ export const PARADOX = {
   rise: 0.24,            // how high he hovers, in cat-heights
   spin: 2.4,             // radians a second, once up to speed
   loaf: 0.6,             // the strapped loaf's length, in cat-heights
-  // where the loaf sits on his back in each pose (his own space), and how far it leans back along it (radians)
-  back: { sit: [0, 0.6, -0.3, -0.55], lie: [0.12, 0.6, -0.05, 0], sleep: [0.12, 0.5, -0.05, 0], stretch: [0.1, 0.6, -0.2, 0.3] },
+  // Where it lies on his back in each pose, and the strap's loop round him and it: measured from the splats
+  // (src/gags/paradox-fit.js, written by tools/splats/paradox.mjs; p8: it used to float off him). `press`: how far
+  // into his fur the strap pulls it (cat-heights).
+  fit: PARADOX_FIT, press: 0.02, strap: 0.017,
   side: -1.5,            // the angle he is turned to for it: side-on, so the loaf on his back can be seen
   hum: { hz: 98, gain: 0.07 },
 };
@@ -61,14 +64,35 @@ export default function createParadox(site) {
     const stand = await site.eggs.bread.whenReady();
     const loaf = makeSplatMesh(stand.splat), k = P.loaf * cat.height / stand.size.x, c = stand.splat.box.getCenter(new THREE.Vector3());
     loaf.scale.setScalar(k); loaf.position.set(-c.x * k, -stand.splat.box.min.y * k, -c.z * k);
-    const turned = new THREE.Group(); turned.add(loaf); turned.rotation.y = Math.PI / 2;       // its length runs down his back
+    const turned = new THREE.Group(); turned.add(loaf);        // turned so its length runs down his back (or across it)
     const group = new THREE.Group(); group.add(turned);
-    const strap = new THREE.Mesh(new THREE.TorusGeometry(0.33, 0.017, 8, 40), forPicture(new THREE.MeshStandardMaterial({ color: 0x6b4426, roughness: 0.8 })));
     const butter = new THREE.Mesh(cat.butterGeometry, cat.butter.material);
     butter.scale.setScalar(0.8); butter.position.set(0, stand.size.y * k + 0.012, 0); butter.rotation.y = 0.3;
     group.add(butter);
-    return (rig = { group, loaf, strap, loafTop: stand.size.y * k });
+    rig = { group, turned, loaf, straps: {}, shownFor: null, loafTop: stand.size.y * k };
+    for (const name of Object.keys(P.fit)) strapFor(name);    // all of them now: a pose change mid-gag builds nothing
+    return rig;
   }
+  // the strap for a pose: one band along its measured loop, round him and over the loaf (in the loaf's own frame)
+  let strapMaterial = null;
+  function strapFor(name) {
+    const curve = new THREE.CatmullRomCurve3(P.fit[name].strap.map(([x, y, z]) => new THREE.Vector3(x, y, z)), true, 'centripetal');
+    strapMaterial ??= forPicture(new THREE.MeshStandardMaterial({ color: 0x6b4426, roughness: 0.8 }));
+    const strap = new THREE.Mesh(new THREE.TubeGeometry(curve, 96, P.strap, 8, true), strapMaterial);
+    rig.group.add(cat.inPicture(strap));
+    return (rig.straps[name] = strap);
+  }
+  // put the loaf and its strap on the pose he is showing (again at every pose change while it is on: p8)
+  function strapOn(name) {
+    const f = P.fit[name] ? P.fit[name] : P.fit.sit, use = P.fit[name] ? name : 'sit', g = rig.group;
+    g.rotation.set(f.lean, 0, 0); rig.turned.rotation.y = Math.PI / 2 - f.turn;   // 0: along his spine
+    // pressed a little into his fur, along the underside's normal
+    g.position.set(f.at[0], f.at[1] - Math.cos(f.lean) * P.press, f.at[2] - Math.sin(f.lean) * P.press);
+    for (const [k, s] of Object.entries(rig.straps)) s.visible = k === use;
+    rig.shownFor = name;
+    cat.touch();
+  }
+  const follow = () => { if (cat.showing !== rig.shownFor) strapOn(cat.showing); };
   let hum = null, humWanted = false;
   audio.load('paradox-hum').then(() => { if (humWanted) humOn(true); });
   function humOn(on) {
@@ -90,11 +114,9 @@ export default function createParadox(site) {
     const m = cat.screenOf([0, cat.height * 0.45, 0]); puff(m.x, m.y, cat.rect.ppu * 0.9);
     audio.play('ding', { gain: 0.5 });
     // strap it on: the loaf on his back, butter side up; the butter leaves his head for the loaf
-    const b = P.back[cat.shown] || P.back.sit;
-    r.group.position.set(b[0], b[1], b[2]); r.group.rotation.x = b[3];
-    r.strap.position.set(b[0], b[1] - 0.16, b[2] * 0.45); r.strap.rotation.set(b[3] * 0.5, 0, 0);     // round his middle and over the loaf
+    cat.spin.add(cat.inPicture(r.group));
+    strapOn(cat.showing); stage.onFrame.push(follow);
     cat.setYawTarget(P.side, 4);
-    cat.spin.add(cat.inPicture(r.group)); cat.spin.add(cat.inPicture(r.strap));
     cat.setButter(false, 'quiet');
     cat.touch();
     await stage.after(0.5);
@@ -120,7 +142,7 @@ export default function createParadox(site) {
     audio.play('box-thud', { gain: 0.6 });
     cat.playEmote('startle', 'paradox');
     const m2 = cat.screenOf([0, cat.height * 0.45, 0]); puff(m2.x, m2.y, cat.rect.ppu * 0.8);
-    cat.spin.remove(r.group); cat.spin.remove(r.strap);
+    cat.spin.remove(r.group); stage.onFrame.splice(stage.onFrame.indexOf(follow), 1);
     cat.setYawTarget(null);
     cat.setButter(true, 'slap'); audio.play('slap', { gain: 0.4 });
     cat.touch();
@@ -140,6 +162,6 @@ export default function createParadox(site) {
   }
   cards.define({id:'paper',label:'the rejected paper',size:.56,aspect:1.25,home:()=>({x:1.28,y:-.3}),tap:read,read},transcript.textContent);
 
-  return { find: 'paradox', config: PARADOX, start, due, take: (by) => (due() ? (start(), true) : false), read,
+  return { find: 'paradox', config: PARADOX, start, due, get rig() { return rig; }, take: (by) => (due() ? (start(), true) : false), read,
     get active() { return active; }, get count() { return count; }, get reading() { return !!reading?.open; }, closeReading() { reading?.close(); }, again: () => start() };
 }

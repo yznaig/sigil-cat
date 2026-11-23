@@ -29,6 +29,9 @@ await __pointer([centre(button)]);await sleep(100);
 check('noscope footer button unmutes without unlocking',hit()&&E.noscopeVideo.phase==='playing'&&input.locked&&E.noscopeVideo.audio.gain>0);
 E.noscopeVideo.stop();await sleep(200);const original=usualCentre();
 // The return is abrupt (Aaron, e1111-58): no return phase, the footer is simply back where it lives, unlocked.
-check('noscope footer is back in place at once after return',hit()&&!input.locked&&Math.hypot(centre(slider).x-original.x,centre(slider).y-original.y)<1,JSON.stringify({original,now:centre(slider),hit:hit(),locked:input.locked}));
+// (p8 settings lane: in the room the master sound lives in the settings screen; the footer's is the scenes' only, so
+// "back in place" is the settings button back where it lives, and the scene's slider hidden again)
+const setBtn=document.getElementById('settings-btn'),sb=centre(setBtn),onBtn=document.elementFromPoint(sb.x,sb.y)?.closest('#settings-btn')===setBtn;
+check('noscope footer is back in place at once after return',onBtn&&!input.locked&&getComputedStyle(slider.closest('.sound')).display==='none',JSON.stringify({original,settings:sb,hit:onBtn,soundDisplay:getComputedStyle(slider.closest('.sound')).display,locked:input.locked}));
 await sleep(600);
 check('noscope footer restores normal page after return',!input.locked&&!E.noscopeVideo.active&&!document.body.classList.contains('noscope-showing'));

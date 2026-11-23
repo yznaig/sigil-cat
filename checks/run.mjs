@@ -30,8 +30,9 @@ const sizeName = opt('size', 'desktop');
 // phone: a phone on its side (phones play landscape only, shell lane playtest-2); phone-portrait: held upright, which
 // only ever shows the "flip sideways" overlay (checks/shell-turn.js).
 // phone-notch (controls lane, playtest-4): a tall-notch phone on its side (iPhone Pro Max class, 932x430 at dpr 3).
-const SIZES = { desktop: [1280, 900, 1], phone: [844, 390, 2], 'phone-portrait': [390, 844, 2], 'phone-notch': [932, 430, 3] };
-const PHONE = sizeName === 'phone' || sizeName === 'phone-portrait' || sizeName === 'phone-notch';
+// phone-tall-portrait (loadbars lane, p8): the same phone held upright, for the loading screen (checks/loader-bars.js).
+const SIZES = { desktop: [1280, 900, 1], phone: [844, 390, 2], 'phone-portrait': [390, 844, 2], 'phone-notch': [932, 430, 3], 'phone-tall-portrait': [430, 932, 3] };
+const PHONE = sizeName === 'phone' || sizeName === 'phone-portrait' || sizeName === 'phone-notch' || sizeName === 'phone-tall-portrait';
 const [W, H, D] = SIZES[sizeName] || [...sizeName.split('x').map(Number), 1];
 const dpr = Number(opt('dpr', D)), out = opt('out', 'checks/out'), timeout = Number(opt('timeout', 120)) * 1000, gpu = opt('gpu', 'nvidia');
 const exe = process.env.CHROME || (() => {

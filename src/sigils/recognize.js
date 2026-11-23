@@ -204,7 +204,9 @@ export function createRecognizer(SIGILS, { minScore = 0.8, minLength = 120, thin
 
     const scores = dollar.Scores(points);
     let best = null;
-    for (const [n, s] of Object.entries(scores)) if (Number.isFinite(s) && (!best || s > scores[best])) best = n;
+    // a sign may veto itself by its own shape test (accept: his sign, src/sigils/templates.js); then the next best wins
+    const ok = (n) => !SIGILS[n]?.accept || SIGILS[n].accept(points);
+    for (const [n, s] of Object.entries(scores)) if (Number.isFinite(s) && (!best || s > scores[best]) && ok(n)) best = n;
     let score = best ? scores[best] : 0;
     const low = (why) => ({ name: null, reason: 'low', best, score, why });
     if (!best || score < minScore) return low('score');

@@ -14,7 +14,7 @@ export const FINDS = [
     riddle: 'a broken path from cloud to earth. the sky remembers', does: 'borrowed weather. one cloud forgets to leave.' },
   // The star is gone from the grimoire (playtest 4, Aaron: "the star can be removed from the grimoire its no longer in
   // the game"). The fast spin still opens the galaxy and earns Into the Void; it just is not a find. An old save's
-  // found.star is never read: the count, the tally and Completionist all go by this list.
+  // found.star is never read: the count, the tally and Completionist's pages all go by this list.
   { id: 'loaf', kind: 'sigil', sigil: 'dome', name: 'The Loaf', d: 'M4 17a8 8 0 0 1 16 0M3 17h18',
     riddle: 'an oven roof, drawn from one end of the crust to the other', does: 'he becomes what he was already pretending to be.' },
   { id: 'glass', kind: 'sigil', sigil: 'cup', name: 'The Cup', d: 'M7 4l1 14a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-14zM7.5 10h9',

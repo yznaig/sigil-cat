@@ -419,8 +419,12 @@ export function createWorld(site) {
     if (entries.has(id)) throw new Error('Duplicate world body: ' + id);
     const saved=persist&&site.store.get('worldBodies.'+id);
     const sound=impactSound(id,soundOverride);if(sound)site.audio.loadImpacts(sound.material);
+    let savedLayout=saved?.layout,homePose=null;
     if(saved?.version===1&&saved.position?.length===3&&saved.quaternion?.length===4){
       position=new THREE.Vector3(...saved.position);rotation=new THREE.Quaternion(...saved.quaternion);sleeping=saved.awake!==true;
+      // HOME below: saved fitted to another layout, and that layout is back: its own pose, exactly. Otherwise the fit
+      // (when the layout differs) starts again from its home pose, not from the last fit.
+      const h=saved.home;if(h?.position?.length===3&&Array.isArray(h.layout)&&saved.awake!==true){homePose={position:[...h.position],layout:[...h.layout]};if(sameLayout(h.layout)){position=new THREE.Vector3(...h.position);savedLayout=h.layout;homePose=null;}}
     }
     // .08 soft-CCD envelope covers the measured .065-unit extremity sweep.
     const body = physics.createRigidBody((fixed?R.RigidBodyDesc.fixed():R.RigidBodyDesc.dynamic()).setTranslation(position.x, position.y, position.z).setRotation(rotation)
@@ -470,14 +474,15 @@ export function createWorld(site) {
     const entry = { id, body, object, persist, fixed, presentation, adapterState:adapterState??saved?.adapter??null, sound, silentRestore:!!saved, beforeStep, sync: onSync, resize: onResize, rest, tap, timer: null, reach, low: new Float32Array(low), thin: Math.max(thin, .002), soft: material.softCcdPrediction ?? .08, groups, damping: { linear: material.linearDamping ?? .18, angular: material.angularDamping ?? .4 }, calm: false, calmAt: null, pxRef: Infinity, pxAt: -1, gaining: false, gainRun: 0, wRef: { x: 0, y: 0, z: 0 }, ccd: true, slot: slots++, offAt: null, home: home || (() => ({x:0,y:2,z:0})) };
     entries.set(id, entry); if(sleeping)body.sleep();
     // See RESTORE: an exact restore (same layout, asleep, on the floor or another body) is held at its saved pose.
-    if(saved&&sleeping&&!fixed&&sameLayout(saved.layout))entry.hold={p:{x:position.x,y:position.y,z:position.z},q:{x:rotation.x,y:rotation.y,z:rotation.z,w:rotation.w},until:stats.steps+RESTORE.hold};
+    if(homePose&&sameLayout(savedLayout)){entry.homePose=homePose;entry.fitAt=[position.x,position.y,position.z];}
+    if(saved&&sleeping&&!fixed&&sameLayout(savedLayout))entry.hold={p:{x:position.x,y:position.y,z:position.z},q:{x:rotation.x,y:rotation.y,z:rotation.z,w:rotation.w},until:stats.steps+RESTORE.hold};
     // Every disable of this body goes through disable()/enable() below, whoever calls body.setEnabled.
     const setEnabled = body.setEnabled.bind(body);
     body.setEnabled = on => on ? enable(entry, setEnabled) : disable(entry, setEnabled);
     if (saved?.support && typeof saved.support==='object') site.supports?.restore(entry,saved.support);
     // Where a resting prop may be is one rule (floor-home.js fitResting, fix round C): a body restored into the layout
     // it was saved in keeps its pose exactly; a new body, or one saved in another layout, is fitted by its adapter.
-    if(onResize&&!entry.support&&!(saved&&sameLayout(saved.layout)))onResize(entry); entry.fitKey=layoutKey().join(','); sync(entry);
+    if(onResize&&!entry.support&&!(saved&&sameLayout(savedLayout)))fit(entry,saved?savedLayout:null,homePose); entry.fitKey=layoutKey().join(','); sync(entry);
     if (!sleeping&&!fixed&&!entry.support) wake(entry,!!saved);
     return entry;
   }
@@ -497,13 +502,34 @@ export function createWorld(site) {
     }
     restLater.clear();
   }
+  // HOME (lane p8-farprops, Aaron: "it has spawned my items way way in the back"): a layout fit (floor-home.js
+  // fitResting) only ever moves a prop back inside the page's sides and above its footer, never forward, so fitting
+  // the last fit again on every new layout was a ratchet: a load on a shorter screen (a phone's address bar showing)
+  // pushed the front props back and saved them there, and the full screen next time never brought them forward. Now a
+  // fitted prop remembers its home: the pose it was last left at by the player or the physics, and the layout that was
+  // valid in. Each later fit starts from that home (back in that very layout: the home itself), until something really
+  // moves it (then where it was left is its home again).
+  const atFit = (entry) => { const f = entry.fitAt, t = entry.body.translation(); return !!f && Math.hypot(t.x - f[0], t.y - f[1], t.z - f[2]) < 1e-4; };
+  // from: the layout (an array, layoutKey) its current pose was valid in, or null (a new body: nothing to come back to)
+  function fit(entry, from, home = entry.homePose) {
+    const t = entry.body.translation(), here = [t.x, t.y, t.z];
+    if (home && (entry.homePose ? atFit(entry) : true)) {
+      entry.body.setTranslation({ x: home.position[0], y: home.position[1], z: home.position[2] }, false);
+      if (sameLayout(home.layout)) { entry.homePose = entry.fitAt = null; return; }
+      entry.homePose = home;
+    } else entry.homePose = Array.isArray(from) ? { position: here, layout: [...from] } : null;
+    entry.resize?.(entry);
+    const n = entry.body.translation(), h = entry.homePose?.position;
+    if (!h || Math.hypot(n.x - h[0], n.y - h[1], n.z - h[2]) < 1e-4) entry.homePose = entry.fitAt = null; else entry.fitAt = [n.x, n.y, n.z];
+  }
   function sameLayout(saved) { const now = layoutKey(); return Array.isArray(saved) && saved.length === now.length && saved.every((v, i) => Math.abs(v - now[i]) < 1e-6); }
   function layoutKey() { return [stage.width,stage.height,stage.insets.top,stage.insets.bottom,stage.insets.left,stage.insets.right,   // (controls lane: the safe sides)
 ...stage.camera.matrixWorld.elements,...stage.camera.projectionMatrix.elements]; }
   function save(entry, resume = false) {
     if(!entry.persist||(!entry.support&&!entry.body.isSleeping()&&!resume))return;
+    if(entry.homePose&&(entry.support||!atFit(entry)))entry.homePose=entry.fitAt=null;   // really moved since its fit: here is home
     const p=entry.body.translation(),q=entry.body.rotation();
-    site.store.set('worldBodies.'+entry.id,{version:1,position:[p.x,p.y,p.z],quaternion:[q.x,q.y,q.z,q.w],support:entry.support?structuredClone(entry.support):'floor',awake:!entry.support&&!entry.body.isSleeping(),layout:layoutKey(),adapter:entry.adapterState?structuredClone(entry.adapterState):undefined});
+    site.store.set('worldBodies.'+entry.id,{version:1,position:[p.x,p.y,p.z],quaternion:[q.x,q.y,q.z,q.w],support:entry.support?structuredClone(entry.support):'floor',awake:!entry.support&&!entry.body.isSleeping(),layout:layoutKey(),home:entry.homePose?structuredClone(entry.homePose):undefined,adapter:entry.adapterState?structuredClone(entry.adapterState):undefined});
   }
   // An adaptive pixel-ratio step (stage.js setDpr) fires onResize too, but moves nothing in the world: only a new
   // layout re-places and re-saves the floor bodies. (Their pictures follow the new ratio at their next draw, as the
@@ -514,9 +540,10 @@ export function createWorld(site) {
     const key=layoutKey().join(',');if(key===resizedKey)return;resizedKey=key;
     for(const entry of entries.values()){
       // Each body is fitted once per layout: a body added (restored exactly, or fitted) in this layout is left alone.
-      if(!entry.persist||entry.timer||entry.support||entry.fitKey===key)continue;entry.fitKey=key;
+      if(!entry.persist||entry.timer||entry.support||entry.fitKey===key)continue;const from=entry.fitKey?.split(',').map(Number);entry.fitKey=key;
       // The adapter's resize is the shared minimal fit (floor-home.js fitResting); a body without one stays put.
-      entry.resize?.(entry);
+      // It starts from the body's home pose (HOME above), not from the last layout's fit.
+      if(entry.resize&&entry.body.isSleeping())fit(entry,from);else entry.resize?.(entry);
       sync(entry);save(entry);
     }
   }

@@ -32,7 +32,7 @@ const nSig = sigils.filter((f) => registry.has(f.id)).length;
 check('4 "N of M sigils" counts the sigils the row shows', document.getElementById('found').textContent === `${nSig} of ${sigils.length} sigils`, document.getElementById('found').textContent);
 
 // ---- 3: the footer's buttons ----
-for (const [label, el] of [['sound', document.querySelector('#footer .sound')], ['grimoire', document.getElementById('grimoire')], ['achievements mark', document.getElementById('achievements')]]) {
+for (const [label, el] of [['settings', document.getElementById('settings-btn')], ['grimoire', document.getElementById('grimoire')], ['achievements mark', document.getElementById('achievements')]]) {
   const cs = getComputedStyle(el), r = el.getBoundingClientRect();
   check(`3 ${label} wears the felt patch (outline, round ends, on screen)`, parseFloat(cs.borderTopWidth) >= 1 && parseFloat(cs.borderTopLeftRadius) >= r.height / 2 - 1 && /gradient/.test(cs.backgroundImage) && r.right <= stage.width && r.left >= 0, `${cs.borderTopWidth} ${cs.borderTopLeftRadius} ${Math.round(r.left)}..${Math.round(r.right)}`);
 }

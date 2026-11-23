@@ -160,9 +160,10 @@ async function run(n, gap) {
   return { start, got, gaps };
 }
 const first = await run(40, [0.4, 0.8]);
-const repeats = (list) => list.filter((t, i) => i && t === list[i - 1]).length;
+// p8: a song can't come back until two others have played (no A A, no A B A)
+const repeats = (list) => list.filter((t, i) => (i && t === list[i - 1]) || (i > 1 && t === list[i - 2])).length;
 const counts = (list) => Object.fromEntries(MUSIC.rotation.map((t) => [t, list.filter((x) => x === t).length]));
-check('music 40 songs, locked: never the same twice in a row, never orbit-loaf, all three come round', repeats([first.start, ...first.got]) === 0 && !first.got.includes('orbit-loaf') &&
+check('music 40 songs, locked: never one of the last two again (three go round in turn), never orbit-loaf, all three come round', repeats([first.start, ...first.got]) === 0 && !first.got.includes('orbit-loaf') &&
   ['glass-garden', 'sequencer-sky', 'phase-cat'].every((t) => first.got.includes(t)), JSON.stringify(counts(first.got)));
 check('music the shrunk gap is honoured (0.4-0.8 s drawn, the next song starts after it)', first.gaps.every((g) => g.length >= 0.4 && g.length <= 0.8 && g.took >= g.length - 0.02 && g.took < g.length + 0.5),
   `drawn ${Math.min(...first.gaps.map((g) => g.length)).toFixed(2)}-${Math.max(...first.gaps.map((g) => g.length)).toFixed(2)} s, waited ${Math.min(...first.gaps.map((g) => g.took)).toFixed(2)}-${Math.max(...first.gaps.map((g) => g.took)).toFixed(2)} s`);
@@ -181,9 +182,9 @@ check('music the shrunk gap is honoured (0.4-0.8 s drawn, the next song starts a
 }
 // the picker alone, many times
 {
-  let last = null, bad = 0; const n = {}; const pool = MUSIC.rotation;
-  for (let i = 0; i < 20000; i++) { const t = pickNext(pool, last); if (t === last) bad++; n[t] = (n[t] || 0) + 1; last = t; }
-  check('music the picker: 20000 picks of four, no repeat, each about a quarter', bad === 0 && pool.every((t) => n[t] > 4300 && n[t] < 5700), JSON.stringify(n));
+  const played = [], n = {}; const pool = MUSIC.rotation; let bad = 0;
+  for (let i = 0; i < 20000; i++) { const t = pickNext(pool, played.slice(-2)); if (played.slice(-2).includes(t)) bad++; n[t] = (n[t] || 0) + 1; played.push(t); }
+  check('music the picker: 20000 picks of four, never one of the last two, each about a quarter', bad === 0 && pool.every((t) => n[t] > 4300 && n[t] < 5700), JSON.stringify(n));
 }
 
 // ---- 6. the galaxy loaf scene: its song, the twinkle at 23.0 s, the unlock ----
@@ -223,7 +224,7 @@ await __shot('music-after-blastoff');
 
 // ---- 7. the rotation with orbit-loaf in ----
 const second = await run(40, [0.4, 0.8]);
-check('music 40 more songs, unlocked: no repeats, orbit-loaf comes round', repeats([second.start, ...second.got]) === 0 && second.got.includes('orbit-loaf') &&
+check('music 40 more songs, unlocked: never one of the last two again, orbit-loaf comes round', repeats([second.start, ...second.got]) === 0 && second.got.includes('orbit-loaf') &&
   MUSIC.rotation.every((t) => second.got.includes(t)), JSON.stringify(counts(second.got)));
 // the loudest 4 s of the loudest song (sequencer-sky at 98.2 s, measured offline from the file) against the same effects
 for (let i = 0; i < 30 && st().track !== 'sequencer-sky'; i++) { const n = M.history.length; M.next(); await poll(() => M.history.length > n, 8000); }
@@ -233,4 +234,11 @@ const loudest = await rms(4, ml);
 check('music the loudest 4 s of the loudest song (sequencer-sky 98-102 s) still sits under the effects', st().track === 'sequencer-sky' && pos() > 101 && dB(bonk) - dB(meanSq(loudest)) >= 6 && dB(wind) - dB(meanSq(loudest)) >= 3,
   `${dB(meanSq(loudest)).toFixed(1)} dBFS (loudest 43 ms ${dB(Math.max(...loudest)).toFixed(1)}); bonk +${(dB(bonk) - dB(meanSq(loudest))).toFixed(1)} dB, wind +${(dB(wind) - dB(meanSq(loudest))).toFixed(1)} dB`);
 check('music the debug readout has a music line', /music\s+\w+/.test(stage.debugExtra.map((f) => f()).join('\n')), stage.debugExtra.map((f) => f()).find((l) => l.startsWith('music')));
+// p8: the whole visit's songs (through the holds, the blast-off and orbit-loaf unlocking): no A A and no A B A anywhere
+{
+  const seq = M.history.map((h) => h.track), short = (t) => t.split('-')[0][0].toUpperCase() + t.split('-')[1][0];
+  note('music the songs played this visit', `${seq.length}: ${seq.map(short).join(' ')}`);
+  check('music the whole visit: no song back within two (no A B A), the debug line shows the last two', repeats(seq) === 0 && seq.length > 80 &&
+    stage.debugExtra.map((f) => f()).some((l) => l.includes('recent ' + st().recent.join(', '))) && st().recent.join() === seq.slice(-2).join(), `${repeats(seq)} of ${seq.length}; recent ${st().recent.join(', ')}`);
+}
 store.flush();

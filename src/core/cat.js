@@ -513,7 +513,9 @@ export function createCat(site) {
     THREE, spin, seat, face, butterSlot, poses, config: C, card, sprite, shadow, fx,
     onTap, onDrag, onPose, onPress, onButter, onPicture,
     get loaded() { return !!current; }, get height() { return C.height; },
-    get pose() { return pose; }, get shown() { return current; }, get phase() { return phase; }, get popping() { return !!pop; },
+    get pose() { return pose; }, get shown() { return current; },
+    // the pose that can be seen: the one a pop is going to, from the moment it appears (things on him follow it then)
+    get showing() { return pop?.swapped ? pop.to : current; }, get phase() { return phase; }, get popping() { return !!pop; },
     get auto() { return auto; }, set auto(v) { auto = v; if (v && phase === 'hold') holdUntil = Math.min(holdUntil, clock + rand(CY.poses[pose].hold)); },
     get heldBefore() { return heldBefore; }, get emoteLog() { return [...emoteLog]; }, nextPose: (p, before) => pickWeighted(nextOf(p, before)),
     // Keep his pose for at least this long (no idle pose change): a whisker pluck asks for 4 s (gags lane, playtest 2).

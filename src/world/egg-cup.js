@@ -13,7 +13,7 @@
 import {forPicture} from '../core/cat.js';
 import {createMeshPicture} from '../core/mesh-picture.js';
 import {createRackDrop} from './rack-drop.js';
-import {floorRow,clearFootprint} from '../flappy/stand.js';
+import {floorRow,clearFootprint,rowSettled} from '../flappy/stand.js';
 // The cup's lathe profile [radius, y] in the units of an egg drawn at REF_SCALE (the room's egg; the cup scales with the
 // egg's own art scale): foot, stem, bowl, rim, then down the inside to the bowl's floor.
 export const EGG_CUP={refScale:1.15,
@@ -42,7 +42,7 @@ function createEggCup(site){
   site.worldLayout.invalidateShadow('egg-cup');invalidate();
  }
  // a keepsake lying where it lands is moved clear (src/flappy/stand.js clearFootprint)
- const clearRow=()=>clearFootprint(site,root,{hx:radius,hz:radius,h:.25*k});
+ const clearRow=()=>rowSettled(site)&&clearFootprint(site,root,{hx:radius,hz:radius,h:.25*k});
  // The egg sits as low as the bowl lets it: the lowest seat where the shell nowhere passes the bowl's inside.
  function seatHeight(radiusAt,length,s){
   const inner=C.profile.slice(C.outer).map(([r,y])=>[r*k,y*k]).sort((a,b)=>a[1]-b[1]),rim=Math.max(...inner.map(p=>p[1]));

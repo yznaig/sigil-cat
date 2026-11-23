@@ -24,7 +24,7 @@ else {
   // (the page runs again while the cat pops in and the page opens, playtest 3: let the fork's fall settle first, so
   // "the same keepsakes" means nothing moved because of the error page)
   await until(() => !site.world.stats.listening, 12000);
-  const body=[...document.body.children], originalTitle=document.title, focus=document.getElementById('sound');focus.focus();
+  const body=[...document.body.children], originalTitle=document.title, focus=document.getElementById('settings-btn');focus.focus();
   const saved=[...keepsakes.live].map(([id,i])=>({id,i,x:i.x,y:i.y}));
   const counts={frame:0,render:0,timer:0,interval:0,idle:0,raf:0,stageWait:0};
   const frame=()=>counts.frame++,render=()=>counts.render++;

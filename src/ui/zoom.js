@@ -1,7 +1,7 @@
 // The zoom (controls lane, playtest-4). Aaron: "It seems like everything could be a little bit bigger and tighter in on
 // mobile ... Perhaps there could be a zoom slider alongside the sound slider? this could help with both desktop and
 // mobile to customize their zoom and screen tightness".
-// A felt patch beside SOUND with a magnifier and a slider: the camera comes closer (stage.setZoom), so he, the room
+// A slider (since the p8 settings lane, in the settings screen; it was a felt patch beside SOUND): the camera comes closer (stage.setZoom), so he, the room
 // and every keepsake are drawn larger; the furniture still plans itself on the page (shelf top left, board top right,
 // rack bottom left, bin bottom right, all inside the safe sides), and what ends up behind something scoots into view,
 // the same rules as after a resize. A change re-plans once it settles (ZOOM.settle ms after the last move of the
@@ -23,13 +23,9 @@ export function createZoom(site) {
   const deviceDefault = () => isPhone() ? ZOOM.phone : ZOOM.other;
   const current = () => { const z = forced ?? Number(store.get('view.zoom', NaN)); return Number.isFinite(z) ? clamp(z) : deviceDefault(); };
 
-  // the patch: after the sound's, in the footer's left group
-  const fl = document.querySelector('#footer .fl');
-  const wrap = document.createElement('span');
-  wrap.className = 'zoom felt';   // the felt patch's look (hush.css), like SOUND's
-  wrap.innerHTML = '<svg class="zoom-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="6.6" cy="6.6" r="4.4"/><path d="M9.9 9.9 14 14M4.6 6.6h4M6.6 4.6v4"/></svg>'
-    + `<input type="range" id="zoom" min="${Math.round(ZOOM.min * 100)}" max="${Math.round(ZOOM.max * 100)}" step="${Math.round(ZOOM.step * 100)}" aria-label="Zoom">`;
-  fl?.appendChild(wrap);
+  // the slider: the zoom row of the settings screen (p8 settings lane; index.html #settings, src/ui/settings.js)
+  const wrap = document.querySelector('#settings .set-zoom') || document.body.appendChild(document.createElement('span'));
+  wrap.insertAdjacentHTML('beforeend', `<input type="range" id="zoom" min="${Math.round(ZOOM.min * 100)}" max="${Math.round(ZOOM.max * 100)}" step="${Math.round(ZOOM.step * 100)}" aria-label="Zoom">`);
   const input = wrap.querySelector('input');
 
   function show(z) {

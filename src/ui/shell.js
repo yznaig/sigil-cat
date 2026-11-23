@@ -97,6 +97,8 @@ export function createShell(site) {
   // The stage's own resize handler may run before the freeze hears of the turn: an upright phone never lays the room
   // out for itself (it is frozen under the overlay a moment later, and turned back it is the same size again).
   stage.setLayoutGate(() => started && upright());
+  // and the room is not built for an upright phone at all, while it loads either (stage.js prepare: lane p8-farprops)
+  stage.setRoomGate(upright);
   matchMedia('(orientation: portrait)').addEventListener?.('change', checkTurn);
   const landscape = () => upright() ? new Promise((r) => { turned = r; showTurn(); }) : Promise.resolve();
 

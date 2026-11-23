@@ -16,6 +16,8 @@
 //     (src/eggs/butterman.js), the bird clicked (src/eggs/bird.js), the bird game's score (src/flappy/screen.js).
 //   - Let There Be Light: the window event 'sigilcat:lamp-lit', or the lamp's saved state (bulb in the rack's
 //     socket and switched on).
+// Completionist: every grimoire page (src/finds.js) and every achievement but itself and Platinum Cat (p8 lane; it was
+// the grimoire alone). One already earned is kept.
 // Platinum Cat (e1112-37): earned when every other achievement in the list is. An achievement added later counts
 // toward it for those who do not have it yet; one already earned is never taken back (nothing here ever clears an
 // 'achievements.<id>', only the debug forget() and the grimoire's start over, which wipe everything).
@@ -33,6 +35,9 @@ export const ACH = {
   platinumDelay: 1.4,     // seconds after Platinum Cat is earned before the badge falls
   watched: ['found', 'bonks', 'rareBonks', 'worldDiscoveries', 'keepsakes', 'worldBodies', 'cakeChain', 'hat', 'lamp'],
 };
+// Completionist (p8 lane, Aaron: "I got the completionist achievement but hadnt gotten these 2 achievements yet"): every
+// grimoire page and every other achievement. Not itself, and not Platinum Cat, which is made of Completionist.
+const NOT_FOR_COMPLETE = ['complete', 'platinum'];
 const HATS = ['wizard', 'cone', 'party', 'crown'];
 // What fills the shelf, its hooks and the board (furniture lane, playtest 2)
 const FULL = { shelf: ['rifle', 'top', 'pat', 'tin'], hooks: ['bucket', 'flour'], board: ['paper', 'postcard', 'ticket', 'recipe'] };
@@ -79,7 +84,7 @@ export function createAchievements(site) {
   // the three that are made of the others
   function meta(quiet) {
     if (SIGN_IDS.every(has)) unlock('fluent', { quiet });
-    if (registry.count() === registry.total) unlock('complete', { quiet });
+    if (registry.count() === registry.total && ACHIEVEMENTS.every((a) => NOT_FOR_COMPLETE.includes(a.id) || has(a.id))) unlock('complete', { quiet });
     if (ACHIEVEMENTS.every((a) => a.id === 'platinum' || has(a.id))) unlock('platinum', { quiet });
   }
 

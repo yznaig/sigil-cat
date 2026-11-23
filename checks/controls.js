@@ -21,7 +21,7 @@ if(SAFE){const [left,right,top,bottom]=SAFE;const ok=await __safeArea({left,righ
  check('controls safe area emulated (DevTools protocol)',ok&&stage.insets.left===left&&stage.insets.right===right,show({ok,insets:stage.insets}));}
 const L=()=>stage.insets.left||0,Rt=()=>stage.width-(stage.insets.right||0);
 // the page's controls a keepsake must not lie under
-const uiRects=()=>['.top .tl','.top .name','#tally','.fs-toggle','#footer .sound','#footer .zoom','#footer .fr > *','#marks > li','#hint']
+const uiRects=()=>['.top .tl','.top .name','#tally','.fs-toggle','#footer .set-mark','#footer .sound','#footer .fr > *','#marks > li','#hint']
  .flatMap(s=>[...document.querySelectorAll(s)]).filter(e=>!e.hidden&&getComputedStyle(e).visibility!=='hidden'&&getComputedStyle(e).opacity!=='0').map(e=>({el:e.id||e.className?.baseVal||e.className,r:rectOf(e)})).filter(u=>u.r);
 
 // ---- 1. Nearer / Deeper, real touch ----
@@ -72,15 +72,16 @@ if(MOBILE){
 
 // ---- 2. the zoom ----
 const Z=site.zoom,{ZOOM}=await import(new URL('src/ui/zoom.js',document.baseURI).href);
-const zin=document.querySelector('#footer .zoom input#zoom'),snd=document.querySelector('#footer .sound');
-{const zr=rectOf(document.querySelector('#footer .zoom')),sr=rectOf(snd);
- const beside=zr&&sr&&(Math.abs(zr.y-sr.y)<4&&zr.x>=sr.x+sr.w||Math.abs(zr.x-sr.x)<4&&zr.y+zr.h<=sr.y);
- check('controls 2 a ZOOM slider beside SOUND (desktop: after it; a phone: over it), named for assistive tech, the device\'s default',
-  !!zin&&zin.getAttribute('aria-label')==='Zoom'&&beside&&Math.abs(stage.zoom-(MOBILE?ZOOM.phone:ZOOM.other))<1e-6&&Number(zin.value)===Math.round(stage.zoom*100),
-  show({zoom:stage.zoom,value:zin?.value,zoomPill:R(zr),sound:R(sr)}));}
+// (p8 settings lane: the zoom moved from beside SOUND into the settings screen, behind the bottom-left button)
+const zin=document.querySelector('#settings .set-zoom input#zoom');
+site.settings.open();await sleep(300);
+{const zr=rectOf(zin);
+ check('controls 2 a ZOOM slider in the settings screen, named for assistive tech, the device\'s default',
+  !!zin&&!!zr&&zin.getAttribute('aria-label')==='Zoom'&&Math.abs(stage.zoom-(MOBILE?ZOOM.phone:ZOOM.other))<1e-6&&Number(zin.value)===Math.round(stage.zoom*100),
+  show({zoom:stage.zoom,value:zin?.value,zoomSlider:R(zr)}));}
 {const before=stage.zoom;zin.focus();await __key('ArrowRight');await sleep(ZOOM.settle+250);const up=stage.zoom;await __key('ArrowLeft');await sleep(ZOOM.settle+250);
  check('controls 2 the keyboard moves it (arrows), and the room follows',Math.abs(up-before-ZOOM.step)<1e-6&&Math.abs(stage.zoom-before)<1e-6&&document.activeElement===zin,show({before,up,after:stage.zoom}));
- zin.blur();}
+ zin.blur();site.settings.close();await sleep(200);}
 if(q.get('zooms')!=='0'){
  const {collectFinal}=await import('/checks/world-final-collection.mjs');
  await collectFinal(site,{cake:true});

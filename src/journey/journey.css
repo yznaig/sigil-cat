@@ -1,0 +1,31 @@
+/* The Journey's own look (docs/journey/design.md). Linked at runtime by src/journey/snapshot.js. */
+
+/* ---- the room card (unit sc/p9-share): the picture, and save / share / close under it (beside it on a short screen) ---- */
+.room-pop { z-index: 70; place-items: center; overflow: auto; overscroll-behavior: contain;
+  background: rgba(43, 39, 36, .5); padding: max(14px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+.room-card { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 14px; outline: none; max-width: 100%; max-height: 100%; min-height: 0; }
+.room-card img { display: block; width: auto; height: auto; max-width: min(100%, 760px); max-height: calc(100dvh - 150px); object-fit: contain;
+  border-radius: 4px; box-shadow: 0 30px 70px -30px rgba(20, 12, 4, .75), 0 0 0 1px rgba(18, 18, 18, .2); background: #F7EDE3; }
+.room-pop.landscape .room-card img { max-width: min(100%, 1100px); }
+.room-card figcaption { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.room-note { margin: 0; color: #fbede0; font-weight: 800; font-size: 11px; letter-spacing: .2em; text-shadow: 0 1px 2px rgba(0, 0, 0, .35); text-align: center; }
+.room-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.room-row .pill { min-width: 92px; }
+
+/* a short, wide screen (a phone on its side): the card at the left, the buttons in a column beside it */
+@media (max-height: 560px) and (orientation: landscape) {
+  .room-card { flex-direction: row; gap: 18px; height: 100%; }
+  .room-card img, .room-pop.landscape .room-card img { max-height: 100%; max-width: calc(100vw - 230px); }
+  .room-card figcaption { align-items: stretch; width: 170px; }
+  .room-row { flex-direction: column; flex-wrap: nowrap; }
+  .room-note { text-align: left; }
+}
+
+/* the camera's flash as the card is taken */
+.room-flash { position: fixed; inset: 0; z-index: 69; background: #fffaf2; pointer-events: none; opacity: 0; }
+
+/* the "my room" button, in the grimoire's header by the tally */
+.book .head-r .my-room { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 0 14px; font-weight: 800; }
+.book .head-r .my-room svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+section.journey[data-journey="my-room"][hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .room-flash { display: none; } }

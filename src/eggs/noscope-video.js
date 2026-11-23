@@ -36,10 +36,11 @@ export function createNoScopeVideo(site) {
   // Only this small audio clip preloads. No video element or URL assignment exists before fire().
   const ready=audio.load(C.riser);
   let run=null, bus=null, meter=null, lastEnd=null;
-  function sound({muted,volume}=audio.state()) {
-    if(bus) bus.gain.value=muted?0:volume;
+  function sound({muted,volume,levels}=audio.state()) {
+    const v=volume*(levels?.sfx??1);   // the 360 is an effect: master x the settings screen's sound effects volume
+    if(bus) bus.gain.value=muted?0:v;
     if(!run)return;
-    run.video.muted=muted;run.video.volume=bus?1:volume;
+    run.video.muted=muted;run.video.volume=bus?1:v;
     const master=audio.output();
     if(master){master.gain.cancelScheduledValues(0);master.gain.value=0;}
   }

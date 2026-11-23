@@ -10,7 +10,7 @@ const started = [], nativeStart = AudioBufferSourceNode.prototype.start;
 AudioBufferSourceNode.prototype.start = function (...a) { started.push({ node: this, buffer: this.buffer, at: a[0] ?? 0, offset: a[1] ?? 0, rate: this.playbackRate.value }); return nativeStart.apply(this, a); };
 // music round (e1115-13): the galaxy loaf scene's own song is a known clip too (src/eggs/bread.js BREAD.blast.track)
 const song = { 'orbit-loaf-blastoff': E.bread?.config.blast.track };
-const nameOf = (b) => named.find((n) => audio.buffer(n) === b) ?? Object.keys(song).find((n) => song[n] && b && audio.buffer(song[n]) === b) ?? (b ? `unnamed ${b.duration.toFixed(2)}s` : 'none');
+const nameOf = (b) => named.find((n) => audio.buffer(n) === b) ?? Object.keys(song).find((n) => song[n] && b && audio.buffer(song[n]) === b) ?? (b && site.journey?.tells && audio.buffer(site.journey.tells.config.scrape.file) === b ? 'journey-scrape' : null) ?? (b ? `unnamed ${b.duration.toFixed(2)}s` : 'none');
 async function record(task, settle = 300) { const i = started.length; await task(); await sleep(settle); return started.slice(i).map((s) => ({ ...s, name: nameOf(s.buffer) })); }
 const list = (r) => r.map((s) => s.name).join(', ');
 const impactRequests = async () => (await __requests()).filter((u) => /assets\/audio\/impacts\//.test(u));
@@ -44,12 +44,15 @@ const P = Object.values(E).find((e) => e?.find === 'bite');
 // ---- the other kept originals at their triggers ----
 async function expectOriginal(label, name, task, settle) {
   const r = await record(task, settle);
-  check(`playtest ${label} plays the original ${name}`, r.some((s) => s.name === name && s.buffer === audio.buffer(name)) && r.every((s) => !/unnamed|impact/.test(s.name)), list(r));
+  check(`playtest ${label} plays the original ${name}`, r.some((s) => s.name === name && s.buffer === audio.buffer(name)) && r.every((s) => !/unnamed|impact|journey-scrape/.test(s.name)), list(r));
   return r;
 }
 await expectOriginal('unmuting', 'click', async () => { document.querySelector('#sound').click(); await sleep(80); document.querySelector('#sound').click(); });
 audio.setMuted(false);
 { const tin = keepsakes.give('tin'); await tin.worldTask; await expectOriginal('the plaster tin tap', 'paper', () => tin.def.tap(tin)); }
+// The Journey's scrape (src/journey/tells.js): the first solid keepsake (the tin, just now) brings a far-off scrape 1.2 s
+// later. It is the tin's, not the eyes': let it start before the eyes are recorded (no wait where there is none to come).
+await until(() => !site.journey?.tells || site.journey.tells.stats.scrapes.length > 0, 4000);
 await expectOriginal('the googly eyes', 'choir', async () => { site.spells.eight(); await until(() => !E.eyes.busy, 12000); }, 200);
 await until(settled, 8000);
 await expectOriginal('the bread blast-off', 'twinkle', async () => {

@@ -4,7 +4,9 @@
 //   audio.play('sfx/ding')            a clip by its name in SITE.sounds (or a path / a [m4a, mp3] list)
 //   audio.reshape(src, fn)            rework a clip's samples after decoding, same name (the purr on a phone)
 //   audio.loop(src, { gain })         a seamless loop (two copies crossfading), returns { gain(v, seconds), stop() }
-//   audio.setMuted(true)  audio.setVolume(0.6)  audio.level   the sound control
+//   audio.setMuted(true)  audio.setVolume(0.6)  audio.level   the sound control (master)
+//   audio.setLevel('music' | 'sfx' | 'cat', 0.5)  audio.levels   the settings screen's own volumes, each x master
+//   audio.play(src, { bus: 'cat' })   a clip on the cat's voice bus (CAT_VOICES below are there by name already)
 //   audio.impact(item, { material, size, strength, sleeping, restoring })  debounced world contacts (off: e1111-58)
 //   audio.play(src, { radio: true }) / audio.loop(src, { radio: true })   through the old-radio voice (Butterman)
 //   audio.tone({ ... })               optional synthesized notes on the same bus
@@ -32,6 +34,21 @@ let suspensionReady = Promise.resolve();
 const park = () => { if (ctx && ctx.state !== 'closed') suspensionReady = ctx.suspend().catch(() => {}); };
 let muted = !!store.get('sound.muted', false), volume = store.get('sound.volume', 0.8);
 const listeners = new Set();
+// The settings screen (p8 settings lane, 2026-11-21; Aaron: "change the volume of different things individually like the
+// music and sounds and cat sounds"): three volumes under the master, each 0-1, multiplied with it. Saved as
+// 'sound.levels' { music, sfx, cat }; a save from before it has none, so every level starts at 1 and the old master
+// volume and mute carry on exactly as they were.
+//   music: the background songs (src/core/music.js, its own context: it reads levels from onChange)
+//   cat:   his own voice: the trill, the purr, the hiss, his bite, his speech's bonk and the sound of bonking him
+//   sfx:   everything else on the page bus
+export const LEVELS = ['music', 'sfx', 'cat'];
+// clips that are his voice wherever they are played (anything else reaches the cat bus by play(src, { bus: 'cat' }))
+export const CAT_VOICES = new Set(['tap-mrrp', 'purr', 'hiss']);
+const clampLevel = (v) => Math.min(1, Math.max(0, Number(v)));
+const levels = { music: 1, sfx: 1, cat: 1 };
+{ const saved = store.get('sound.levels', null); if (saved && typeof saved === 'object') for (const k of LEVELS) if (Number.isFinite(Number(saved[k]))) levels[k] = clampLevel(saved[k]); }
+const buses = {};   // sfx / cat gain nodes into master (made with the context)
+const busFor = (src, bus) => buses[bus === 'cat' || (bus == null && CAT_VOICES.has(src)) ? 'cat' : 'sfx'] || master;
 
 const resolve = (src) => (typeof src === 'string' && names[src] ? names[src] : src);
 const keyOf = (src) => { const s = resolve(src); return Array.isArray(s) ? s[0] : s; };
@@ -111,6 +128,7 @@ export function context(force = false) {
     try { if (navigator.audioSession && navigator.audioSession.type === 'auto') navigator.audioSession.type = 'ambient'; } catch { /* Safari only */ }
     ctx = new Ctx();
     master = ctx.createGain(); master.gain.value = muted ? 0 : volume;
+    for (const k of ['sfx', 'cat']) { buses[k] = ctx.createGain(); buses[k].gain.value = levels[k]; buses[k].connect(master); }
     analyser = ctx.createAnalyser(); analyser.fftSize = 2048;
     safety = ctx.createWaveShaper(); safety.curve = safetyCurve(); safety.oversample = '4x';
     finalMeter = ctx.createAnalyser(); finalMeter.fftSize = 2048;
@@ -149,18 +167,26 @@ export function suspend(reason) {
   };
 }
 export const output = () => master;
+// the sfx or cat bus (a node of the caller's own, like a filter, connects here to follow that volume)
+export const bus = (name) => buses[name === 'cat' ? 'cat' : 'sfx'] || master;
 export const suspended = () => suspensions.size > 0;
 export const suspendReasons = () => [...suspensions];
 
 // ---- the sound control ----
 function apply() {
   if (master && ctx) master.gain.setTargetAtTime(muted ? 0 : volume, ctx.currentTime, 0.015);
-  for (const f of listeners) f({ muted, volume });
+  if (ctx) for (const k of ['sfx', 'cat']) buses[k].gain.setTargetAtTime(levels[k], ctx.currentTime, 0.015);
+  for (const f of listeners) f(state());
 }
 export function setMuted(v) { muted = !!v; store.set('sound.muted', muted); apply(); }
 export function setVolume(v) { volume = Math.min(1, Math.max(0, v)); store.set('sound.volume', volume); if (volume > 0 && muted) { muted = false; store.set('sound.muted', false); } apply(); }
-export const onChange = (f) => { listeners.add(f); f({ muted, volume }); };
-export const state = () => ({ muted, volume });
+// One of the settings screen's volumes. Unlike the master it never unmutes: the master's switch is the master's.
+export function setLevel(name, v) {
+  if (!LEVELS.includes(name)) return;
+  levels[name] = clampLevel(v); store.set('sound.levels', { ...levels }); apply();
+}
+export const onChange = (f) => { listeners.add(f); f(state()); };
+export const state = () => ({ muted, volume, levels: { ...levels } });
 // Page-bus RMS before final peak protection (0 = silence); the montage has its own mute meter.
 export function level() {
   if (!analyser) return 0;
@@ -205,7 +231,7 @@ export function impact(item, { material = 'wood', size = 'small', strength = 1, 
 }
 
 // Play a loaded clip now (or at `when` on the audio clock). Returns the source node (its gain node at .gain), or null.
-export function play(src, { gain = 1, rate = 1, when = 0, offset = 0, duration, fade = 0, dest, radio = false } = {}) {
+export function play(src, { gain = 1, rate = 1, when = 0, offset = 0, duration, fade = 0, dest, radio = false, bus: busName } = {}) {
   if (restoreDepth) { counts.suppressedRestore++; return null; }
   const c = context();
   const buf = buffer(src);
@@ -216,7 +242,8 @@ export function play(src, { gain = 1, rate = 1, when = 0, offset = 0, duration, 
   if (muted) { master.gain.cancelScheduledValues(0); master.gain.value = 0; }
   const s = c.createBufferSource(), g = c.createGain();
   s.buffer = buf; s.playbackRate.value = rate; g.gain.value = gain;
-  s.connect(g).connect(radio ? radioInput(c, dest || master) : dest || master);
+  const to = dest || busFor(src, busName);
+  s.connect(g).connect(radio ? radioInput(c, to) : to);
   s.addEventListener('ended', () => { s.disconnect(); g.disconnect(); }, { once: true });
   const at = Math.max(when || 0, c.currentTime);
   const len = duration ?? Math.max(0.01, buf.duration - offset);
@@ -234,12 +261,13 @@ export function play(src, { gain = 1, rate = 1, when = 0, offset = 0, duration, 
 
 // A loop with no audible seam: the clip plays as overlapping copies, each fading in over the last one's tail, so
 // neither the file's edges nor an mp3's padding can click. Starts silent unless `gain` is given.
-export function loop(src, { gain = 0, cross = 0.6, trim = [0, 0], radio = false } = {}) {
+export function loop(src, { gain = 0, cross = 0.6, trim = [0, 0], radio = false, bus: busName } = {}) {
   if (restoreDepth) { counts.suppressedRestore++; return null; }
   const c = context();
   const buf = buffer(src);
   if (!c || !buf) return null;
-  const out = c.createGain(); out.gain.value = gain; out.connect(radio ? radioInput(c, master) : master);
+  const to = busFor(src, busName);
+  const out = c.createGain(); out.gain.value = gain; out.connect(radio ? radioInput(c, to) : to);
   const bed = radio ? radioVoice(c, null, out, c.currentTime, Infinity, 1) : null;
   const from = trim[0], len = buf.duration - trim[0] - trim[1], period = len - cross;
   let next = c.currentTime + 0.02, timer = 0, alive = true;
@@ -364,7 +392,7 @@ export function tone({ freq = 440, type = 'sine', at = 0, dur = 0.2, gain = 0.2,
   if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
   g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + attack);
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  o.connect(g).connect(dest || master);
+  o.connect(g).connect(dest || busFor(null));
   o.start(t); o.stop(t + dur + 0.05);
   counts.tones++;
   return o;

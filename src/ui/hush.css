@@ -8,8 +8,9 @@
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
+html { background: var(--bars, var(--page)); }   /* --bars: Safari's bar strips under a grey sheet (end of the shell lane's rules) */
 body {
-  background: var(--page); color: var(--dark); overflow: hidden; overscroll-behavior: none;
+  background: var(--bars, var(--page)); color: var(--dark); overflow: hidden; overscroll-behavior: none;
   font: 600 10.5px/1.2 var(--type); font-stretch: 125%; letter-spacing: .14em; text-transform: uppercase;
   -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
 }
@@ -468,6 +469,32 @@ body.bm-big .speech, body.galaxy-showing .speech { opacity: 0; }   /* a takeover
 body.shell-boot canvas#c { z-index: 31; pointer-events: none; transition: none; }
 body.shell-boot .top, body.shell-boot #footer { transition: none; }
 @media (prefers-reduced-motion: reduce) { .loader .ring .fill, .loader .ring .rune, .loader-words { transition: none; } }
+/* The loading screen on a phone (loadbars lane, p8): iPhone Safari paints its own bars (the strip under the status bar,
+   the strip where the toolbar sits) flat in the page's background colour, and does not draw our fixed layers there, so
+   the paper's edges showed as bare bands that cut the frame and the spine. Here: the paper runs past the screen (in case
+   Safari does draw there), its top and bottom edges settle to exactly the page colour (so Safari's bars read as more of
+   the same paper), the frame keeps clear of the safe areas, and the spine and its shadow run only as far as the frame.
+   The desktop look above is untouched. --bleed: how far the paper runs past the screen; --ft / --fb: the frame's top
+   and bottom from the paper's edge; --et / --eb: where the page colour gives way to the paper at top and bottom. */
+@media (pointer: coarse) {
+  .loader { overflow: visible; overflow-x: clip; --bleed: 120px;
+    --ft: calc(var(--bleed) + env(safe-area-inset-top, 0px) + 14px); --fb: calc(var(--bleed) + env(safe-area-inset-bottom, 0px) + 14px);
+    --et: calc(var(--bleed) + env(safe-area-inset-top, 0px)); --eb: calc(var(--bleed) + env(safe-area-inset-bottom, 0px)); }
+  .loader .door { top: calc(-1 * var(--bleed)); bottom: calc(-1 * var(--bleed)); box-shadow: none;
+    --edge: linear-gradient(var(--page) var(--et), rgba(253, 240, 230, 0) calc(var(--et) + 12px), rgba(253, 240, 230, 0) calc(100% - var(--eb) - 40px), var(--page) calc(100% - var(--eb)));
+    --spine: linear-gradient(transparent var(--ft), rgba(43, 39, 36, .2) var(--ft), rgba(43, 39, 36, .2) calc(100% - var(--fb)), transparent calc(100% - var(--fb)));
+    --glow: radial-gradient(ellipse 180% 60% at var(--door-x) 105%, rgba(240, 214, 190, .45), transparent 70%) 0 var(--bleed) / 100% calc(100% - 2 * var(--bleed)) no-repeat; }
+  .loader .door-l { background: var(--spine) right / 1px 100% no-repeat, var(--edge),
+    linear-gradient(to left, rgba(60, 40, 20, .1), rgba(60, 40, 20, .03) 5px, transparent 10px) right var(--ft) / 10px calc(100% - var(--ft) - var(--fb)) no-repeat, var(--glow), var(--page); }
+  .loader .door-r { background: var(--spine) left / 1px 100% no-repeat, var(--edge), var(--glow), var(--page); }
+  .loader .door::before { background-position: 0 var(--bleed);
+    -webkit-mask-image: linear-gradient(transparent var(--et), #000 calc(var(--et) + 12px), #000 calc(100% - var(--eb) - 40px), transparent calc(100% - var(--eb)));
+    mask-image: linear-gradient(transparent var(--et), #000 calc(var(--et) + 12px), #000 calc(100% - var(--eb) - 40px), transparent calc(100% - var(--eb))); }
+  .loader .door::after { top: var(--ft); bottom: var(--fb); }
+  .loader .door-l::after { left: calc(14px + env(safe-area-inset-left, 0px)); }
+  .loader .door-r::after { right: calc(14px + env(safe-area-inset-right, 0px)); }
+  .loader .seal-half { top: calc(var(--bleed) + var(--cy) - var(--ring) / 2); }
+}
 
 /* "flip sideways": a translucent grey sheet over the frozen page, a phone turning on its side */
 .turn { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; padding: 24px;
@@ -482,6 +509,21 @@ body.shell-boot .top, body.shell-boot #footer { transition: none; }
 @keyframes turn-phone { 0%, 22% { transform: rotate(0deg); } 50%, 78% { transform: rotate(90deg); } 100% { transform: rotate(0deg); } }
 .turn.calm .turn-phone .ph { animation: none; transform: rotate(90deg); }
 @media (prefers-reduced-motion: reduce) { .turn-phone .ph { animation: none; transform: rotate(90deg); } }
+
+/* Safari's bars under a grey sheet (loadbars lane, p8 follow-up; Aaron: "a big white bar ... at the bottom of my flipped
+   screen"). iPhone Safari fills its own strips (under the status bar, where its toolbar sits) with the page's root
+   background colour (older Safari: the theme-color, kept in step by src/ui/bars.js), never with our fixed layers. The
+   paper is that colour, so normally nothing shows; but the sheets that come and go around a turn ("flip sideways", the
+   full-screen hint, "turn silence off for sound", a book) grey the page and left those strips light. While one is up,
+   the root takes the colour the sheet makes at the screen's edges (measured over the paper; the page itself is under
+   .wash, so nothing on screen changes). Later rules win: the top sheet decides. */
+html:has(> body > .book-pop) { --bars: #a59a91; }          /* the book's dim, between its top edge and its shadowed bottom */
+html:has(> body > .book-pop .book-confirm) { --bars: #80786f; }
+html:has(> body > .settings-pop:not([hidden])) { --bars: #cfc4bb; }   /* the settings screen's lighter dim (.22) over the paper */
+html:has(> body > .fs-step) { --bars: #beb4ac; }
+html:has(> body > .turn) { --bars: #827d79; }               /* "flip sideways", "turn silence off for sound" */
+html:has(> body > .turn):has(> body > .fs-step) { --bars: #6a6663; }
+html:has(> body > .turn):has(> body > .book-pop) { --bars: #635e5b; }
 
 /* the books as pop-ups (src/ui/books.js): the old pages' sheet, over the frozen cat; a click outside closes it */
 .book-pop { position: fixed; inset: 0; z-index: 60; display: grid; background: rgba(43, 39, 36, .34);
@@ -570,3 +612,58 @@ body .world-grip.low button { position: fixed; pointer-events: auto; padding: 0 
 body .world-grip.low.under button { min-height: 0; height: 28px; }
 body .world-grip, body .world-grip button { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 body .world-grip button.on { translate: 0 1px; box-shadow: 0 0 0 3px var(--glow), inset 0 1px 3px rgba(43, 39, 36, .2); border-color: var(--dark); }
+
+/* ==== the settings screen (p8 settings lane, 2026-11-21; src/ui/settings.js) ====
+   One round felt button at the bottom left (the achievements mark's twin) in place of SOUND and the zoom; the card is
+   the books' paper, centred, over the room (not frozen: the zoom is seen as it moves). */
+#footer .fl .set-mark { position: relative; display: inline-grid; place-items: center; width: 30px; height: 30px; padding: 0; color: var(--soft); cursor: pointer; }
+#footer .fl .set-mark svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+#footer .fl .set-mark::before { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
+@media (hover: hover) { #footer .fl .set-mark:hover { color: var(--dark); } }
+@media (max-width: 700px) { #footer .fl .set-mark { width: 28px; height: 28px; } }
+/* the master sound in the footer only while something else has the page (the galaxy, the 360, the bread's blast-off,
+   the bird's trailer: any lock but the settings screen's own), as SOUND always was on main: the settings button can't
+   open then, so the pill takes its place and can still mute (src/core/input.js lets #footer .sound through a lock) */
+#footer .sound { display: none; }
+body.galaxy-showing #footer .sound, body.noscope-showing #footer .sound, body.locked:not(.settings-open) #footer .sound { display: inline-flex; }
+body.galaxy-showing #footer .fl .set-mark, body.noscope-showing #footer .fl .set-mark, body.locked:not(.settings-open) #footer .fl .set-mark { display: none; }
+/* a phone on its side: the left group keeps the height ZOOM stacked over SOUND had (two 28 px patches 6 px apart), so the
+   footer, and with it the room's framing (stage.insets.bottom), is exactly what it was: a returning player's props
+   come back where they were left instead of being fitted again. The button sits at the bottom, where SOUND was. */
+@media (max-height: 500px) and (orientation: landscape) {
+  #footer .fl { min-height: calc(2 * 28px + 6px); justify-content: flex-end; }
+}
+
+.settings-pop { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; background: rgba(43, 39, 36, .22);
+  padding: max(10px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+.settings-pop[hidden] { display: none; }
+.settings-card { width: min(440px, 100%); max-height: 100%; overflow: auto; overscroll-behavior: contain; outline: none; padding: 16px 22px 14px;
+  border-radius: 16px; background: radial-gradient(ellipse 90% 50% at 50% 100%, rgba(240, 214, 190, .4), transparent 70%) var(--page);
+  box-shadow: 0 24px 60px -24px rgba(40, 25, 10, .6), 0 0 0 1px rgba(43, 39, 36, .1); }
+.settings-card header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.settings-card h2 { margin: 0; font: 800 15px/1.2 var(--type); font-stretch: 125%; letter-spacing: .16em; color: var(--dark); }
+.settings-card .set-close { display: inline-grid; place-items: center; width: 32px; height: 32px; padding: 0; margin-right: -6px; color: var(--soft); cursor: pointer; }
+.settings-card .set-close::before { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
+.settings-card .set-close svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.set-rows { display: grid; grid-template-columns: max-content auto minmax(0, 1fr); column-gap: 14px; }
+.set-row { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: center; min-height: 48px; border-top: 1px dashed rgba(43, 39, 36, .14); }
+.set-row label { grid-column: 1; color: var(--dark); font-weight: 700; cursor: pointer; white-space: nowrap; }
+.set-row input { grid-column: 2 / 4; }
+.set-master input { grid-column: 3; }
+.set-toggle { display: inline-flex; align-items: center; justify-content: center; min-width: 52px; height: 30px; padding: 0 12px; color: var(--soft); cursor: pointer; font: inherit; }
+.set-toggle::before { content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 44px); height: 44px; transform: translate(-50%, -50%); }
+.set-toggle[aria-pressed="false"] b { color: var(--soft); }
+/* a muted master: the three volumes under it are quiet too */
+.settings-card.muted .set-row[data-under], .settings-card.muted .set-row:has(input[data-level]) { opacity: .45; }
+/* the sliders: the footer's quiet line, a little bolder for a finger */
+#settings input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; min-width: 0; height: 44px; margin: 0; padding: 0; background: none; cursor: pointer; opacity: 1; touch-action: none; }
+#settings input[type="range"]::-webkit-slider-runnable-track { height: 3px; border-radius: 2px; background: linear-gradient(var(--dark), var(--dark)) 0 / var(--v, 50%) 100% no-repeat, rgba(43, 39, 36, .2); }
+#settings input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -5.5px; border-radius: 50%; background: var(--dark); box-shadow: 0 0 0 3px var(--page); }
+#settings input[type="range"]::-moz-range-track { height: 3px; border-radius: 2px; background: rgba(43, 39, 36, .2); }
+#settings input[type="range"]::-moz-range-progress { height: 3px; border-radius: 2px; background: var(--dark); }
+#settings input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border: 0; border-radius: 50%; background: var(--dark); box-shadow: 0 0 0 3px var(--page); }
+#settings input[type="range"]:focus-visible { outline-offset: -8px; }
+@media (max-height: 500px) and (orientation: landscape) {
+  .settings-card { padding: 10px 20px 8px; }
+}
+@media (max-width: 420px) { .settings-card { padding: 14px 16px 10px; } .set-rows { column-gap: 10px; } }

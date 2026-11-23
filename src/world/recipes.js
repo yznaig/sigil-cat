@@ -190,7 +190,9 @@ export function createRecipes(site){
   state.inv[id]=invSlot;respawning.add(id);
   let inst;try{inst=keepsakes.give(id,{state:entry.state||{}});}finally{respawning.delete(id);}
   if(!inst)return null;inst.autoHome=false;stats.respawned++;
-  await inst.worldTask;const e=inst.worldEntry;if(!e||keepsakes.get(id)!==inst)return inst;
+  // floor-home marks a new arrival autoHome while placing it: set false again once it is placed, so the next thing out of
+  // the chest does not repack this one (to the back of the floor: lane p8-chestout).
+  await inst.worldTask;inst.autoHome=false;const e=inst.worldEntry;if(!e||keepsakes.get(id)!==inst)return inst;
   e.quickUntil=performance.now()+4000;
   site.supports.detach(e,{wake:false});
   const q=q4(e.body.rotation()),now=v3(e.body.translation()),spot=inst.colliderVertices?.length&&clearSpot(site,inst,inst.colliderVertices,q,now);
