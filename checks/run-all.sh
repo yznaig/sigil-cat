@@ -373,7 +373,7 @@ run "journey-boot-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/journey-
 # resets the stuck clock, quiet under a book and Butterman, every line told ('said'), a reload is welcomed back
 run "journey-voice-1536x864" "$BASE/?dpr=1&nudge=fast" --lib checks/lib.js --js checks/journey-voice.js --then checks/journey-voice-reload.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 400
 run "journey-voice-phone" "$BASE/?dpr=2&nudge=fast" --lib checks/lib.js --js checks/journey-voice.js --then checks/journey-voice-reload.js --size phone --out "$SHOTS" --jpeg --timeout 400
-# journey unit "tells" (docs/journey/design.md §5.4-§5.6): no ghost doodle, scrape, butter shimmer, whisker hum, shelf dust
+# journey unit "tells" (docs/journey/design.md §5.4-§5.6): no ghost doodle, scrape, butter shimmer, no whisker hum, shelf dust
 # outlines, board pins, empty peg, "what he said" in the grimoire, combo riddles shown once their needs are done
 run "journey-tells-1536x864" "$BASE/?dpr=1" --lib checks/lib.js --js checks/journey-tells.js --size 1536x864 --out "$SHOTS" --jpeg --timeout 400
 run "journey-tells-phone" "$BASE/?dpr=2" --lib checks/lib.js --js checks/journey-tells.js --size phone --out "$SHOTS" --jpeg --timeout 400

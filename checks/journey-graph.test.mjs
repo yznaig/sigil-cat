@@ -36,6 +36,10 @@ const vias = new Set(['cat', 'grimoire', 'book', 'journal', 'tell', 'thing']);
 check('3 every hint has a known via and text', NODES.every((n) => n.hints.every((h) => vias.has(h.via) && h.text && (h.via !== 'tell' || h.tell))));
 // the ghost doodle is gone (playtest: it came too soon and gave the circle away); the first signs keep their routes
 check('3 no hint names the removed ghost doodle', NODES.every((n) => n.hints.every((h) => h.tell !== 'ghost-doodle')));
+// the whisker hum is gone too (e1123-59: it glinted the harp's tune order and gave the answer away); the harp keeps
+// its grimoire riddle and the cat's nudges
+check('3 no hint names the removed whisker hum', NODES.every((n) => n.hints.every((h) => h.tell !== 'whisker-hum' && !/whiskers glint/.test(h.text))));
+check('3 the harp still has a route a player meets (its riddle and the cat)', byId.get('harp').hints.some((h) => !h.from && h.via === 'grimoire') && byId.get('harp').hints.some((h) => h.via === 'cat'));
 check('3 the circle and the scribble still have a route a player meets', ['circle', 'scribble'].every((id) => byId.get(id).hints.some((h) => !h.from && ['cat', 'grimoire', 'thing'].includes(h.via))));
 // 4
 check('4 pieces are nodes', PIECES.every((id) => byId.has(id)));

@@ -82,10 +82,20 @@ function spotOn(id){const e=entry(id),r=keepsakes.get(id).picture?.rect;if(!r)re
 
 // 3. A press on him, with an item within the reach, is his: he turns, nothing is lifted, no grace is used.
 {
- // set the egg down against his side first (carried by the world's own hand), so an item lies within reach of his edge
+ // set the tin down beside him first, so an item lies within reach of his edge. The tin, not the egg: the egg rests on
+ // its side and rolled away after it was let go, so where it ended was random (a flake on main too). The tin's
+ // collider is a box; its own moveWorld (src/world/solid.js) sets it on the floor at rest, upright, nothing moving.
  {const m=catMid();let y=m.y+60,x=m.x;while(cat.hitTest(x+2,y)&&x<stage.width)x+=2;
-  const e=entry('egg'),grip=e.object.getWorldPosition(new T.Vector3());W.grab(e,grip);
-  const to=stage.onFloor(x+14,y).setY(grip.y);for(let n=1;n<=20;n++){W.move(grip.clone().lerp(to,n/20));await sleep(30);}W.release();await settle();}
+  const t0=performance.now(),tin=keepsakes.get('tin'),at={x:x+tin.w/2+6,y};tin.moveWorld(at);   // moveWorld syncs the picture at once
+  // its picture is narrower than its 2D box: slide it in by its projected bounds, then by its own pixels (rows at its
+  // foot), until the gap to his edge is a few px
+  const left=()=>{const b=new T.Box3().setFromObject(entry('tin').object),v=new T.Vector3();let mn=1e9;for(let k=0;k<8;k++){v.set(k&1?b.max.x:b.min.x,k&2?b.max.y:b.min.y,k&4?b.max.z:b.min.z);mn=Math.min(mn,stage.toScreen(v).x);}return mn;};
+  at.x+=x+5-left();tin.moveWorld(at);await settle();
+  const gap=()=>{let g=1e9;for(let yy=y-72;yy<=y+8;yy+=4){if(!cat.hitTest(m.x,yy))continue;let cx=m.x;while(cat.hitTest(cx+1,yy)&&cx<stage.width)cx++;
+   for(let xx=cx+1;xx<cx+60;xx++){const h=site.worldInput.pick({clientX:xx,clientY:yy});if(h){if(h.entry===entry('tin'))g=Math.min(g,xx-cx);break;}}}return g;};
+  for(let k=0,g=gap();k<3&&g<1e8&&(g<3||g>8);k++,g=gap()){at.x+=5-g;tin.moveWorld(at);await settle();}
+  const p=entry('tin').object.getWorldPosition(new T.Vector3()),q=stage.toScreen(p);
+  note('grace near him: the tin set down beside him, settled',show({at:{x:Math.round(at.x),y:Math.round(at.y)},now:{x:Math.round(q.x),y:Math.round(q.y)},gap:gap(),ms:Math.round(performance.now()-t0),support:entry('tin').support?.id||'floor',asleep:entry('tin').body.isSleeping()}));}
  const m=catMid();let best=null;
  for(let y=m.y-160;y<m.y+160;y+=3)for(let x=m.x-160;x<m.x+160;x+=3){
   if(!cat.hitTest(x,y)||E.harp?.whiskerAt(x,y)||site.worldInput.pick({clientX:x,clientY:y})||document.elementFromPoint(x,y)!==canvas)continue;
@@ -99,6 +109,7 @@ function spotOn(id){const e=entry(id),r=keepsakes.get(id).picture?.rect;if(!r)re
   check(`grace ${MOBILE?'touch':'mouse'}: a press on him ${best.d} px from an item (${best.near}) still turns him`,!r.graced&&r.cat&&!r.held&&!r.heldDown&&!r.drawing,show({best,...r,turned:+(cat.yaw-yaw0).toFixed(3)}));
   await __shot('grab-grace-by-him');await settle();
  }
+ S.mount(entry('tin'),'shelf','tin',{animate:false});await settle();   // back on the shelf, out of the box's way (5.)
 }
 
 // 4. Open air far from everything still draws a sigil; so does a press just past the reach of an item.

@@ -299,7 +299,15 @@ await until(() => !keepsakes.physics?.active, 3500);
 }
 await shot('29-a-page-played-with');
 check('found', registry.count() === registry.total, `${registry.count()} of ${registry.total}: ${registry.FINDS.filter((f) => !registry.has(f.id)).map((f) => f.id).join(', ') || 'all'}`);
-// what must still be there after a reload
+// what must still be there after a reload: recorded only once the room is still. The bird and the controller's ending
+// leave bodies awake (the controller, its stand arriving), and on a phone the footer grows (64 -> 78 px) near the end,
+// which re-fits the floor and moves what lies on it. Wait until nothing is awake, nothing is moving in screen space,
+// the insets and the floor's layout hold, and every keepsake has kept its place for 2 s running.
+{ const W = site.world, at = () => JSON.stringify([stage.insets.top, stage.insets.bottom, W.layoutKey?.(), [...keepsakes.live.values()].filter((k) => k.id !== 'eyes' && site.supports.registry.get(k.worldEntry?.support?.id)?.kind !== 'attachment').map((k) => [k.id, k.id === 'cloud' ? null : +k.x.toFixed(3), +k.y.toFixed(3)])]);   // as after-reload.js compares them: the cloud drifts sideways, what he wears moves with him
+  const still = () => !W.active && !W.syncing && !W.held && !keepsakes.physics?.active && !site.arrivals?.active && !input.locked;
+  let last = '', since = performance.now();
+  const calm = await until(() => { const now = at(); if (now !== last || !still()) { last = now; since = performance.now(); return false; } return performance.now() - since > 2000; }, 30000, 100);
+  note('the room is still before the reload', `${calm ? 'still' : 'NOT still after 30 s'}; insets ${stage.insets.top}/${stage.insets.bottom}; awake ${W.active}, moving ${keepsakes.physics?.active}`); }
 const keep = { keepsakes: Object.fromEntries([...keepsakes.live.values()].map((k) => [k.id, [+k.x.toFixed(3), +k.y.toFixed(3)]])), found: registry.count(), bonks: ui.count, attachments: Object.fromEntries([...keepsakes.live.values()].filter(k=>site.supports.registry.get(k.worldEntry?.support?.id)?.kind==='attachment').map(k=>[k.id,k.worldEntry.support])), hat: E.hat.wearing, butter: cat.butterOn, eyesOn: E.eyes.on, volume: audio.state().volume };
 note('before the reload', `${Object.keys(keep.keepsakes).length} keepsakes: ${Object.keys(keep.keepsakes).join(', ')}`);
 store.flush();

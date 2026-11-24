@@ -184,7 +184,7 @@ Chapter 3 (pointed, through things)
 Chapter 4 (cryptic)
 - `whisper` ← riddle; tell **butter-shimmer**; cat
 - `buttaman` ← B's "does" ("each visit turns another page"); cat "he has more to say. he says it louder each time."
-- `harp` ← riddle; tell **whisker-hum** (during the butter song's "what's the butter man", the whiskers glint once in the tune's order); cat ×2
+- `harp` ← riddle; cat ×2 (the **whisker-hum** tell is gone, e1123-59: glinting the whiskers in the tune's order gave the answer away)
 - `noscope` ← riddle; cat; `void` ← the circle's twenty turns; cat "faster. faster than that. there is something behind me."
 - `blastoff` ← riddle (now shown once `loaf` and `spin` are done, see §5.6); cat
 - `paradox` ← riddle (shown once `loaf` and `butter` are done); cat "cats land on their feet. toast lands butter down. i wear butter. make me toast."
@@ -281,8 +281,9 @@ All cheap, all one-shot or event-driven (no per-frame work at rest):
   panned left (right), using the arrivals' scrape sound at low gain.
 - **butter-shimmer**: with butter on and `whisper` not found, a pointer passing within ~120 px of the butter makes
   it catch a small specular glint (at most once per 20 s).
-- **whisker-hum**: with `harp` not found, while Butterman's butter scene sings its first line, the whiskers glint
-  once each in the tune's order (C C B C D C), using the harp's own ring drawing.
+- ~~**whisker-hum**~~ (removed, e1123-59): it glinted his whiskers once each in the tune's order (C C B C D C)
+  during the butter song's "what's the butter man", which handed out the harp's answer. The harp keeps its grimoire
+  riddle and the cat's two nudges; `src/gags/harp.js` no longer has a `glint(index)`.
 - **shelf-gaps**: an empty shelf bay or hook shows a faint dust outline of its missing item's silhouette (the item
   icons in `src/ui/item-icons.js`), only for items the player has *not yet ever owned* (an owned one elsewhere in the
   room shows no outline: no help placing what you have).
@@ -364,14 +365,13 @@ unit that needs another's part treats it as optional (`journey.snapshot?.open?.(
 ### Unit 2 — `sc/p9-tells`: tells, the journal, combo riddles
 - **Goal:** §5.4, §5.5, §5.6.
 - **Owns:** `src/journey/tells.js`, `src/journey/journal.js`, `checks/journey-tells.js`. **May touch:** one line in
-  `src/ui/books.js` (the combo filter), small read-only hooks in `src/gags/harp.js` (export a `glint(index)` if none
-  fits) and `src/world/shelf.js` / `src/world/pinboard.js` (expose empty bay/pin positions) — additive exports only.
+  `src/ui/books.js` (the combo filter), small read-only hooks in `src/gags/harp.js` (a `glint(index)` for the whisker
+  hum, since removed with it) and `src/world/shelf.js` / `src/world/pinboard.js` (expose empty bay/pin positions) — additive exports only.
 - **Must not touch:** `voice.js`, `lastpage.js`, `ending.js`, `snapshot.js`, the egg/gag behaviour itself.
 - **Done check** (`checks/journey-tells.js`): fresh save → nothing draws itself in the air (the ghost doodle is gone);
   seeded butter → a pointer pass near the butter
   fires one shimmer, not two within 20 s; seeded shelf with empty bays → the dust outlines exist only for never-owned
-  items; harp tell fires the six glints in tune order during the butter scene (frozen-beat `#b=` or the scene's own
-  clock); `journey.emit('said', …)` × 2 → the grimoire shows a "what he said" section with both lines; a combo whose
+  items; the butter scene runs past its first line with no whisker hum (the tell was removed, e1123-59); `journey.emit('said', …)` × 2 → the grimoire shows a "what he said" section with both lines; a combo whose
   needs are done shows its riddle card, one whose needs are not stays hidden; reduced motion: tells are static or off.
 
 ### Unit 3 — `sc/p9-ending`: the last page, his own sign, the ending

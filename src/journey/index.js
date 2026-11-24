@@ -6,7 +6,7 @@
 // after the page is ready so the cat's first frame never waits on it. A part that throws is logged and skipped: the
 // page plays on without it.
 //   voice.js     unit sc/p9-voice     the cat's lines: hook, idle, return, reactions, stuck nudges   -> journey.voice
-//   tells.js     unit sc/p9-tells     environmental tells (scrape, butter shimmer, whisker hum, ...)   -> journey.tells
+//   tells.js     unit sc/p9-tells     environmental tells (scrape, butter shimmer, shelf dust, ...)   -> journey.tells
 //   journal.js   unit sc/p9-tells     the grimoire's "what he said" page                            -> journey.journal
 //   lastpage.js  unit sc/p9-ending    the torn last page, his own sign (the cat-head sigil)        -> journey.lastpage
 //   ending.js    unit sc/p9-ending    the ending scene                                              -> journey.ending

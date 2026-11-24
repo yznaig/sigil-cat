@@ -24,6 +24,20 @@ else {
   // (the page runs again while the cat pops in and the page opens, playtest 3: let the fork's fall settle first, so
   // "the same keepsakes" means nothing moved because of the error page)
   await until(() => !site.world.stats.listening, 12000);
+  // An audio-thread meter for the toot (check-only: a worklet on the page bus, into a silent sink), set up before the
+  // freeze's counters below. The main thread can stall at the return (the confetti, the blower and the hat are built
+  // and drawn then) for longer than the 1.25 s toot, and a main-thread read of the bus then sees nothing; the
+  // worklet's reports queue up and arrive after.
+  const meter=await (async()=>{try{
+    const url=URL.createObjectURL(new Blob([`registerProcessor('check-peak',class extends AudioWorkletProcessor{constructor(){super();this.m=0;this.n=0;}
+      process(ins){const ch=ins[0]&&ins[0][0];if(ch)for(let i=0;i<ch.length;i++){const v=Math.abs(ch[i]);if(v>this.m)this.m=v;}
+      if(++this.n>=16){this.port.postMessage({m:this.m,t:currentTime});this.m=0;this.n=0;}return true;}})`],{type:'text/javascript'}));
+    const ctx=audio.context();await ctx.audioWorklet.addModule(url);URL.revokeObjectURL(url);
+    const node=new AudioWorkletNode(ctx,'check-peak'),sink=ctx.createGain();sink.gain.value=0;
+    audio.output().connect(node);node.connect(sink).connect(ctx.destination);
+    const log=[];node.port.onmessage=(e)=>log.push(e.data);
+    return {log,peak:(a,b)=>log.filter(r=>r.t>=a&&r.t<=b).reduce((p,r)=>Math.max(p,r.m),0),stop(){try{audio.output().disconnect(node);}catch{}node.disconnect();sink.disconnect();node.port.onmessage=null;}};
+  }catch(e){return {error:String(e),peak:()=>0,stop(){}};}})();
   const body=[...document.body.children], originalTitle=document.title, focus=document.getElementById('settings-btn');focus.focus();
   const saved=[...keepsakes.live].map(([id,i])=>({id,i,x:i.x,y:i.y}));
   const counts={frame:0,render:0,timer:0,interval:0,idle:0,raf:0,stageWait:0};
@@ -63,6 +77,21 @@ else {
     bonk:null,miss:null,keyBonk:null,openedEarly:false};
   await wait(()=>(performance.now()-start)/1000>4.0,8000);
   seen.stillAt4=!!document.getElementById('party-error')&&!P.state.reopening&&!document.body.classList.contains('party-pop')&&input.locked&&cat.fx.scale===1;
+  // the toot's loudness: its peak, read every frame (one sample 0.55 s after the return missed it on a busy machine).
+  // The watch starts now, before the return: the loop below can sit in a screenshot of the opening doors while the
+  // return comes and the 1.25 s toot plays out. The toot is scheduled at the return, and the sound resumes once the
+  // freeze's suspend settles and ctx.resume() lands (src/core/audio.js suspend), which can take a while under load: from
+  // the return, wait for the context to run (up to 10 s), then read the peak until both 2.5 s of wall time and 1.5 s
+  // of the sound's own clock have passed, at most 12 s in all.
+  let tootPeak=0,resumedMs=null,audioSecs=null,atReturn=null,finalPeak=0,workletPeak=0;const tootWatch=(async()=>{
+    let pre=ctx.currentTime;await wait(()=>{if(P.state.returns>=1)return true;pre=ctx.currentTime;return false;},60000);
+    const t0=performance.now(),c=audio.context();
+    atReturn={state:c.state,clock:+c.currentTime.toFixed(3),sinceFreeze:+(c.currentTime-audio0).toFixed(3),stalledAudioSecs:+(c.currentTime-pre).toFixed(3),master:+audio.output().gain.value.toFixed(3),sfx:+audio.bus('sfx').gain.value.toFixed(3),reasons:audio.suspendReasons(),muted:audio.state().muted};
+    while(c.state!=='running'&&performance.now()-t0<10000){tootPeak=Math.max(tootPeak,audio.level());await wallSleep(8);}resumedMs=Math.round(performance.now()-t0);
+    const t1=performance.now(),a1=c.currentTime;
+    while((performance.now()-t1<2500||c.currentTime-a1<1.5)&&performance.now()-t0<12000){tootPeak=Math.max(tootPeak,audio.level());finalPeak=Math.max(finalPeak,audio.peak());await wallSleep(8);}
+    audioSecs=+(c.currentTime-a1).toFixed(2);
+    await wallSleep(300);workletPeak=meter.peak(pre-0.05,c.currentTime);meter.stop();})();
   let tries=0;
   while(P.state.active){
     const t=(performance.now()-start)/1000,root=document.getElementById('party-error'),doors=root?[...root.querySelectorAll('.pe-door')]:[];
@@ -74,9 +103,13 @@ else {
     // a bonk, a second after he is up: real input where he is (touch on a phone, the mouse on a desktop)
     if(P.state.bonkable&&!seen.bonk&&t>seen.popAt+1.2&&tries<4){tries++;
       const m=catMid(),b0={count:ui.count,taps:cat.taps,mine:P.state.bonks,emotes:cat.emoteLog.length};
-      await __pointer([{x:m.x,y:m.y}]);await wallSleep(250);
-      const hop=cat.emoteLog.slice(b0.emotes).some(s=>/^tap: hop/.test(s));
-      if(ui.count===b0.count+1)seen.bonk={count:ui.count-b0.count,taps:cat.taps-b0.taps,mine:P.state.bonks-b0.mine,hop,saved:store.get('bonks')===ui.count,level:audio.level(),at:+t.toFixed(2)};}
+      // under load the hop and the bonk's sound land late: poll for them (up to 1.5 s), not one look 250 ms after.
+      // A tap's reaction is picked at random, hop 4 : spin 1 (src/config.js cycle.tap; a spin is a hop with one full
+      // turn), so either is the hop here. The emote log keeps the last 30: once full, read only its newest entries.
+      await __pointer([{x:m.x,y:m.y}]);
+      const hopped=()=>cat.emoteLog.slice(b0.emotes<30?b0.emotes:-2).some(s=>/^tap: (hop|spin)/.test(s));let peak=0;
+      await wait(()=>{peak=Math.max(peak,audio.level());return ui.count===b0.count+1&&hopped()&&(audio.state().muted||peak>0);},1500);
+      if(ui.count===b0.count+1)seen.bonk={count:ui.count-b0.count,taps:cat.taps-b0.taps,mine:P.state.bonks-b0.mine,hop:hopped(),emote:cat.emoteLog.slice(-1)[0],saved:store.get('bonks')===ui.count,level:peak,at:+t.toFixed(2)};}
     // a tap beside him: nothing (no bonk, no way out)
     if(P.state.bonkable&&seen.bonk&&!seen.miss&&t>seen.popAt+3){const c0=ui.count;await __pointer([{x:12,y:stage.height*.5}]);await wallSleep(200);
       seen.miss={bonks:ui.count-c0,active:P.state.active,locked:input.locked,bonkable:P.state.bonkable};}
@@ -103,8 +136,11 @@ else {
     JSON.stringify({title:document.title===originalTitle,inert:body.filter(e=>!e.isConnected||e.inert).map(e=>e.id||e.tagName),focus:document.activeElement?.id,moved:saved.filter(s=>keepsakes.get(s.id)!==s.i||s.i.x!==s.x||s.i.y!==s.y).map(s=>s.id)}));
   await wallSleep(550);
   const fx=P.state, paper=stage.scene.getObjectByName('party-confetti'), blower=stage.scene.getObjectByName('party-blower');
+  const blowerOn=!!blower?.visible && blower.children.some(o=>o.isMesh);
   const visible=[0,0];
-  if(paper?.isInstancedMesh) {
+  // the most pieces seen on each side, looked at every frame for up to 3 s (one look at 0.55 s saw none on a busy
+  // machine, where the burst's first frames come late)
+  const look=()=>{const v=[0,0];if(!paper?.isInstancedMesh)return v;
     paper.updateWorldMatrix(true,false);
     const m=new site.THREE.Matrix4(),pos=new site.THREE.Vector3(),scale=new site.THREE.Vector3();
     for(let i=0;i<paper.count;i++) {
@@ -112,19 +148,21 @@ else {
       const p=stage.toScreen(pos.setFromMatrixPosition(m).applyMatrix4(paper.matrixWorld),{});
       // Starts are staggered: measure the visible burst, not two arbitrary particle indices.
       if(scale.setFromMatrixScale(m).length()>0 && !p.behind && p.x>=0 && p.x<=stage.width && p.y>=0 && p.y<=stage.height)
-        visible[p.x<stage.width/2?0:1]++;
+        v[p.x<stage.width/2?0:1]++;
     }
-  }
+    return v;};
+  if(paper?.isInstancedMesh)await wait(()=>{const v=look();visible[0]=Math.max(visible[0],v[0]);visible[1]=Math.max(visible[1],v[1]);return visible.every(n=>n>=8);},3000);
   const bilateral=visible.every(n=>n>=8);
-  // The toot, the blower and the confetti are sampled here, 0.55 s after the return, while they play. The party hat is
-  // a gift now (playtest 2): on a first return the rack and that hat are built then (the rack module, its art and
+  // The blower is sampled 0.55 s after the return, while it plays; the confetti from then for up to 3 s; the toot's
+  // peak is read above (the watch from the return, and the audio-thread meter). The party hat is a gift now (playtest 2): on a first return the rack and that hat are built then (the rack module, its art and
   // pictures load lazily), which took up to ~6 s on a busy machine, so the hat gets its own, longer wait
   // (integration, playtest-2: the old single sample at 0.55 s failed on the base commit too).
-  const blowerOn=!!blower?.visible && blower.children.some(o=>o.isMesh), level=audio.level(), hat0=performance.now();
+  const hat0=performance.now();
+  await tootWatch; const level=Math.max(tootPeak,workletPeak);
   const hatOn=await wait(()=>E.hat.wearing==='party',10000), hatMs=Math.round(performance.now()-hat0+550);
   check(names[5], hatOn && blowerOn &&
     fx.toots===1 && (stage.reducedMotion ? !paper : paper?.count===160 && bilateral) && level>0,
-    JSON.stringify({...fx,visiblePiecesPerSide:visible,hat:E.hat.wearing,hatAfterMs:hatMs,audioLevel:level}));
+    JSON.stringify({...fx,visiblePiecesPerSide:visible,hat:E.hat.wearing,hatAfterMs:hatMs,audioLevel:level,soundResumedMs:resumedMs,audioSecondsRead:audioSecs,atReturn,finalPeak,mainThreadPeak:tootPeak,workletPeak,meterError:meter.error}));
   await __shot(stage.reducedMotion?'party-return-calm':'party-return');
   await wait(()=>!P.state.effects,9000);
   check(names[6], !P.state.effects && !stage.scene.getObjectByName('party-confetti') && !stage.scene.getObjectByName('party-blower') && P.state.confetti===0 && !P.state.blower && counts.timer===1 && counts.raf===1 && counts.idle===1 && counts.interval>0 && counts.stageWait===1 && counts.frame>0 && counts.render>0 && stage.onFrame.every(fn=>callbacks0.has(fn)),JSON.stringify({party:P.state,counts,extraCallbacks:stage.onFrame.filter(fn=>!callbacks0.has(fn)).map(fn=>fn.name),stageClock:stage.clock}));

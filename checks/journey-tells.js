@@ -1,5 +1,5 @@
 // The Journey's tells unit (docs/journey/design.md §5.4-§5.6, §7 unit 2): no ghost doodle, the scrape, the butter
-// shimmer, the whisker hum, the shelf's dust outlines, the board's pins, the empty peg, "what he said" in the grimoire
+// shimmer, no whisker hum (removed, e1123-59), the shelf's dust outlines, the board's pins, the empty peg, "what he said" in the grimoire
 // and the combo riddles that show once their needs are done. Run with checks/lib.js on a fresh save; --reduced too.
 const J=site.journey,R=stage.reducedMotion;
 check('tells: the tells and journal parts are built',await until(()=>J.parts.tells?.stats&&J.parts.journal?.entries,10000),Object.keys(J.parts).join());
@@ -25,17 +25,15 @@ check('tells: the circle is drawn by hand',registry.has('circle'),drew(sig));
 // ---- the scrape: the circle's top was the first solid keepsake, before the shelf ----
 check('tells: the first solid keepsake scrapes from the left',await until(()=>S.scrapes.includes('left'),4000),JSON.stringify(S.scrapes));
 
-// ---- the whisker hum: the butter song's "what's the butter man", six glints in the tune's order ----
-const bm=E.butterman,harp=E.harp,g0=harp.glints;
+// ---- no whisker hum (removed, e1123-59: it glinted the harp's tune order and gave the answer away): the butter song
+// runs past "what's the butter man" (10.5 beats in) with the harp not found, and no tell fires, no glint api is left ----
+const bm=E.butterman,harp=E.harp,tellsSeen=[];
+J.on('tell',(d)=>tellsSeen.push(d?.id));
 bm.play({scene:'butter',forceAudio:true});
-const hummed=await until(()=>S.hum.length>=6,30000,20);
-const hum=S.hum.slice(0,6);
-check('tells: the whisker hum fires six glints during the butter scene',hummed&&bm.running,JSON.stringify(hum.map(h=>h.whisker)));
-check('tells: the glints are in the tune\'s order (C C B C D C)',hum.map(h=>h.whisker).join()==='1,1,0,1,2,1');
-const gapsMs=hum.slice(1).map((h,i)=>h.at-hum[i].at);
-check('tells: the glints are spaced like notes, not a burst',gapsMs.every(d=>d>200&&d<900),JSON.stringify(gapsMs));
-check('tells: the harp drew them with its own gold ring',harp.glints-g0===hum.filter(h=>h.shown).length&&hum.filter(h=>h.shown).length>=4,JSON.stringify({glints:harp.glints-g0,shown:hum.filter(h=>h.shown).length}));
-if(hum.length)await __shot('journey-tells-hum');
+const sc=()=>bm.state.scenes.find((x)=>x.id==='butter');
+const pastLine=await until(()=>bm.running&&bm.state.scene==='butter'&&sc()&&(bm.state.beat??-1)-sc().beats[0]>=10.5+3+1.5,30000,20);
+check('tells: the butter song runs past "what\'s the butter man" with the harp not found',pastLine&&!registry.has('harp'),JSON.stringify({beat:bm.state.beat,scene:bm.state.scene}));
+check('tells: no whisker hum (no tell fired, no glint api on the harp or the tells)',!tellsSeen.includes('whisker-hum')&&!('glint' in harp)&&!('glints' in harp)&&!('hum' in TL)&&!('hum' in TL.config)&&!('hum' in S),JSON.stringify({tellsSeen,harp:Object.keys(harp).filter(k=>/glint/.test(k)),tells:Object.keys(TL)}));
 bm.stop();await until(settled,15000);
 if(!cat.butterOn){cat.setButter(true);await cat.ensureButter();}
 await until(()=>keepsakes.has('pat'),5000);await sleep(400);

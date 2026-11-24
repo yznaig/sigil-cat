@@ -120,7 +120,6 @@ export const NODES = [
     { via: 'cat', text: 'he has more to say. he says it louder each time.' }] },
   { id: 'harp', ch: 4, needs: ['butter'], how: 'whisker tune C C B C D C (S S A S D S)', hints: [
     { via: 'grimoire', text: 'six small strings beside his nose remember the spreader\'s tune' },
-    { via: 'tell', tell: 'whisker-hum', text: 'during the butter song\'s first line, his whiskers glint in the tune\'s order, once' },
     { via: 'cat', text: 'my whiskers are in tune. that is not a normal thing for whiskers.' },
     { via: 'cat', text: 'the song goes: what\'s the butter man. my whiskers know it.' }] },
   { id: 'noscope', ch: 4, needs: [], how: 'one flick that turns him exactly once round, then let go', hints: [

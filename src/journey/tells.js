@@ -1,10 +1,8 @@
 // Environmental tells (docs/journey/design.md §5.4): small things in the room that point at a secret without saying it.
-// All cheap and event-driven: nothing here runs per frame at rest (the whisker hum reads one getter per frame, and only
-// returns at once unless Butterman is on). Each tell draws into one fixed, click-through SVG layer (#tells-fx).
+// All cheap and event-driven: nothing here runs per frame. Each tell draws into one fixed, click-through SVG layer
+// (#tells-fx).
 //   scrape          the first solid (flat) keepsake, shelf (board) not here yet: a far-off scrape, panned left (right).
 //   butter-shimmer  butter on, whisper not found: a pointer passing near the butter makes it glint (at most every 20 s).
-//   whisker-hum     harp not found: as the butter song reaches "what's the butter man", his whiskers glint once each in
-//                   the tune's order (C C B C D C), with the harp's own gold ring (src/gags/harp.js glint).
 //   shelf-gaps      an empty shelf bay or hook shows a dust outline of the thing that goes there, only for things never
 //                   owned (no help placing what you already have).
 //   board-pins      a flat keepsake picked up: the board's empty pin heads glint once.
@@ -14,9 +12,11 @@
 // (their graph needs are done); src/ui/books.js reads it.
 // (The ghost doodle, an invisible pen drawing the circle in the air, was here; removed after a playtest: it came
 // too soon and too often, and it handed out the first sign. A player finds the circle by drawing.)
+// (The whisker hum, his whiskers glinting in the harp's tune order during the butter song's "what's the butter man",
+// was here too; removed (e1123-59): it gave the harp's answer away. The harp keeps its grimoire riddle and his nudges.)
 // Events: journey.emit('tell', { id, phase: 'start' }) on every tell shown.
 // Reduced motion: the glints show still (a fade at most) and nothing wobbles.
-// api (journey.tells): config, stats, shimmer(), hum(), gaps(), pins(heldId), peg({force}), layer
+// api (journey.tells): config, stats, shimmer(), gaps(), pins(heldId), peg({force}), layer
 import { css } from '../core/util.js';
 import { FINDS } from '../finds.js';
 import { done } from './progress.js';
@@ -24,8 +24,6 @@ import { done } from './progress.js';
 export const TELLS = {
   scrape: { file: 'assets/audio/arrivals/concrete-scrape-loop.wav', gain: 0.16, pan: 0.85, offset: 2, seconds: 2.6, fade: 0.7, wait: 1.2 },
   shimmer: { near: 120, every: 20 },
-  // beats into the butter scene (src/eggs/butterman-config.js captions: "what's the butter man..." starts at 10.5)
-  hum: { start: 10.5, step: 0.5, tune: [1, 1, 0, 1, 2, 1] },
   gaps: { every: 1.5 },
   pins: { every: 4 },
   peg: { every: 30, settle: 1.2, facing: 6 },
@@ -53,7 +51,7 @@ const SIL = {
 export default function createTells(site, journey) {
   const { stage, cat, store, registry, audio } = site;
   const T = site.THREE, C = TELLS, calm = () => stage.reducedMotion;
-  const stats = { scrapes: [], shimmers: 0, hum: [], gaps: [], pins: 0, pegs: 0 };
+  const stats = { scrapes: [], shimmers: 0, gaps: [], pins: 0, pegs: 0 };
   const layer = document.createElementNS(NS, 'svg'); layer.id = 'tells-fx'; layer.setAttribute('aria-hidden', 'true');
   document.body.appendChild(layer);
   const make = (tag, attrs = {}, parent = layer) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); parent.appendChild(n); return n; };
@@ -117,23 +115,6 @@ export default function createTells(site, journey) {
     const b = site.eggs.butterman?.butterScreen?.(); if (!b) return;
     if (Math.hypot(e.clientX - b.x, e.clientY - b.y) < C.shimmer.near) shimmer();
   }, { passive: true });
-
-  // ---- whisker hum ----
-  let humRun = null;
-  function humGlint(i) { const shown = !!site.eggs.harp?.glint?.(C.hum.tune[i]); stats.hum.push({ i, whisker: C.hum.tune[i], shown, at: Math.round(performance.now()) }); }
-  stage.onFrame.push(() => {
-    const bm = site.eggs.butterman;
-    if (!bm?.running) { humRun = null; return; }
-    if (found('harp') || bm.state.scene !== 'butter') return;
-    if (!humRun) { const sc = bm.state.scenes.find((x) => x.id === 'butter'); humRun = { start: sc ? sc.beats[0] : 0, next: 0 }; }
-    if (humRun.next >= C.hum.tune.length) return;
-    const rel = (bm.state.beat ?? -1) - humRun.start, H = C.hum;
-    if (rel > H.start + H.tune.length * H.step + 1) { humRun.next = H.tune.length; return; }   // came in late: not a burst
-    while (humRun.next < H.tune.length && rel >= H.start + humRun.next * H.step) {
-      if (humRun.next === 0) tell('whisker-hum');
-      humGlint(humRun.next++);
-    }
-  });
 
   // ---- shelf gaps ----
   const gapLayer = make('g', { 'data-tell': 'shelf-gaps' });
@@ -243,5 +224,5 @@ export default function createTells(site, journey) {
     return !!n && n.needs.every((id) => { const m = journey.node(id); return m && done(m, journey.has, journey.get); });
   }).map((f) => f.id);
 
-  return { config: TELLS, stats, layer, shimmer, hum: () => ({ run: humRun, fired: stats.hum }), gaps, pins, peg, facingRack };
+  return { config: TELLS, stats, layer, shimmer, gaps, pins, peg, facingRack };
 }

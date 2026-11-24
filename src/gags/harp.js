@@ -108,10 +108,6 @@ export default function createHarp(site) {
     });
   }
   function flare() { flares++; for (const w of whiskers()) if (w.seen) ringing.push({ w, t: 0, right: true }); }
-  // One whisker rings gold with no sound and no pluck (the Journey's whisker-hum tell, src/journey/tells.js): false when
-  // that whisker is not on show.
-  let glints = 0;
-  function glint(index) { const w = whiskers().find((x) => x.index === index && x.seen); if (!w) return false; glints++; ringing.push({ w, t: 0, right: true }); return true; }
   // A tap on a whisker is a pluck (before the cat's own tap gets it). A press that starts on a whisker but moves off
   // is a drag after all, and is handed to the cat so he still turns.
   input.claim(60, (e) => {
@@ -261,6 +257,6 @@ export default function createHarp(site) {
     tap(inst) { site.cards?.wiggle(inst); site.audio.play('paper', { gain: 0.4 }); },
   }, 'ADMIT ONE\nBUTTAMAN\nthe encore\nNo. 0001\n\nBack: KEEP THIS STUB. One more for the road.');
 
-  return { find: 'harp', config: HARP, pluck, whiskers, whiskerAt, tellKeys, get progress() { return progress; }, get plucks() { return plucks; }, get keyPlucks() { return keyPlucks; }, get flares() { return flares; }, glint, get glints() { return glints; }, get unlocked() { return unlocked; }, buttons,
+  return { find: 'harp', config: HARP, pluck, whiskers, whiskerAt, tellKeys, get progress() { return progress; }, get plucks() { return plucks; }, get keyPlucks() { return keyPlucks; }, get flares() { return flares; }, get unlocked() { return unlocked; }, buttons,
     again: () => site.eggs.butterman?.encore?.() ?? false };   // once ever (butterman lane, playtest-2)
 }
